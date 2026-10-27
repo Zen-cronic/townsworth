@@ -86,14 +86,26 @@ export default async function ProofPage() {
           />
           <Finding
             n="04"
-            big={`${totals.controlOwnPct}% vs ${totals.controlCrossPct}%`}
-            label="negative control: right town vs wrong town"
-            bars={[
-              { label: "Own town", pct: totals.controlOwnPct, tone: "gn" },
-              { label: "Other town", pct: totals.controlCrossPct, tone: "llm" },
-            ]}
-            note="Good Neighbor's partner places found in their own town's Qloo places, vs in another town's. A swapped location breaks the plan."
+            big={`${totals.affinityChangedPct}%`}
+            label="of partner picks change if Qloo is swapped for a nearby-places directory"
+            bars={[{ label: "Changed", pct: totals.affinityChangedPct, tone: "gn" }]}
+            note="Same candidate places, same venue-fit and host-community rules; only the order differs: Qloo's local affinity vs distance from the site. The share of Good Neighbor's picks a distance-only directory would not make."
           />
+        </section>
+
+        {/* Sanity check */}
+        <section className="mt-6 grid gap-5 rounded-lg border border-dashed border-rule bg-paper px-5 py-5 sm:px-6 md:grid-cols-[14rem_1fr] md:items-center">
+          <div>
+            <h2 className="font-semibold">Sanity check: holds by construction</h2>
+            <p className="mt-2 font-mono text-2xl font-medium tabular-nums">
+              {totals.controlOwnPct}% vs {totals.controlCrossPct}%
+            </p>
+          </div>
+          <p className="text-sm leading-relaxed text-muted">
+            Good Neighbor&apos;s partner places appear in their own town&apos;s Qloo places {totals.controlOwnPct}% of the time and in another
+            town&apos;s {totals.controlCrossPct}%. Partners are picked from the town&apos;s own list and the towns are far apart, so this has to hold.
+            It checks the wiring (no town reads another town&apos;s data); it is not evidence that Qloo improves the plan.
+          </p>
         </section>
 
         {/* Template check */}
@@ -125,7 +137,7 @@ export default async function ProofPage() {
             <p className="text-xs text-muted">Partner places are program items with a named local partner. Open a town to see its audit.</p>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[720px] text-sm">
+            <table className="w-full min-w-[820px] text-sm">
               <thead>
                 <tr className="border-b border-hairline text-[11px] uppercase tracking-wider text-muted">
                   <th scope="col" className="sticky left-0 z-10 bg-paper px-4 py-2.5 pl-5 text-left font-medium sm:pl-6">Town</th>
@@ -133,7 +145,8 @@ export default async function ProofPage() {
                   <th scope="col" className="px-4 py-2.5 text-right font-medium">Verified real</th>
                   <th scope="col" className="px-4 py-2.5 text-right font-medium">Institutions</th>
                   <th scope="col" className="border-l border-hairline px-4 py-2.5 text-right font-medium">Good Neighbor partner places</th>
-                  <th scope="col" className="px-4 py-2.5 pr-6 text-right font-medium">Also named by LLM</th>
+                  <th scope="col" className="px-4 py-2.5 text-right font-medium">Also named by LLM</th>
+                  <th scope="col" className="px-4 py-2.5 pr-6 text-right font-medium">Changed by affinity</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-hairline">
@@ -157,7 +170,11 @@ export default async function ProofPage() {
                     </td>
                     <td className={num}>{t.llmInstitutional}</td>
                     <td className={`${num} border-l border-hairline`}>{t.gnPartners}</td>
-                    <td className={`${num} pr-6`}>{t.gnAlsoNamedByLlm}</td>
+                    <td className={num}>{t.gnAlsoNamedByLlm}</td>
+                    <td className={`${num} pr-6`}>
+                      {t.gnPicksChangedByAffinity}
+                      <span className="text-muted"> / {t.gnPicks}</span>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -172,7 +189,11 @@ export default async function ProofPage() {
             <ul className="mt-3 space-y-2 text-muted">
               <li>Baseline: OpenAI {baseline.model}, frozen {baseline.createdAt.slice(0, 10)} before any measurement.</li>
               <li>Good Neighbor: live Qloo Insights calls (places within 15 km, plus local taste), with the same deterministic rules for every town.</li>
-              <li>&ldquo;Institution&rdquo; is a keyword rule (college, school, district, library, chamber, city, county…), applied identically to both sides.</li>
+              <li>
+                &ldquo;Institution&rdquo; is one keyword rule (college, university, school, district, library, chamber, city, county, department, EDC,
+                foundation, park, zoo, museum…), applied identically to both sides.
+              </li>
+              <li>An OpenStreetMap hit verifies a partner only if it shares a distinctive name word with it: a settlement or a different body doesn&apos;t count.</li>
             </ul>
             <details className="group mt-4 border-t border-hairline pt-3">
               <summary className="inline-flex cursor-pointer items-center gap-1.5 rounded text-xs font-medium text-muted hover:text-ink">

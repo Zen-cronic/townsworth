@@ -1,5 +1,5 @@
 import "server-only";
-import { BASELINE, BASELINE_SHA256, baselineFor, isInstitution } from "./baselineData";
+import { BASELINE, BASELINE_SHA256, baselineFor, isInstitution, namedPartner } from "./baselineData";
 import { cleanName } from "./plan";
 import { runTown } from "./run";
 import { TOWNS } from "./towns";
@@ -32,6 +32,9 @@ export interface TownProof {
   gnPartners: number;
   gnInstitutional: number;
   gnAlsoNamedByLlm: number;
+  // Qloo-affinity partner picks that a distance-only pick of the same candidates would not make.
+  gnPicks: number;
+  gnPicksChangedByAffinity: number;
   thin: boolean;
 }
 
@@ -46,8 +49,9 @@ export async function computeProof() {
     if (!run) return;
     const town = TOWNS[i];
     const baseline = baselineFor(town.slug);
-    const named = run.audit.filter((_, k) => baseline[k]?.partner);
-    const llmPartners = baseline.map((b) => b.partner).filter((p): p is string => !!p);
+    const named = run.audit.filter((_, k) => namedPartner(baseline[k]?.partner));
+    const llmPartners = baseline.map((b) => namedPartner(b.partner)).filter((p): p is string => !!p);
+    const distancePicks = new Set(run.program.picks.distance);
     const gnPartners = run.program.items.map((it) => it.partner?.name).filter((p): p is string => !!p);
     const llmText = norm(baseline.map((b) => `${b.partner ?? ""} ${b.item}`).join(" "));
 
@@ -60,6 +64,8 @@ export async function computeProof() {
       gnPartners: gnPartners.length,
       gnInstitutional: gnPartners.filter(isInstitution).length,
       gnAlsoNamedByLlm: gnPartners.filter((p) => llmText.includes(norm(p))).length,
+      gnPicks: run.program.picks.affinity.length,
+      gnPicksChangedByAffinity: run.program.picks.affinity.filter((id) => !distancePicks.has(id)).length,
       thin: run.profile.thin,
     });
     llmWords.push(contentWords(baseline.map((b) => b.item).join(" "), [town.name, town.region, ...llmPartners]));
@@ -70,16 +76,19 @@ export async function computeProof() {
   const pairs: [number, number][] = [];
   for (let a = 0; a < towns.length; a++) for (let b = a + 1; b < towns.length; b++) pairs.push([a, b]);
 
-  // Negative control: one town's Qloo partners, checked against another town's Qloo places.
+  // Sanity check, true by construction: partners are picked from their own town's Qloo places, so
+  // they are found there (100%) and, 15 km lists being disjoint, not in another town's. Not a finding.
+  // Towns with no partner places have nothing to check and are left out.
   const crossHits: number[] = [];
+  const ownHits: number[] = [];
   for (let a = 0; a < towns.length; a++) {
+    const set = gnPartnerSets[a];
+    if (!set.size) continue;
+    ownHits.push([...set].filter((p) => placeSets[a].has(p)).length / set.size);
     for (let b = 0; b < towns.length; b++) {
-      if (a === b) continue;
-      const set = gnPartnerSets[a];
-      crossHits.push(set.size ? [...set].filter((p) => placeSets[b].has(p)).length / set.size : 0);
+      if (a !== b) crossHits.push([...set].filter((p) => placeSets[b].has(p)).length / set.size);
     }
   }
-  const ownHits = gnPartnerSets.map((set, i) => (set.size ? [...set].filter((p) => placeSets[i].has(p)).length / set.size : 0));
 
   const sum = (f: (t: TownProof) => number) => towns.reduce((s, t) => s + f(t), 0);
   return {
@@ -93,6 +102,7 @@ export async function computeProof() {
       gnPartnerOverlapPct: pct(mean(pairs.map(([a, b]) => jaccard(gnPartnerSets[a], gnPartnerSets[b])))),
       controlOwnPct: pct(mean(ownHits)),
       controlCrossPct: pct(mean(crossHits)),
+      affinityChangedPct: pct(sum((t) => t.gnPicksChangedByAffinity) / Math.max(1, sum((t) => t.gnPicks))),
     },
     baseline: { model: BASELINE.model, promptVersion: BASELINE.promptVersion, createdAt: BASELINE.createdAt, sha256: BASELINE_SHA256 },
   };
