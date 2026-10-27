@@ -7,7 +7,9 @@ import { Chevron, ChevronLeft, Download } from "@/components/dashboard/Icons";
 import { PrintButton } from "@/components/dashboard/PrintButton";
 import { parseFund, secondaryCta } from "@/components/dashboard/ui";
 import { StatusPill } from "@/components/dashboard/StatusPill";
-import { BUCKETS, type Bucket } from "@/lib/plan";
+import { isKept } from "@/lib/audit";
+import { commitmentsFor } from "@/lib/commitments";
+import { BUCKETS, costLine, type Bucket } from "@/lib/plan";
 import { money, runTown } from "@/lib/run";
 
 const MATERIAL = [
@@ -16,7 +18,7 @@ const MATERIAL = [
   ["Water", "Cooling method, annual draw, replenishment"],
   ["Noise & light", "Limits at the fence line, monitoring"],
   ["Tax", "Abatements, PILOT payments, school-district share"],
-];
+] as const;
 
 const toolButton =
   "inline-flex items-center gap-1.5 rounded-md border border-rule bg-paper px-3 py-1.5 text-sm transition-colors duration-150 hover:border-ink active:bg-concrete";
@@ -44,7 +46,9 @@ export default async function MemoPage({
   const run = await runTown(slug, parseFund(fund));
   if (!run) notFound();
   const { town, program, profile, audit } = run;
-  const flagged = audit.filter((a) => a.verdict !== "grounded").length;
+  const flagged = audit.filter((a) => !isKept(a.verdict)).length;
+  const keptInstitutions = audit.filter((a) => a.verdict === "institution").length;
+  const commitments = commitmentsFor(town.slug);
   const partnerPlaces = program.items.filter((i) => i.partner).length;
   const byBucket = (Object.keys(BUCKETS) as Bucket[])
     .map((b) => ({ b, items: program.items.filter((i) => i.bucket === b) }))
@@ -115,10 +119,14 @@ export default async function MemoPage({
             </dl>
             <p className="mt-5 leading-relaxed">
               The draft plan had <strong className="font-semibold">{flagged} of {audit.length}</strong> items that name nothing local or a partner
-              that can&apos;t be verified. This memo replaces them with <strong className="font-semibold">{program.items.length} program items</strong>{" "}
-              ({partnerPlaces} with a named local partner place) grounded in {town.name}&apos;s Qloo signals, totaling{" "}
-              <strong className="font-mono font-medium tabular-nums">{money(program.totalAllocated)}</strong> over 24 months. Sponsor-labeled;
-              prepared with aggregate Qloo signals.
+              that can&apos;t be verified.
+              {keptInstitutions > 0 &&
+                ` ${keptInstitutions} ${keptInstitutions === 1 ? "institution it names stays" : "institutions it names stay"} in, for the committee to confirm.`}{" "}
+              This memo sets out <strong className="font-semibold">{program.items.length} program items</strong> ({partnerPlaces} with a named local
+              partner place) grounded in {town.name}&apos;s Qloo signals and costed per session:{" "}
+              <strong className="font-mono font-medium tabular-nums">{money(program.totalAllocated)}</strong> itemized, and{" "}
+              <strong className="font-mono font-medium tabular-nums">{money(program.unassigned)}</strong> left for the committee to allocate, of the{" "}
+              {money(program.twoYearFund)} 24-month fund. Sponsor-labeled; prepared with aggregate Qloo signals.
             </p>
           </header>
 
@@ -127,20 +135,46 @@ export default async function MemoPage({
             <SectionTitle n="1" note="The cultural program below is in addition to these, never instead of them.">
               Material commitments, from the developer&apos;s filings
             </SectionTitle>
-            <div className="mt-4 rounded-md border border-dashed border-amber/50 bg-amber-wash/40 px-4 py-4 sm:px-5">
-              <p className="flex flex-wrap items-center gap-2 text-sm font-medium">
-                Not yet entered
-                <span className="text-xs font-normal text-muted">Copy each figure from the developer&apos;s filings before this memo goes to the committee.</span>
-              </p>
-              <dl className="mt-3 grid gap-x-8 gap-y-2 text-sm sm:grid-cols-2">
-                {MATERIAL.map(([k, v]) => (
-                  <div key={k} className="grid grid-cols-[6.5rem_1fr] gap-2">
+            {commitments && (
+              <dl className="mt-4 divide-y divide-hairline rounded-md border border-hairline text-sm">
+                {MATERIAL.filter(([k]) => commitments.items.some((c) => c.topic === k)).map(([k]) => (
+                  <div key={k} className="grid gap-1 px-4 py-3 sm:grid-cols-[6.5rem_1fr] sm:gap-3 sm:px-5">
                     <dt className="font-medium">{k}</dt>
-                    <dd className="text-muted">{v}</dd>
+                    <dd className="space-y-1.5">
+                      {commitments.items
+                        .filter((c) => c.topic === k)
+                        .map((c, i) => (
+                          <p key={i} className="leading-relaxed">
+                            {c.text}{" "}
+                            <a href={c.url} target="_blank" rel="noopener noreferrer" className="whitespace-nowrap text-xs text-muted underline decoration-rule underline-offset-2 hover:text-ink">
+                              {c.source}
+                            </a>
+                          </p>
+                        ))}
+                    </dd>
                   </div>
                 ))}
+                <p className="px-4 py-2 text-[11px] text-muted sm:px-5">
+                  From public reporting as of {commitments.asOf}. Check each figure against the developer&apos;s filings before this memo goes to the committee.
+                </p>
               </dl>
-            </div>
+            )}
+            {MATERIAL.some(([k]) => !commitments?.items.some((c) => c.topic === k)) && (
+              <div className="mt-4 rounded-md border border-dashed border-amber/50 bg-amber-wash/40 px-4 py-4 sm:px-5">
+                <p className="flex flex-wrap items-center gap-2 text-sm font-medium">
+                  Not yet entered
+                  <span className="text-xs font-normal text-muted">Copy each figure from the developer&apos;s filings before this memo goes to the committee.</span>
+                </p>
+                <dl className="mt-3 grid gap-x-8 gap-y-2 text-sm sm:grid-cols-2">
+                  {MATERIAL.filter(([k]) => !commitments?.items.some((c) => c.topic === k)).map(([k, v]) => (
+                    <div key={k} className="grid grid-cols-[6.5rem_1fr] gap-2">
+                      <dt className="font-medium">{k}</dt>
+                      <dd className="text-muted">{v}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
+            )}
           </section>
 
           {/* Program */}
@@ -166,7 +200,7 @@ export default async function MemoPage({
                     <tr>
                       <th scope="rowgroup" className="pb-1.5 pt-5 text-left font-semibold">
                         {BUCKETS[b].label}
-                        <span className="ml-2 text-xs font-normal text-muted">{BUCKETS[b].cadence}</span>
+                        <span className="ml-2 text-xs font-normal text-muted">{program.cadence[b]}</span>
                       </th>
                       <td className="pb-1.5 pt-5 text-right font-mono text-sm tabular-nums text-muted">{money(amount)}</td>
                     </tr>
@@ -175,6 +209,10 @@ export default async function MemoPage({
                         <td className="py-2 pr-4">
                           <div className="leading-snug">{it.title}</div>
                           <div className="mt-0.5 text-xs leading-relaxed text-muted">
+                            {costLine(it)} · {it.cadence}
+                            {it.partner?.neighbouring && ` · Neighbouring community${it.partner.city ? ` (${it.partner.city})` : ""}`}
+                          </div>
+                          <div className="text-xs leading-relaxed text-muted">
                             {it.partner?.address ?? it.detail}
                             <span className="ml-2 whitespace-nowrap font-mono text-[11px] text-muted/90">{it.provenance[0]?.signal}</span>
                           </div>
@@ -184,10 +222,26 @@ export default async function MemoPage({
                     ))}
                   </tbody>
                 ))}
+              <tbody className="border-b border-hairline">
+                <tr className="align-top">
+                  <th scope="row" className="py-3 pr-4 text-left font-normal">
+                    <div className="font-semibold">Unassigned, for the committee to allocate</div>
+                    <div className="mt-0.5 text-xs font-normal text-muted">
+                      Not itemized by this tool: more grant cycles, larger awards or items residents add. The committee decides.
+                    </div>
+                  </th>
+                  <td className="py-3 text-right font-mono tabular-nums">{money(program.unassigned)}</td>
+                </tr>
+              </tbody>
               <tfoot>
                 <tr className="border-t-2 border-ink">
-                  <th scope="row" className="pt-3 text-left font-semibold">Total over 24 months</th>
-                  <td className="pt-3 text-right font-mono font-medium tabular-nums">{money(program.totalAllocated)}</td>
+                  <th scope="row" className="pt-3 text-left font-semibold">
+                    Total over 24 months
+                    <span className="ml-2 text-xs font-normal text-muted">
+                      {money(program.totalAllocated)} itemized + {money(program.unassigned)} unassigned
+                    </span>
+                  </th>
+                  <td className="pt-3 text-right font-mono font-medium tabular-nums">{money(program.totalAllocated + program.unassigned)}</td>
                 </tr>
               </tfoot>
             </table>

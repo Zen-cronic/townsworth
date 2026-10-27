@@ -1,0 +1,224 @@
+{
+  "mount-pleasant-wi": {
+    "asOf": "2026-10-27",
+    "items": [
+      {
+        "topic": "Jobs",
+        "text": "Microsoft says it anticipates 2,000 jobs for the completed phase of its southeast Wisconsin datacenter development, with about 500 full-time employees and contractors hired for the first datacenter by the end of 2026.",
+        "source": "Microsoft — Microsoft datacenters in Wisconsin fact sheet (Oct 2025)",
+        "url": "https://local.microsoft.com/wp-content/uploads/2025/10/Microsoft-datacenters-in-Wisconsin.pdf"
+      },
+      {
+        "topic": "Jobs",
+        "text": "Microsoft says construction of the new datacenters will require about 12.1 million work hours and more than 2,960 jobs at peak activity.",
+        "source": "Microsoft — Microsoft datacenters in Wisconsin fact sheet (Oct 2025)",
+        "url": "https://local.microsoft.com/wp-content/uploads/2025/10/Microsoft-datacenters-in-Wisconsin.pdf"
+      },
+      {
+        "topic": "Jobs",
+        "text": "At the June 23, 2026 opening of the first Fairwater datacenter, Microsoft counted about 550 employees and vendors on site and expected about 800 when the second facility opens in 2028; wages and the share of Racine County hires were not disclosed.",
+        "source": "Racine County Eye via Civic Media — Microsoft opens the Fairwater data center in Mount Pleasant (Jun 24, 2026)",
+        "url": "https://civicmedia.us/news/2026/06/24/microsoft-opens-the-fairwater-data-center-in-mount-pleasant"
+      },
+      {
+        "topic": "Power",
+        "text": "Microsoft says it is partnering with We Energies on the energy infrastructure for the campus \"while ensuring we pay our fair share and protect other ratepayers,\" and is adding carbon-free supply equal to its use, including a 250 MW solar project in Portage County.",
+        "source": "Microsoft — Microsoft datacenters in Wisconsin fact sheet (Oct 2025)",
+        "url": "https://local.microsoft.com/wp-content/uploads/2025/10/Microsoft-datacenters-in-Wisconsin.pdf"
+      },
+      {
+        "topic": "Power",
+        "text": "In a preliminary April 24, 2026 decision (final order pending), the PSC of Wisconsin approved a modified We Energies Very Large Customer tariff (docket 6630-TE-113) that applies to loads of 100 MW or more, sets a 15-year minimum term, and requires these customers to pay 100% of the costs of generation built for them.",
+        "source": "Public Service Commission of Wisconsin — PSC Overhauls We Energies' Data Center Tariff (Apr 24, 2026)",
+        "url": "https://content.govdelivery.com/attachments/WIPSC/2026/04/24/file_attachments/3629258/PSC%20Overhauls%20We%20Energies%20Data%20Center%20Tariff,%20Makes%20Improvements%20to%20Protect%20Existing%20Customers.pdf"
+      },
+      {
+        "topic": "Water",
+        "text": "Microsoft says its Wisconsin facilities will mostly use closed-loop, zero-water direct-to-chip cooling, with a smaller share of servers on direct evaporative cooling used less than 5% of the year (above 85°F), and that it will buy water from the City of Racine.",
+        "source": "Microsoft — Microsoft datacenters in Wisconsin fact sheet (Oct 2025)",
+        "url": "https://local.microsoft.com/wp-content/uploads/2025/10/Microsoft-datacenters-in-Wisconsin.pdf"
+      },
+      {
+        "topic": "Water",
+        "text": "Records released by Racine project peak use of 234,000 gallons a day (about 2.8 million gallons a year) in phase one and up to 702,000 gallons a day (about 8.4 million gallons a year) at full buildout, within Racine's 7-million-gallon-a-day Lake Michigan diversion approved in 2018 for Foxconn.",
+        "source": "Wisconsin Public Radio — Microsoft data centers could use 8 million gallons of water each year (Sep 17, 2025)",
+        "url": "https://www.wpr.org/news/microsoft-data-centers-8-million-gallons-water-each-year"
+      },
+      {
+        "topic": "Noise & light",
+        "text": "Microsoft says it will use vegetative screening and building setbacks where possible, place downward-directed exterior lighting to limit light pollution, and have its contractors comply with local noise ordinances during construction.",
+        "source": "Microsoft — Microsoft datacenters in Wisconsin fact sheet (Oct 2025)",
+        "url": "https://local.microsoft.com/wp-content/uploads/2025/10/Microsoft-datacenters-in-Wisconsin.pdf"
+      },
+      {
+        "topic": "Tax",
+        "text": "Under its 2023 agreement with the village, Microsoft guarantees a minimum assessed value of $1.4 billion on its investments in TID 5 Areas II and III by Jan. 1, 2028, with no additional public financial incentives.",
+        "source": "Wisconsin Public Radio via Urban Milwaukee — Mount Pleasant Deal With Microsoft Has No Public Subsidies (Nov 14, 2023)",
+        "url": "https://urbanmilwaukee.com/2023/11/14/mount-pleasant-deal-with-microsoft-has-no-public-subsidies/"
+      },
+      {
+        "topic": "Tax",
+        "text": "Microsoft paid $3.8 million in property taxes to Mount Pleasant in 2025 on its 2024 tax bill, according to the village.",
+        "source": "Racine County Eye via Civic Media — Microsoft opens the Fairwater data center in Mount Pleasant, corrected (Jun 24, 2026)",
+        "url": "https://civicmedia.us/news/2026/06/24/microsoft-opens-the-fairwater-data-center-in-mount-pleasant"
+      },
+      {
+        "topic": "Tax",
+        "text": "Microsoft's proposed 15-building expansion sits in tax increment districts expected to generate about $45 million (Durand Avenue) and $30 million (International Drive) a year for the village once district debts are paid.",
+        "source": "Wisconsin Public Radio via Urban Milwaukee — Microsoft wants to build 15 more data centers in Mount Pleasant (Jan 20, 2026)",
+        "url": "https://urbanmilwaukee.com/2026/01/20/microsoft-wants-to-build-15-more-data-centers-in-mount-pleasant/"
+      }
+    ]
+  },
+  "clay-ny": {
+    "asOf": "2026-10-27",
+    "items": [
+      {
+        "topic": "Jobs",
+        "text": "New York State says the Micron project will create 9,000 new jobs on site and up to 50,000 permanent jobs in the region over 30 years.",
+        "source": "Office of the Governor of New York — Governor Hochul announces over $43 million in community investment funding (Mar 27, 2026)",
+        "url": "https://governor.ny.gov/news/governor-hochul-announces-over-43-million-community-investment-funding-central-new-york-part"
+      },
+      {
+        "topic": "Jobs",
+        "text": "The $500 million Green CHIPS Community Investment Fund is funded and distributed over 20 years, with $250 million from Micron and $100 million from New York State, for workforce development, education, community investments and housing.",
+        "source": "Empire State Development — Green CHIPS Community Investment Fund (accessed Oct 27, 2026)",
+        "url": "https://esd.ny.gov/green-chips-community-investment-fund"
+      },
+      {
+        "topic": "Jobs",
+        "text": "The first awards from the fund totaled over $43 million: nearly $35 million from Micron, including $30 million to the Housing CNY Fund, and $8.5 million from the state.",
+        "source": "Office of the Governor of New York — Governor Hochul announces over $43 million in community investment funding (Mar 27, 2026)",
+        "url": "https://governor.ny.gov/news/governor-hochul-announces-over-43-million-community-investment-funding-central-new-york-part"
+      },
+      {
+        "topic": "Water",
+        "text": "Micron estimated it would need up to 48 million gallons of water a day at full buildout, mostly from Lake Ontario via the Onondaga County Water Authority, and says it aims for 100% water conservation through recycling and restoration.",
+        "source": "WRVO — Micron estimates needing up to 48 million gallons of water a day (Aug 2, 2023)",
+        "url": "https://www.wrvo.org/business/2023-08-02/micron-estimates-needing-up-to-48-million-gallons-of-water-a-day-aiming-to-achieve-100-water-conservation"
+      },
+      {
+        "topic": "Power",
+        "text": "Micron says it aims for 100% renewable electricity at the Clay site.",
+        "source": "WRVO — Micron estimates needing up to 48 million gallons of water a day (Aug 2, 2023)",
+        "url": "https://www.wrvo.org/business/2023-08-02/micron-estimates-needing-up-to-48-million-gallons-of-water-a-day-aiming-to-achieve-100-water-conservation"
+      },
+      {
+        "topic": "Power",
+        "text": "National Grid will expand its White Pine substation by about seven acres and run eight 345 kV lines, two per fab, under Caughdenoy Road; it has not disclosed the cost.",
+        "source": "CNY Central — National Grid ramps up power and gas links as Micron fabs rise in Clay (Oct 5, 2026)",
+        "url": "https://cnycentral.com/news/local/national-grid-ramps-up-power-and-gas-links-as-micron-semiconductor-fabs-rise-in-clay-central-new-york-white-pines-commerce-park-utlities-bills-caughdenoy-road-electricity"
+      },
+      {
+        "topic": "Tax",
+        "text": "The Onondaga County IDA approved a 49-year PILOT under which Micron pays $84.5 million, against $283.9 million in property tax exemptions, and authorized the lease or sale of 820 acres of White Pine Commerce Park for $30 million.",
+        "source": "Spectrum News — Onondaga County IDA votes on Micron land transfer, tax breaks (Nov 18, 2025)",
+        "url": "https://spectrumlocalnews.com/nys/central-ny/news/2025/11/18/onondaga-county-ida-to-voter-on-micron-land-transfer--tax-breaks-"
+      }
+    ]
+  },
+  "new-albany-oh": {
+    "asOf": "2026-10-27",
+    "items": [
+      {
+        "topic": "Power",
+        "text": "Under the AEP Ohio data center tariff adopted by PUCO on July 9, 2025, new loads of 25 MW or more pay for at least 85% of their highest billing demand, for a ramp period of up to four years plus eight years, with an exit fee of 36 months of minimum charges.",
+        "source": "AEP Ohio — Data Center Tariff (accessed Oct 27, 2026)",
+        "url": "https://www.aepohio.com/company/about/rates/data-center-tariff"
+      },
+      {
+        "topic": "Water",
+        "text": "The city says its data centers do not use large amounts of water daily and that it has not needed additional water capacity because of them.",
+        "source": "City of New Albany — New Albany Data Centers (accessed Oct 27, 2026)",
+        "url": "https://datacenters.newalbanyohio.org/"
+      },
+      {
+        "topic": "Noise & light",
+        "text": "The city reports four noise complaints from an operational data center in 15+ years, plus September 2025 complaints about exhaust fans at Google's campus, with a permanent fix scheduled to start installation in June 2026.",
+        "source": "City of New Albany — New Albany Data Centers (accessed Oct 27, 2026)",
+        "url": "https://datacenters.newalbanyohio.org/"
+      },
+      {
+        "topic": "Tax",
+        "text": "The city says data centers paid $10 million in community development charges for tax year 2024, abatements usually cover the first 10 or 15 operating years, and abated companies must make minimum annual payments.",
+        "source": "City of New Albany — City Finances (accessed Oct 27, 2026)",
+        "url": "https://datacenters.newalbanyohio.org/city-finances/"
+      }
+    ]
+  },
+  "kincardine-on": {
+    "asOf": "2026-10-27",
+    "items": [
+      {
+        "topic": "Jobs",
+        "text": "The Municipality of Kincardine says Bruce Power employs more than 4,200 people and that its Major Component Replacement project, begun in 2016, creates 22,000 jobs and adds $4 billion a year to Ontario's economy through 2033.",
+        "source": "Municipality of Kincardine — Bruce Power (accessed Oct 27, 2026)",
+        "url": "https://www.kincardine.ca/live-here/bruce-power/"
+      },
+      {
+        "topic": "Power",
+        "text": "For its proposed Bruce C expansion of up to 4,800 MW of new nuclear generation, Bruce Power signed a four-year, $2.2 million agreement funding Kincardine's studies of water, waste, emergency response, transit and recreation needs.",
+        "source": "Sarnia News Today — Kincardine and Bruce Power partner on infrastructure and readiness agreement (May 15, 2026)",
+        "url": "https://sarnianewstoday.ca/midwestern/news/2026/05/14/kincardine-and-bruce-power-partner-on-infrastructure-and-readiness-agreement"
+      }
+    ]
+  },
+  "kemmerer-wy": {
+    "asOf": "2026-10-27",
+    "items": [
+      {
+        "topic": "Jobs",
+        "text": "TerraPower says it is mobilizing about 1,600 construction workers for the Natrium plant and expects about 250 full-time staff once it operates.",
+        "source": "TerraPower — TerraPower Commences Construction on America's First Utility-Scale Advanced Nuclear Power Plant (Apr 23, 2026)",
+        "url": "https://www.terrapower.com/TerraPower-Commences-Construction-on-Americas-First-Utility-Scale-Advanced-Nuclear-Power-Plant"
+      },
+      {
+        "topic": "Jobs",
+        "text": "Lead contractor Bechtel left the project in September 2026, leaving Kemmerer's plans to house up to 1,600 workers in limbo; Bechtel said it does not expect the schedule to change, and completion is still expected around 2030.",
+        "source": "Cowboy State Daily — Kemmerer plans for 1,600 nuclear plant workers in limbo after contractor backs out (Oct 13, 2026)",
+        "url": "https://cowboystatedaily.com/2026/10/13/kemmerer-plans-for-1-600-nuclear-plant-workers-in-limbo-after-contractor-backs-out/"
+      },
+      {
+        "topic": "Power",
+        "text": "TerraPower says the plant pairs a 345 MW sodium-cooled fast reactor with molten-salt storage that can raise output to 500 MW.",
+        "source": "TerraPower — TerraPower Commences Construction on America's First Utility-Scale Advanced Nuclear Power Plant (Apr 23, 2026)",
+        "url": "https://www.terrapower.com/TerraPower-Commences-Construction-on-Americas-First-Utility-Scale-Advanced-Nuclear-Power-Plant"
+      }
+    ]
+  },
+  "abilene-tx": {
+    "asOf": "2026-10-27",
+    "items": [
+      {
+        "topic": "Jobs",
+        "text": "In exchange for an 85% property tax abatement through Abilene's economic development corporation, Crusoe committed to 357 new full-time jobs and up to $3.5 billion in spending.",
+        "source": "Business Insider via AOL — Oracle got big tax breaks (Jul 17, 2025)",
+        "url": "https://www.aol.com/oracle-got-big-tax-breaks-090001667.html"
+      },
+      {
+        "topic": "Jobs",
+        "text": "About 9,000 craft workers were on site daily in March 2026, with construction of the eight buildings expected to run through the first quarter of 2027.",
+        "source": "KTXS — Construction on Stargate One data center campus set to run through early 2027 (Mar 5, 2026)",
+        "url": "https://ktxs.com/news/local/lancium-crusoe-executives-brief-abilene-leaders-on-major-northside-investment"
+      },
+      {
+        "topic": "Power",
+        "text": "Crusoe says the campus connects directly to the ERCOT grid, mainly using wind power, with GE Vernova gas turbines as backup power in place of diesel generators.",
+        "source": "Crusoe — An inside look at the Abilene AI data center (Aug 5, 2025)",
+        "url": "https://www.crusoe.ai/resources/blog/an-inside-look-at-the-abilene-ai-data-center"
+      },
+      {
+        "topic": "Water",
+        "text": "Crusoe says its closed-loop, non-evaporative cooling needs an initial fill of about 1 million gallons of municipal water per building, across eight buildings, plus about 50,000 gallons per building per year.",
+        "source": "Crusoe — An inside look at the Abilene AI data center (Aug 5, 2025)",
+        "url": "https://www.crusoe.ai/resources/blog/an-inside-look-at-the-abilene-ai-data-center"
+      },
+      {
+        "topic": "Tax",
+        "text": "Crusoe says that once fully operational the campus will provide up to 32% of the City of Abilene's and up to 25% of Taylor County's FY 2025 budgeted property tax revenue.",
+        "source": "Crusoe — An inside look at the Abilene AI data center (Aug 5, 2025)",
+        "url": "https://www.crusoe.ai/resources/blog/an-inside-look-at-the-abilene-ai-data-center"
+      }
+    ]
+  }
+}
