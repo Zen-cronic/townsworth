@@ -37,10 +37,11 @@ export interface QlooEntity {
 export interface QlooCall {
   label: string;
   params: Record<string, string>;
+  // HTTP status, or 0 when the request never got an answer (network error, timeout).
   status: number;
+  ok: boolean;
   count: number;
   ms: number;
-  quotaRemaining?: string;
 }
 
 export interface QlooResult {
@@ -148,22 +149,20 @@ async function insights(label: string, params: Record<string, string>, type: Ent
   if (!key) throw new Error("QLOO_API_KEY is not set");
   const url = `${BASE}/v2/insights?${new URLSearchParams(params)}`;
   const started = Date.now();
-  const res = await fetchWithRetry(url, key);
-  const ms = Date.now() - started;
-  const body = res.ok ? await res.json() : null;
-  const raw: RawEntity[] = body?.results?.entities ?? [];
+  // A failed call is recorded as an error, never silently treated as "no results" (thin data).
+  let status = 0;
+  let raw: RawEntity[] = [];
+  try {
+    const res = await fetchWithRetry(url, key);
+    status = res.status;
+    const body = res.ok ? await res.json() : null;
+    raw = body?.results?.entities ?? [];
+  } catch {
+    // No answer at all: keep status 0 so the UI reports an error rather than thin data.
+  }
   const entities = raw.map((r) => parseEntity(r, type));
-  return {
-    entities,
-    call: {
-      label,
-      params,
-      status: res.status,
-      count: entities.length,
-      ms,
-      quotaRemaining: res.headers.get("x-month-ratelimit-remaining") ?? undefined,
-    },
-  };
+  const ok = status >= 200 && status < 300;
+  return { entities, call: { label, params, status, ok, count: entities.length, ms: Date.now() - started } };
 }
 
 const point = (lat: number, lon: number) => `POINT(${lon} ${lat})`;
@@ -186,12 +185,19 @@ export function tasteNational(type: Exclude<EntityType, "place">, country: "Unit
   }, type);
 }
 
-// Real places within a radius: the candidate local partners and venues.
-export function placesNear(lat: number, lon: number, radiusM = 15000, take = 50) {
-  return insights(`places within ${Math.round(radiusM / 1000)} km`, {
+// Real places within a radius: the candidate local partners and venues. `signal.location` at the
+// same point makes Qloo rank them by local affinity (query.affinity) instead of returning a plain
+// nearby list, so partner selection follows what the town favours, with distance only as a tie-break.
+// In thin towns the affinity-ranked query returns only the few places that carry a local affinity
+// score, so the caller tops it up with the plain radius query (`ranked = false`).
+export function placesNear(lat: number, lon: number, radiusM = 15000, take = 50, ranked = true) {
+  const params: Record<string, string> = {
     "filter.type": "urn:entity:place",
     "filter.location": point(lat, lon),
     "filter.location.radius": String(radiusM),
-    take: String(take),
-  }, "place");
+  };
+  if (ranked) params["signal.location"] = point(lat, lon);
+  params.take = String(take);
+  const km = Math.round(radiusM / 1000);
+  return insights(ranked ? `places within ${km} km, ranked by local affinity` : `places within ${km} km, by distance (top-up)`, params, "place");
 }
