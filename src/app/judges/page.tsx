@@ -18,9 +18,21 @@ const STEPS: { title: string; body: string; href: string; cta: string }[] = [
   },
   {
     title: "Open the commitments memo",
-    body: "The document a community committee would review, with item budgets from your fund. Download the partner sheet or the calendar.",
+    body: `The document a community committee would review. Click Draft outreach: an OpenAI agent picks partners, checks each one in OpenStreetMap independently of Qloo, and drafts emails that name the funder (${HERO_TOWN.sponsor}). Rules check every draft.`,
     href: `/memo/${HERO_TOWN.slug}`,
     cta: "Open the memo",
+  },
+  {
+    title: "Residents rank it",
+    body: "From the memo, send the shortlist to residents: rank the grants and events on the ballot, then see the committee tally. The tally adds 120 simulated ballots to yours, and every screen says so.",
+    href: `/ballot/${HERO_TOWN.slug}`,
+    cta: "Open the ballot",
+  },
+  {
+    title: "Type any town",
+    body: "Any US or Canadian town, with the company that funds it. Try Taylor, Texas, a Samsung chip fab, then click “Have a plain LLM draft it now” to watch OpenAI write a fresh plan (about 15 seconds) and get red-penned.",
+    href: "/find?q=Taylor%2C%20TX&facility=fab&company=Samsung",
+    cta: "Try Taylor, TX",
   },
   {
     title: "Switch town in the header",
@@ -41,9 +53,9 @@ export default function JudgesPage() {
     <>
       <AppHeader page="judges" />
       <main className="mx-auto max-w-3xl px-4 pb-24 pt-8 sm:px-6 sm:pt-12">
-        <p className="font-mono text-[11px] uppercase tracking-wider text-muted">Guided path · about 90 seconds</p>
+        <p className="font-mono text-[11px] uppercase tracking-wider text-muted">Guided path · about 2 minutes</p>
         <h1 className="mt-2 text-3xl font-semibold tracking-tight">Start here</h1>
-        <p className="mt-2 text-muted">Five steps through a finished example. Nothing to sign up for.</p>
+        <p className="mt-2 text-muted">{STEPS.length} steps through a finished example, then a town of your choice. Nothing to sign up for.</p>
 
         <ol className="mt-8 divide-y divide-hairline overflow-hidden rounded-lg border border-rule bg-paper">
           {STEPS.map((s, i) => (

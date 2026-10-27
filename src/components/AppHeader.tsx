@@ -52,6 +52,14 @@ export function AppHeader({ active, page, towns = true }: { active?: string; pag
 
         <nav aria-label="Primary" className="order-2 ml-auto flex items-center gap-0.5 text-muted lg:order-3">
           <HeaderTownSearch />
+          {/* Phones: the town search is an icon link to /find */}
+          <Link href="/find" title="Try any town" className={`${navLink} inline-flex items-center md:hidden`}>
+            <svg aria-hidden viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-4 w-4">
+              <circle cx="7" cy="7" r="4.25" />
+              <path d="m10.25 10.25 3 3" strokeLinecap="round" />
+            </svg>
+            <span className="sr-only">Try any town</span>
+          </Link>
           {/* At lg the six towns leave no room for the input, so the search is an icon link */}
           <Link href="/find" title="Try any town" className={`${navLink} hidden items-center lg:inline-flex xl:hidden`}>
             <svg aria-hidden viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-4 w-4">
@@ -68,7 +76,8 @@ export function AppHeader({ active, page, towns = true }: { active?: string; pag
             aria-current={page === "judges" ? "page" : undefined}
             className={`${navLink} ${page === "judges" ? "text-ink" : ""}`}
           >
-            Start here
+            <span className="sm:hidden">Guide</span>
+            <span className="hidden sm:inline">Start here</span>
           </Link>
         </nav>
       </div>
