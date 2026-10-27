@@ -1,0 +1,62 @@
+import Link from "next/link";
+import { AppHeader } from "@/components/AppHeader";
+import { ChevronLeft } from "@/components/dashboard/Icons";
+import { secondaryCta } from "@/components/dashboard/ui";
+
+// Shared frame for the resident ballot and the committee view: narrow, mobile-first, calm.
+export function BallotShell({
+  slug,
+  kicker,
+  title,
+  children,
+}: {
+  slug: string;
+  kicker: string;
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <>
+      <AppHeader towns={false} />
+      <main className="mx-auto max-w-[680px] px-4 pb-24 pt-5 sm:px-6 sm:pt-8">
+        <Link
+          href={`/memo/${slug}`}
+          className="inline-flex items-center gap-1 rounded-md py-1.5 pr-2 text-sm text-muted transition-colors duration-150 hover:text-ink"
+        >
+          <ChevronLeft />
+          Back to the memo
+        </Link>
+        <p className="mt-4 font-mono text-[11px] uppercase tracking-wider text-muted">{kicker}</p>
+        <h1 className="mt-1.5 text-balance text-2xl font-semibold leading-tight tracking-tight sm:text-[1.75rem]">{title}</h1>
+        {children}
+      </main>
+    </>
+  );
+}
+
+export function PrivacyLine() {
+  return (
+    <p className="mt-4 flex items-start gap-2 rounded-md border border-hairline bg-paper px-3 py-2.5 text-sm leading-relaxed">
+      <svg aria-hidden viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" className="mt-0.5 h-4 w-4 shrink-0 text-ok">
+        <rect x="3" y="7" width="10" height="7" rx="1.5" />
+        <path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" strokeLinecap="round" />
+      </svg>
+      <span>Your ballot stays in this browser. Nothing is sent to Qloo.</span>
+    </p>
+  );
+}
+
+export function ThinShortlist({ slug, townName, count }: { slug: string; townName: string; count: number }) {
+  return (
+    <div className="mt-6 rounded-md border border-dashed border-rule bg-paper px-4 py-5">
+      <p className="font-semibold">Not enough ideas to rank yet</p>
+      <p className="mt-1 text-sm leading-relaxed text-muted">
+        Qloo returned {count === 0 ? "no" : "only one"} resident-facing {count === 1 ? "idea" : "ideas"} for {townName}, so there is nothing to put
+        in order. The committee can add items to the memo first.
+      </p>
+      <Link href={`/memo/${slug}`} className={`${secondaryCta} mt-4`}>
+        Back to the memo
+      </Link>
+    </div>
+  );
+}

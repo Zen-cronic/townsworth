@@ -3,9 +3,9 @@ import { notFound } from "next/navigation";
 import { AgentDrafts } from "@/components/AgentDrafts";
 import { AppHeader } from "@/components/AppHeader";
 import { AllocationBar } from "@/components/dashboard/AllocationBar";
-import { ChevronLeft, Download } from "@/components/dashboard/Icons";
+import { Chevron, ChevronLeft, Download } from "@/components/dashboard/Icons";
 import { PrintButton } from "@/components/dashboard/PrintButton";
-import { parseFund } from "@/components/dashboard/ui";
+import { parseFund, secondaryCta } from "@/components/dashboard/ui";
 import { StatusPill } from "@/components/dashboard/StatusPill";
 import { BUCKETS, type Bucket } from "@/lib/plan";
 import { money, runTown } from "@/lib/run";
@@ -214,6 +214,13 @@ export default async function MemoPage({
                 </li>
               ))}
             </ol>
+            <div className="no-print mt-5 flex flex-wrap items-center gap-x-3 gap-y-2 rounded-md border border-hairline bg-concrete/60 px-4 py-3">
+              <Link href={`/ballot/${town.slug}`} className={secondaryCta}>
+                Send the shortlist to residents
+                <Chevron />
+              </Link>
+              <span className="text-xs leading-relaxed text-muted">Opens the anonymous resident ballot and a simulated committee tally.</span>
+            </div>
           </section>
 
           <footer className="mt-12 flex flex-wrap justify-between gap-2 border-t border-hairline pt-4 text-[11px] text-muted">
