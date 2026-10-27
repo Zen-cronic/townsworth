@@ -1,10 +1,10 @@
 import "server-only";
 import { cache } from "react";
-import { auditPlan, GENERIC_AGENCY_PLAN, type AuditInput } from "./audit";
-import { baselineFor, BASELINE } from "./baselineData";
+import { auditPlan, GENERIC_AGENCY_PLAN, isKept, type AuditInput } from "./audit";
+import { baselineFor, BASELINE, isInstitution } from "./baselineData";
 import { liveLlmDraft } from "./liveDraft";
 import { buildProfile } from "./profile";
-import { buildProgram, type ProgramItem } from "./plan";
+import { buildProgram, runWith, type Bucket, type ProgramItem } from "./plan";
 import { townBySlug } from "./towns";
 
 export type PlanSource = "llm" | "agency";
@@ -63,9 +63,17 @@ export const runTown = cache(async (slug: string, fund?: number, source: PlanSou
   }
   const audit = auditPlan(inputs, profile, program.items);
 
+  // Where the draft named an institution the audit kept (the technical college, the county EDC),
+  // that institution runs the bucket's items and the Qloo place hosts them. Grants go to applicants.
+  const RUN_WITH: Bucket[] = ["training", "procurement", "events", "channels"];
+  for (const bucket of RUN_WITH) {
+    const lead = audit.find((a) => a.bucket === bucket && isKept(a.verdict) && a.named && isInstitution(a.named));
+    if (lead?.named) program.items.filter((it) => it.bucket === bucket).forEach((it) => runWith(it, lead.named!));
+  }
+
   // Partners Qloo surfaces that the audited draft never named.
   const draftText = norm(inputs.map((i) => `${i.named ?? ""} ${i.text}`).join(" "));
-  const usedIds = new Set(audit.map((a) => a.replacement?.id).filter(Boolean));
+  const usedIds = new Set(audit.flatMap((a) => [a.replacement?.id, a.alongside?.id]).filter(Boolean));
   const qlooAdds: ProgramItem[] = program.items.filter(
     (it) => !usedIds.has(it.id) && it.partner && !draftText.includes(norm(it.partner.name)),
   );

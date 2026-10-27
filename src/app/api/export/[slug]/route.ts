@@ -1,5 +1,5 @@
 import { runTown } from "@/lib/run";
-import { BUCKETS } from "@/lib/plan";
+import { BUCKETS, ROLE_LABEL } from "@/lib/plan";
 
 const csvCell = (v: unknown) => `"${String(v ?? "").replace(/"/g, '""')}"`;
 
@@ -38,21 +38,32 @@ export async function GET(req: Request, { params }: { params: Promise<{ slug: st
     });
   }
 
-  const header = ["bucket", "item", "partner", "address", "distance_km", "phone", "website", "event_space", "amount_usd", "months", "qloo_signal", "signal_detail"];
+  const header = [
+    "bucket", "item", "partner", "partner_role", "run_with", "address", "distance_km", "neighbouring_community", "phone", "website", "event_space",
+    "sessions", "unit_cost_usd", "amount_usd", "months", "cadence", "qloo_signal", "signal_detail",
+  ];
   const rows = program.items.map((it) => [
     BUCKETS[it.bucket].label,
     it.title,
     it.partner?.name,
+    it.role ? ROLE_LABEL[it.role] : "",
+    it.runWith,
     it.partner?.address,
     it.partner?.distanceKm,
+    it.partner?.neighbouring ? "yes" : "",
     it.partner?.phone,
     it.partner?.website,
     it.partner?.eventSpaces ? "yes" : "",
+    it.sessions,
+    it.unitCost,
     it.amount,
     it.months.join(" "),
+    it.cadence,
     it.provenance[0]?.signal,
     it.provenance[0]?.detail,
   ]);
+  // The unassigned remainder is a line of its own, so the sheet reconciles with the fund.
+  rows.push(["Unassigned", "Unassigned, for the committee to allocate", "", "", "", "", "", "", "", "", "", "", "", program.unassigned, "", "", "", ""]);
   const csv = [header, ...rows].map((r) => r.map(csvCell).join(",")).join("\n");
   return new Response(csv, {
     headers: { "Content-Type": "text/csv", "Content-Disposition": `attachment; filename="${town.slug}-partners.csv"` },
