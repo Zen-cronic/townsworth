@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { TOWNS } from "@/lib/towns";
+import { HeaderTownSearch } from "@/components/TownSearchForm";
 
 const navLink =
   "rounded-md px-2.5 py-1.5 text-sm transition-colors duration-150 hover:bg-concrete hover:text-ink active:bg-hairline";
@@ -40,10 +41,25 @@ export function AppHeader({ active, page, towns = true }: { active?: string; pag
                 </Link>
               );
             })}
+            <Link
+              href="/find"
+              className="shrink-0 rounded-md px-2.5 py-1.5 text-sm text-ink underline decoration-rule underline-offset-[7px] transition-colors duration-150 hover:bg-concrete active:bg-hairline md:hidden"
+            >
+              Any town
+            </Link>
           </nav>
         )}
 
         <nav aria-label="Primary" className="order-2 ml-auto flex items-center gap-0.5 text-muted lg:order-3">
+          <HeaderTownSearch />
+          {/* At lg the six towns leave no room for the input, so the search is an icon link */}
+          <Link href="/find" title="Try any town" className={`${navLink} hidden items-center lg:inline-flex xl:hidden`}>
+            <svg aria-hidden viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-4 w-4">
+              <circle cx="7" cy="7" r="4.25" />
+              <path d="m10.25 10.25 3 3" strokeLinecap="round" />
+            </svg>
+            <span className="sr-only">Try any town</span>
+          </Link>
           <Link href="/proof" aria-current={page === "proof" ? "page" : undefined} className={`${navLink} ${page === "proof" ? "text-ink" : ""}`}>
             Proof
           </Link>

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Town } from "@/lib/towns";
+import { TownSearchForm } from "@/components/TownSearchForm";
 import { Chevron } from "./Chevron";
 
 export interface TownPick {
@@ -112,6 +113,20 @@ export function TownGrid({
             </li>
           ))}
         </ul>
+
+        {/* Type any town */}
+        <div className="mt-6 rounded-md border border-rule bg-paper p-4 sm:p-6">
+          <div className="mb-4 max-w-2xl">
+            <h3 id="anytown-h" className="text-lg font-semibold tracking-tight">
+              Or type any town
+            </h3>
+            <p className="mt-1 text-sm leading-relaxed text-muted">
+              Any US or Canadian host town gets the same audit, memo and exports, from Qloo signals at its coordinates. With no frozen LLM
+              plan, the agency template is audited first; a plain LLM can draft one live.
+            </p>
+          </div>
+          <TownSearchForm idPrefix="landing" />
+        </div>
       </div>
     </section>
   );

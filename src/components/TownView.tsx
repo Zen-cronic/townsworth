@@ -7,7 +7,7 @@ import { Check, Chevron, Notice } from "@/components/dashboard/Icons";
 import { ProvenanceChip } from "@/components/dashboard/ProvenanceChip";
 import { Figure } from "@/components/dashboard/Figure";
 import { StatusPill } from "@/components/dashboard/StatusPill";
-import { primaryCta } from "@/components/dashboard/ui";
+import { primaryCta, secondaryCta } from "@/components/dashboard/ui";
 import { cadenceLower, formatPhone, km, quotedName } from "@/components/dashboard/format";
 
 const FACILITY_LABEL: Record<string, string> = {
@@ -27,6 +27,22 @@ const DRAFT: Record<PlanSource, { tab: string; note: string }> = {
     note: "A sample of the generic plan a consultancy might send to any town.",
   },
 };
+
+// The audited draft's provenance line. A typed-in town has no frozen plan, and says so.
+function draftNote(run: TownRun): string {
+  const { draft, source, town } = run;
+  if (draft.origin === "live" && draft.live) {
+    const secs = Math.round((draft.live.llmMs + draft.live.osmMs) / 1000);
+    const failed = draft.live.osmFailures ? ` ${draft.live.osmFailures} OpenStreetMap checks didn't answer and count as unverified.` : "";
+    const fresh = Date.now() - Date.parse(draft.live.createdAt) < 10 * 60_000;
+    const when = fresh
+      ? "just now"
+      : `on ${new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", timeZone: "America/Toronto" }).format(new Date(draft.live.createdAt))}`;
+    return `Written live by OpenAI ${draft.live.model} ${when} (${secs} s, no Qloo access), not part of the frozen set on /proof.${failed}`;
+  }
+  if (town.custom && source === "agency") return "No frozen LLM plan for this town; auditing the typical agency template.";
+  return DRAFT[source].note;
+}
 
 const TASTE_LABEL = { brand: "Brands", artist: "Artists", tv_show: "TV", podcast: "Podcasts" } as const;
 
@@ -261,7 +277,7 @@ function SectionHead({ id, title, note, children }: { id?: string; title: string
 const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
 
 export function TownView({ run }: { run: TownRun }) {
-  const { town, profile, program, audit, source, qlooAdds } = run;
+  const { town, profile, program, audit, source, qlooAdds, draft } = run;
 
   // Counts, each with the unit it measures (see the legend under the summary).
   const flagged = audit.filter((a) => a.verdict !== "grounded").length;
@@ -287,13 +303,19 @@ export function TownView({ run }: { run: TownRun }) {
         <div className="order-1 min-w-0 max-w-3xl">
           <p className="flex flex-wrap items-center gap-x-2 text-sm text-muted">
             <span className="font-medium text-ink">{FACILITY_LABEL[town.facility]} host community</span>
-            <span aria-hidden className="hidden text-rule sm:inline">/</span>
-            <span className="hidden sm:inline">{town.project}</span>
+            {town.custom ? (
+              <StatusPill tone="neutral">Entered by you</StatusPill>
+            ) : (
+              <>
+                <span aria-hidden className="hidden text-rule sm:inline">/</span>
+                <span className="hidden sm:inline">{town.project}</span>
+              </>
+            )}
           </p>
           <h1 id="town-title" className="mt-1 text-[1.75rem] font-semibold leading-tight tracking-tight md:text-[2.5rem]">
             {town.name}, {town.region}
           </h1>
-          <p className="mt-1 text-sm text-muted sm:hidden">{town.project}</p>
+          {!town.custom && <p className="mt-1 text-sm text-muted sm:hidden">{town.project}</p>}
         </div>
 
         <form className="no-print order-4 flex items-end gap-2 text-sm md:order-2" action={`/town/${town.slug}`}>
@@ -391,7 +413,21 @@ export function TownView({ run }: { run: TownRun }) {
             <h2 id="audit-title" className="mt-1 text-lg font-semibold tracking-tight">
               The draft, red-penned against {town.name}
             </h2>
-            <p className="mt-1 text-sm text-muted">{DRAFT[source].note}</p>
+            <p className="mt-1 text-sm text-muted">{draftNote(run)}</p>
+            {draft.notice && (
+              <p role="note" className="mt-2 flex gap-2 rounded-md border border-amber/35 bg-amber-wash px-3 py-2 text-sm">
+                <Notice className="mt-0.5 h-4 w-4 text-amber" />
+                <span>{draft.notice}</span>
+              </p>
+            )}
+            {town.custom && source === "agency" && (
+              <div className="no-print mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5">
+                <Link href={planHref("llm")} className={secondaryCta}>
+                  {draft.notice ? "Try the live LLM draft again" : "Have a plain LLM draft it now"}
+                </Link>
+                <span className="text-xs text-muted">About 20 s. OpenAI writes it with no Qloo access; each named partner is checked on OpenStreetMap.</span>
+              </div>
+            )}
           </div>
           <div role="tablist" aria-label="Draft plan to audit" className="no-print flex rounded-md border border-rule bg-concrete p-0.5 text-sm">
             {(["llm", "agency"] as const).map((p) => (
