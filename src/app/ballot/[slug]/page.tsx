@@ -4,6 +4,7 @@ import { BallotForm } from "@/components/ballot/BallotForm";
 import { BallotShell, PrivacyLine, ThinShortlist } from "@/components/ballot/BallotShell";
 import { SHORTLIST_MIN, selectShortlist } from "@/lib/ballot";
 import { runTown } from "@/lib/run";
+import { companyFormHref, fundedByLine } from "@/lib/towns";
 
 export const metadata: Metadata = { title: "Resident ballot · Good Neighbor" };
 
@@ -13,9 +14,10 @@ export default async function BallotPage({ params }: { params: Promise<{ slug: s
   if (!run) notFound();
   const { town, program } = run;
   const items = selectShortlist(program.items);
+  const funder = { line: fundedByLine(town), placeholder: town.sponsorSource === "placeholder", fixHref: town.custom ? companyFormHref(town) : undefined };
 
   return (
-    <BallotShell slug={town.slug} kicker={`Resident ballot · ${town.name}, ${town.region}`} title="Which of these should the community fund do first?">
+    <BallotShell slug={town.slug} funder={funder} kicker={`Resident ballot · ${town.name}, ${town.region}`} title="Which of these should the community fund do first?">
       <p className="mt-3 leading-relaxed">
         The community committee has a shortlist of {items.length} {items.length === 1 ? "idea" : "ideas"} for {town.name}. Put them in the order
         you&apos;d like to see them happen. The committee decides; your ranking informs it.

@@ -4,6 +4,7 @@ import { BallotResults } from "@/components/ballot/BallotResults";
 import { BallotShell, ThinShortlist } from "@/components/ballot/BallotShell";
 import { selectShortlist } from "@/lib/ballot";
 import { runTown } from "@/lib/run";
+import { companyFormHref, fundedByLine } from "@/lib/towns";
 
 export const metadata: Metadata = { title: "Ballot tally · Good Neighbor" };
 
@@ -13,9 +14,10 @@ export default async function BallotResultsPage({ params }: { params: Promise<{ 
   if (!run) notFound();
   const { town, program } = run;
   const items = selectShortlist(program.items);
+  const funder = { line: fundedByLine(town), placeholder: town.sponsorSource === "placeholder", fixHref: town.custom ? companyFormHref(town) : undefined };
 
   return (
-    <BallotShell slug={town.slug} kicker={`Committee view · ${town.name}, ${town.region}`} title="How the shortlist ranks">
+    <BallotShell slug={town.slug} funder={funder} kicker={`Committee view · ${town.name}, ${town.region}`} title="How the shortlist ranks">
       {items.length < 2 ? (
         <ThinShortlist slug={town.slug} townName={town.name} count={items.length} />
       ) : (

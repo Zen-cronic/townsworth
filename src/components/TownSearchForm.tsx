@@ -1,4 +1,4 @@
-import { FACILITY_CHOICES, type FacilityCode } from "@/lib/towns";
+import { FACILITY_CHOICES, SPONSOR_PLACEHOLDER, type FacilityCode } from "@/lib/towns";
 
 // A plain GET form to /find, so it works without JavaScript. Geocoding happens on the server.
 
@@ -32,16 +32,18 @@ export function HeaderTownSearch() {
 export function TownSearchForm({
   q = "",
   facility = "data-center",
+  company = "",
   idPrefix = "town",
   autoFocus,
 }: {
   q?: string;
   facility?: FacilityCode;
+  company?: string;
   idPrefix?: string;
   autoFocus?: boolean;
 }) {
   return (
-    <form action="/find" role="search" className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_12rem_auto] sm:items-end">
+    <form action="/find" role="search" className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_12rem] sm:items-end">
       <label className="flex min-w-0 flex-col gap-1 text-sm">
         <span className="text-xs text-muted">Host town (US or Canada)</span>
         <input
@@ -68,9 +70,28 @@ export function TownSearchForm({
           ))}
         </select>
       </label>
+      <label className="flex min-w-0 flex-col gap-1 text-sm">
+        <span className="text-xs text-muted">Company funding the program</span>
+        <input
+          id={`${idPrefix}-company`}
+          name="company"
+          type="text"
+          maxLength={40}
+          autoComplete="organization"
+          defaultValue={company}
+          placeholder={SPONSOR_PLACEHOLDER}
+          aria-describedby={`${idPrefix}-company-help`}
+          className={`${field} h-10 w-full px-3`}
+        />
+      </label>
       <button className="inline-flex h-10 items-center justify-center gap-1.5 rounded-md bg-ink px-4 text-sm font-semibold text-paper transition-colors duration-150 hover:bg-ink/85 active:bg-ink/75">
         Find town
       </button>
+      <p id={`${idPrefix}-company-help`} className={`text-xs leading-relaxed sm:col-span-2 ${company ? "text-muted" : "text-amber"}`}>
+        {company
+          ? `Every outreach draft and the resident ballot will name ${company} as the funder.`
+          : `Fill in the company: every outreach draft and the resident ballot name the funder. Left blank, they say “${SPONSOR_PLACEHOLDER}”.`}
+      </p>
     </form>
   );
 }

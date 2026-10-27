@@ -9,6 +9,10 @@ export interface Town {
   lat: number;
   lon: number;
   project: string;
+  // Who funds the community program, as named in `project` (public reporting) or typed by the user.
+  sponsor: string;
+  // "reported": named in public reporting; "entered": typed by the user; "placeholder": not entered yet.
+  sponsorSource: "reported" | "entered" | "placeholder";
   facility: "data center" | "fab" | "nuclear" | "plant";
   defaultAnnualFund: number;
   fundNote: string;
@@ -26,6 +30,8 @@ export const TOWNS: Town[] = [
     lat: 42.7117,
     lon: -87.8836,
     project: "Hyperscale AI data center campus (Microsoft, per public reporting)",
+    sponsor: "Microsoft",
+    sponsorSource: "reported",
     facility: "data center",
     defaultAnnualFund: 2_000_000,
     fundNote: "Illustrative. Replace with your actual community fund.",
@@ -38,6 +44,8 @@ export const TOWNS: Town[] = [
     lat: 43.1857,
     lon: -76.1724,
     project: "Semiconductor megafab (Micron, per public reporting)",
+    sponsor: "Micron",
+    sponsorSource: "reported",
     facility: "fab",
     defaultAnnualFund: 25_000_000,
     fundNote: "Micron and partners committed $500M over 20 years (≈$25M/yr), per Empire State Development.",
@@ -50,6 +58,8 @@ export const TOWNS: Town[] = [
     lat: 40.0804,
     lon: -82.7842,
     project: "Data center cluster and chip fab (Meta, Google, AWS, Intel, per public reporting)",
+    sponsor: "Meta, Google, AWS and Intel",
+    sponsorSource: "reported",
     facility: "data center",
     defaultAnnualFund: 1_500_000,
     fundNote: "Illustrative. Meta reports $5.6M+ given locally to date.",
@@ -62,6 +72,8 @@ export const TOWNS: Town[] = [
     lat: 32.4553,
     lon: -99.7385,
     project: "AI data center campus (Stargate, per public reporting)",
+    sponsor: "Stargate",
+    sponsorSource: "reported",
     facility: "data center",
     defaultAnnualFund: 2_000_000,
     fundNote: "Illustrative. Replace with your actual community fund.",
@@ -74,6 +86,8 @@ export const TOWNS: Town[] = [
     lat: 44.1767,
     lon: -81.6367,
     project: "Nuclear generating station (Bruce Power, per public reporting)",
+    sponsor: "Bruce Power",
+    sponsorSource: "reported",
     facility: "nuclear",
     defaultAnnualFund: 2_000_000,
     fundNote: "Bruce Power reports CAD $2M+ a year in community giving.",
@@ -86,6 +100,8 @@ export const TOWNS: Town[] = [
     lat: 41.7761,
     lon: -110.5555,
     project: "Advanced nuclear plant (TerraPower Natrium, per public reporting)",
+    sponsor: "TerraPower",
+    sponsorSource: "reported",
     facility: "nuclear",
     defaultAnnualFund: 500_000,
     fundNote: "Illustrative. A thin-data host: expect fewer grounded picks.",
@@ -96,7 +112,11 @@ export const TOWNS: Town[] = [
 export const HERO_TOWN = TOWNS[0];
 
 // Custom towns: everything a route needs is encoded in the slug, so no server state is kept.
-// Format: <Name-With-Hyphens>-<REGION>~<lat>_<lon>~<facility>, e.g. Taylor-TX~30.5729_-97.4141~fab
+// Format: <Name-With-Hyphens>-<REGION>~<lat>_<lon>~<facility>[~<Company-With-Hyphens>],
+// e.g. Taylor-TX~30.5729_-97.4141~fab or Taylor-TX~30.5729_-97.4141~fab~Samsung. No company means
+// drafts are signed "[Your company]" until the user enters one.
+
+export const SPONSOR_PLACEHOLDER = "[Your company]";
 
 export const US_STATES: Record<string, string> = {
   AL: "Alabama", AK: "Alaska", AZ: "Arizona", AR: "Arkansas", CA: "California", CO: "Colorado", CT: "Connecticut",
@@ -169,17 +189,27 @@ function nameToken(name: string) {
     .replace(/-{2,}/g, "-");
 }
 
-export function customSlug(name: string, regionCode: string, lat: number, lon: number, facility: FacilityCode): string {
-  return `${nameToken(name)}-${regionCode.toUpperCase()}~${lat.toFixed(4)}_${lon.toFixed(4)}~${facility}`;
+// A company name as typed: letters, digits, spaces and light punctuation, at most 40 characters.
+export function cleanCompany(raw: string | undefined) {
+  return nameToken((raw ?? "").replace(/&/g, " and ").slice(0, 60))
+    .slice(0, 40)
+    .replace(/[-.]+$/g, "")
+    .replace(/-/g, " ")
+    .trim();
 }
 
-const CUSTOM_SLUG = /^([A-Za-z0-9.]+(?:-[A-Za-z0-9.]+)*)-([A-Za-z]{2})~(-?\d{1,2}(?:\.\d{1,6})?)_(-?\d{1,3}(?:\.\d{1,6})?)~(data-center|fab|nuclear|plant)$/;
+export function customSlug(name: string, regionCode: string, lat: number, lon: number, facility: FacilityCode, company?: string): string {
+  const co = cleanCompany(company);
+  return `${nameToken(name)}-${regionCode.toUpperCase()}~${lat.toFixed(4)}_${lon.toFixed(4)}~${facility}${co ? `~${nameToken(co)}` : ""}`;
+}
+
+const CUSTOM_SLUG = /^([A-Za-z0-9.]+(?:-[A-Za-z0-9.]+)*)-([A-Za-z]{2})~(-?\d{1,2}(?:\.\d{1,6})?)_(-?\d{1,3}(?:\.\d{1,6})?)~(data-center|fab|nuclear|plant)(?:~([A-Za-z0-9.]+(?:-[A-Za-z0-9.]+)*))?$/;
 
 export function parseCustomSlug(slug: string): Town | undefined {
-  if (slug.length > 120) return undefined;
+  if (slug.length > 170) return undefined;
   const m = CUSTOM_SLUG.exec(slug);
   if (!m) return undefined;
-  const [, token, code, latRaw, lonRaw, facilityCode] = m;
+  const [, token, code, latRaw, lonRaw, facilityCode, companyToken] = m;
   const place = regionFor(code);
   const name = token.replace(/-/g, " ").trim();
   if (!place || name.length < 2 || name.length > 60 || !/[A-Za-z]/.test(name)) return undefined;
@@ -187,19 +217,32 @@ export function parseCustomSlug(slug: string): Town | undefined {
   const lon = Number(lonRaw);
   if (!Number.isFinite(lat) || !Number.isFinite(lon) || !inCountry(place.country, lat, lon)) return undefined;
   const facility = facilityCode as FacilityCode;
+  const company = cleanCompany(companyToken);
+  if (companyToken && !company) return undefined;
   return {
-    slug: customSlug(name, code, lat, lon, facility),
+    slug: customSlug(name, code, lat, lon, facility, company),
     name,
     region: place.region,
     country: place.country,
     lat,
     lon,
-    project: `${FACILITY_PROJECT[facility]} project (entered by you)`,
+    project: company ? `${FACILITY_PROJECT[facility]} project (${company}, entered by you)` : `${FACILITY_PROJECT[facility]} project (entered by you; company not entered)`,
+    sponsor: company || SPONSOR_PLACEHOLDER,
+    sponsorSource: company ? "entered" : "placeholder",
     facility: FACILITY_CODES[facility],
     defaultAnnualFund: 1_000_000,
     fundNote: "Illustrative default for a town you entered. Replace with your actual community fund.",
     custom: true,
   };
+}
+
+// Adds (or replaces) the company segment on a custom slug. Preset slugs are returned unchanged.
+export function withCompany(slug: string, company: string | undefined): string {
+  const m = CUSTOM_SLUG.exec(slug);
+  if (!m || !parseCustomSlug(slug)) return slug;
+  const base = m[6] ? slug.slice(0, -(m[6].length + 1)) : slug;
+  const co = cleanCompany(company);
+  return co ? `${base}~${nameToken(co)}` : base;
 }
 
 // A preset within ~10 km of a point, so a typed-in preset town keeps its frozen LLM plan.
@@ -209,4 +252,49 @@ export function presetNear(lat: number, lon: number, km = 10): Town | undefined 
 
 export function townBySlug(slug: string): Town | undefined {
   return TOWNS.find((t) => t.slug === slug) ?? parseCustomSlug(slug);
+}
+
+// Sponsor disclosure. Every outreach draft and the resident ballot name the funder.
+
+const FACILITY_NOUN: Record<Town["facility"], string> = {
+  "data center": "data center",
+  fab: "chip fab",
+  nuclear: "nuclear plant",
+  plant: "plant",
+};
+
+// "Meta, Google, AWS and Intel" -> ["Meta", "Google", "AWS", "Intel"].
+export function sponsorNames(sponsor: string): string[] {
+  return sponsor
+    .split(/\s*,\s*|\s+and\s+|\s*&\s*/i)
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
+// The line every draft must end with, e.g. "Sent on behalf of Microsoft's Mount Pleasant data center team".
+export function sponsorSignature(town: Pick<Town, "name" | "facility" | "sponsor">): string {
+  const team = `${town.name} ${FACILITY_NOUN[town.facility]} team`;
+  return sponsorNames(town.sponsor).length > 1 ? `Sent on behalf of the ${team} (${town.sponsor})` : `Sent on behalf of ${town.sponsor}'s ${team}`;
+}
+
+const squash = (s: string) => s.toLowerCase().replace(/[^a-z0-9[\]]+/g, " ").trim();
+
+// True when every sponsor name appears in the text (case- and punctuation-insensitive).
+export function namesSponsor(text: string, sponsor: string): boolean {
+  const hay = ` ${squash(text)} `;
+  return sponsorNames(sponsor).every((n) => hay.includes(` ${squash(n)} `));
+}
+
+// The ballot's disclosure line.
+export function fundedByLine(town: Pick<Town, "sponsor" | "sponsorSource">): string {
+  if (town.sponsorSource === "reported") return `Funded by ${town.sponsor} (per public reporting)`;
+  if (town.sponsorSource === "entered") return `Funded by ${town.sponsor} (as entered by the organizer)`;
+  return `Funded by ${SPONSOR_PLACEHOLDER} (not entered yet)`;
+}
+
+// Where to fill in the company for a typed town.
+export function companyFormHref(town: Pick<Town, "name" | "region" | "facility">): string {
+  const code = Object.entries({ ...US_STATES, ...CA_PROVINCES }).find(([, n]) => n === town.region)?.[0] ?? "";
+  const fac = (Object.entries(FACILITY_CODES).find(([, f]) => f === town.facility)?.[0] ?? "data-center") as FacilityCode;
+  return `/find?q=${encodeURIComponent(code ? `${town.name}, ${code}` : town.name)}&facility=${fac}`;
 }

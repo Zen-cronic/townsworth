@@ -8,11 +8,13 @@ export function BallotShell({
   slug,
   kicker,
   title,
+  funder,
   children,
 }: {
   slug: string;
   kicker: string;
   title: string;
+  funder?: { line: string; placeholder: boolean; fixHref?: string };
   children: React.ReactNode;
 }) {
   return (
@@ -28,9 +30,33 @@ export function BallotShell({
         </Link>
         <p className="mt-4 font-mono text-[11px] uppercase tracking-wider text-muted">{kicker}</p>
         <h1 className="mt-1.5 text-balance text-2xl font-semibold leading-tight tracking-tight sm:text-[1.75rem]">{title}</h1>
+        {funder && <FundedBy {...funder} />}
         {children}
       </main>
     </>
+  );
+}
+
+// Sponsor disclosure: residents see who pays for the program before they rank anything.
+function FundedBy({ line, placeholder, fixHref }: { line: string; placeholder: boolean; fixHref?: string }) {
+  return (
+    <p data-testid="ballot-funder" className={`mt-2 flex items-start gap-2 text-sm ${placeholder ? "text-amber" : "text-ink/80"}`}>
+      <svg aria-hidden viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="mt-0.5 h-4 w-4 shrink-0 text-muted">
+        <path d="M2.5 14V6.5L8 3l5.5 3.5V14" strokeLinejoin="round" />
+        <path d="M6 14v-3.5h4V14M1.5 14h13" strokeLinecap="round" />
+      </svg>
+      <span>
+        <span className="font-medium">{line}</span>
+        {placeholder && fixHref && (
+          <>
+            {" · "}
+            <Link href={fixHref} className="underline underline-offset-4">
+              Add the company
+            </Link>
+          </>
+        )}
+      </span>
+    </p>
   );
 }
 

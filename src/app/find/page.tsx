@@ -5,20 +5,22 @@ import { Chevron, Notice } from "@/components/dashboard/Icons";
 import { StatusPill } from "@/components/dashboard/StatusPill";
 import { TownSearchForm } from "@/components/TownSearchForm";
 import { cleanTownQuery, geocodeTowns, type GeocodeResult } from "@/lib/nominatim";
-import { FACILITY_CHOICES, isFacilityCode } from "@/lib/towns";
+import { cleanCompany, FACILITY_CHOICES, isFacilityCode, withCompany } from "@/lib/towns";
 
 export const metadata: Metadata = { title: "Type any town · Good Neighbor" };
 
-const EXAMPLES: [string, string][] = [
-  ["Taylor, TX", "fab"],
-  ["New Carlisle, IN", "data-center"],
-  ["St. Thomas, ON", "plant"],
+// Companies as reported publicly for each example project.
+const EXAMPLES: [string, string, string][] = [
+  ["Taylor, TX", "fab", "Samsung"],
+  ["New Carlisle, IN", "data-center", "Amazon"],
+  ["St. Thomas, ON", "plant", "PowerCo"],
 ];
 
-export default async function FindPage({ searchParams }: { searchParams: Promise<{ q?: string; facility?: string }> }) {
+export default async function FindPage({ searchParams }: { searchParams: Promise<{ q?: string; facility?: string; company?: string }> }) {
   const sp = await searchParams;
   const q = cleanTownQuery(sp.q);
   const facility = isFacilityCode(sp.facility) ? sp.facility : "data-center";
+  const company = cleanCompany(sp.company);
   const facilityLabel = FACILITY_CHOICES.find((f) => f.code === facility)!.label.toLowerCase();
   const result: GeocodeResult | null = q.length >= 2 ? await geocodeTowns(q, facility) : null;
 
@@ -35,20 +37,20 @@ export default async function FindPage({ searchParams }: { searchParams: Promise
         </p>
 
         <div className="mt-6 rounded-lg border border-rule bg-paper p-4 sm:p-5">
-          <TownSearchForm q={q} facility={facility} idPrefix="find" autoFocus={!q} />
+          <TownSearchForm q={q} facility={facility} company={company} idPrefix="find" autoFocus={!q} />
         </div>
 
         {result === null && (
           <p className="mt-5 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted">
             Try
-            {EXAMPLES.map(([name, f], i) => (
+            {EXAMPLES.map(([name, f, co], i) => (
               <span key={name} className="flex items-center gap-2">
                 {i > 0 && (
                   <span aria-hidden className="text-rule">
                     ·
                   </span>
                 )}
-                <Link href={`/find?q=${encodeURIComponent(name)}&facility=${f}`} className="text-ink underline decoration-rule underline-offset-4 hover:decoration-ink">
+                <Link href={`/find?q=${encodeURIComponent(name)}&facility=${f}&company=${encodeURIComponent(co)}`} className="text-ink underline decoration-rule underline-offset-4 hover:decoration-ink">
                   {name}
                 </Link>
               </span>
@@ -85,11 +87,12 @@ export default async function FindPage({ searchParams }: { searchParams: Promise
               </h2>
               <p className="text-xs text-muted">
                 {result.candidates.length} {result.candidates.length === 1 ? "match" : "matches"} for &ldquo;{q}&rdquo; · {facilityLabel}
+                {company ? ` · ${company}` : " · company not entered"}
               </p>
             </div>
             <ol className="mt-3 space-y-2">
               {result.candidates.map((c) => {
-                const href = c.preset ? `/town/${c.preset.slug}` : `/town/${c.slug}`;
+                const href = c.preset ? `/town/${c.preset.slug}` : `/town/${withCompany(c.slug, company)}`;
                 return (
                   <li key={c.slug}>
                     <Link
@@ -103,7 +106,7 @@ export default async function FindPage({ searchParams }: { searchParams: Promise
                         </span>
                         <span className="mt-0.5 block font-mono text-xs tabular-nums text-muted">
                           {c.lat.toFixed(4)}, {c.lon.toFixed(4)} · {c.kind}
-                          {c.preset && ` · opens ${c.preset.name}, ${c.preset.project.split(" (")[0].toLowerCase()}`}
+                          {c.preset && ` · opens ${c.preset.name}, ${c.preset.project.split(" (")[0].toLowerCase()}, funded by ${c.preset.sponsor} per public reporting`}
                         </span>
                       </span>
                       <span className="flex items-center gap-1 text-sm text-muted group-hover:text-ink">
