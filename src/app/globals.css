@@ -89,14 +89,14 @@ details[open] > summary .chev { transform: rotate(90deg); }
 .strike {
   background-image: linear-gradient(var(--hivis), var(--hivis));
   background-repeat: no-repeat;
-  background-position: 0 58%;
-  background-size: 100% 2px;
+  background-position: 0 60%;
+  background-size: 100% 1.5px;
   animation: strike-sweep 420ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 
 @keyframes strike-sweep {
-  from { background-size: 0% 2px; }
-  to { background-size: 100% 2px; }
+  from { background-size: 0% 1.5px; }
+  to { background-size: 100% 1.5px; }
 }
 
 .slide-in {

@@ -3,6 +3,7 @@ import { AppHeader } from "@/components/AppHeader";
 import { TownView } from "@/components/TownView";
 import { runTown } from "@/lib/run";
 import { TOWNS } from "@/lib/towns";
+import { parseFund } from "@/components/dashboard/ui";
 
 export function generateStaticParams() {
   return TOWNS.map((t) => ({ slug: t.slug }));
@@ -16,7 +17,7 @@ export default async function TownPage({
   searchParams: Promise<{ fund?: string; plan?: string }>;
 }) {
   const [{ slug }, { fund, plan }] = await Promise.all([params, searchParams]);
-  const run = await runTown(slug, Number(fund) || undefined, plan === "agency" ? "agency" : "llm");
+  const run = await runTown(slug, parseFund(fund), plan === "agency" ? "agency" : "llm");
   if (!run) notFound();
   return (
     <>

@@ -65,7 +65,7 @@ export function AgentDrafts({ slug, fund }: { slug: string; fund: number }) {
   const activity = Array.from(new Set((result?.trace ?? []).map(describe)));
 
   return (
-    <section data-testid="agent-drafts" aria-busy={state === "loading"} className="no-print mt-10 rounded-lg border border-rule bg-paper">
+    <section data-testid="agent-drafts" aria-busy={state === "loading"} className="no-print mt-10 scroll-mt-24 rounded-lg border border-rule bg-paper">
       <div className="flex flex-wrap items-start justify-between gap-4 px-5 py-5 sm:px-6">
         <div className="max-w-xl">
           <p className="font-mono text-[11px] uppercase tracking-wider text-muted">Next step</p>
