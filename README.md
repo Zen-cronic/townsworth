@@ -16,11 +16,15 @@ We asked OpenAI `gpt-5.4-mini`, with no Qloo access, to write the community plan
 
 **What it shows:** the plain LLM knows a town's institutions (the college, the district, the library, the chamber). Qloo knows where the town actually goes. **What it doesn't show:** that residents value the program more, or anything about acceptance or approval. It's six towns and one model, so read it as a directional check.
 
+**Live app:** https://good-neighbor-rho.vercel.app (no login).
+
 ## Start here (90 seconds)
 1. Open `/town/mount-pleasant-wi`: the plain-LLM plan, audited item by item. Real partners are kept; generic items are struck and replaced.
 2. Click **why?** on any replacement to see the Qloo signal behind it.
 3. Open the commitments memo, download the partner sheet (CSV) and calendar (.ics), and click **Draft outreach** to run the OpenAI agent.
-4. Switch towns in the header. Kemmerer, WY shows the honest thin-data case.
+4. **Send the shortlist to residents** from the memo: rank the grants and events in the resident ballot, then see the committee tally. The tally uses 120 simulated sample ballots plus yours, and every screen says so. Your ballot stays in your browser.
+5. **Type any US or Canadian town** in the header (try *Taylor, Texas*, a chip fab, or *St. Thomas, Ontario*, a battery plant). It audits the typical agency template, or click **Have a plain LLM draft it now** to have OpenAI write a fresh draft live (about 15 s) and red-pen that.
+6. Switch towns in the header. Kemmerer, WY shows the honest thin-data case.
 
 ## How Qloo drives it
 - `GET /v2/insights` with `filter.type=urn:entity:place` + `filter.location=POINT(lon lat)` + radius gives the candidate local partners, with categories, rating, event space and distance.
@@ -40,13 +44,14 @@ We asked OpenAI `gpt-5.4-mini`, with no Qloo access, to write the community plan
 - Fund sizes are illustrative unless a public figure exists (Micron's $500M/20 years; Bruce Power's reported CAD $2M+/yr). Amounts are item budgets split by fixed policy shares, not Qloo output.
 - Partner availability and willingness are not confirmed. Drafts are drafts; nothing is sent.
 - Metro-suburb artist signals are weak (they lean national). Places and brands carry the local signal.
-- The six towns are presets with known coordinates.
+- The six towns are presets with known coordinates, and only they are in the /proof measurement. Typed-in towns are geocoded with OpenStreetMap Nominatim. Their live LLM drafts are labelled live and never enter the frozen proof set.
+- The resident ballot's tally is simulated (seeded random ballots). It shows how the ranking works and predicts nothing about real residents.
 
 ## Run locally
 ```bash
 cp .env.example .env.local   # QLOO_API_KEY, OPENAI_API_KEY, OPENAI_MODEL
 npm install
-npm run dev                  # http://localhost:3000
+npm run dev -- -p 4317       # http://localhost:4317
 npx tsx --env-file=.env.local scripts/freeze-baseline.ts   # optional: re-freeze the plain-LLM baseline
 ```
 Qloo responses are cached privately by Next's server data cache and never written to the repository.
