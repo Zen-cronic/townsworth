@@ -1,26 +1,77 @@
 @import "tailwindcss";
 
+/* Hi-vis field kit: concrete, charcoal, safety orange. Orange is for marks and fills;
+   orange text uses the deeper tone to pass WCAG AA on the concrete background. */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --concrete: #efede8;
+  --paper: #fbfaf7;
+  --ink: #22211f;
+  --muted: #5e5b55;
+  --rule: #cfcbc2;
+  --hairline: #e2dfd7;
+  --hivis: #d9480f;
+  --hivis-text: #a33409;
+  --hivis-wash: #fbe3d6;
+  --ok: #2f7d4f;
+  --ok-text: #276a43;
+  --ok-wash: #e1eee5;
+  --amber: #9a6b00;
+  --amber-wash: #f5ecd3;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-concrete: var(--concrete);
+  --color-paper: var(--paper);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-rule: var(--rule);
+  --color-hairline: var(--hairline);
+  --color-hivis: var(--hivis);
+  --color-hivis-text: var(--hivis-text);
+  --color-hivis-wash: var(--hivis-wash);
+  --color-ok: var(--ok);
+  --color-ok-text: var(--ok-text);
+  --color-ok-wash: var(--ok-wash);
+  --color-amber: var(--amber);
+  --color-amber-wash: var(--amber-wash);
+  --font-sans: var(--font-public-sans);
+  --font-mono: var(--font-plex-mono);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--concrete);
+  color: var(--ink);
+  font-family: var(--font-public-sans), system-ui, sans-serif;
+}
+
+/* Signature moment: the red-pen strike sweeping across a generic item. */
+.strike {
+  background-image: linear-gradient(var(--hivis), var(--hivis));
+  background-repeat: no-repeat;
+  background-position: 0 58%;
+  background-size: 100% 2px;
+  animation: strike-sweep 420ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+@keyframes strike-sweep {
+  from { background-size: 0% 2px; }
+  to { background-size: 100% 2px; }
+}
+
+.slide-in {
+  animation: slide-in 260ms ease-out both;
+}
+
+@keyframes slide-in {
+  from { opacity: 0; transform: translateX(8px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .strike, .slide-in { animation: none; }
+}
+
+@media print {
+  body { background: #fff; }
+  .no-print { display: none !important; }
 }
