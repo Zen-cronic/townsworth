@@ -30,11 +30,11 @@ export const runTown = cache(async (slug: string, fund?: number, source: PlanSou
       : GENERIC_AGENCY_PLAN.map((text) => ({ text }));
   const audit = auditPlan(inputs, profile, program.items);
 
-  // Partners Qloo surfaces that the plain LLM never named.
-  const llmText = norm(baseline.map((b) => `${b.partner ?? ""} ${b.item}`).join(" "));
+  // Partners Qloo surfaces that the audited draft never named.
+  const draftText = norm(inputs.map((i) => `${i.named ?? ""} ${i.text}`).join(" "));
   const used = new Set(audit.map((a) => a.replacement?.id).filter(Boolean));
   const qlooAdds: ProgramItem[] = program.items.filter(
-    (it) => !used.has(it.id) && it.partner && !llmText.includes(norm(it.partner.name)),
+    (it) => !used.has(it.id) && it.partner && !draftText.includes(norm(it.partner.name)),
   );
 
   return { town, profile, program, audit, source, qlooAdds };
