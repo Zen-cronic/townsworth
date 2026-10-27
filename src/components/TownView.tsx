@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { money, type PlanSource, type TownRun } from "@/lib/run";
 import { BASELINE } from "@/lib/baselineData";
-import { BUCKETS, type ProgramItem } from "@/lib/plan";
-import type { AuditRow } from "@/lib/audit";
+import { BUCKETS, costLine, ROLE_LABEL, type ProgramItem } from "@/lib/plan";
+import { isKept, type AuditRow } from "@/lib/audit";
 import { Check, Chevron, Notice } from "@/components/dashboard/Icons";
 import { ProvenanceChip } from "@/components/dashboard/ProvenanceChip";
 import { Figure } from "@/components/dashboard/Figure";
@@ -68,6 +68,7 @@ function PartnerFacts({ item }: { item: ProgramItem }) {
   if (!p) return null;
   const facts = [
     km(p.distanceKm) && `${km(p.distanceKm)} from site`,
+    p.neighbouring && `Neighbouring community${p.city ? ` (${p.city})` : ""}`,
     p.rating != null && `Rated ${p.rating.toFixed(1)}`,
     p.eventSpaces && "Event space",
     formatPhone(p.phone),
@@ -85,20 +86,21 @@ function PartnerFacts({ item }: { item: ProgramItem }) {
   );
 }
 
-function Proposal({ item, delay }: { item: ProgramItem; delay: number }) {
+function Proposal({ item, delay, label = "Proposed" }: { item: ProgramItem; delay: number; label?: string }) {
   const bucket = BUCKETS[item.bucket];
   return (
     <div className={SHELL.proposed} style={{ animationDelay: `${delay}ms` }}>
       <Eyebrow tone="ok">
-        Proposed <span className="font-normal normal-case tracking-normal text-muted">· {bucket.label}</span>
+        {label} <span className="font-normal normal-case tracking-normal text-muted">· {bucket.label}</span>
       </Eyebrow>
       {/* Tier 1: what and where */}
       <p className="mt-1 text-[15px] font-medium leading-snug">{item.title}</p>
       <PartnerFacts item={item} />
-      {/* Tier 2: budget and cadence */}
-      <p className="mt-2 flex flex-wrap items-baseline gap-x-1.5 text-xs text-muted">
+      {/* Tier 2: who hosts, sessions x unit cost, cadence */}
+      <p className="mt-2 text-xs text-muted">{costLine(item)}</p>
+      <p className="mt-0.5 flex flex-wrap items-baseline gap-x-1.5 text-xs text-muted">
         <span className="font-mono text-sm tabular-nums text-ink">{money(item.amount)}</span>
-        <span>item budget from your fund · {cadenceLower(bucket.cadence)}</span>
+        <span>item budget from your fund · {cadenceLower(item.cadence)}</span>
       </p>
       {/* Tier 3: evidence */}
       <div className="mt-2.5">
@@ -109,6 +111,35 @@ function Proposal({ item, delay }: { item: ProgramItem; delay: number }) {
 }
 
 function Kept({ row }: { row: AuditRow }) {
+  if (row.verdict === "institution") {
+    return (
+      <div className={SHELL.kept}>
+        <Eyebrow tone="ok">
+          <Check className="h-3 w-3" />
+          Kept <span className="font-normal normal-case tracking-normal text-muted">· institution, couldn&apos;t verify here</span>
+        </Eyebrow>
+        <p className="mt-1 text-[15px] leading-snug">{row.named}</p>
+        <p className="mt-0.5 text-xs text-muted">Not in Qloo&apos;s places or OpenStreetMap nearby. Confirm with the committee.</p>
+      </div>
+    );
+  }
+  if (row.verdict === "mechanism") {
+    const names = (row.applicants ?? []).map((a) => a.partner?.name).filter(Boolean) as string[];
+    return (
+      <div className={SHELL.kept}>
+        <Eyebrow tone="ok">
+          <Check className="h-3 w-3" />
+          Kept <span className="font-normal normal-case tracking-normal text-muted">· grant mechanism</span>
+        </Eyebrow>
+        <p className="mt-1 text-[15px] leading-snug">How grants are decided stays as drafted.</p>
+        {names.length > 0 && (
+          <p className="mt-1 text-xs leading-relaxed text-muted">
+            <span className="font-medium text-ink">Suggested applicants from Qloo:</span> {names.join(" · ")}
+          </p>
+        )}
+      </div>
+    );
+  }
   return (
     <div className={SHELL.kept}>
       <Eyebrow tone="ok">
@@ -118,7 +149,7 @@ function Kept({ row }: { row: AuditRow }) {
       <p className="mt-1 text-[15px] leading-snug">{row.matched?.name ?? "Matches a local signal"}</p>
       <p className="mt-0.5 text-xs text-muted">
         {row.matched
-          ? [row.matched.source === "osm" ? "Verified on OpenStreetMap" : "In Qloo's local data", km(row.matched.distanceKm) && `${km(row.matched.distanceKm)} away`]
+          ? [row.matched.source === "osm" ? "Verified on OpenStreetMap" : "A Qloo place within 15 km", km(row.matched.distanceKm) && `${km(row.matched.distanceKm)} away`]
               .filter(Boolean)
               .join(" · ")
           : row.termHits[0]}
@@ -141,7 +172,7 @@ function NoSwap({ plural }: { plural?: boolean }) {
 const ROW = "grid grid-cols-[2rem_minmax(0,1fr)] gap-x-3 gap-y-3 border-b border-hairline py-4 last:border-b-0 md:grid-cols-[2.25rem_minmax(0,1fr)_minmax(0,1fr)] md:gap-x-6";
 
 function AuditLine({ row, index }: { row: AuditRow; index: number }) {
-  const kept = row.verdict === "grounded";
+  const kept = isKept(row.verdict);
   const missing = row.verdict === "unverified" ? quotedName(row.reasons[0]) : undefined;
   const delay = index * 70;
 
@@ -161,8 +192,9 @@ function AuditLine({ row, index }: { row: AuditRow; index: number }) {
           </div>
         )}
       </div>
-      <div className="col-start-2 md:col-start-3">
+      <div className="col-start-2 space-y-2 md:col-start-3">
         {kept ? <Kept row={row} /> : row.replacement ? <Proposal item={row.replacement} delay={delay + 260} /> : <NoSwap />}
+        {row.alongside && <Proposal item={row.alongside} delay={delay + 260} label="Added alongside" />}
       </div>
     </li>
   );
@@ -222,7 +254,7 @@ function segment(audit: AuditRow[]): Segment[] {
     run = [];
   };
   audit.forEach((row, index) => {
-    if (row.verdict !== "grounded" && !row.replacement) run.push({ row, index });
+    if (!isKept(row.verdict) && !row.replacement) run.push({ row, index });
     else {
       flush();
       out.push({ kind: "row", row, index });
@@ -274,27 +306,71 @@ function SectionHead({ id, title, note, children }: { id?: string; title: string
   );
 }
 
+// The Qloo call log: quiet unless something failed. Never shows the API key or quota.
+function QlooCalls({ calls }: { calls: TownRun["profile"]["calls"] }) {
+  const failed = calls.filter((c) => !c.ok).length;
+  return (
+    <details className="group no-print mt-2 text-xs">
+      <summary className="inline-flex cursor-pointer items-center gap-1.5 rounded border border-hairline px-2 py-0.5 text-muted transition-colors duration-150 hover:border-rule hover:text-ink">
+        <span aria-hidden className={`h-1.5 w-1.5 rounded-full ${failed ? "bg-hivis" : "bg-ok"}`} />
+        <span className="font-mono">
+          Qloo calls: {calls.length} · {failed ? `${failed} failed` : "all OK"}
+        </span>
+        <Chevron className="chev h-3 w-3" />
+      </summary>
+      <table className="mt-2 w-full max-w-md text-left font-mono text-[11px] text-muted">
+        <thead>
+          <tr className="border-b border-hairline">
+            <th className="py-1 pr-3 font-medium">Call</th>
+            <th className="py-1 pr-3 text-right font-medium">Status</th>
+            <th className="py-1 text-right font-medium">Results</th>
+          </tr>
+        </thead>
+        <tbody>
+          {calls.map((c, i) => (
+            <tr key={i} className={c.ok ? "" : "text-hivis-text"}>
+              <td className="py-0.5 pr-3">{c.label}</td>
+              <td className="py-0.5 pr-3 text-right tabular-nums">{c.status || "no answer"}</td>
+              <td className="py-0.5 text-right tabular-nums">{c.count}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </details>
+  );
+}
+
 const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
 
 export function TownView({ run }: { run: TownRun }) {
   const { town, profile, program, audit, source, qlooAdds, draft } = run;
 
   // Counts, each with the unit it measures (see the legend under the summary).
-  const flagged = audit.filter((a) => a.verdict !== "grounded").length;
+  const flagged = audit.filter((a) => !isKept(a.verdict)).length;
   const keptPartners = audit.filter((a) => a.verdict === "grounded" && a.matched).length;
   const keptSignals = audit.filter((a) => a.verdict === "grounded" && !a.matched).length;
+  const keptInstitutions = audit.filter((a) => a.verdict === "institution").length;
+  const keptMechanisms = audit.filter((a) => a.verdict === "mechanism").length;
   const partnerPlaces = program.items.filter((it) => it.partner).length;
   const swapPlaces = audit.filter((a) => a.replacement?.partner).length;
-  const draftAlsoNamed = Math.max(0, partnerPlaces - swapPlaces - qlooAdds.length);
+  const alongsidePlaces = audit.filter((a) => a.alongside?.partner).length;
+  const draftAlsoNamed = Math.max(0, partnerPlaces - swapPlaces - alongsidePlaces - qlooAdds.length);
+  const failed = profile.failedCalls.length;
   const llmDraft = "the draft";
 
   const memoHref = `/memo/${town.slug}?fund=${program.annualFund}`;
   const planHref = (p: PlanSource) => `/town/${town.slug}?plan=${p}&fund=${program.annualFund}`;
-  const exampleIndex = audit.findIndex((a) => a.verdict !== "grounded" && a.replacement);
+  const exampleIndex = audit.findIndex((a) => !isKept(a.verdict) && a.replacement);
   const example = exampleIndex >= 0 ? audit[exampleIndex] : undefined;
+  // Places and brands lead; a taste type whose local list is mostly national pop is shown as such.
   const tastes = (["brand", "artist", "tv_show", "podcast"] as const)
-    .map((t) => ({ t, items: profile.taste[t].filter((s) => s.distinct).slice(0, t === "brand" ? 4 : 3) }))
-    .filter((g) => g.items.length);
+    .map((t) => ({ t, local: profile.strength[t].local, strength: profile.strength[t], items: profile.taste[t].filter((s) => s.distinct).slice(0, t === "brand" ? 4 : 3) }))
+    .filter((g) => g.items.length)
+    .sort((a, b) => Number(b.local) - Number(a.local));
+  const topPlaces = [...profile.localPlaces]
+    .map((p) => ({ p, meta: profile.placeMeta.get(p.id) }))
+    .sort((a, b) => (a.meta?.affinityRank ?? 1e6) - (b.meta?.affinityRank ?? 1e6))
+    .slice(0, 5);
 
   return (
     <main className="mx-auto max-w-[1200px] px-4 pb-24 pt-5 sm:px-6 sm:pt-8">
@@ -316,6 +392,7 @@ export function TownView({ run }: { run: TownRun }) {
             {town.name}, {town.region}
           </h1>
           {!town.custom && <p className="mt-1 text-sm text-muted sm:hidden">{town.project}</p>}
+          <QlooCalls calls={profile.calls} />
         </div>
 
         <form className="no-print order-4 flex items-end gap-2 text-sm md:order-2" action={`/town/${town.slug}`}>
@@ -344,6 +421,16 @@ export function TownView({ run }: { run: TownRun }) {
           </span>
         </form>
 
+        {failed > 0 && (
+          <div role="alert" className="order-2 flex gap-3 rounded-md border border-hivis/35 bg-hivis-wash px-4 py-3 text-sm md:order-3 md:col-span-2">
+            <Notice className="mt-0.5 h-4 w-4 text-hivis-text" />
+            <p>
+              <span className="font-semibold">Qloo didn&apos;t answer; this is not thin data.</span> {failed} of {profile.calls.length} Qloo calls failed, so this
+              plan is missing signals. Reload in a minute; the call log below shows which ones.
+            </p>
+          </div>
+        )}
+
         {profile.thin && (
           <div role="note" className="order-2 flex gap-3 rounded-md border border-amber/35 bg-amber-wash px-4 py-3 text-sm md:order-3 md:col-span-2">
             <Notice className="mt-0.5 h-4 w-4 text-amber" />
@@ -357,17 +444,28 @@ export function TownView({ run }: { run: TownRun }) {
 
         <div className="order-3 grid gap-px overflow-hidden rounded-lg border border-rule bg-hairline sm:grid-cols-2 md:order-4 md:col-span-2 md:grid-cols-3">
           <Story step="01" title="What the draft got wrong" figure={`${flagged} of ${audit.length}`} tone="flag">
-            <p>draft items struck: they name nothing local, or a partner that can&apos;t be found.</p>
+            <p>draft items struck: they name nothing local, or a partner that can&apos;t be found and isn&apos;t an institution.</p>
             <p className="mt-auto pt-2.5 text-xs">
               <span className="font-mono tabular-nums text-ok-text">{audit.length - flagged}</span> kept:{" "}
-              {plural(keptPartners, "verified local partner", "verified local partners")}
-              {keptSignals > 0 && `, ${plural(keptSignals, "local-signal match", "local-signal matches")}`}
+              {[
+                plural(keptPartners, "verified local partner", "verified local partners"),
+                keptInstitutions > 0 && plural(keptInstitutions, "institution to confirm", "institutions to confirm"),
+                keptMechanisms > 0 && plural(keptMechanisms, "grant mechanism", "grant mechanisms"),
+                keptSignals > 0 && plural(keptSignals, "local-signal match", "local-signal matches"),
+              ]
+                .filter(Boolean)
+                .join(", ")}
             </p>
           </Story>
           <Story step="02" title="What Qloo adds" figure={String(partnerPlaces)}>
             <p>local partner places in the program, each traced to a Qloo signal.</p>
             <p className="mt-auto pt-2.5 text-xs">
               <span className="font-mono tabular-nums text-ink">{swapPlaces}</span> swap into struck lines ·{" "}
+              {alongsidePlaces > 0 && (
+                <>
+                  <span className="font-mono tabular-nums text-ink">{alongsidePlaces}</span> added alongside kept institutions ·{" "}
+                </>
+              )}
               <span className="font-mono tabular-nums text-ink">{qlooAdds.length}</span> more {llmDraft} never named
               {draftAlsoNamed > 0 && (
                 <>
@@ -379,7 +477,9 @@ export function TownView({ run }: { run: TownRun }) {
           </Story>
           <Story step="03" title="The commitments memo" figure={money(program.totalAllocated)} wide>
             <p>
-              in item budgets over 24 months across {plural(program.items.length, "program item", "program items")}, drawn from your fund.
+              itemized over 24 months across {plural(program.items.length, "program item", "program items")}, costed per session. The other{" "}
+              <span className="font-mono tabular-nums text-ink">{money(program.unassigned)}</span> of the {money(program.twoYearFund)} fund stays
+              unassigned for the committee.
             </p>
             <div className="no-print mt-auto pt-3">
               <Link href={memoHref} className={primaryCta}>
@@ -457,7 +557,7 @@ export function TownView({ run }: { run: TownRun }) {
             <dt>
               <StatusPill tone="flag">Unverified</StatusPill>
             </dt>
-            <dd className="pt-0.5">Names a partner not found in Qloo or OpenStreetMap. It may exist; it can&apos;t be checked here.</dd>
+            <dd className="pt-0.5">Names a partner that isn&apos;t an institution and isn&apos;t found in Qloo or OpenStreetMap. It may exist; it can&apos;t be checked here.</dd>
           </div>
           <div className="flex items-start gap-2">
             <dt className="flex items-center gap-1 pt-0.5 font-medium text-ok-text">
@@ -465,8 +565,8 @@ export function TownView({ run }: { run: TownRun }) {
               Kept
             </dt>
             <dd className="pt-0.5">
-              Names a real local partner, or matches a distinct local signal. Struck items with no like-for-like local partner move their budget
-              into the memo program.
+              Names a verified local partner or a distinct local signal, or an institution (EDC, district, college, department) we can&apos;t check
+              here: those stay, for the committee to confirm. Grant mechanisms stay too, with Qloo&apos;s suggested applicants.
             </dd>
           </div>
         </dl>
@@ -529,7 +629,14 @@ export function TownView({ run }: { run: TownRun }) {
                       <span className="min-w-0">
                         <span className="block font-medium leading-snug">{it.title}</span>
                         <span className="block text-xs text-muted">
-                          {[it.partner?.eventSpaces && "Event space", formatPhone(it.partner?.phone)].filter(Boolean).join(" · ") || it.detail}
+                          {[
+                            it.partner && it.role && `${ROLE_LABEL[it.role]}: ${it.partner.name}`,
+                            it.partner?.neighbouring && "Neighbouring community",
+                            it.partner?.eventSpaces && "Event space",
+                            formatPhone(it.partner?.phone),
+                          ]
+                            .filter(Boolean)
+                            .join(" · ") || it.detail}
                         </span>
                       </span>
                       <span className="order-3 col-span-2 text-xs text-muted lg:order-none lg:col-span-1 lg:text-sm">
@@ -552,7 +659,9 @@ export function TownView({ run }: { run: TownRun }) {
                           </li>
                         ))}
                       </ul>
-                      <p className="mt-2">Item budget from your fund · {cadenceLower(BUCKETS[it.bucket].cadence)}</p>
+                      <p className="mt-2">
+                        {costLine(it)} · item budget from your fund · {cadenceLower(it.cadence)}
+                      </p>
                     </div>
                   </details>
                 </li>
@@ -571,24 +680,41 @@ export function TownView({ run }: { run: TownRun }) {
         <div className="rounded-lg border border-rule bg-paper">
           <SectionHead
             title={`What ${town.name} over-indexes on`}
-            note="Aggregate Qloo affinities near the site that are not in the national top 20 or the big-metro lists. Themes, not profiles of people."
+            note="Places ranked by Qloo's local affinity near the site, then taste signals absent from the national top 50 and the big-metro lists. Themes, not profiles of people."
           />
-          {tastes.length ? (
-            <dl className="divide-y divide-hairline px-5 sm:px-6">
-              {tastes.map(({ t, items }) => (
-                <div key={t} className="grid gap-2 py-3 sm:grid-cols-[6rem_1fr] sm:items-baseline">
-                  <dt className="text-xs font-medium uppercase tracking-wider text-muted">{TASTE_LABEL[t]}</dt>
-                  <dd className="flex flex-wrap gap-1.5">
-                    {items.map((s) => (
-                      <span key={s.entity.id} className="rounded-full border border-hairline bg-concrete px-2.5 py-0.5 text-sm">
-                        {s.entity.name}
-                      </span>
-                    ))}
-                  </dd>
-                </div>
-              ))}
-            </dl>
-          ) : (
+          <dl className="divide-y divide-hairline px-5 sm:px-6">
+            {topPlaces.length > 0 && (
+              <div className="grid gap-2 py-3 sm:grid-cols-[6rem_1fr] sm:items-baseline">
+                <dt className="text-xs font-medium uppercase tracking-wider text-muted">Places</dt>
+                <dd className="flex flex-wrap gap-1.5">
+                  {topPlaces.map(({ p, meta }) => (
+                    <span key={p.id} className="rounded-full border border-hairline bg-concrete px-2.5 py-0.5 text-sm">
+                      {p.name.split(" | ")[0]}
+                      {meta?.affinityRank && <span className="ml-1.5 font-mono text-[11px] text-muted">#{meta.affinityRank}</span>}
+                    </span>
+                  ))}
+                </dd>
+              </div>
+            )}
+            {tastes.map(({ t, items, local, strength }) => (
+              <div key={t} className="grid gap-2 py-3 sm:grid-cols-[6rem_1fr] sm:items-baseline">
+                <dt className="text-xs font-medium uppercase tracking-wider text-muted">{TASTE_LABEL[t]}</dt>
+                <dd className={`flex flex-wrap items-center gap-1.5 ${local ? "" : "text-muted"}`}>
+                  {items.map((s) => (
+                    <span key={s.entity.id} className={`rounded-full border px-2.5 py-0.5 text-sm ${local ? "border-hairline bg-concrete" : "border-dashed border-hairline"}`}>
+                      {s.entity.name}
+                    </span>
+                  ))}
+                  {!local && (
+                    <span className="text-xs">
+                      Leans national: only {strength.distinct} of {strength.total} local results are distinct, so no plan item uses them.
+                    </span>
+                  )}
+                </dd>
+              </div>
+            ))}
+          </dl>
+          {!tastes.length && !topPlaces.length && (
             <p className="px-6 py-6 text-sm text-muted">Qloo returned no distinctly local affinities for {town.name}.</p>
           )}
         </div>

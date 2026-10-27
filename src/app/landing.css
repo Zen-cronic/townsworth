@@ -203,6 +203,11 @@ a:focus-visible > .lp-chev {
   font-weight: 650;
   font-size: 1.0625rem;
 }
+.lp-byline {
+  margin-top: 2px;
+  font-size: 0.75rem;
+  color: var(--l-muted);
+}
 .lp-tally {
   display: flex;
   gap: 18px;
@@ -330,6 +335,7 @@ a:focus-visible > .lp-chev {
   background: #fff;
   padding: 12px 14px;
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 4px;
   animation: lp-in 280ms ease-out calc(var(--d, 0ms) + 420ms) both;
 }
@@ -389,6 +395,7 @@ a:focus-visible > .lp-chev {
 }
 .lp-chip {
   display: inline-flex;
+  max-width: 100%;
   align-items: center;
   gap: 6px;
   padding: 3px 8px;
@@ -398,9 +405,10 @@ a:focus-visible > .lp-chev {
   font-family: var(--l-mono);
   font-size: 11px;
   color: var(--l-ink);
-  white-space: nowrap;
+  white-space: normal;
 }
 .lp-dot {
+  flex: none;
   width: 6px;
   height: 6px;
   border-radius: 50%;

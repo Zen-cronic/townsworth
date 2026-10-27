@@ -1,6 +1,6 @@
 import Link from "next/link";
-import type { AuditRow } from "@/lib/audit";
-import { BUCKETS } from "@/lib/plan";
+import { isKept, type AuditRow } from "@/lib/audit";
+import { BUCKETS, costLine, ROLE_LABEL } from "@/lib/plan";
 import { Chevron } from "./Chevron";
 import { clip } from "./clip";
 
@@ -48,6 +48,7 @@ export function AuditPreview({
             {townLabel} · {facility}
           </p>
           <p className="lp-preview-title">Draft plan, item by item</p>
+          <p className="lp-byline">Draft written by OpenAI with no Qloo access, the way a consultant would</p>
         </div>
         <dl className="lp-tally">
           <div>
@@ -79,13 +80,19 @@ export function AuditPreview({
                   {skipped.length > 1 ? `–${String(row.n - 1).padStart(2, "0")}` : ""}
                 </span>
                 <p>
-                  {skipped.every((v) => v === "grounded")
+                  {skipped.every(isKept)
                     ? `${skipped.length} more ${skipped.length > 1 ? "items" : "item"} kept, grounded locally`
                     : `${skipped.length} more ${skipped.length > 1 ? "items" : "item"} in the full audit`}
                 </p>
               </li>
             ) : null;
-          if (row.verdict === "grounded") {
+          if (isKept(row.verdict)) {
+            const [label, source] =
+              row.verdict === "institution"
+                ? [`Kept: ${row.named}`, "institution, couldn’t verify here · confirm with the committee"]
+                : row.verdict === "mechanism"
+                  ? ["Kept · grant mechanism", "Qloo suggests the applicants"]
+                  : [`Kept: ${row.matched?.name ?? "local signal"}`, row.matched?.source === "osm" ? "verified on OpenStreetMap" : "a Qloo place within 15 km"];
             return [
               gap,
               <li key={row.n} className="lp-row is-kept">
@@ -97,10 +104,8 @@ export function AuditPreview({
                   <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false">
                     <path d="M3 8.5 6.5 12 13 4.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
-                  Kept: {row.matched?.name}
-                  <span className="lp-keep-src">
-                    {row.matched?.source === "osm" ? "verified on OpenStreetMap" : "in Qloo’s local data"}
-                  </span>
+                  {label}
+                  <span className="lp-keep-src">{source}</span>
                 </p>
               </li>,
             ];
@@ -109,8 +114,8 @@ export function AuditPreview({
           const delay = 500 + strikeIndex++ * 520;
           const meta = [
             r.partner?.distanceKm != null ? `${r.partner.distanceKm} km from site` : null,
+            r.partner?.neighbouring ? "Neighbouring community" : null,
             r.partner?.rating ? `Rated ${r.partner.rating.toFixed(1)}` : null,
-            r.partner?.eventSpaces ? "Event space" : null,
           ].filter(Boolean);
           return [
             gap,
@@ -126,9 +131,13 @@ export function AuditPreview({
                 <p className="lp-swap-bucket">{BUCKETS[r.bucket].label}</p>
                 <p className="lp-swap-title">{r.title}</p>
                 {meta.length > 0 && <p className="lp-swap-meta">{meta.join(" · ")}</p>}
+                <p className="lp-swap-meta">
+                  {r.role ? `${ROLE_LABEL[r.role]} · ` : ""}
+                  {costLine({ ...r, partner: undefined })}
+                </p>
                 <div className="lp-swap-foot">
                   <span className="lp-amount">
-                    {usd(r.amount)} <span>from your fund</span>
+                    {usd(r.amount)} <span>item budget</span>
                   </span>
                   {r.provenance[0] && (
                     <span className="lp-chip">
@@ -145,7 +154,7 @@ export function AuditPreview({
           const last = rows[rows.length - 1]?.n ?? 0;
           const rest = verdicts.slice(last);
           if (!rest.length) return null;
-          const restKept = rest.filter((v) => v === "grounded").length;
+          const restKept = rest.filter(isKept).length;
           const restStruck = rest.length - restKept;
           return (
             <li className="lp-row lp-gap" aria-label={`Items ${last + 1} to ${verdicts.length}`}>

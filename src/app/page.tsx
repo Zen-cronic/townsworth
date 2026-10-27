@@ -8,6 +8,7 @@ import { Guardrails } from "@/components/landing/Guardrails";
 import { HowItWorks, type OutputFragments, type SitePoint } from "@/components/landing/HowItWorks";
 import { ProofBand, type ProofRow } from "@/components/landing/ProofBand";
 import { TownGrid, type TownPick } from "@/components/landing/TownGrid";
+import { isKept } from "@/lib/audit";
 import { cleanName } from "@/lib/plan";
 import { computeProof } from "@/lib/proof";
 import { money, runTown } from "@/lib/run";
@@ -26,12 +27,21 @@ export default async function Home() {
   const { town, audit, program, profile, qlooAdds } = run;
   const auditHref = `/town/${town.slug}`;
 
-  // Preview: the first kept item, then the first two struck items that have a like-for-like replacement.
+  // Preview: one verified partner, one kept institution the plain LLM named but no list can confirm,
+  // and the strongest swap: a struck line whose replacement is a host-community place, best affinity first.
   const rows: PreviewRow[] = audit.map((r, i) => ({ ...r, n: i + 1 }));
-  const kept = rows.filter((r) => r.verdict === "grounded");
-  const struck = rows.filter((r) => r.verdict !== "grounded");
-  const preview = [kept[0], ...struck.filter((r) => r.replacement).slice(0, 2)]
+  const kept = rows.filter((r) => isKept(r.verdict));
+  const struck = rows.filter((r) => !isKept(r.verdict));
+  const swaps = struck
+    .filter((r) => r.replacement?.partner)
+    .sort(
+      (a, b) =>
+        Number(!!a.replacement!.partner!.neighbouring) - Number(!!b.replacement!.partner!.neighbouring) ||
+        (a.replacement!.partner!.affinityRank ?? 1e6) - (b.replacement!.partner!.affinityRank ?? 1e6),
+    );
+  const preview = [kept.find((r) => r.verdict === "grounded" && r.matched), kept.find((r) => r.verdict === "institution"), swaps[0] ?? struck.find((r) => r.replacement)]
     .filter((r): r is PreviewRow => !!r)
+    .filter((r, i, all) => all.findIndex((x) => x.n === r.n) === i)
     .sort((a, b) => a.n - b.n);
 
   // Site plan: every kept Qloo place within 15 km, at its real offset from the town centre.
@@ -83,10 +93,10 @@ export default async function Home() {
       gn: { pct: t.gnNovelPct },
     },
     {
-      measure: "Control: own town vs swapped town",
-      note: `Good Neighbor’s partners appear in their own town’s Qloo places ${t.controlOwnPct}% of the time, and ${t.controlCrossPct}% in a swapped town’s.`,
-      llm: { na: "n/a: the LLM has no Qloo list" },
-      gn: { pct: t.controlOwnPct },
+      measure: "Picks that change without Qloo’s affinity ranking",
+      note: "Same candidate places and rules, ordered by distance instead, like a nearby-places directory.",
+      llm: { na: "n/a: the LLM has no candidate list" },
+      gn: { pct: t.affinityChangedPct },
     },
   ];
   // Real fragments of each output for the example town, matching the memo and the exports.
@@ -177,7 +187,7 @@ export default async function Home() {
         </section>
 
         <ProofBand rows={proofRows} townCount={TOWNS.length === 6 ? "six" : String(TOWNS.length)} />
-        <HowItWorks points={points} town={townLabel} outputs={outputs} draft={audit.map((r) => ({ text: r.text, kept: r.verdict === "grounded" }))} />
+        <HowItWorks points={points} town={townLabel} outputs={outputs} draft={audit.map((r) => ({ text: r.text, kept: isKept(r.verdict) }))} />
         <TownGrid towns={TOWNS} partners={partnersByTown} picks={picksByTown} heroSlug={HERO_TOWN.slug} />
         <Guardrails />
 
@@ -203,7 +213,7 @@ export default async function Home() {
           <span className="lp-brand">
             <span aria-hidden="true" className="lp-brand-mark" /> Good Neighbor
           </span>
-          <span>Qloo signals are aggregate for a town. Costs come from your fund, not from Qloo.</span>
+          <span>Qloo signals are aggregate for a town. Costs come from a per-session model and your fund, not from Qloo.</span>
           <nav aria-label="Footer" className="lp-footer-nav">
             <Link href="/proof">Proof</Link>
             <Link href="/judges">Start here</Link>

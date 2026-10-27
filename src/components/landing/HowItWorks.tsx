@@ -201,8 +201,8 @@ export function HowItWorks({
             <p className="lp-step-n">02 · Signals</p>
             <h3 className="lp-h3">Qloo local signals</h3>
             <p className="lp-step-copy">
-              Places within 15 km of the site, plus the brands and artists the town over-indexes on against the
-              national top 20. Every pick keeps the signal behind it.
+              Places within 15 km of the site, ranked by Qloo&apos;s local affinity, plus the brands the town
+              over-indexes on against the national top 50. Every pick keeps the signal behind it.
             </p>
           </li>
           <li className="lp-step">
