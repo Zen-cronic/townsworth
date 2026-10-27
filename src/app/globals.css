@@ -17,6 +17,8 @@
   --ok-wash: #e1eee5;
   --amber: #9a6b00;
   --amber-wash: #f5ecd3;
+  --focus: #22211f;
+  --sheet-shadow: 0 1px 2px rgb(34 33 31 / 0.06), 0 8px 24px -12px rgb(34 33 31 / 0.18);
 }
 
 @theme inline {
@@ -34,6 +36,7 @@
   --color-ok-wash: var(--ok-wash);
   --color-amber: var(--amber);
   --color-amber-wash: var(--amber-wash);
+  --color-focus: var(--focus);
   --font-sans: var(--font-public-sans);
   --font-mono: var(--font-plex-mono);
 }
@@ -42,6 +45,44 @@ body {
   background: var(--concrete);
   color: var(--ink);
   font-family: var(--font-public-sans), system-ui, sans-serif;
+}
+
+/* Keyboard focus: one consistent ring on every interactive element. */
+:where(a, button, input, select, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* A document sheet: paper on concrete with a hi-vis top rule, like a printed form. */
+.doc-sheet {
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-top: 4px solid var(--hivis);
+  box-shadow: var(--sheet-shadow);
+}
+
+.no-scrollbar { scrollbar-width: none; }
+/* Scroll cue on the town switcher where it overflows (below the lg breakpoint). */
+.fade-x { mask-image: linear-gradient(to right, #000 calc(100% - 2.5rem), transparent); }
+@media (min-width: 64rem) { .fade-x { mask-image: none; } }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
+summary { list-style: none; }
+summary::-webkit-details-marker { display: none; }
+details[open] > summary .chev { transform: rotate(90deg); }
+.chev { transition: transform 160ms ease-out; }
+
+/* Pending state for the outreach agent. */
+.skeleton {
+  background: linear-gradient(90deg, var(--hairline) 0%, var(--concrete) 50%, var(--hairline) 100%);
+  background-size: 200% 100%;
+  animation: skeleton-shift 1.4s ease-in-out infinite;
+  border-radius: 4px;
+}
+
+@keyframes skeleton-shift {
+  from { background-position: 100% 0; }
+  to { background-position: -100% 0; }
 }
 
 /* Signature moment: the red-pen strike sweeping across a generic item. */
@@ -68,10 +109,12 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .strike, .slide-in { animation: none; }
+  .strike, .slide-in, .skeleton { animation: none; }
+  .chev { transition: none; }
 }
 
 @media print {
   body { background: #fff; }
+  .doc-sheet { box-shadow: none; border: 0; border-top: 4px solid var(--hivis); }
   .no-print { display: none !important; }
 }
