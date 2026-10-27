@@ -13,10 +13,10 @@ export default async function TownPage({
   searchParams,
 }: {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ fund?: string }>;
+  searchParams: Promise<{ fund?: string; plan?: string }>;
 }) {
-  const [{ slug }, { fund }] = await Promise.all([params, searchParams]);
-  const run = await runTown(slug, Number(fund) || undefined);
+  const [{ slug }, { fund, plan }] = await Promise.all([params, searchParams]);
+  const run = await runTown(slug, Number(fund) || undefined, plan === "agency" ? "agency" : "llm");
   if (!run) notFound();
   return (
     <>

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { money, type TownRun } from "@/lib/run";
+import { money, PLAN_LABEL, type PlanSource, type TownRun } from "@/lib/run";
 import { BUCKETS, type ProgramItem } from "@/lib/plan";
 import type { AuditRow } from "@/lib/audit";
 
@@ -90,7 +90,10 @@ function AuditLine({ row, index }: { row: AuditRow; index: number }) {
             No like-for-like local swap. This budget moves into the program in the commitments memo.
           </p>
         ) : (
-          <p className="pt-1 text-sm text-ok-text">Keep as written.</p>
+          <p className="pt-1 text-sm text-ok-text">
+            Keep{row.matched ? `: ${row.matched.name}` : ""}
+            {row.matched?.source === "osm" ? " · verified on OpenStreetMap" : row.matched?.source === "qloo" ? " · in Qloo's local data" : ""}
+          </p>
         )}
       </div>
     </li>
@@ -98,8 +101,10 @@ function AuditLine({ row, index }: { row: AuditRow; index: number }) {
 }
 
 export function TownView({ run }: { run: TownRun }) {
-  const { town, profile, program, audit } = run;
+  const { town, profile, program, audit, source, qlooAdds } = run;
   const flagged = audit.filter((a) => a.verdict !== "grounded").length;
+  const verified = audit.filter((a) => a.matched).length;
+  const planHref = (p: PlanSource) => `/town/${town.slug}?plan=${p}&fund=${program.annualFund}`;
   const distinctSignals = (["brand", "artist", "tv_show", "podcast"] as const).flatMap((t) =>
     profile.taste[t].filter((s) => s.distinct).slice(0, t === "brand" ? 4 : 3),
   );
@@ -115,8 +120,8 @@ export function TownView({ run }: { run: TownRun }) {
             {town.name}, {town.region}
           </h1>
           <p className="mt-2 max-w-2xl text-muted">
-            The agency&apos;s draft community plan, checked against what {town.name} measurably over-indexes on.
-            Generic items are struck and replaced with local partners you can call this week.
+            A draft community plan, checked item by item. Real local partners are kept; generic items are struck and replaced with
+            places {town.name} over-indexes on, each traceable to a Qloo signal.
           </p>
         </div>
         <form className="no-print flex items-end gap-2 text-sm" action="">
@@ -143,16 +148,31 @@ export function TownView({ run }: { run: TownRun }) {
       )}
 
       <section className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <Stat value={`${flagged} of ${audit.length}`} label="agency items name nothing local" tone="flag" />
-        <Stat value={String(program.items.length)} label="grounded program items, each traceable to Qloo" tone="ok" />
-        <Stat value={String(profile.localPlaces.length)} label="independent local places checked within 15 km" />
+        <Stat value={`${flagged} of ${audit.length}`} label="draft items name nothing local or can't be verified" tone="flag" />
+        <Stat value={`${verified} of ${audit.length}`} label="draft items name a real local partner (kept)" tone="ok" />
+        <Stat value={String(qlooAdds.length + audit.filter((a) => a.replacement).length)} label="resident-favourite partners Qloo adds that the draft never named" />
         <Stat value={money(program.totalAllocated)} label="allocated over 24 months from your fund" />
       </section>
 
       <section className="mt-8 rounded-lg border border-rule bg-paper">
         <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-rule px-5 py-3">
-          <h2 className="font-semibold">Plan audit</h2>
-          <p className="text-xs text-muted">Left: the agency draft. Right: what Good Neighbor proposes instead.</p>
+          <div>
+            <h2 className="font-semibold">Plan audit</h2>
+            <p className="text-xs text-muted">Left: the draft. Right: what Good Neighbor keeps or proposes instead.</p>
+          </div>
+          <div role="tablist" aria-label="Draft plan to audit" className="no-print flex gap-1 rounded-md border border-rule p-0.5 text-sm">
+            {(["llm", "agency"] as const).map((p) => (
+              <Link
+                key={p}
+                role="tab"
+                aria-selected={source === p}
+                href={planHref(p)}
+                className={`rounded px-3 py-1 ${source === p ? "bg-ink text-paper" : "text-muted hover:text-ink"}`}
+              >
+                {PLAN_LABEL[p]}
+              </Link>
+            ))}
+          </div>
         </div>
         <ol className="px-5">
           {audit.map((row, i) => (
@@ -169,6 +189,22 @@ export function TownView({ run }: { run: TownRun }) {
           </Link>
         </div>
       </section>
+
+      {qlooAdds.length > 0 && (
+        <section className="mt-8 rounded-lg border border-rule bg-paper">
+          <div className="border-b border-rule px-5 py-3">
+            <h2 className="font-semibold">What Qloo adds</h2>
+            <p className="text-xs text-muted">
+              The draft names the town&apos;s institutions. These are places residents actually go, which the draft never mentions.
+            </p>
+          </div>
+          <div className="grid gap-3 p-5 sm:grid-cols-2 lg:grid-cols-3">
+            {qlooAdds.map((it) => (
+              <Replacement key={it.id} item={it} />
+            ))}
+          </div>
+        </section>
+      )}
 
       <section className="mt-8 grid gap-6 md:grid-cols-[1.2fr_1fr]">
         <div className="rounded-lg border border-rule bg-paper p-5">
