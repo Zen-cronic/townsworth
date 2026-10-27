@@ -56,9 +56,12 @@ const km = (m?: number) => (m == null ? undefined : Math.round(m / 100) / 10);
 
 const hasCategory = (e: QlooEntity, re: RegExp) => categories(e).some((c) => re.test(c));
 
+// Qloo place names sometimes carry a "| City" suffix; the distance already says where it is.
+export const cleanName = (name: string) => name.split(" | ")[0].trim();
+
 function partnerOf(e: QlooEntity): Partner {
   return {
-    name: e.name,
+    name: cleanName(e.name),
     address: e.address,
     distanceKm: km(e.distanceM),
     phone: e.phone,
@@ -114,7 +117,7 @@ export function buildProgram(profile: TownProfile, annualFund: number): Program 
     items.push({
       id: `training-${i}`,
       bucket: "training",
-      title: `Trades-training info night at ${v.name}`,
+      title: `Trades-training info night at ${cleanName(v.name)}`,
       detail: "Apprenticeship and hiring info sessions where people already gather, not at the facility.",
       partner: partnerOf(v),
       amount: 0,
@@ -128,7 +131,7 @@ export function buildProgram(profile: TownProfile, annualFund: number): Program 
     items.push({
       id: `procurement-${i}`,
       bucket: "procurement",
-      title: `Supplier day: ${s.name}`,
+      title: `Supplier day: ${cleanName(s.name)}`,
       detail: "Invite to bid on catering, events and site services before going to regional vendors.",
       partner: partnerOf(s),
       amount: 0,
@@ -142,7 +145,7 @@ export function buildProgram(profile: TownProfile, annualFund: number): Program 
     items.push({
       id: `grants-${i}`,
       bucket: "grants",
-      title: `Community grant: ${inst.name}`,
+      title: `Community grant: ${cleanName(inst.name)}`,
       detail: "Shortlisted for the resident ballot. Residents rank; the committee decides.",
       partner: partnerOf(inst),
       amount: 0,

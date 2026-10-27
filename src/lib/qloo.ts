@@ -55,7 +55,41 @@ function asBool(v: unknown): boolean | undefined {
   return undefined;
 }
 
-function parseEntity(raw: Record<string, any>, type: EntityType): QlooEntity {
+// The subset of the raw Insights entity shape this app reads.
+interface RawNamed {
+  name?: string;
+}
+interface RawTag extends RawNamed {
+  type?: string;
+  tag_id?: string;
+  id?: string;
+}
+interface RawEntity {
+  entity_id: string;
+  name: string;
+  popularity?: number;
+  tags?: RawTag[];
+  location?: { lat: number; lon: number };
+  query?: { affinity?: number; distance?: number };
+  properties?: {
+    short_description?: string;
+    description?: string;
+    address?: string;
+    geocode?: { city?: string } | null;
+    phone?: string;
+    website?: string;
+    business_rating?: string | number;
+    event_spaces?: unknown;
+    is_closed?: unknown;
+    good_for?: RawNamed[];
+    keywords?: RawNamed[];
+  };
+}
+
+const names = (list: RawNamed[] | undefined, limit = 50) =>
+  Array.isArray(list) ? list.slice(0, limit).map((x) => x.name).filter((n): n is string => typeof n === "string") : [];
+
+function parseEntity(raw: RawEntity, type: EntityType): QlooEntity {
   const p = raw.properties ?? {};
   const q = raw.query ?? {};
   const geocode = typeof p.geocode === "object" && p.geocode ? p.geocode : {};
@@ -66,7 +100,9 @@ function parseEntity(raw: Record<string, any>, type: EntityType): QlooEntity {
     affinity: typeof q.affinity === "number" ? q.affinity : undefined,
     distanceM: typeof q.distance === "number" ? q.distance : undefined,
     popularity: typeof raw.popularity === "number" ? raw.popularity : undefined,
-    tags: (raw.tags ?? []).filter((t: any) => typeof t?.name === "string").map((t: any) => ({ name: t.name, type: t.type, id: t.tag_id ?? t.id })),
+    tags: (raw.tags ?? [])
+      .filter((t): t is RawTag & { name: string } => typeof t?.name === "string")
+      .map((t) => ({ name: t.name, type: t.type, id: t.tag_id ?? t.id })),
     description: p.short_description ?? p.description,
     address: p.address,
     city: geocode.city ?? undefined,
@@ -75,8 +111,8 @@ function parseEntity(raw: Record<string, any>, type: EntityType): QlooEntity {
     rating: p.business_rating != null ? Number(p.business_rating) : undefined,
     eventSpaces: asBool(p.event_spaces),
     isClosed: asBool(p.is_closed),
-    goodFor: Array.isArray(p.good_for) ? p.good_for.map((g: any) => g.name).filter(Boolean) : [],
-    keywords: Array.isArray(p.keywords) ? p.keywords.slice(0, 25).map((k: any) => k.name).filter(Boolean) : [],
+    goodFor: names(p.good_for),
+    keywords: names(p.keywords, 25),
     location: raw.location ? { lat: raw.location.lat, lon: raw.location.lon } : undefined,
   };
 }
@@ -115,7 +151,7 @@ async function insights(label: string, params: Record<string, string>, type: Ent
   const res = await fetchWithRetry(url, key);
   const ms = Date.now() - started;
   const body = res.ok ? await res.json() : null;
-  const raw: any[] = body?.results?.entities ?? [];
+  const raw: RawEntity[] = body?.results?.entities ?? [];
   const entities = raw.map((r) => parseEntity(r, type));
   return {
     entities,

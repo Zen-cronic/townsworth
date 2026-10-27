@@ -106,9 +106,8 @@ export function auditPlan(inputs: AuditInput[], profile: TownProfile, program: P
 
     let replacement: ProgramItem | undefined;
     if (verdict !== "grounded") {
-      replacement =
-        program.find((p) => p.bucket === bucket && !usedReplacements.has(p.id)) ??
-        program.find((p) => !usedReplacements.has(p.id));
+      // Like-for-like only: a swap from another bucket would be a misleading pairing.
+      replacement = program.find((p) => p.bucket === bucket && !usedReplacements.has(p.id));
       if (replacement) usedReplacements.add(replacement.id);
     }
     return { text, bucket, verdict, reasons, matched, termHits: hits, replacement };
