@@ -10,6 +10,8 @@ export type Verdict = "grounded" | "generic" | "unverified";
 export interface AuditInput {
   text: string;
   named?: string | null;
+  // Pre-computed OpenStreetMap check for the named partner (frozen with the baseline).
+  osm?: { found: boolean; osmName?: string; km?: number } | null;
 }
 
 export interface AuditRow {
@@ -17,7 +19,7 @@ export interface AuditRow {
   bucket: Bucket;
   verdict: Verdict;
   reasons: string[];
-  matched?: { name: string; distanceKm?: number };
+  matched?: { name: string; distanceKm?: number; source: "qloo" | "osm" };
   termHits: string[];
   replacement?: ProgramItem;
 }
@@ -79,7 +81,7 @@ function termHits(text: string, vocab: Map<string, string[]>): string[] {
 
 export function auditPlan(inputs: AuditInput[], profile: TownProfile, program: ProgramItem[]): AuditRow[] {
   const usedReplacements = new Set<string>();
-  return inputs.map(({ text, named }) => {
+  return inputs.map(({ text, named, osm }) => {
     const bucket = bucketOf(text);
     const reasons: string[] = [];
     const hits = termHits(text, profile.themeVocabulary);
@@ -89,9 +91,13 @@ export function auditPlan(inputs: AuditInput[], profile: TownProfile, program: P
     if (named) {
       const found = findPartner(named, profile);
       if (found) {
-        matched = { name: found.name, distanceKm: found.distanceM != null ? Math.round(found.distanceM / 100) / 10 : undefined };
+        matched = { name: found.name, distanceKm: found.distanceM != null ? Math.round(found.distanceM / 100) / 10 : undefined, source: "qloo" };
         verdict = "grounded";
         reasons.push(`"${named}" matches a Qloo place or brand in this town`);
+      } else if (osm?.found) {
+        matched = { name: osm.osmName ?? named, distanceKm: osm.km, source: "osm" };
+        verdict = "grounded";
+        reasons.push(`"${named}" is a real local organisation (found on OpenStreetMap${osm.km != null ? `, ${osm.km} km away` : ""})`);
       } else {
         verdict = "unverified";
         reasons.push(`"${named}" was not found among Qloo's local places or brands. It may exist, but it can't be verified here`);
