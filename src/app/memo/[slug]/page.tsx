@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { AgentDrafts } from "@/components/AgentDrafts";
 import { AppHeader } from "@/components/AppHeader";
 import { BUCKETS, type Bucket } from "@/lib/plan";
 import { money, runTown } from "@/lib/run";
@@ -107,6 +108,8 @@ export default async function MemoPage({
             </ul>
           </section>
         </article>
+
+        <AgentDrafts slug={town.slug} fund={program.annualFund} />
       </main>
     </>
   );

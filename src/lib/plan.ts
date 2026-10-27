@@ -203,6 +203,6 @@ export function buildProgram(profile: TownProfile, annualFund: number): Program 
     annualFund,
     totalAllocated: items.reduce((s, it) => s + it.amount, 0),
     costNote:
-      "Amounts split your fund by fixed policy shares (training 30%, purchasing 25%, grants 30%, events 10%, announcements 5%) over 24 months. Qloo supplies the partners and signals, not the costs.",
+      "Amounts split your fund by fixed policy shares (training 30%, purchasing 25%, grants 30%, events 10%, announcements 5%) over 24 months. Each amount is the budget for that item (instructors, stipends, childcare, venue hire), not a payment to the partner. Qloo supplies the partners and signals, not the costs.",
   };
 }
