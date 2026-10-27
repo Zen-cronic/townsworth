@@ -3,7 +3,7 @@ import type { Town } from "@/lib/towns";
 import { Chevron } from "./Chevron";
 
 export interface TownPick {
-  pick?: { title: string; km?: number };
+  pick?: { kind: string; partner: string; km?: number };
   signal?: { name: string; type: string };
 }
 
@@ -66,7 +66,7 @@ export function TownGrid({
             </h2>
           </div>
           <p className="lp-section-lede">
-            Projects are from public reporting. Fund figures are illustrative until you enter your own.
+            Every pick comes from that town’s own Qloo signals. Fund figures are illustrative until you enter your own.
           </p>
         </div>
 
@@ -75,42 +75,33 @@ export function TownGrid({
             <li key={t.slug}>
               <Link href={`/town/${t.slug}`} className="lp-town">
                 <span className="lp-town-top">
-                  <FacilityGlyph type={t.facility} />
-                  <span className="lp-town-type">{FACILITY[t.facility]}</span>
+                  <span className="lp-town-name">{t.name}</span>
                   {t.slug === heroSlug && <span className="lp-badge is-example">Example</span>}
                   {t.thinData && <span className="lp-badge is-thin">Thin data</span>}
                 </span>
-                <span className="lp-town-name">{t.name}</span>
                 <span className="lp-town-region">
-                  {t.region}, {t.country === "United States" ? "US" : "Canada"}
+                  <FacilityGlyph type={t.facility} />
+                  {FACILITY[t.facility]} · {t.region}, {t.country === "United States" ? "US" : "Canada"}
                 </span>
-                <span className="lp-town-project">{t.project.replace(/ \(.*?, per public reporting\)$/, "")}</span>
-                <span className="lp-town-picks">
-                  {picks[t.slug]?.pick ? (
-                    <span className="lp-town-pick">
-                      <span className="lp-town-pick-k">Top pick</span>
-                      <span className="lp-town-pick-v">
-                        {picks[t.slug].pick!.title}
-                        {picks[t.slug].pick!.km != null && (
-                          <span className="lp-town-pick-km"> · {picks[t.slug].pick!.km} km</span>
-                        )}
-                      </span>
+                {picks[t.slug]?.pick ? (
+                  <span className="lp-town-pick">
+                    <span className="lp-town-pick-k">
+                      Top pick · {picks[t.slug].pick!.kind}
+                      {picks[t.slug].pick!.km != null && ` · ${picks[t.slug].pick!.km} km`}
                     </span>
-                  ) : (
-                    <span className="lp-town-pick is-empty">
-                      <span className="lp-town-pick-k">Top pick</span>
-                      <span className="lp-town-pick-v">Too few local places: enter partners from filings</span>
-                    </span>
-                  )}
-                  {picks[t.slug]?.signal && (
-                    <span className="lp-town-signal">
-                      <span className="lp-town-pick-k">Over-indexes on</span>
-                      <span className="lp-town-pick-v">
-                        {picks[t.slug].signal!.name} <span className="lp-town-pick-km">{picks[t.slug].signal!.type}</span>
-                      </span>
-                    </span>
-                  )}
-                </span>
+                    <span className="lp-town-pick-v">{picks[t.slug].pick!.partner}</span>
+                  </span>
+                ) : (
+                  <span className="lp-town-pick is-empty">
+                    <span className="lp-town-pick-k">Top pick</span>
+                    <span className="lp-town-pick-v">Too few local places: enter partners from filings</span>
+                  </span>
+                )}
+                {picks[t.slug]?.signal && (
+                  <span className="lp-town-signal">
+                    Over-indexes on <b>{picks[t.slug].signal!.name}</b> ({picks[t.slug].signal!.type})
+                  </span>
+                )}
                 <span className="lp-town-foot">
                   <span>
                     <b>{partners[t.slug] ?? 0}</b> local partners found

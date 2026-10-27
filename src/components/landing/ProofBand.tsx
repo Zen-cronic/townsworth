@@ -1,26 +1,25 @@
 import Link from "next/link";
 import { Chevron } from "./Chevron";
 
-export type Side = "llm" | "gn";
-
-export interface ProofBar {
-  label: string;
-  pct: number;
-  side: Side;
+export interface ProofArm {
+  pct?: number;
+  na?: string; // shown instead of a bar when this comparison does not measure this side
 }
 
-export interface ProofFigure {
-  value: string;
-  side: Side;
-  label: string;
-  bars: ProofBar[];
-  caveat: string;
+export interface ProofRow {
+  measure: string;
+  note: string;
+  llm: ProofArm;
+  gn: ProofArm;
 }
 
-const SIDE_LABEL: Record<Side, string> = { llm: "Plain LLM", gn: "Good Neighbor" };
+const ARMS = [
+  { key: "llm", who: "Plain LLM" },
+  { key: "gn", who: "Good Neighbor" },
+] as const;
 
-// The headline numbers from /proof, one format per figure, each with the line that keeps it honest.
-export function ProofBand({ figures, townCount }: { figures: ProofFigure[]; townCount: string }) {
+// Head-to-head rows from /proof: the plain LLM and Good Neighbor on the same 0-100 scale.
+export function ProofBand({ rows, townCount }: { rows: ProofRow[]; townCount: string }) {
   return (
     <section className="lp-section lp-proof" aria-labelledby="proof-h">
       <div className="lp-wrap">
@@ -41,31 +40,44 @@ export function ProofBand({ figures, townCount }: { figures: ProofFigure[]; town
           <span className="is-llm">Plain LLM, no Qloo</span>
           <span className="is-gn">Good Neighbor, with Qloo</span>
         </p>
-        <ul className="lp-figures">
-          {figures.map((f) => (
-            <li key={f.label} className={`lp-figure is-${f.side}`}>
-              <p className="lp-figure-side">{SIDE_LABEL[f.side]}</p>
-              <p className="lp-figure-value">{f.value}</p>
-              <p className="lp-figure-label">{f.label}</p>
-              <div className="lp-bars">
-                {f.bars.map((b) => (
-                  <div key={b.label} className={`lp-bar is-${b.side}`}>
-                    <span className="lp-bar-label">{b.label}</span>
-                    <span className="lp-bar-track" aria-hidden="true">
-                      <span className="lp-bar-fill" style={{ width: `${b.pct}%` }} />
-                    </span>
-                    <span className="lp-bar-pct">{b.pct}%</span>
-                  </div>
-                ))}
+
+        <ol className="lp-h2h">
+          {rows.map((r) => (
+            <li key={r.measure} className="lp-h2h-row">
+              <div className="lp-h2h-measure">
+                <h3 className="lp-h3">{r.measure}</h3>
+                <p>{r.note}</p>
               </div>
-              <p className="lp-figure-caveat">{f.caveat}</p>
+              <div className="lp-h2h-lines">
+                {ARMS.map(({ key, who }) => {
+                  const arm = r[key];
+                  return (
+                    <div key={key} className={`lp-h2h-line is-${key}`}>
+                      <span className="lp-h2h-who">{who}</span>
+                      {arm.pct != null ? (
+                        <>
+                          <span className="lp-h2h-track" aria-hidden="true">
+                            <span className="lp-h2h-fill" style={{ width: `${arm.pct}%` }} />
+                          </span>
+                          <span className="lp-h2h-val">{arm.pct}%</span>
+                        </>
+                      ) : (
+                        <span className="lp-h2h-na">
+                          <span aria-hidden="true">—</span> {arm.na}
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             </li>
           ))}
-        </ul>
+        </ol>
 
         <p className="lp-proof-foot">
-          Six towns, one model: a directional check, not a statistical study. It does not show that residents prefer
-          the program.{" "}
+          Verified means found on Qloo or OpenStreetMap within 25 km; unverified is not proof of invented. Institutions
+          are good partners too, and a partner’s willingness is not confirmed. Six towns, one model: a directional check,
+          not a statistical study, and it does not show that residents prefer the program.{" "}
           <Link href="/proof" className="lp-textlink">
             Read the method and the per-town table <Chevron />
           </Link>

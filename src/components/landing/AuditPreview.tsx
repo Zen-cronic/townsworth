@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { AuditRow } from "@/lib/audit";
 import { BUCKETS } from "@/lib/plan";
 import { Chevron } from "./Chevron";
+import { clip } from "./clip";
 
 export interface PreviewRow extends AuditRow {
   n: number;
@@ -9,13 +10,6 @@ export interface PreviewRow extends AuditRow {
 
 const usd = (n: number) =>
   new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n);
-
-// Trim long draft items at a word boundary so the strike ends where the text does.
-function clip(text: string, max = 96) {
-  if (text.length <= max) return text;
-  const cut = text.slice(0, max);
-  return `${cut.slice(0, cut.lastIndexOf(" ")).replace(/[,;:]$/, "")}…`;
-}
 
 function strikeReason(row: AuditRow) {
   if (row.verdict === "generic") return "Generic: names nothing local";
@@ -53,7 +47,7 @@ export function AuditPreview({
           <p className="lp-kicker">
             {townLabel} · {facility}
           </p>
-          <p className="lp-preview-title">Draft community plan, checked item by item</p>
+          <p className="lp-preview-title">Draft plan, item by item</p>
         </div>
         <dl className="lp-tally">
           <div>
@@ -124,7 +118,7 @@ export function AuditPreview({
               <span className="lp-num">{n}</span>
               <div className="lp-row-draft">
                 <p className="lp-draft" title={row.text}>
-                  <del className="lp-strike">{clip(row.text)}</del>
+                  <del className="lp-strike">{clip(row.text, 88)}</del>
                 </p>
                 <p className="lp-reason">{strikeReason(row)}</p>
               </div>

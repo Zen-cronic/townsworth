@@ -5,12 +5,12 @@ import { AppHeader } from "@/components/AppHeader";
 import { AuditPreview, type PreviewRow } from "@/components/landing/AuditPreview";
 import { Chevron } from "@/components/landing/Chevron";
 import { Guardrails } from "@/components/landing/Guardrails";
-import { HowItWorks, type SitePoint } from "@/components/landing/HowItWorks";
-import { ProofBand, type ProofFigure } from "@/components/landing/ProofBand";
+import { HowItWorks, type OutputFragments, type SitePoint } from "@/components/landing/HowItWorks";
+import { ProofBand, type ProofRow } from "@/components/landing/ProofBand";
 import { TownGrid, type TownPick } from "@/components/landing/TownGrid";
 import { cleanName } from "@/lib/plan";
 import { computeProof } from "@/lib/proof";
-import { runTown } from "@/lib/run";
+import { money, runTown } from "@/lib/run";
 import { HERO_TOWN, TOWNS } from "@/lib/towns";
 
 const FACILITY_LABEL = { "data center": "Data center", fab: "Chip fab", nuclear: "Nuclear plant", plant: "Plant" } as const;
@@ -63,42 +63,53 @@ export default async function Home() {
     });
 
   const t = proof.totals;
-  const figures: ProofFigure[] = [
+  const proofRows: ProofRow[] = [
     {
-      value: `${t.llmVerifiedPct}%`,
-      side: "llm",
-      label: "of the partners the plain LLM named turned out to be real",
-      bars: [{ label: "Verified real", pct: t.llmVerifiedPct, side: "llm" }],
-      caveat: "Checked against Qloo or OpenStreetMap within 25 km. Unverified is not proof of invented.",
+      measure: "Institutions among named partners",
+      note: "Colleges, districts, chambers and city departments. Lower means more of the places residents actually go.",
+      llm: { pct: t.llmInstitutionalPct },
+      gn: { pct: t.gnInstitutionalPct },
     },
     {
-      value: `${t.gnInstitutionalPct}%`,
-      side: "gn",
-      label: `of Good Neighbor’s partners are institutions, against ${t.llmInstitutionalPct}% of the LLM’s`,
-      bars: [
-        { label: "Plain LLM", pct: t.llmInstitutionalPct, side: "llm" },
-        { label: "Good Neighbor", pct: t.gnInstitutionalPct, side: "gn" },
-      ],
-      caveat: "Colleges and chambers are good partners too. Qloo adds the places residents go.",
+      measure: "Named partners verified as real",
+      note: "Checked against Qloo and OpenStreetMap within 25 km.",
+      llm: { pct: t.llmVerifiedPct },
+      gn: { na: "n/a: picked from Qloo by construction" },
     },
     {
-      value: `${t.gnNovelPct}%`,
-      side: "gn",
-      label: "of Good Neighbor’s partners the plain LLM never named",
-      bars: [{ label: "Never named", pct: t.gnNovelPct, side: "gn" }],
-      caveat: "A layer the model doesn’t have. A partner’s willingness is not confirmed.",
+      measure: "Partners the plain LLM never named",
+      note: "Qloo isn’t re-deriving what the model already knows.",
+      llm: { na: "n/a: measured against the LLM’s own list" },
+      gn: { pct: t.gnNovelPct },
     },
     {
-      value: `${t.controlOwnPct}%`,
-      side: "gn",
-      label: `of Good Neighbor’s partners are found in their own town, against ${t.controlCrossPct}% in a wrong one`,
-      bars: [
-        { label: "Right town", pct: t.controlOwnPct, side: "gn" },
-        { label: "Wrong town", pct: t.controlCrossPct, side: "gn" },
-      ],
-      caveat: "A negative control: the plan is local to its town. It does not show residents prefer it.",
+      measure: "Control: own town vs swapped town",
+      note: `Good Neighbor’s partners appear in their own town’s Qloo places ${t.controlOwnPct}% of the time, and ${t.controlCrossPct}% in a swapped town’s.`,
+      llm: { na: "n/a: the LLM has no Qloo list" },
+      gn: { pct: t.controlOwnPct },
     },
   ];
+  // Real fragments of each output for the example town, matching the memo and the exports.
+  const first = program.items.filter((it) => it.partner).find((it) => it.bucket === "procurement") ?? program.items[0];
+  const earliest = program.items.filter((it) => it.partner).flatMap((it) => it.months.map((m) => ({ m, it }))).sort((a, b) => a.m - b.m)[0];
+  const now = new Date();
+  const calDate = earliest
+    ? new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + earliest.m, 15)).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+        timeZone: "UTC",
+      })
+    : "";
+  const shortName = (name: string) => name.split(/ & | - |, /)[0].split(" ").slice(0, 2).join(" ");
+  const kindOf = (title: string) => title.split(/: | at /)[0];
+  const outputs: OutputFragments = {
+    memo: `Commitments first, then ${program.items.length} programs`,
+    sheet: first?.partner ? `${money(first.amount)} · ${kindOf(first.title)} · ${shortName(first.partner.name)}` : "",
+    calendar: earliest ? `${calDate} · ${kindOf(earliest.it.title)}` : "",
+    drafts: first?.partner ? `To ${shortName(first.partner.name)}, about the ${kindOf(first.title).toLowerCase()}` : "",
+  };
+
   const partnersByTown = Object.fromEntries(proof.towns.map((p) => [p.slug, p.gnPartners]));
 
   // Each town's own top pick and its strongest distinct signal, so the cards differ the way the plans do.
@@ -112,7 +123,7 @@ export default async function Home() {
       .flatMap((type) => r.profile.taste[type].filter((x) => x.distinct).map((x) => ({ type, x })))
       .sort((a, b) => a.x.rank - b.x.rank)[0];
     picksByTown[TOWNS[i].slug] = {
-      pick: top ? { title: top.title, km: top.partner?.distanceKm } : undefined,
+      pick: top?.partner ? { kind: top.title.split(/: | at /)[0], partner: top.partner.name, km: top.partner.distanceKm } : undefined,
       signal: signal ? { name: signal.x.entity.name, type: SIGNAL_TYPE[signal.type] } : undefined,
     };
   });
@@ -120,13 +131,13 @@ export default async function Home() {
 
   return (
     <div className="gn-landing">
-      <AppHeader />
+      <AppHeader towns={false} />
 
       <main>
         <section className="lp-hero" aria-labelledby="hero-h">
           <div className="lp-wrap lp-hero-grid">
             <div className="lp-hero-copy">
-              <p className="lp-kicker lp-for">For community-affairs teams at data centers, fabs and nuclear plants</p>
+              <p className="lp-kicker lp-for">For community-affairs teams</p>
               <h1 id="hero-h" className="lp-h1">
                 Red-pen the generic community plan.
               </h1>
@@ -165,8 +176,8 @@ export default async function Home() {
           </div>
         </section>
 
-        <ProofBand figures={figures} townCount={TOWNS.length === 6 ? "six" : String(TOWNS.length)} />
-        <HowItWorks points={points} town={townLabel} draft={audit.map((r) => ({ text: r.text, kept: r.verdict === "grounded" }))} />
+        <ProofBand rows={proofRows} townCount={TOWNS.length === 6 ? "six" : String(TOWNS.length)} />
+        <HowItWorks points={points} town={townLabel} outputs={outputs} draft={audit.map((r) => ({ text: r.text, kept: r.verdict === "grounded" }))} />
         <TownGrid towns={TOWNS} partners={partnersByTown} picks={picksByTown} heroSlug={HERO_TOWN.slug} />
         <Guardrails />
 

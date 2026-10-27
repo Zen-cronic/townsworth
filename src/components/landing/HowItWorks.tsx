@@ -1,3 +1,5 @@
+import { clip } from "./clip";
+
 export interface SitePoint {
   east: number; // km east of the site
   north: number; // km north of the site
@@ -98,7 +100,6 @@ export interface DraftLine {
   kept: boolean;
 }
 
-const short = (t: string, n = 46) => (t.length <= n ? t : `${t.slice(0, t.lastIndexOf(" ", n))}…`);
 
 // The whole draft at a glance: every item, kept or struck.
 function DraftSheet({ lines }: { lines: DraftLine[] }) {
@@ -109,7 +110,7 @@ function DraftSheet({ lines }: { lines: DraftLine[] }) {
         {lines.map((l, i) => (
           <li key={i} className={l.kept ? "is-kept" : "is-struck"}>
             <span className="lp-doc-mark">{l.kept ? "✓" : ""}</span>
-            <span className="lp-doc-text">{short(l.text)}</span>
+            <span className="lp-doc-text">{clip(l.text, 44)}</span>
           </li>
         ))}
       </ol>
@@ -117,45 +118,47 @@ function DraftSheet({ lines }: { lines: DraftLine[] }) {
   );
 }
 
-function DocGlyph({ kind }: { kind: "memo" | "sheet" | "calendar" | "drafts" }) {
-  if (kind === "sheet") {
-    return (
-      <svg viewBox="0 0 60 44" className="lp-doc-glyph" aria-hidden="true" focusable="false">
-        {[0, 1, 2, 3, 4].map((r) => (
-          <line key={r} x1="0" x2="60" y1={4 + r * 9} y2={4 + r * 9} />
-        ))}
-        <line x1="22" x2="22" y1="0" y2="40" />
-        <line x1="42" x2="42" y1="0" y2="40" />
-      </svg>
-    );
-  }
-  if (kind === "calendar") {
-    return (
-      <svg viewBox="0 0 60 44" className="lp-doc-glyph" aria-hidden="true" focusable="false">
-        {Array.from({ length: 18 }, (_, i) => (
-          <rect key={i} x={(i % 6) * 10} y={Math.floor(i / 6) * 12 + 4} width="7" height="8" className={i === 4 || i === 9 || i === 15 ? "is-on" : ""} />
-        ))}
-      </svg>
-    );
-  }
-  const widths = kind === "memo" ? [60, 52, 58, 40, 56, 34] : [44, 60, 54, 60, 30];
+export interface OutputFragments {
+  memo: string;
+  sheet: string;
+  calendar: string;
+  drafts: string;
+}
+
+// Each output shows one complete, real line of what it contains for the example town.
+function Outputs({ f }: { f: OutputFragments }) {
+  const tiles = [
+    { name: "Commitments memo", format: "Print / PDF", line: f.memo },
+    { name: "Partner sheet", format: "CSV", line: f.sheet },
+    { name: "24-month calendar", format: "ICS", line: f.calendar },
+    { name: "Outreach drafts", format: "For review", line: f.drafts },
+  ];
   return (
-    <svg viewBox="0 0 60 44" className="lp-doc-glyph" aria-hidden="true" focusable="false">
-      {widths.map((w, i) => (
-        <line key={i} x1="0" x2={w} y1={4 + i * 7.5} y2={4 + i * 7.5} className={kind === "memo" && i === 0 ? "is-head" : ""} />
+    <ul>
+      {tiles.map((t) => (
+        <li key={t.name}>
+          <span className="lp-out-head">
+            <span className="lp-out-name">{t.name}</span>
+            <span className="lp-out-note">{t.format}</span>
+          </span>
+          <span className="lp-out-frag">{t.line}</span>
+        </li>
       ))}
-    </svg>
+    </ul>
   );
 }
 
-const OUTPUTS = [
-  { kind: "memo", name: "Commitments memo", note: "Commitments first" },
-  { kind: "sheet", name: "Partner sheet", note: "CSV" },
-  { kind: "calendar", name: "24-month calendar", note: "ICS" },
-  { kind: "drafts", name: "Outreach drafts", note: "For review" },
-] as const;
-
-export function HowItWorks({ points, town, draft }: { points: SitePoint[]; town: string; draft: DraftLine[] }) {
+export function HowItWorks({
+  points,
+  town,
+  draft,
+  outputs,
+}: {
+  points: SitePoint[];
+  town: string;
+  draft: DraftLine[];
+  outputs: OutputFragments;
+}) {
   return (
     <section className="lp-section" aria-labelledby="how-h">
       <div className="lp-wrap">
@@ -204,15 +207,7 @@ export function HowItWorks({ points, town, draft }: { points: SitePoint[]; town:
           </li>
           <li className="lp-step">
             <div className="lp-step-art lp-outputs">
-              <ul>
-                {OUTPUTS.map((o, i) => (
-                  <li key={o.name} style={{ "--i": i } as React.CSSProperties}>
-                    <DocGlyph kind={o.kind} />
-                    <span className="lp-out-name">{o.name}</span>
-                    <span className="lp-out-note">{o.note}</span>
-                  </li>
-                ))}
-              </ul>
+              <Outputs f={outputs} />
             </div>
             <p className="lp-step-n">03 · Out</p>
             <h3 className="lp-h3">A costed program, ready to discuss</h3>
