@@ -5,6 +5,7 @@ import { AppHeader } from "@/components/AppHeader";
 import { AllocationBar } from "@/components/dashboard/AllocationBar";
 import { ChevronLeft, Download } from "@/components/dashboard/Icons";
 import { PrintButton } from "@/components/dashboard/PrintButton";
+import { parseFund } from "@/components/dashboard/ui";
 import { StatusPill } from "@/components/dashboard/StatusPill";
 import { BUCKETS, type Bucket } from "@/lib/plan";
 import { money, runTown } from "@/lib/run";
@@ -40,10 +41,11 @@ export default async function MemoPage({
   searchParams: Promise<{ fund?: string }>;
 }) {
   const [{ slug }, { fund }] = await Promise.all([params, searchParams]);
-  const run = await runTown(slug, Number(fund) || undefined);
+  const run = await runTown(slug, parseFund(fund));
   if (!run) notFound();
   const { town, program, profile, audit } = run;
   const flagged = audit.filter((a) => a.verdict !== "grounded").length;
+  const partnerPlaces = program.items.filter((i) => i.partner).length;
   const byBucket = (Object.keys(BUCKETS) as Bucket[])
     .map((b) => ({ b, items: program.items.filter((i) => i.bucket === b) }))
     .map((g) => ({ ...g, amount: g.items.reduce((s, i) => s + i.amount, 0) }));
@@ -99,8 +101,9 @@ export default async function MemoPage({
                 <StatusPill tone="warn">Draft for committee review</StatusPill>
               </div>
             </div>
-            <h1 className="mt-8 text-2xl font-semibold leading-tight tracking-tight sm:text-[1.75rem]">
-              {town.name}, {town.region}: 24-month good-neighbour program
+            <h1 className="mt-8 text-balance text-2xl font-semibold leading-tight tracking-tight sm:text-[1.75rem]">
+              <span className="block">{town.name}, {town.region}</span>
+              <span className="block text-muted">24-month good-neighbor program</span>
             </h1>
             <dl className="mt-6 grid grid-cols-2 gap-x-6 gap-y-3 border-y border-hairline py-4 text-sm sm:grid-cols-3">
               {meta.map(([k, v]) => (
@@ -112,9 +115,9 @@ export default async function MemoPage({
             </dl>
             <p className="mt-5 leading-relaxed">
               The draft plan had <strong className="font-semibold">{flagged} of {audit.length}</strong> items that name nothing local or a partner
-              that can&apos;t be verified. This memo replaces them with <strong className="font-semibold">{program.items.length} items</strong> grounded
-              in {town.name}&apos;s Qloo signals, totalling{" "}
-              <strong className="font-mono font-medium tabular-nums">{money(program.totalAllocated)}</strong> over 24 months. Sponsor-labelled;
+              that can&apos;t be verified. This memo replaces them with <strong className="font-semibold">{program.items.length} program items</strong>{" "}
+              ({partnerPlaces} with a named local partner place) grounded in {town.name}&apos;s Qloo signals, totaling{" "}
+              <strong className="font-mono font-medium tabular-nums">{money(program.totalAllocated)}</strong> over 24 months. Sponsor-labeled;
               prepared with aggregate Qloo signals.
             </p>
           </header>
@@ -124,31 +127,25 @@ export default async function MemoPage({
             <SectionTitle n="1" note="The cultural program below is in addition to these, never instead of them.">
               Material commitments, from the developer&apos;s filings
             </SectionTitle>
-            <table className="mt-3 w-full text-sm">
-              <thead className="sr-only">
-                <tr>
-                  <th>Commitment</th>
-                  <th>What to state</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-hairline">
+            <div className="mt-4 rounded-md border border-dashed border-amber/50 bg-amber-wash/40 px-4 py-4 sm:px-5">
+              <p className="flex flex-wrap items-center gap-2 text-sm font-medium">
+                Not yet entered
+                <span className="text-xs font-normal text-muted">Copy each figure from the developer&apos;s filings before this memo goes to the committee.</span>
+              </p>
+              <dl className="mt-3 grid gap-x-8 gap-y-2 text-sm sm:grid-cols-2">
                 {MATERIAL.map(([k, v]) => (
-                  <tr key={k} className="align-top">
-                    <th scope="row" className="w-32 py-2.5 pr-3 text-left font-medium">{k}</th>
-                    <td className="py-2.5 pr-3 text-muted">{v}</td>
-                    <td className="py-2.5 text-right">
-                      <StatusPill tone="warn" dot={false}>Enter from filings</StatusPill>
-                    </td>
-                  </tr>
+                  <div key={k} className="grid grid-cols-[6.5rem_1fr] gap-2">
+                    <dt className="font-medium">{k}</dt>
+                    <dd className="text-muted">{v}</dd>
+                  </div>
                 ))}
-              </tbody>
-            </table>
+              </dl>
+            </div>
           </section>
 
           {/* Program */}
           <section className="mt-10">
-            <SectionTitle n="2" note={`${program.items.length} items across ${byBucket.filter((g) => g.items.length).length} program areas.`}>
+            <SectionTitle n="2" note={`${program.items.length} program items across ${byBucket.filter((g) => g.items.length).length} areas; ${partnerPlaces} name a local partner place.`}>
               The program
             </SectionTitle>
             <div className="mt-4">

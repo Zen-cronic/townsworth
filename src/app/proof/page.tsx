@@ -16,7 +16,7 @@ function Bars({ bars }: { bars: Bar[] }) {
         <div key={b.label} className="grid grid-cols-[5.5rem_1fr_2.75rem] items-center gap-2 text-[11px] text-muted">
           <span className="truncate">{b.label}</span>
           <span className="h-1.5 overflow-hidden rounded-full bg-hairline">
-            <span className={`block h-full rounded-full ${b.tone === "gn" ? "bg-hivis" : "bg-ink/55"}`} style={{ width: `${Math.max(b.pct, 1.5)}%` }} />
+            <span className={`block h-full rounded-full ${b.tone === "gn" ? "bg-ok" : "bg-ink/50"}`} style={{ width: `${Math.max(b.pct, 1.5)}%` }} />
           </span>
           <span className="text-right font-mono tabular-nums text-ink">{b.pct}%</span>
         </div>
@@ -70,7 +70,7 @@ export default async function ProofPage() {
           <Finding
             n="02"
             big={`${totals.llmInstitutionalPct}% vs ${totals.gnInstitutionalPct}%`}
-            label="institutions: LLM partners vs Good Neighbor partners"
+            label="institutions: share of LLM partners vs Good Neighbor partner places"
             bars={[
               { label: "Plain LLM", pct: totals.llmInstitutionalPct, tone: "llm" },
               { label: "Good Neighbor", pct: totals.gnInstitutionalPct, tone: "gn" },
@@ -80,7 +80,7 @@ export default async function ProofPage() {
           <Finding
             n="03"
             big={`${totals.gnNovelPct}%`}
-            label="of Good Neighbor's partners the LLM never named"
+            label="of Good Neighbor's partner places the LLM never named"
             bars={[{ label: "Never named", pct: totals.gnNovelPct, tone: "gn" }]}
             note="Qloo isn't re-deriving what the model already knows. It adds a layer the model doesn't have."
           />
@@ -92,7 +92,7 @@ export default async function ProofPage() {
               { label: "Own town", pct: totals.controlOwnPct, tone: "gn" },
               { label: "Other town", pct: totals.controlCrossPct, tone: "llm" },
             ]}
-            note="Good Neighbor's partners found in their own town's Qloo places, vs in another town's. A swapped location breaks the plan."
+            note="Good Neighbor's partner places found in their own town's Qloo places, vs in another town's. A swapped location breaks the plan."
           />
         </section>
 
@@ -122,7 +122,7 @@ export default async function ProofPage() {
         <section aria-labelledby="by-town" className="mt-6 rounded-lg border border-rule bg-paper">
           <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-rule px-5 py-4 sm:px-6">
             <h2 id="by-town" className="font-semibold">By town</h2>
-            <p className="text-xs text-muted">Open a town to see its audit.</p>
+            <p className="text-xs text-muted">Partner places are program items with a named local partner. Open a town to see its audit.</p>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[720px] text-sm">
@@ -132,7 +132,7 @@ export default async function ProofPage() {
                   <th scope="col" className="px-4 py-2.5 text-right font-medium">LLM partners named</th>
                   <th scope="col" className="px-4 py-2.5 text-right font-medium">Verified real</th>
                   <th scope="col" className="px-4 py-2.5 text-right font-medium">Institutions</th>
-                  <th scope="col" className="border-l border-hairline px-4 py-2.5 text-right font-medium">Good Neighbor partners</th>
+                  <th scope="col" className="border-l border-hairline px-4 py-2.5 text-right font-medium">Good Neighbor partner places</th>
                   <th scope="col" className="px-4 py-2.5 pr-6 text-right font-medium">Also named by LLM</th>
                 </tr>
               </thead>

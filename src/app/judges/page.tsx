@@ -56,9 +56,7 @@ export default function JudgesPage() {
               <Link
                 href={s.href}
                 className={`col-start-2 mt-3 inline-flex w-fit items-center gap-1 rounded-md border px-3 py-1.5 text-sm font-medium transition-colors duration-150 sm:col-start-3 sm:mt-0 ${
-                  i === 0
-                    ? "border-hivis bg-hivis text-white hover:border-hivis-text hover:bg-hivis-text"
-                    : "border-rule hover:border-ink active:bg-concrete"
+                  i === 0 ? "border-ink bg-ink text-paper hover:bg-ink/85 active:bg-ink/75" : "border-rule hover:border-ink active:bg-concrete"
                 }`}
               >
                 {s.cta}
