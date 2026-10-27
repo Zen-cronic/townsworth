@@ -1,0 +1,608 @@
+{
+  "promptVersion": "baseline-v1",
+  "model": "gpt-5.4-mini",
+  "createdAt": "2026-10-27T05:55:01.192Z",
+  "towns": [
+    {
+      "slug": "mount-pleasant-wi",
+      "items": [
+        {
+          "item": "Launch a Mount Pleasant Data Center Workforce Pipeline with paid internships, pre-apprenticeships, and job-shadow days for local high school, technical college, and returning adult learners.",
+          "partner": "Gateway Technical College",
+          "osm": {
+            "status": 200,
+            "found": true,
+            "osmName": "Gateway Technical College",
+            "km": 12.1
+          }
+        },
+        {
+          "item": "Create a 24-month trades scholarship and tool stipend program for electrical, HVAC, welding, and diesel/industrial maintenance students who live in Racine County.",
+          "partner": "Gateway Technical College",
+          "osm": {
+            "status": 200,
+            "found": true,
+            "osmName": "Gateway Technical College",
+            "km": 12.1
+          }
+        },
+        {
+          "item": "Host quarterly trades hiring and training fairs at the Gateway Technical College campus to connect residents with contractors, union apprenticeship programs, and direct-hire jobs.",
+          "partner": "Gateway Technical College",
+          "osm": {
+            "status": 200,
+            "found": true,
+            "osmName": "Gateway Technical College",
+            "km": 12.1
+          }
+        },
+        {
+          "item": "Set a local purchasing target and supplier-development program that prioritizes Mount Pleasant, Racine, Caledonia, and Racine County vendors for food service, landscaping, maintenance, trucking, office supplies, and event services.",
+          "partner": null,
+          "osm": null
+        },
+        {
+          "item": "Establish a small-business procurement workshop series to help local firms qualify for construction and operations work, including insurance, safety, invoicing, and bid-readiness support.",
+          "partner": "Racine County Economic Development Corporation",
+          "osm": {
+            "status": 200,
+            "found": false
+          }
+        },
+        {
+          "item": "Fund a Community Impact Grants Fund for neighborhood projects, youth programs, and nonprofit capacity-building, with decisions made twice a year by a local advisory panel.",
+          "partner": null,
+          "osm": null
+        },
+        {
+          "item": "Partner with local parks and recreation leaders to sponsor seasonal family events, including a summer movie night, a fall community picnic, and a winter holiday drive, all open to nearby residents.",
+          "partner": "Mount Pleasant Parks and Recreation Department",
+          "osm": {
+            "status": 200,
+            "found": false
+          }
+        },
+        {
+          "item": "Support science, technology, engineering, arts, and math programming for local students through classroom grants, robotics support, and field trips tied to data center operations and energy efficiency.",
+          "partner": "Case High School",
+          "osm": {
+            "status": 200,
+            "found": true,
+            "osmName": "Case High School",
+            "km": 1.2
+          }
+        },
+        {
+          "item": "Offer a public open house and information session at the Village Hall to explain the campus, expected jobs, traffic plans, noise mitigation, and community investment commitments.",
+          "partner": "Village of Mount Pleasant",
+          "osm": {
+            "status": 200,
+            "found": true,
+            "osmName": "Franksville",
+            "km": 5.5
+          }
+        },
+        {
+          "item": "Create a volunteer program that gives employees paid hours to support local food pantries, school supply drives, and cleanup days across Mount Pleasant and greater Racine.",
+          "partner": "Joy House",
+          "osm": {
+            "status": 200,
+            "found": false
+          }
+        },
+        {
+          "item": "Provide annual sponsorships for local civic and cultural events so the campus is visibly supporting the community beyond construction, including youth sports, library programs, and neighborhood celebrations.",
+          "partner": "Racine Art Museum",
+          "osm": {
+            "status": 200,
+            "found": true,
+            "osmName": "R|A|M Racine Art Museum",
+            "km": 8.4
+          }
+        },
+        {
+          "item": "Announce the full 24-month program through a coordinated rollout with a press conference, mailed resident fact sheet, project website, social media, and presentations to the Village Board and nearby neighborhood groups.",
+          "partner": "Village of Mount Pleasant",
+          "osm": {
+            "status": 200,
+            "found": true,
+            "osmName": "Franksville",
+            "km": 5.5
+          }
+        }
+      ]
+    },
+    {
+      "slug": "clay-ny",
+      "items": [
+        {
+          "item": "Launch a Micron Clay Workforce & Trades Pipeline with SUNY Onondaga Community College and SUNY Oswego to fund certificates, apprenticeships, and paid internships for welding, electrical, HVAC, process technology, and industrial maintenance over 24 months.",
+          "partner": "Onondaga Community College",
+          "osm": {
+            "status": 200,
+            "found": true,
+            "osmName": "Onondaga Community College",
+            "km": 20.1
+          }
+        },
+        {
+          "item": "Create a pre-apprenticeship “fast track” for North Syracuse Central School District, Liverpool Central School District, and CNY Works participants that includes tuition, tools, transportation stipends, and guaranteed interview slots with contractors.",
+          "partner": "CNY Works",
+          "osm": {
+            "status": 200,
+            "found": false
+          }
+        },
+        {
+          "item": "Set up a local contractor and supplier registry for Syracuse-area and Central New York firms, with quarterly matchmaking sessions hosted in Clay to increase local purchasing for food service, janitorial, landscaping, logistics, construction, and professional services.",
+          "partner": null,
+          "osm": null
+        },
+        {
+          "item": "Publish a simple local-hiring and local-spend scorecard every quarter and review it publicly with the Clay Town Board and the Onondaga County Industrial Development Agency.",
+          "partner": "Clay Town Board",
+          "osm": {
+            "status": 200,
+            "found": true,
+            "osmName": "Metropolitan Water Board",
+            "km": 4.2
+          }
+        },
+        {
+          "item": "Provide annual microgrants for neighborhood nonprofits, youth programs, and food-security groups serving Clay, Liverpool, Cicero, and North Syracuse, with priority for volunteer-led, measurable projects.",
+          "partner": null,
+          "osm": null
+        },
+        {
+          "item": "Establish a community grants advisory panel drawn from local residents and civic leaders, and hold its meetings at the North Syracuse Library or a similar public venue in the area.",
+          "partner": "North Syracuse Library",
+          "osm": {
+            "status": 200,
+            "found": true,
+            "osmName": "NOPL at North Syracuse",
+            "km": 6.7
+          }
+        },
+        {
+          "item": "Sponsor a 24-month calendar of family events such as summer concerts, STEM fairs, and holiday activities at the New York State Fairgrounds and other accessible local venues, with free admission and shuttle service where possible.",
+          "partner": "New York State Fairgrounds",
+          "osm": {
+            "status": 200,
+            "found": true,
+            "osmName": "New York State Fairgrounds",
+            "km": 13
+          }
+        },
+        {
+          "item": "Host quarterly open-house and listening sessions in Clay with project updates, job booths, and small-business sign-ups, and stream them online for residents who cannot attend in person.",
+          "partner": null,
+          "osm": null
+        },
+        {
+          "item": "Fund hands-on STEM programming for middle and high school students through local institutions such as the Milton J. Rubenstein Museum of Science & Technology and Syracuse City school partners, including classroom kits and lab visits.",
+          "partner": "Milton J. Rubenstein Museum of Science & Technology",
+          "osm": {
+            "status": 200,
+            "found": false
+          }
+        },
+        {
+          "item": "Offer paid summer youth employment and career exploration placements with local nonprofits and municipal partners to build interest in manufacturing, construction, environmental monitoring, and IT careers.",
+          "partner": null,
+          "osm": null
+        },
+        {
+          "item": "Use local venues and businesses for program communications and outreach, including posting and tabling at the Clay Central Park area, Destiny USA, and community gathering spaces in Liverpool and North Syracuse, so residents see the program where they already shop and meet.",
+          "partner": "Destiny USA",
+          "osm": {
+            "status": 200,
+            "found": true,
+            "osmName": "Destiny USA",
+            "km": 13
+          }
+        },
+        {
+          "item": "Announce the full 24-month program through a coordinated public launch with the Town of Clay, a press event in the Syracuse media market, direct mail to nearby households, a dedicated website, and bilingual flyers distributed through schools, libraries, churches, and small businesses.",
+          "partner": "Town of Clay",
+          "osm": {
+            "status": 200,
+            "found": true,
+            "osmName": "Town of Clay",
+            "km": 2.8
+          }
+        }
+      ]
+    },
+    {
+      "slug": "new-albany-oh",
+      "items": [
+        {
+          "item": "Launch a New Albany–focused workforce and trades pathway with paid pre-apprenticeship slots for local residents in electrical, HVAC, welding, and controls, with recruitment through local schools and job centers and direct placement into union apprenticeship pipelines where possible.",
+          "partner": null,
+          "osm": null
+        },
+        {
+          "item": "Create a 24-month supplier diversity and local procurement program that sets quarterly targets for spending with New Albany and central Ohio businesses for catering, landscaping, maintenance, security, logistics, and office supplies, with a public vendor portal and local bid workshops.",
+          "partner": null,
+          "osm": null
+        },
+        {
+          "item": "Fund a technical training partnership for data center operations, industrial maintenance, and semiconductor-related skills with Columbus State Community College and nearby workforce partners to support certificate completion and job placement.",
+          "partner": "Columbus State Community College",
+          "osm": {
+            "status": 200,
+            "found": true,
+            "osmName": "Columbus State Community College",
+            "km": 21.3
+          }
+        },
+        {
+          "item": "Sponsor hands-on STEM and career exposure programs for local students through New Albany-Plain Local Schools, including site tours, classroom visits, teacher externships, and summer internships for high school and recent graduates.",
+          "partner": "New Albany-Plain Local Schools",
+          "osm": {
+            "status": 200,
+            "found": true,
+            "osmName": "New Albany Plain Local Schools",
+            "km": 2.6
+          }
+        },
+        {
+          "item": "Provide annual community grants for youth development, food security, and housing stability in New Albany and Franklin County, with a simple application process and a local review committee.",
+          "partner": null,
+          "osm": null
+        },
+        {
+          "item": "Offer recurring public job fairs and hiring information sessions at the Jeanne B. McCoy Community Center for the Arts to connect residents with construction, facilities, security, and operations roles.",
+          "partner": "Jeanne B. McCoy Community Center for the Arts",
+          "osm": {
+            "status": 200,
+            "found": false
+          }
+        },
+        {
+          "item": "Hold quarterly listening sessions and open houses at the New Albany Branch Library to share project updates, answer questions, and collect community feedback in an accessible neighborhood setting.",
+          "partner": "New Albany Branch Library",
+          "osm": {
+            "status": 200,
+            "found": true,
+            "osmName": "Columbus Metropolitan Library (New Albany Branch)",
+            "km": 2.6
+          }
+        },
+        {
+          "item": "Create a small-business accelerator and local purchasing clinic in partnership with the New Albany Chamber of Commerce to help neighborhood firms become vendor-ready on insurance, invoicing, safety, and compliance requirements.",
+          "partner": "New Albany Chamber of Commerce",
+          "osm": {
+            "status": 200,
+            "found": false
+          }
+        },
+        {
+          "item": "Sponsor community events and family days on the New Albany Village Green and at local parks, with free food, children’s activities, and information tables for jobs, apprenticeships, and grants.",
+          "partner": "New Albany Village Green",
+          "osm": {
+            "status": 200,
+            "found": true,
+            "osmName": "Albany Green",
+            "km": 7.1
+          }
+        },
+        {
+          "item": "Support transportation access for workers by funding transit passes, ride-share subsidies, and shuttle connections to major employment hubs, coordinated with Central Ohio Transit Authority as available.",
+          "partner": "Central Ohio Transit Authority",
+          "osm": {
+            "status": 200,
+            "found": true,
+            "osmName": "Central Ohio Transit Authority",
+            "km": 20.4
+          }
+        },
+        {
+          "item": "Establish a 24-month environmental and community stewardship fund for tree planting, trail improvements, and neighborhood resilience projects with local nonprofits and park partners, prioritizing visible benefits near the project area.",
+          "partner": null,
+          "osm": null
+        },
+        {
+          "item": "Announce the program with a joint public statement, bilingual mailers to nearby households, a dedicated project website, social media, and a launch event in New Albany that features local partners, hiring dates, grant timelines, and a clear community hotline.",
+          "partner": null,
+          "osm": null
+        }
+      ]
+    },
+    {
+      "slug": "abilene-tx",
+      "items": [
+        {
+          "item": "Launch a 24-month Abilene Data Center Workforce Pathways program with paid pre-apprenticeships for electricians, HVAC, controls, welding, and fiber technicians, using priority recruiting from Abilene and Taylor County.",
+          "partner": "Abilene Independent School District",
+          "osm": {
+            "status": 200,
+            "found": true,
+            "osmName": "Abilene Independent School District",
+            "km": 0.8
+          }
+        },
+        {
+          "item": "Create a standing training pipeline with Cisco College for short-term certificates, safety credentialing, and work-readiness classes tied to campus hiring needs.",
+          "partner": "Cisco College",
+          "osm": {
+            "status": 200,
+            "found": true,
+            "osmName": "Cisco College",
+            "km": 6.6
+          }
+        },
+        {
+          "item": "Fund an annual trades scholarship and tool stipend for students entering relevant programs at Abilene Christian University and Hardin-Simmons University, with internships on campus operations and community-benefit projects.",
+          "partner": "Abilene Christian University",
+          "osm": {
+            "status": 200,
+            "found": true,
+            "osmName": "Abilene Christian University",
+            "km": 3.3
+          }
+        },
+        {
+          "item": "Host quarterly hiring and supplier open houses at the Abilene Convention Center to connect local residents, contractors, and small businesses with procurement and job opportunities.",
+          "partner": "Abilene Convention Center",
+          "osm": {
+            "status": 200,
+            "found": true,
+            "osmName": "Abilene Convention Center",
+            "km": 0.4
+          }
+        },
+        {
+          "item": "Set a local purchasing goal and vendor onboarding program that prioritizes Abilene-area firms for food service, maintenance, landscaping, transportation, office supplies, and professional services.",
+          "partner": "Abilene Chamber of Commerce",
+          "osm": {
+            "status": 200,
+            "found": false
+          }
+        },
+        {
+          "item": "Hold monthly community office hours at the Abilene Public Library to answer resident questions about the project, hiring, road work, traffic, water, and construction timelines.",
+          "partner": "Abilene Public Library",
+          "osm": {
+            "status": 200,
+            "found": true,
+            "osmName": "Abilene Public Library",
+            "km": 0.6
+          }
+        },
+        {
+          "item": "Provide multi-year community grants to neighborhood nonprofits, youth programs, and basic-needs organizations through an open application process, with a focus on education, hunger relief, and family stability.",
+          "partner": "United Way of Abilene",
+          "osm": {
+            "status": 200,
+            "found": false
+          }
+        },
+        {
+          "item": "Sponsor STEM and career-exposure events for middle and high school students at the Center for Contemporary Arts and local schools, including campus tours, robotics demos, and mock interviews.",
+          "partner": "Center for Contemporary Arts",
+          "osm": {
+            "status": 200,
+            "found": true,
+            "osmName": "Center For Contemporary Arts",
+            "km": 0.6
+          }
+        },
+        {
+          "item": "Underwrite volunteer days and small improvement projects with local civic groups, including park cleanups, school beautification, and food-pantry support, with employee volunteer hours built into the program.",
+          "partner": "Keep Abilene Beautiful",
+          "osm": {
+            "status": 200,
+            "found": false
+          }
+        },
+        {
+          "item": "Create a community safety and emergency-preparedness grant for equipment or training support to first responders and disaster-response partners in the Abilene area.",
+          "partner": "City of Abilene",
+          "osm": {
+            "status": 200,
+            "found": true,
+            "osmName": "City of Abilene Fleet",
+            "km": 2.9
+          }
+        },
+        {
+          "item": "Kick off the program with a public announcement and listening session at the DoubleTree by Hilton Abilene Downtown Convention Center, then repeat progress updates every six months through a public dashboard and media briefings.",
+          "partner": "DoubleTree by Hilton Abilene Downtown Convention Center",
+          "osm": {
+            "status": 200,
+            "found": true,
+            "osmName": "DoubleTree by Hilton Abilene Downtown Convention Center",
+            "km": 0.4
+          }
+        }
+      ]
+    },
+    {
+      "slug": "kincardine-on",
+      "items": [
+        {
+          "item": "Launch a 24-month Bruce Power Community Benefits Program with a public kick-off at the Davidson Centre in Kincardine, including a simple dashboard of commitments, timelines and local contacts.",
+          "partner": "Davidson Centre",
+          "osm": {
+            "status": 200,
+            "found": true,
+            "osmName": "Davidson Centre",
+            "km": 1.2
+          }
+        },
+        {
+          "item": "Create a two-year trades and apprenticeship fund for local residents, with paid pre-apprenticeship seats reserved for applicants from Kincardine, Huron-Kinloss and nearby Saugeen Shores, delivered through local training partners where available.",
+          "partner": null,
+          "osm": null
+        },
+        {
+          "item": "Partner with Bruce Power’s existing supplier network to host quarterly procurement readiness sessions in Kincardine for small businesses, focused on bidding, safety requirements, insurance and nuclear-quality documentation.",
+          "partner": "Bruce Power",
+          "osm": {
+            "status": 200,
+            "found": true,
+            "osmName": "Bruce Nuclear Generating Station",
+            "km": 16.8
+          }
+        },
+        {
+          "item": "Set up a local procurement preference policy for low-risk goods and services, with a target to source routine spending from businesses in Kincardine and the South Bruce area wherever competitive and practical.",
+          "partner": null,
+          "osm": null
+        },
+        {
+          "item": "Provide community micro-grants for neighbourhood projects, youth sports, accessibility upgrades and environmental stewardship, with an annual application intake and decisions made by a local advisory panel.",
+          "partner": null,
+          "osm": null
+        },
+        {
+          "item": "Offer a dedicated grant stream for youth skills and STEM programming through local schools and clubs, including classroom visits, shop-class support and hands-on career exposure in skilled trades and energy careers.",
+          "partner": null,
+          "osm": null
+        },
+        {
+          "item": "Sponsor a summer community celebration and family open-house style event in Kincardine, using local recreation or waterfront venues and featuring local food vendors, civic groups and live demonstrations from tradespeople.",
+          "partner": "Kincardine",
+          "osm": {
+            "status": 200,
+            "found": true,
+            "osmName": "Kincardine",
+            "km": 0.2
+          }
+        },
+        {
+          "item": "Host a fall community appreciation event tied to the local festival calendar, with sponsorship support for established gatherings such as the Kincardine Scottish Festival and Highland Games and related downtown activities.",
+          "partner": "Kincardine Scottish Festival and Highland Games",
+          "osm": {
+            "status": 200,
+            "found": false
+          }
+        },
+        {
+          "item": "Create a local hiring pathway for resident services, maintenance and construction support roles, with job fairs and resume clinics at the Kincardine Public Library and partner outreach through regional employment agencies.",
+          "partner": "Kincardine Public Library",
+          "osm": {
+            "status": 200,
+            "found": true,
+            "osmName": "Bruce County Public Library - Kincardine Branch",
+            "km": 0.1
+          }
+        },
+        {
+          "item": "Fund hands-on trades exposure for high school students through visits, job-shadowing and mentorships coordinated with local secondary schools in the area, plus transportation support where needed.",
+          "partner": null,
+          "osm": null
+        },
+        {
+          "item": "Announce the program with a joint media release, social media campaign, mailed community summary and a town-hall style launch in Kincardine, followed by quarterly public progress updates.",
+          "partner": null,
+          "osm": null
+        }
+      ]
+    },
+    {
+      "slug": "kemmerer-wy",
+      "items": [
+        {
+          "item": "Launch a 24-month Kemmerer Local Hiring and Trades Pipeline with paid pre-apprenticeship slots, interview days, and priority hiring for Lincoln County residents into construction, welding, electrical, heavy equipment, and radiation-protection support roles.",
+          "partner": "Western Wyoming Community College",
+          "osm": {
+            "status": 200,
+            "found": false
+          }
+        },
+        {
+          "item": "Create a scholarship and tool-and-PPE fund for local students and apprentices pursuing skilled trades, diesel tech, welding, electrical, and instrumentation careers tied to the project.",
+          "partner": "North Lincoln County School District",
+          "osm": {
+            "status": 200,
+            "found": false
+          }
+        },
+        {
+          "item": "Host quarterly contractor roundtables in Kemmerer to connect the project team with local suppliers and service firms for concrete, trucking, lodging, food service, mechanic work, and maintenance.",
+          "partner": "Kemmerer Chamber of Commerce",
+          "osm": {
+            "status": 200,
+            "found": false
+          }
+        },
+        {
+          "item": "Set up a local procurement registry and simplified vendor onboarding process so small businesses in Kemmerer, Diamondville, and surrounding Lincoln County towns can register for bidding and receive monthly sourcing notices.",
+          "partner": "Kemmerer Chamber of Commerce",
+          "osm": {
+            "status": 200,
+            "found": false
+          }
+        },
+        {
+          "item": "Provide a small-business microgrant program for local firms that need equipment, inventory, certification, or workforce upgrades to qualify for project-related work.",
+          "partner": "Uinta Bank",
+          "osm": {
+            "status": 200,
+            "found": false
+          }
+        },
+        {
+          "item": "Offer annual community grants for youth programs, emergency services, senior services, arts, and public health, with a transparent local review panel and simple application form.",
+          "partner": "Lincoln County School District #1 Foundation",
+          "osm": {
+            "status": 200,
+            "found": false
+          }
+        },
+        {
+          "item": "Sponsor family-friendly community events such as a summer kickoff, holiday light event, or town picnic at the Kemmerer City Park with local food vendors and student performances.",
+          "partner": "Kemmerer City Park",
+          "osm": {
+            "status": 200,
+            "found": false
+          }
+        },
+        {
+          "item": "Support workforce-readiness programming at the local library with résumé help, computer access, and job-application workshops for residents seeking project jobs or advancement.",
+          "partner": "Kimball Library",
+          "osm": {
+            "status": 200,
+            "found": false
+          }
+        },
+        {
+          "item": "Fund safety and emergency-preparedness training for local fire, EMS, and law enforcement partners, including tabletop exercises and equipment support tied to construction and operations planning.",
+          "partner": "Kemmerer Volunteer Fire Department",
+          "osm": {
+            "status": 200,
+            "found": false
+          }
+        },
+        {
+          "item": "Create a school STEM and energy-education program with classroom visits, lab kits, and plant tours for teachers and students from Kemmerer and surrounding communities.",
+          "partner": "Kemmerer Jr./Sr. High School",
+          "osm": {
+            "status": 200,
+            "found": false
+          }
+        },
+        {
+          "item": "Open a quarterly community information office hour in town to share construction updates, traffic plans, hiring forecasts, and local purchasing opportunities in plain language.",
+          "partner": "Kemmerer City Hall",
+          "osm": {
+            "status": 200,
+            "found": false
+          }
+        },
+        {
+          "item": "Announce the program with a joint press event in Kemmerer, mailed postcards to households, a dedicated website page, and notices in local media, followed by door-to-door outreach to business owners and civic groups.",
+          "partner": "The Kemmerer Gazette",
+          "osm": {
+            "status": 200,
+            "found": true,
+            "osmName": "The Kemmerer Gazette",
+            "km": 2.6
+          }
+        }
+      ]
+    }
+  ]
+}
