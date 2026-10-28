@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { Check, Download, Notice } from "@/components/dashboard/Icons";
 import { StatusPill } from "@/components/dashboard/StatusPill";
+import { ExternalLink } from "@/components/integrations/SessionCalendarLinks";
+import { gmailComposeUrl, outlookComposeUrl } from "@/lib/integrations";
 
 import type { AgentDraft, TraceStep } from "@/lib/agent";
 
@@ -246,14 +248,23 @@ export function AgentDrafts({ slug, fund }: { slug: string; fund: number }) {
                         )}
                       </ul>
                     )}
-                    <a
-                      href={emlHref(d)}
-                      download={`${d.partner.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}.eml`}
-                      className="mt-3 inline-flex items-center gap-1.5 rounded-md border border-rule px-3 py-1.5 text-sm transition-colors duration-150 hover:border-ink active:bg-concrete"
-                    >
-                      <Download />
-                      Download .eml
-                    </a>
+                    {/* Compose links leave "to" empty: no partner email address is known. */}
+                    <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
+                      <a
+                        href={emlHref(d)}
+                        download={`${d.partner.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}.eml`}
+                        className="inline-flex items-center gap-1.5 rounded-md border border-rule px-3 py-1.5 transition-colors duration-150 hover:border-ink active:bg-concrete"
+                      >
+                        <Download />
+                        Download .eml
+                      </a>
+                      <ExternalLink href={gmailComposeUrl({ subject: d.subject, body: d.body })} label={`Open the draft to ${d.partner} in Gmail`}>
+                        Open in Gmail
+                      </ExternalLink>
+                      <ExternalLink href={outlookComposeUrl({ subject: d.subject, body: d.body })} label={`Open the draft to ${d.partner} in Outlook`}>
+                        Outlook
+                      </ExternalLink>
+                    </div>
                   </li>
                 ))}
               </ul>

@@ -19,7 +19,7 @@ test("the ballot CSV guards titles and partners but leaves numbers alone", () =>
 });
 
 test("ICS text escapes backslash, semicolon, comma and newline", () => {
-  assert.equal(icsText("a\\b; c, d\ne"), "a\\\\b\; c\\, d\\ne");
+  assert.equal(icsText("a\\b; c, d\ne"), "a\\\\b\\; c\\, d\\ne");
 });
 
 test("long ICS lines fold at 75 octets with a leading space", () => {

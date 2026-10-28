@@ -1,20 +1,11 @@
 import { runTown } from "@/lib/run";
-import { guardFormula } from "@/lib/ballot";
 import { BUCKETS, ROLE_LABEL } from "@/lib/plan";
+import { hubspotCsv, salesforceCsv, toCsv } from "@/lib/integrations";
 import { fundParam } from "../../fund";
-import { foldLine, icsText } from "../ics";
+import { programIcs } from "../ics";
 
-const csvCell = (v: unknown) => {
-  const s = typeof v === "string" ? guardFormula(v) : String(v ?? "");
-  return `"${s.replace(/"/g, '""')}"`;
-};
-
-// Month 1 of the program is the first month after today.
-function monthDate(month: number) {
-  const now = new Date();
-  const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + month, 15, 17));
-  return d.toISOString().replace(/[-:]/g, "").slice(0, 15) + "Z";
-}
+const csvResponse = (csv: string, filename: string) =>
+  new Response(csv, { headers: { "Content-Type": "text/csv; charset=utf-8", "Content-Disposition": `attachment; filename="${filename}"` } });
 
 export async function GET(req: Request, { params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -25,26 +16,14 @@ export async function GET(req: Request, { params }: { params: Promise<{ slug: st
   const { town, program } = run;
 
   if (format === "ics") {
-    const events = program.items.flatMap((it) =>
-      it.months.map((m, k) =>
-        [
-          "BEGIN:VEVENT",
-          `UID:${town.slug}-${it.id}-${k}@good-neighbor`,
-          `DTSTAMP:${monthDate(0)}`,
-          `DTSTART:${monthDate(m)}`,
-          `SUMMARY:${icsText(it.title)}`,
-          `DESCRIPTION:${icsText(`${BUCKETS[it.bucket].label}. Draft date: confirm with the partner. Sponsor-labelled program item.`)}`,
-          "END:VEVENT",
-        ]
-          .map(foldLine)
-          .join("\r\n"),
-      ),
-    );
-    const body = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Good Neighbor//EN", ...events, "END:VCALENDAR"].join("\r\n") + "\r\n";
+    const body = programIcs(town.slug, program.items);
     return new Response(body, {
       headers: { "Content-Type": "text/calendar; charset=utf-8", "Content-Disposition": `attachment; filename="${town.slug}-program.ics"` },
     });
   }
+
+  if (format === "hubspot") return csvResponse(hubspotCsv(program.items, town), `${town.slug}-partners-hubspot.csv`);
+  if (format === "salesforce") return csvResponse(salesforceCsv(program.items, town), `${town.slug}-partners-salesforce.csv`);
 
   const header = [
     "bucket", "item", "partner", "partner_role", "run_with", "address", "distance_km", "neighbouring_community", "phone", "website", "event_space",
@@ -72,7 +51,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ slug: st
   ]);
   // The unassigned remainder is a line of its own, so the sheet reconciles with the fund.
   rows.push(["Unassigned", "Unassigned, for the committee to allocate", "", "", "", "", "", "", "", "", "", "", "", program.unassigned, "", "", "", ""]);
-  const csv = [header, ...rows].map((r) => r.map(csvCell).join(",")).join("\n");
+  const csv = toCsv([header, ...rows]);
   return new Response(csv, {
     headers: { "Content-Type": "text/csv", "Content-Disposition": `attachment; filename="${town.slug}-partners.csv"` },
   });
