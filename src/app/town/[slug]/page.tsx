@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { AppHeader } from "@/components/AppHeader";
@@ -7,8 +8,15 @@ import { runTown, type PlanSource } from "@/lib/run";
 import { TOWNS, townBySlug } from "@/lib/towns";
 import { parseFund } from "@/components/dashboard/ui";
 
-// A live plain-LLM draft for a typed-in town takes about 20 s (OpenAI, then one OSM check a second).
-export const maxDuration = 60;
+// A live plain-LLM draft for a typed-in town takes about 20 s (OpenAI, then one OSM check a second);
+// the limit leaves room for a slow model call plus a full OSM pass.
+export const maxDuration = 120;
+
+// Typed-in towns are generated on request from the slug, so they stay out of search indexes.
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  return townBySlug(slug)?.custom ? { robots: { index: false, follow: false } } : {};
+}
 
 export function generateStaticParams() {
   return TOWNS.map((t) => ({ slug: t.slug }));
