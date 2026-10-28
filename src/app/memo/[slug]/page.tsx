@@ -9,6 +9,7 @@ import { Chevron, ChevronLeft, Download } from "@/components/dashboard/Icons";
 import { PrintButton } from "@/components/dashboard/PrintButton";
 import { parseFund, secondaryCta } from "@/components/dashboard/ui";
 import { StatusPill } from "@/components/dashboard/StatusPill";
+import { CrmExportLinks, SessionCalendarLinks } from "@/components/integrations";
 import { isKept } from "@/lib/audit";
 import { commitmentsFor } from "@/lib/commitments";
 import { BUCKETS, costLine, type Bucket } from "@/lib/plan";
@@ -93,6 +94,7 @@ export default async function MemoPage({
               <Download />
               Calendar (.ics)
             </a>
+            <CrmExportLinks slug={town.slug} fund={program.annualFund} linkClassName={toolButton} />
             <PrintButton className={toolButton} />
           </span>
         </div>
@@ -223,6 +225,7 @@ export default async function MemoPage({
                             {it.partner?.address ?? it.detail}
                             <span className="ml-2 inline-block font-mono text-[11px] text-muted/90">{it.provenance[0]?.signal}</span>
                           </div>
+                          <SessionCalendarLinks item={it} town={town} firstOnly className="mt-1" />
                         </td>
                         <td className="py-2 text-right font-mono tabular-nums">{money(it.amount)}</td>
                       </tr>
