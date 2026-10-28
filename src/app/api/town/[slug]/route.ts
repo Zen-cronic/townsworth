@@ -3,12 +3,16 @@ import { buildProfile } from "@/lib/profile";
 import { buildProgram } from "@/lib/plan";
 import { auditPlan, GENERIC_AGENCY_PLAN } from "@/lib/audit";
 import { townBySlug } from "@/lib/towns";
+import { fundParam } from "../../fund";
+
+// Debug view of the raw profile for local development. Production deployments return 404.
 
 export async function GET(req: Request, { params }: { params: Promise<{ slug: string }> }) {
+  if (process.env.VERCEL_ENV === "production") return NextResponse.json({ error: "Not found" }, { status: 404 });
   const { slug } = await params;
   const town = townBySlug(slug);
   if (!town) return NextResponse.json({ error: "unknown town" }, { status: 404 });
-  const fund = Number(new URL(req.url).searchParams.get("fund")) || town.defaultAnnualFund;
+  const fund = fundParam(new URL(req.url)) ?? town.defaultAnnualFund;
   const profile = await buildProfile(town);
   const program = buildProgram(profile, fund);
   const audit = auditPlan(GENERIC_AGENCY_PLAN.map((text) => ({ text })), profile, program.items);
