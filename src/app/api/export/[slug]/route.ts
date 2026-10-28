@@ -50,7 +50,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ slug: st
     it.provenance[0]?.detail,
   ]);
   // The unassigned remainder is a line of its own, so the sheet reconciles with the fund.
-  rows.push(["Unassigned", "Unassigned, for the committee to allocate", "", "", "", "", "", "", "", "", "", "", "", program.unassigned, "", "", "", ""]);
+  rows.push(["Reserve", "Reserve, for the committee to allocate", "", "", "", "", "", "", "", "", "", "", "", program.unassigned, "", "", "", ""]);
   const csv = toCsv([header, ...rows]);
   return new Response(csv, {
     headers: { "Content-Type": "text/csv", "Content-Disposition": `attachment; filename="${town.slug}-partners.csv"` },

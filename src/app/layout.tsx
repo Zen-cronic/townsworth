@@ -8,7 +8,7 @@ const plexMono = IBM_Plex_Mono({ variable: "--font-plex-mono", subsets: ["latin"
 export const metadata: Metadata = {
   title: "Good Neighbor: community programs a town recognizes as its own",
   description:
-    "Red-pens a facility's generic community plan against what the host town actually over-indexes on, using Qloo, and returns a costed, resident-ranked program.",
+    "Checks a data center's or plant's community-benefits plan line by line against the host town's own places, using Qloo's local taste data, and returns a costed, resident-ranked program.",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

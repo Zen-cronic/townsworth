@@ -144,7 +144,7 @@ function placeProvenance(e: QlooEntity, why: string, profile: TownProfile): Prov
   const rank = meta?.affinityRank;
   return [
     {
-      signal: rank ? `Qloo place · #${rank} by local affinity` : `Qloo place · ${km(e.distanceM) ?? "?"} km away`,
+      signal: rank ? `Local favourite · #${rank} by local affinity` : `Local place (Qloo) · ${km(e.distanceM) ?? "?"} km away`,
       detail: `${
         rank
           ? `#${rank} by local affinity of ${profile.placeCount} Qloo places within 15 km. `
@@ -157,7 +157,7 @@ function placeProvenance(e: QlooEntity, why: string, profile: TownProfile): Prov
 function signalProvenance(s: Signal, typeLabel: string): Provenance {
   return {
     signal: `Qloo ${typeLabel} · #${s.rank} locally`,
-    detail: s.distinct ? "Over-indexes here: not in the national top 50 or any big-metro list" : `Also popular nationally (#${s.nationalRank})`,
+    detail: s.distinct ? "Stands out here: not in the national top 50 or any big-metro list" : `Also popular nationally (#${s.nationalRank})`,
   };
 }
 
@@ -311,7 +311,7 @@ export function buildProgram(profile: TownProfile, annualFund: number): Program 
       costed({
         id: "events-music",
         bucket: "events",
-        title: `Summer music night in the style the town over-indexes on`,
+        title: `Summer music night in the style the town favours`,
         detail: `Theme signal: ${localArtists.map((a) => a.entity.name).join(", ")}. A theme, not a booking: no artist is contacted or implied.`,
         sessions: 2,
         unitCost: UNIT.music.cost,
@@ -329,7 +329,7 @@ export function buildProgram(profile: TownProfile, annualFund: number): Program 
         id: "events-local-team",
         bucket: "events",
         title: `Community watch party: ${team.entity.name}`,
-        detail: "Free, all ages, at a host venue from this plan. Built around a team the town over-indexes on.",
+        detail: "Free, all ages, at a host venue from this plan. Built around a team the town favours.",
         sessions: 2,
         unitCost: UNIT.watch.cost,
         unit: UNIT.watch.unit,

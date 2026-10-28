@@ -77,7 +77,7 @@ export function AppHeader({ active, page, towns = true }: { active?: string; pag
             className={`${navLink} ${page === "judges" ? "text-ink" : ""}`}
           >
             <span className="sm:hidden">Guide</span>
-            <span className="hidden sm:inline">Start here</span>
+            <span className="hidden sm:inline">Guided path</span>
           </Link>
         </nav>
       </div>

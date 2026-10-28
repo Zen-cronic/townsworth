@@ -1,3 +1,5 @@
+import type { Metadata } from "next";
+import { PRODUCT_NAME } from "@/components/landing/brand";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AgentDrafts } from "@/components/AgentDrafts";
@@ -11,6 +13,11 @@ import { isKept } from "@/lib/audit";
 import { commitmentsFor } from "@/lib/commitments";
 import { BUCKETS, costLine, type Bucket } from "@/lib/plan";
 import { money, runTown } from "@/lib/run";
+
+export const metadata: Metadata = {
+  title: `Committee memo · ${PRODUCT_NAME}`,
+  description: "Checks a facility's draft community plan line by line against the places the host town actually goes (Qloo taste data), and returns a costed, resident-ranked program.",
+};
 
 const MATERIAL = [
   ["Jobs", "Permanent roles, local-hire target, construction peak"],
@@ -107,7 +114,7 @@ export default async function MemoPage({
             </div>
             <h1 className="mt-8 text-balance text-2xl font-semibold leading-tight tracking-tight sm:text-[1.75rem]">
               <span className="block">{town.name}, {town.region}</span>
-              <span className="block text-muted">24-month good-neighbor program</span>
+              <span className="block text-muted">24-month community investment program</span>
             </h1>
             <dl className="mt-6 grid grid-cols-2 gap-x-6 gap-y-3 border-y border-hairline py-4 text-sm sm:grid-cols-3">
               {meta.map(([k, v]) => (
@@ -123,15 +130,15 @@ export default async function MemoPage({
               {keptInstitutions > 0 &&
                 ` ${keptInstitutions} ${keptInstitutions === 1 ? "institution it names stays" : "institutions it names stay"} in, for the committee to confirm.`}{" "}
               This memo sets out <strong className="font-semibold">{program.items.length} program items</strong> ({partnerPlaces} with a named local
-              partner place) grounded in {town.name}&apos;s Qloo signals and costed per session:{" "}
+              partner) grounded in what {town.name} favours (Qloo taste data) and costed per session:{" "}
               <strong className="font-mono font-medium tabular-nums">{money(program.totalAllocated)}</strong> itemized, and{" "}
-              <strong className="font-mono font-medium tabular-nums">{money(program.unassigned)}</strong> left for the committee to allocate, of the{" "}
-              {money(program.twoYearFund)} 24-month fund. Sponsor-labeled; prepared with aggregate Qloo signals.
+              <strong className="font-mono font-medium tabular-nums">{money(program.unassigned)}</strong> held in reserve for the committee, of the{" "}
+              {money(program.twoYearFund)} 24-month fund. Sponsor-labeled; prepared with aggregate Qloo taste data.
             </p>
           </header>
 
           {/* Material commitments */}
-          <section className="mt-10">
+          <section id="commitments" className="mt-10 scroll-mt-24">
             <SectionTitle n="1" note="The cultural program below is in addition to these, never instead of them.">
               Material commitments, from the developer&apos;s filings
             </SectionTitle>
@@ -146,7 +153,7 @@ export default async function MemoPage({
                         .map((c, i) => (
                           <p key={i} className="leading-relaxed">
                             {c.text}{" "}
-                            <a href={c.url} target="_blank" rel="noopener noreferrer" className="whitespace-nowrap text-xs text-muted underline decoration-rule underline-offset-2 hover:text-ink">
+                            <a href={c.url} target="_blank" rel="noopener noreferrer" className="text-xs text-muted underline decoration-rule underline-offset-2 [overflow-wrap:anywhere] hover:text-ink">
                               {c.source}
                             </a>
                           </p>
@@ -178,8 +185,8 @@ export default async function MemoPage({
           </section>
 
           {/* Program */}
-          <section className="mt-10">
-            <SectionTitle n="2" note={`${program.items.length} program items across ${byBucket.filter((g) => g.items.length).length} areas; ${partnerPlaces} name a local partner place.`}>
+          <section id="program" className="mt-10 scroll-mt-24">
+            <SectionTitle n="2" note={`${program.items.length} program items across ${byBucket.filter((g) => g.items.length).length} areas; ${partnerPlaces} name a local partner.`}>
               The program
             </SectionTitle>
             <div className="mt-4">
@@ -214,7 +221,7 @@ export default async function MemoPage({
                           </div>
                           <div className="text-xs leading-relaxed text-muted">
                             {it.partner?.address ?? it.detail}
-                            <span className="ml-2 whitespace-nowrap font-mono text-[11px] text-muted/90">{it.provenance[0]?.signal}</span>
+                            <span className="ml-2 inline-block font-mono text-[11px] text-muted/90">{it.provenance[0]?.signal}</span>
                           </div>
                         </td>
                         <td className="py-2 text-right font-mono tabular-nums">{money(it.amount)}</td>
@@ -225,7 +232,7 @@ export default async function MemoPage({
               <tbody className="border-b border-hairline">
                 <tr className="align-top">
                   <th scope="row" className="py-3 pr-4 text-left font-normal">
-                    <div className="font-semibold">Unassigned, for the committee to allocate</div>
+                    <div className="font-semibold">Reserve, for the committee</div>
                     <div className="mt-0.5 text-xs font-normal text-muted">
                       Not itemized by this tool: more grant cycles, larger awards or items residents add. The committee decides.
                     </div>
@@ -238,7 +245,7 @@ export default async function MemoPage({
                   <th scope="row" className="pt-3 text-left font-semibold">
                     Total over 24 months
                     <span className="ml-2 text-xs font-normal text-muted">
-                      {money(program.totalAllocated)} itemized + {money(program.unassigned)} unassigned
+                      {money(program.totalAllocated)} itemized + {money(program.unassigned)} in reserve
                     </span>
                   </th>
                   <td className="pt-3 text-right font-mono font-medium tabular-nums">{money(program.totalAllocated + program.unassigned)}</td>
@@ -246,14 +253,14 @@ export default async function MemoPage({
               </tfoot>
             </table>
 
-            <p className="mt-6 border-l-2 border-rule pl-3 text-xs leading-relaxed text-muted">
+            <p id="fund-note" className="mt-6 scroll-mt-24 border-l-2 border-rule pl-3 text-xs leading-relaxed text-muted">
               <strong className="font-semibold text-ink">Where the numbers come from.</strong> Annual fund: {money(program.annualFund)} (
               {town.fundNote}). {program.costNote}
             </p>
           </section>
 
           {/* Guardrails */}
-          <section className="mt-10">
+          <section id="guardrails" className="mt-10 scroll-mt-24">
             <SectionTitle n="3">Guardrails</SectionTitle>
             <ol className="mt-3 space-y-2 text-sm leading-relaxed">
               {[

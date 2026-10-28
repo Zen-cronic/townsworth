@@ -19,11 +19,11 @@ const FACILITY_LABEL: Record<string, string> = {
 
 const DRAFT: Record<PlanSource, { tab: string; note: string }> = {
   llm: {
-    tab: "Plain-LLM draft",
+    tab: "AI-written draft",
     note: `Written by OpenAI ${BASELINE.model} with no Qloo access, and frozen before it was measured.`,
   },
   agency: {
-    tab: "Agency template",
+    tab: "Consultant template",
     note: "A sample of the generic plan a consultancy might send to any town.",
   },
 };
@@ -40,7 +40,7 @@ function draftNote(run: TownRun): string {
       : `on ${new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", timeZone: "America/Toronto" }).format(new Date(draft.live.createdAt))}`;
     return `Written live by OpenAI ${draft.live.model} ${when} (${secs} s, no Qloo access), not part of the frozen set on /proof.${failed}`;
   }
-  if (town.custom && source === "agency") return "No frozen LLM plan for this town; auditing the typical agency template.";
+  if (town.custom && source === "agency") return "No frozen AI-written plan for this town; checking the typical consultant template.";
   return DRAFT[source].note;
 }
 
@@ -146,10 +146,10 @@ function Kept({ row }: { row: AuditRow }) {
         <Check className="h-3 w-3" />
         Kept
       </Eyebrow>
-      <p className="mt-1 text-[15px] leading-snug">{row.matched?.name ?? "Matches a local signal"}</p>
+      <p className="mt-1 text-[15px] leading-snug">{row.matched?.name ?? "Matches a local favourite"}</p>
       <p className="mt-0.5 text-xs text-muted">
         {row.matched
-          ? [row.matched.source === "osm" ? "Verified on OpenStreetMap" : "A Qloo place within 15 km", km(row.matched.distanceKm) && `${km(row.matched.distanceKm)} away`]
+          ? [row.matched.source === "osm" ? "Verified on OpenStreetMap" : "A local place from Qloo, within 15 km", km(row.matched.distanceKm) && `${km(row.matched.distanceKm)} away`]
               .filter(Boolean)
               .join(" · ")
           : row.termHits[0]}
@@ -177,7 +177,7 @@ function AuditLine({ row, index }: { row: AuditRow; index: number }) {
   const delay = index * 70;
 
   return (
-    <li className={ROW}>
+    <li id={`line-${pad2(index + 1)}`} className={`${ROW} scroll-mt-24`}>
       <span className="pt-0.5 font-mono text-xs tabular-nums text-muted">{pad2(index + 1)}</span>
       <div>
         <p className={`text-[15px] leading-relaxed ${kept ? "text-ink" : "text-muted"}`}>
@@ -187,7 +187,7 @@ function AuditLine({ row, index }: { row: AuditRow; index: number }) {
         </p>
         {!kept && (
           <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1">
-            <StatusPill tone="flag">{row.verdict === "unverified" ? "Unverified" : "Generic"}</StatusPill>
+            <StatusPill tone="flag">{row.verdict === "unverified" ? "Can't confirm" : "Not local"}</StatusPill>
             {missing && <span className="text-xs text-muted">&ldquo;{missing}&rdquo; not found locally</span>}
           </div>
         )}
@@ -204,15 +204,15 @@ function NoSwapGroup({ rows }: { rows: { row: AuditRow; index: number }[] }) {
   const range = `${pad2(rows[0].index + 1)}–${pad2(rows[rows.length - 1].index + 1)}`;
   const unverified = rows.filter((r) => r.row.verdict === "unverified").length;
   return (
-    <li className="border-b border-hairline py-4 last:border-b-0">
+    <li id={`line-${pad2(rows[0].index + 1)}`} className="scroll-mt-24 border-b border-hairline py-4 last:border-b-0">
       <details className="group">
         <summary className="grid cursor-pointer grid-cols-[2rem_minmax(0,1fr)] gap-x-3 gap-y-3 md:grid-cols-[2.25rem_minmax(0,1fr)_minmax(0,1fr)] md:gap-x-6">
           <span className="whitespace-nowrap pt-0.5 font-mono text-xs tabular-nums text-muted">{range}</span>
           <span>
             <span className="flex flex-wrap items-center gap-2">
               <span className="text-[15px] text-muted">{rows.length} struck items</span>
-              {unverified > 0 && <StatusPill tone="flag">{unverified} Unverified</StatusPill>}
-              {rows.length - unverified > 0 && <StatusPill tone="flag">{rows.length - unverified} Generic</StatusPill>}
+              {unverified > 0 && <StatusPill tone="flag">{unverified} Can&apos;t confirm</StatusPill>}
+              {rows.length - unverified > 0 && <StatusPill tone="flag">{rows.length - unverified} Not local</StatusPill>}
             </span>
             <span className="mt-1.5 inline-flex items-center gap-1 text-xs text-muted group-hover:text-ink">
               <Chevron className="chev h-3 w-3" />
@@ -310,7 +310,7 @@ function SectionHead({ id, title, note, children }: { id?: string; title: string
 function QlooCalls({ calls }: { calls: TownRun["profile"]["calls"] }) {
   const failed = calls.filter((c) => !c.ok).length;
   return (
-    <details className="group no-print mt-2 text-xs">
+    <details id="qloo-calls" className="group no-print mt-2 scroll-mt-24 text-xs">
       <summary className="inline-flex cursor-pointer items-center gap-1.5 rounded border border-hairline px-2 py-0.5 text-muted transition-colors duration-150 hover:border-rule hover:text-ink">
         <span aria-hidden className={`h-1.5 w-1.5 rounded-full ${failed ? "bg-hivis" : "bg-ok"}`} />
         <span className="font-mono">
@@ -435,7 +435,7 @@ export function TownView({ run }: { run: TownRun }) {
           <div role="note" className="order-2 flex gap-3 rounded-md border border-amber/35 bg-amber-wash px-4 py-3 text-sm md:order-3 md:col-span-2">
             <Notice className="mt-0.5 h-4 w-4 text-amber" />
             <p>
-              <span className="font-semibold">Thin data.</span> Qloo has few local signals near {town.name} ({profile.localPlaces.length}{" "}
+              <span className="font-semibold">Limited local data.</span> Qloo has few local signals near {town.name} ({profile.localPlaces.length}{" "}
               independent {profile.localPlaces.length === 1 ? "place" : "places"} within 15 km). The plan is shorter on purpose: treat it as a
               starting list and add the partners residents name.
             </p>
@@ -443,7 +443,7 @@ export function TownView({ run }: { run: TownRun }) {
         )}
 
         <div className="order-3 grid gap-px overflow-hidden rounded-lg border border-rule bg-hairline sm:grid-cols-2 md:order-4 md:col-span-2 md:grid-cols-3">
-          <Story step="01" title="What the draft got wrong" figure={`${flagged} of ${audit.length}`} tone="flag">
+          <Story step="01" title="Lines that could fit any town" figure={`${flagged} of ${audit.length}`} tone="flag">
             <p>draft items struck: they name nothing local, or a partner that can&apos;t be found and isn&apos;t an institution.</p>
             <p className="mt-auto pt-2.5 text-xs">
               <span className="font-mono tabular-nums text-ok-text">{audit.length - flagged}</span> kept:{" "}
@@ -451,14 +451,14 @@ export function TownView({ run }: { run: TownRun }) {
                 plural(keptPartners, "verified local partner", "verified local partners"),
                 keptInstitutions > 0 && plural(keptInstitutions, "institution to confirm", "institutions to confirm"),
                 keptMechanisms > 0 && plural(keptMechanisms, "grant mechanism", "grant mechanisms"),
-                keptSignals > 0 && plural(keptSignals, "local-signal match", "local-signal matches"),
+                keptSignals > 0 && plural(keptSignals, "match to a local favourite", "matches to local favourites"),
               ]
                 .filter(Boolean)
                 .join(", ")}
             </p>
           </Story>
-          <Story step="02" title="What Qloo adds" figure={String(partnerPlaces)}>
-            <p>local partner places in the program, each traced to a Qloo signal.</p>
+          <Story step="02" title="Local partners Qloo found" figure={String(partnerPlaces)}>
+            <p>local partners in the program, each traced to Qloo&apos;s taste data.</p>
             <p className="mt-auto pt-2.5 text-xs">
               <span className="font-mono tabular-nums text-ink">{swapPlaces}</span> swap into struck lines ·{" "}
               {alongsidePlaces > 0 && (
@@ -475,11 +475,11 @@ export function TownView({ run }: { run: TownRun }) {
               )}
             </p>
           </Story>
-          <Story step="03" title="The commitments memo" figure={money(program.totalAllocated)} wide>
+          <Story step="03" title="Costed for the committee" figure={money(program.totalAllocated)} wide>
             <p>
               itemized over 24 months across {plural(program.items.length, "program item", "program items")}, costed per session. The other{" "}
-              <span className="font-mono tabular-nums text-ink">{money(program.unassigned)}</span> of the {money(program.twoYearFund)} fund stays
-              unassigned for the committee.
+              <span className="font-mono tabular-nums text-ink">{money(program.unassigned)}</span> of the {money(program.twoYearFund)} fund is
+              held in reserve for the committee.
             </p>
             <div className="no-print mt-auto pt-3">
               <Link href={memoHref} className={primaryCta}>
@@ -509,9 +509,9 @@ export function TownView({ run }: { run: TownRun }) {
       <section aria-labelledby="audit-title" className="doc-sheet mt-8 scroll-mt-24 rounded-lg">
         <div className="flex flex-wrap items-start justify-between gap-4 border-b border-rule px-5 pb-4 pt-5 sm:px-6">
           <div className="max-w-2xl">
-            <p className="font-mono text-[11px] uppercase tracking-wider text-muted">Plan audit · {audit.length} draft items</p>
+            <p className="font-mono text-[11px] uppercase tracking-wider text-muted">Line-by-line check · {audit.length} draft items</p>
             <h2 id="audit-title" className="mt-1 text-lg font-semibold tracking-tight">
-              The draft, red-penned against {town.name}
+              The draft plan, checked against {town.name}
             </h2>
             <p className="mt-1 text-sm text-muted">{draftNote(run)}</p>
             {draft.notice && (
@@ -522,8 +522,8 @@ export function TownView({ run }: { run: TownRun }) {
             )}
             {town.custom && source === "agency" && (
               <div className="no-print mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5">
-                <Link href={planHref("llm")} className={secondaryCta}>
-                  {draft.notice ? "Try the live LLM draft again" : "Have a plain LLM draft it now"}
+                <Link href={planHref("llm")} prefetch={false} className={secondaryCta}>
+                  {draft.notice ? "Try the live AI draft again" : "Have AI write a draft now"}
                 </Link>
                 <span className="text-xs text-muted">About 20 s. OpenAI writes it with no Qloo access; each named partner is checked on OpenStreetMap.</span>
               </div>
@@ -536,6 +536,7 @@ export function TownView({ run }: { run: TownRun }) {
                 role="tab"
                 aria-selected={source === p}
                 href={planHref(p)}
+                prefetch={p === "llm" ? false : undefined}
                 className={`rounded px-3 py-1.5 transition-colors duration-150 ${
                   source === p ? "bg-paper font-medium text-ink shadow-sm" : "text-muted hover:text-ink active:bg-hairline"
                 }`}
@@ -549,13 +550,13 @@ export function TownView({ run }: { run: TownRun }) {
         <dl className="grid gap-x-6 gap-y-2 border-b border-hairline bg-concrete/50 px-5 py-3 text-xs text-muted sm:px-6 md:grid-cols-3">
           <div className="flex items-start gap-2">
             <dt>
-              <StatusPill tone="flag">Generic</StatusPill>
+              <StatusPill tone="flag">Not local</StatusPill>
             </dt>
-            <dd className="pt-0.5">Names no local partner and matches nothing this town distinctly over-indexes on.</dd>
+            <dd className="pt-0.5">Names no local partner and matches nothing this town stands out for.</dd>
           </div>
           <div className="flex items-start gap-2">
             <dt>
-              <StatusPill tone="flag">Unverified</StatusPill>
+              <StatusPill tone="flag">Can&apos;t confirm</StatusPill>
             </dt>
             <dd className="pt-0.5">Names a partner that isn&apos;t an institution and isn&apos;t found in Qloo or OpenStreetMap. It may exist; it can&apos;t be checked here.</dd>
           </div>
@@ -565,7 +566,7 @@ export function TownView({ run }: { run: TownRun }) {
               Kept
             </dt>
             <dd className="pt-0.5">
-              Names a verified local partner or a distinct local signal, or an institution (EDC, district, college, department) we can&apos;t check
+              Names a verified local partner or something the town stands out for, or an institution (EDC, district, college, department) we can&apos;t check
               here: those stay, for the committee to confirm. Grant mechanisms stay too, with Qloo&apos;s suggested applicants.
             </dd>
           </div>
@@ -606,10 +607,10 @@ export function TownView({ run }: { run: TownRun }) {
       <section aria-labelledby="adds-title" className="mt-8 scroll-mt-24 rounded-lg border border-rule bg-paper">
         <SectionHead
           id="adds-title"
-          title="What Qloo adds"
+          title="More local partners Qloo found"
           note={`Beyond the swaps above: more places residents go that ${llmDraft} never mentions. Open a row for the Qloo signal.`}
         >
-          <p className="font-mono text-xs tabular-nums text-muted">{plural(qlooAdds.length, "more partner place", "more partner places")}</p>
+          <p className="font-mono text-xs tabular-nums text-muted">{plural(qlooAdds.length, "more local partner", "more local partners")}</p>
         </SectionHead>
         {qlooAdds.length ? (
           <>
@@ -670,7 +671,7 @@ export function TownView({ run }: { run: TownRun }) {
           </>
         ) : (
           <p className="px-6 py-8 text-sm text-muted">
-            No further partner places for {town.name} beyond the swaps above. With thin local data, the committee should add places residents name.
+            No further local partners for {town.name} beyond the swaps above. With thin local data, the committee should add places residents name.
           </p>
         )}
       </section>
@@ -679,8 +680,8 @@ export function TownView({ run }: { run: TownRun }) {
       <section className="mt-8 grid gap-6 lg:grid-cols-[1.25fr_1fr]">
         <div className="rounded-lg border border-rule bg-paper">
           <SectionHead
-            title={`What ${town.name} over-indexes on`}
-            note="Places ranked by Qloo's local affinity near the site, then taste signals absent from the national top 50 and the big-metro lists. Themes, not profiles of people."
+            title={`What ${town.name} favours (Qloo taste data)`}
+            note="Places ranked by how strongly locals favour them (Qloo's local affinity), then tastes that stand out locally: absent from the national top 50 and the big-metro lists. Themes, not profiles of people."
           />
           <dl className="divide-y divide-hairline px-5 sm:px-6">
             {topPlaces.length > 0 && (
@@ -707,7 +708,7 @@ export function TownView({ run }: { run: TownRun }) {
                   ))}
                   {!local && (
                     <span className="text-xs">
-                      Leans national: only {strength.distinct} of {strength.total} local results are distinct, so no plan item uses them.
+                      Leans national: only {strength.distinct} of {strength.total} local results stand out locally, so no plan item uses them.
                     </span>
                   )}
                 </dd>
@@ -715,7 +716,7 @@ export function TownView({ run }: { run: TownRun }) {
             ))}
           </dl>
           {!tastes.length && !topPlaces.length && (
-            <p className="px-6 py-6 text-sm text-muted">Qloo returned no distinctly local affinities for {town.name}.</p>
+            <p className="px-6 py-6 text-sm text-muted">Qloo found nothing that stands out locally for {town.name}.</p>
           )}
         </div>
         <div className="rounded-lg border border-rule bg-paper">

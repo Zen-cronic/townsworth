@@ -150,7 +150,7 @@ export function auditPlan(inputs: AuditInput[], profile: TownProfile, program: P
       if (found) {
         matched = { name: cleanName(found.name), distanceKm: km1(found.distanceM), source: "qloo" };
         verdict = "grounded";
-        reasons.push(`"${named}" matches a Qloo place within 15 km`);
+        reasons.push(`"${named}" matches a local place in Qloo's data, within 15 km`);
       } else if (osm?.found && osmVerifies(named, osm.osmName, townName)) {
         matched = { name: osm.osmName ?? named, distanceKm: osm.km, source: "osm" };
         verdict = "grounded";
@@ -170,7 +170,7 @@ export function auditPlan(inputs: AuditInput[], profile: TownProfile, program: P
       reasons.push("Describes how grants are decided, not who gets them. Kept; Qloo suggests applicants");
     } else {
       verdict = "generic";
-      reasons.push("Names no local partner and matches nothing this town distinctly over-indexes on");
+      reasons.push("Names no local partner and matches nothing this town stands out for");
     }
 
     const row: AuditRow = { text, named, bucket, verdict, reasons, matched, termHits: hits };

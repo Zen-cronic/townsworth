@@ -87,7 +87,7 @@ export function BallotResults({ slug, townName, items }: { slug: string; townNam
   return (
     <>
       {/* Simulation label */}
-      <div className="mt-6 rounded-md border border-amber/40 bg-amber-wash px-4 py-3.5 sm:px-5" data-testid="simulated-label">
+      <div id="simulated" className="mt-6 scroll-mt-24 rounded-md border border-amber/40 bg-amber-wash px-4 py-3.5 sm:px-5" data-testid="simulated-label">
         <div className="flex flex-wrap items-center gap-2">
           <StatusPill tone="warn">Simulated</StatusPill>
           {counted && <StatusPill tone="ok">Includes your ballot</StatusPill>}
@@ -119,7 +119,7 @@ export function BallotResults({ slug, townName, items }: { slug: string; townNam
 
       {/* Method */}
       <p className="mt-5 text-sm leading-relaxed text-muted">
-        <strong className="font-semibold text-ink">Method: Borda count.</strong> On a ballot of {n} ideas, 1st place earns {n - 1} points and
+        <strong className="font-semibold text-ink">Method: points ranking (Borda count).</strong> On a ballot of {n} ideas, 1st place earns {n - 1} points and
         last earns 0. The bar shows how often each idea was ranked in each position, darkest = 1st.
       </p>
 
