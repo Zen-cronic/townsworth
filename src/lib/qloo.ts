@@ -118,7 +118,8 @@ function parseEntity(raw: RawEntity, type: EntityType): QlooEntity {
   };
 }
 
-// Qloo allows 10 requests/second per key. Keep at most 4 in flight and retry 429s with backoff.
+// At most 4 requests in flight per server instance (module state, not a global limit). 429s retry
+// with backoff up to three times; a 502 or 503 retries once.
 const MAX_IN_FLIGHT = 4;
 let inFlight = 0;
 const waiters: (() => void)[] = [];
@@ -139,7 +140,8 @@ async function fetchWithRetry(url: string, key: string): Promise<Response> {
     const res = await withSlot(() =>
       fetch(url, { headers: { "X-Api-Key": key, Accept: "application/json" }, next: { revalidate: 60 * 60 * 24 } }),
     );
-    if (res.status !== 429 || attempt >= 3) return res;
+    const transient = (res.status === 502 || res.status === 503) && attempt < 1;
+    if (!transient && (res.status !== 429 || attempt >= 3)) return res;
     await new Promise((r) => setTimeout(r, 400 * 2 ** attempt));
   }
 }

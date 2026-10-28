@@ -1,17 +1,21 @@
 import "server-only";
 import { CA_PROVINCES, customSlug, inCountry, presetNear, US_STATES, type FacilityCode, type Town } from "./towns";
 
-// OpenStreetMap Nominatim, per its usage policy: identify the app, at most one request a second,
-// cache results. Only a town name (or a partner name the LLM wrote) is ever sent.
+// OpenStreetMap Nominatim, per its usage policy: identify the app, at most one request a second
+// per server instance, cache results. Only a town name (or a partner name the LLM wrote) is ever sent.
 
 const BASE = "https://nominatim.openstreetmap.org/search";
 const USER_AGENT = "good-neighbor-hackathon/1.0 (contact via GitHub)";
 const GAP_MS = 1100;
+// A request that would queue longer than this fails fast with a 429 state instead of waiting.
+const MAX_WAIT_MS = 10_000;
 
+// The queue is module state, so the one-a-second spacing holds per server instance only.
 let nextSlot = 0;
-async function politeFetch(params: URLSearchParams) {
+async function politeFetch(params: URLSearchParams): Promise<Response | null> {
   const now = Date.now();
   const wait = Math.max(0, nextSlot - now);
+  if (wait > MAX_WAIT_MS) return null;
   nextSlot = Math.max(now, nextSlot) + GAP_MS;
   if (wait) await new Promise((r) => setTimeout(r, wait));
   return fetch(`${BASE}?${params}`, {
@@ -70,12 +74,13 @@ export async function geocodeTowns(query: string, facility: FacilityCode): Promi
     addressdetails: "1",
     limit: "10",
   });
-  let res: Response;
+  let res: Response | null;
   try {
     res = await politeFetch(params);
   } catch {
     return { ok: false, status: 0 };
   }
+  if (!res) return { ok: false, status: 429 };
   if (!res.ok) return { ok: false, status: res.status };
   const raw = (await res.json()) as RawResult[];
   const seen = new Set<string>();
@@ -133,12 +138,13 @@ export async function osmLookup(name: string, town: { lat: number; lon: number }
     viewbox: `${town.lon - d},${town.lat + d},${town.lon + d},${town.lat - d}`,
     bounded: "1",
   });
-  let res: Response;
+  let res: Response | null;
   try {
     res = await politeFetch(params);
   } catch {
     return { status: 0, found: false };
   }
+  if (!res) return { status: 429, found: false };
   if (!res.ok) return { status: res.status, found: false };
   const hits = (await res.json()) as { display_name: string; lat: string; lon: string }[];
   const near = hits.find((h) => km(town, { lat: Number(h.lat), lon: Number(h.lon) }) <= 25);
