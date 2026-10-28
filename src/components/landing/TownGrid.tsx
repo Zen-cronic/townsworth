@@ -57,17 +57,13 @@ export function TownGrid({
   heroSlug: string;
 }) {
   return (
-    <section className="lp-section" aria-labelledby="towns-h">
-      <div className="lp-wrap">
+    <>
         <div className="lp-section-head">
-          <div>
-            <p className="lp-kicker">Six host communities</p>
-            <h2 id="towns-h" className="lp-h2">
-              Open any town. The picks change because the town does.
-            </h2>
-          </div>
+          <h2 id="towns-h" className="lp-h2">
+            Open any host town. The picks change because the town does.
+          </h2>
           <p className="lp-section-lede">
-            Every pick comes from that town’s own Qloo signals. Fund figures are illustrative until you enter your own.
+            Every pick comes from that town’s own Qloo taste data. Fund figures are illustrative until you enter your own.
           </p>
         </div>
 
@@ -100,7 +96,7 @@ export function TownGrid({
                 )}
                 {picks[t.slug]?.signal && (
                   <span className="lp-town-signal">
-                    Over-indexes on <b>{picks[t.slug].signal!.name}</b> ({picks[t.slug].signal!.type})
+                    Local favourite: <b>{picks[t.slug].signal!.name}</b> ({picks[t.slug].signal!.type})
                   </span>
                 )}
                 <span className="lp-town-foot">
@@ -115,19 +111,18 @@ export function TownGrid({
         </ul>
 
         {/* Type any town */}
-        <div className="mt-6 rounded-md border border-rule bg-paper p-4 sm:p-6">
-          <div className="mb-4 max-w-2xl">
-            <h3 id="anytown-h" className="text-lg font-semibold tracking-tight">
+        <div className="lp-anytown">
+          <div className="lp-anytown-copy">
+            <h3 id="anytown-h" className="lp-h3">
               Or type any town
             </h3>
-            <p className="mt-1 text-sm leading-relaxed text-muted">
-              Any US or Canadian host town gets the same audit, memo and exports, from Qloo signals at its coordinates. With no frozen LLM
-              plan, the agency template is audited first; a plain LLM can draft one live.
+            <p>
+              Any US or Canadian host town gets the same line-by-line check, memo and exports, from Qloo taste data at its coordinates.
+              With no frozen AI-written plan, the consultant template is checked first; AI alone can write one live.
             </p>
           </div>
           <TownSearchForm idPrefix="landing" />
         </div>
-      </div>
-    </section>
+    </>
   );
 }

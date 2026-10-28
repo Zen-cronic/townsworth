@@ -1,18 +1,40 @@
 import "./landing.css";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { preload } from "react-dom";
 import { AppHeader } from "@/components/AppHeader";
 import { AuditPreview, type PreviewRow } from "@/components/landing/AuditPreview";
+import { PRODUCT_NAME } from "@/components/landing/brand";
+import { Chapter } from "@/components/landing/Chapter";
 import { Chevron } from "@/components/landing/Chevron";
 import { Guardrails } from "@/components/landing/Guardrails";
-import { HowItWorks, type OutputFragments, type SitePoint } from "@/components/landing/HowItWorks";
-import { ProofBand, type ProofRow } from "@/components/landing/ProofBand";
+import { HeroBackdrop } from "@/components/landing/HeroBackdrop";
+import { heroFacts } from "@/components/landing/heroFacts";
+import { HostStack, type StackData } from "@/components/landing/HostStack";
+import { LandingEffects } from "@/components/landing/LandingEffects";
+import { HERO_VIDEO } from "@/components/landing/media";
+import { MotionToggle } from "@/components/landing/MotionToggle";
+import { Objections, objectionsFor } from "@/components/landing/Objections";
+import { ProofBand, type ProofStat } from "@/components/landing/ProofBand";
+import { SiteFooter } from "@/components/landing/SiteFooter";
+import { SpecBand } from "@/components/landing/SpecBand";
+import { specsFor } from "@/components/landing/specs";
 import { TownGrid, type TownPick } from "@/components/landing/TownGrid";
 import { isKept } from "@/lib/audit";
-import { cleanName } from "@/lib/plan";
 import { computeProof } from "@/lib/proof";
 import { money, runTown } from "@/lib/run";
 import { HERO_TOWN, TOWNS } from "@/lib/towns";
+
+const TITLE = `${PRODUCT_NAME}: a community-benefits plan built from the host town`;
+const DESCRIPTION = `${PRODUCT_NAME} checks a facility's draft community plan line by line, keeps the real local institutions, swaps generic items for venues and suppliers residents use (ranked by Qloo's local taste data), and costs every item from the fund.`;
+
+export const metadata: Metadata = {
+  title: TITLE,
+  description: DESCRIPTION,
+  openGraph: { title: TITLE, description: DESCRIPTION, type: "website", images: [{ url: "/landing/og.png", width: 1200, height: 630 }] },
+  twitter: { card: "summary_large_image", title: TITLE, description: DESCRIPTION, images: ["/landing/og.png"] },
+};
 
 const FACILITY_LABEL = { "data center": "Data center", fab: "Chip fab", nuclear: "Nuclear plant", plant: "Plant" } as const;
 
@@ -24,11 +46,12 @@ export default async function Home() {
     Promise.all(TOWNS.map((t) => runTown(t.slug, undefined, "llm"))),
   ]);
   if (!run) notFound();
-  const { town, audit, program, profile, qlooAdds } = run;
-  const auditHref = `/town/${town.slug}`;
+  const { town, audit, program, qlooAdds } = run;
+  const facts = heroFacts(run);
+  const auditHref = facts.townHref;
+  if (HERO_VIDEO.ready) preload(HERO_VIDEO.poster, { as: "image", fetchPriority: "high" });
 
-  // Preview: one verified partner, one kept institution the plain LLM named but no list can confirm,
-  // and the strongest swap: a struck line whose replacement is a host-community place, best affinity first.
+  // Preview: the strongest swap alone: a struck line whose replacement is a host-community place, best affinity first.
   const rows: PreviewRow[] = audit.map((r, i) => ({ ...r, n: i + 1 }));
   const kept = rows.filter((r) => isKept(r.verdict));
   const struck = rows.filter((r) => !isKept(r.verdict));
@@ -39,90 +62,34 @@ export default async function Home() {
         Number(!!a.replacement!.partner!.neighbouring) - Number(!!b.replacement!.partner!.neighbouring) ||
         (a.replacement!.partner!.affinityRank ?? 1e6) - (b.replacement!.partner!.affinityRank ?? 1e6),
     );
-  const preview = [kept.find((r) => r.verdict === "grounded" && r.matched), kept.find((r) => r.verdict === "institution"), swaps[0] ?? struck.find((r) => r.replacement)]
+  const preview = [swaps[0] ?? struck.find((r) => r.replacement)]
     .filter((r): r is PreviewRow => !!r)
     .filter((r, i, all) => all.findIndex((x) => x.n === r.n) === i)
     .sort((a, b) => a.n - b.n);
 
-  // Site plan: every kept Qloo place within 15 km, at its real offset from the town centre.
-  const partnerNames = new Set(program.items.map((it) => it.partner?.name).filter(Boolean));
-  const kmPerLon = 111.32 * Math.cos((town.lat * Math.PI) / 180);
-  const labelled: [number, number][] = [];
-  const points: SitePoint[] = profile.places
-    .filter((p) => p.location)
-    .map((p) => {
-      const name = cleanName(p.name);
-      return {
-        east: (p.location!.lon - town.lon) * kmPerLon,
-        north: (p.location!.lat - town.lat) * 110.57,
-        partner: partnerNames.has(name),
-        name,
-      };
-    })
-    .filter((p) => Math.hypot(p.east, p.north) <= 15)
-    .sort((a, b) => Math.hypot(a.east, a.north) - Math.hypot(b.east, b.north))
-    .map(({ name, ...p }) => {
-      // Label up to three partners that sit well apart, so names never collide.
-      const label =
-        p.partner &&
-        labelled.length < 4 &&
-        Math.hypot(p.east, p.north) > 3 &&
-        labelled.every(([e, n]) => Math.hypot(e - p.east, n - p.north) > 4);
-      if (label) labelled.push([p.east, p.north]);
-      return { ...p, label: label ? name.split(/ & | - |, /)[0].replace(/ (Restaurant|Pancake House)$/, "") : undefined };
-    });
-
   const t = proof.totals;
-  const proofRows: ProofRow[] = [
+  const heroProofEarly = proof.towns.find((p) => p.slug === HERO_TOWN.slug);
+  const paired = {
+    measure: "Partners that are institutions",
+    note: "Colleges, districts, chambers and city departments. Lower means more of the places residents actually go.",
+    llm: t.llmInstitutionalPct,
+    gn: t.gnInstitutionalPct,
+  };
+  const stats: ProofStat[] = [
+    { pct: t.gnNovelPct, arm: "gn", label: "of our local partners AI alone never named", note: "Qloo isn’t re-deriving what the model already knows." },
+    { pct: t.llmVerifiedPct, arm: "llm", label: "of the partners AI alone named could be confirmed", note: "Checked against Qloo and OpenStreetMap within 25 km." },
     {
-      measure: "Institutions among named partners",
-      note: "Colleges, districts, chambers and city departments. Lower means more of the places residents actually go.",
-      llm: { pct: t.llmInstitutionalPct },
-      gn: { pct: t.gnInstitutionalPct },
-    },
-    {
-      measure: "Named partners verified as real",
-      note: "Checked against Qloo and OpenStreetMap within 25 km.",
-      llm: { pct: t.llmVerifiedPct },
-      gn: { na: "n/a: picked from Qloo by construction" },
-    },
-    {
-      measure: "Partners the plain LLM never named",
-      note: "Qloo isn’t re-deriving what the model already knows.",
-      llm: { na: "n/a: measured against the LLM’s own list" },
-      gn: { pct: t.gnNovelPct },
-    },
-    {
-      measure: "Picks that change without Qloo’s affinity ranking",
-      note: "Same candidate places and rules, ordered by distance instead, like a nearby-places directory.",
-      llm: { na: "n/a: the LLM has no candidate list" },
-      gn: { pct: t.affinityChangedPct },
+      pct: t.affinityChangedPct,
+      arm: "gn",
+      label: "of picks change without Qloo’s taste ranking",
+      note: `Same places ordered by distance instead${heroProofEarly ? `: ${heroProofEarly.gnPicksChangedByAffinity} of ${heroProofEarly.gnPicks} in ${HERO_TOWN.name}` : ""}. Modest, and measured.`,
     },
   ];
-  // Real fragments of each output for the example town, matching the memo and the exports.
-  const first = program.items.filter((it) => it.partner).find((it) => it.bucket === "procurement") ?? program.items[0];
-  const earliest = program.items.filter((it) => it.partner).flatMap((it) => it.months.map((m) => ({ m, it }))).sort((a, b) => a.m - b.m)[0];
-  const now = new Date();
-  const calDate = earliest
-    ? new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + earliest.m, 15)).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-        timeZone: "UTC",
-      })
-    : "";
-  const shortName = (name: string) => name.split(/ & | - |, /)[0].split(" ").slice(0, 2).join(" ");
-  const kindOf = (title: string) => title.split(/: | at /)[0];
-  const outputs: OutputFragments = {
-    memo: `Commitments first, then ${program.items.length} programs`,
-    sheet: first?.partner ? `${money(first.amount)} · ${kindOf(first.title)} · ${shortName(first.partner.name)}` : "",
-    calendar: earliest ? `${calDate} · ${kindOf(earliest.it.title)}` : "",
-    drafts: first?.partner ? `To ${shortName(first.partner.name)}, about the ${kindOf(first.title).toLowerCase()}` : "",
-  };
 
   const partnersByTown = Object.fromEntries(proof.towns.map((p) => [p.slug, p.gnPartners]));
+  const heroProof = proof.towns.find((p) => p.slug === town.slug);
 
-  // Each town's own top pick and its strongest distinct signal, so the cards differ the way the plans do.
+  // Each town's own top pick and the taste that stands out most, so the cards differ the way the plans do.
   const SIGNAL_TYPE = { brand: "brand", artist: "artist", tv_show: "TV show", podcast: "podcast" } as const;
   const picksByTown: Record<string, TownPick> = {};
   townRuns.forEach((r, i) => {
@@ -139,37 +106,71 @@ export default async function Home() {
   });
   const townLabel = `${town.name}, ${town.region}`;
 
+  // The stack: cited commitments, the partner places by local affinity, and the costed items they feed.
+  const specs = specsFor(town.slug);
+  const short = (name: string) => name.split(/ & | - |, | \| /)[0];
+  const partnerItems = program.items.filter((it) => it.partner);
+  const seen = new Set<string>();
+  const places = [...partnerItems]
+    .sort((a, b) => (a.partner!.affinityRank ?? 1e6) - (b.partner!.affinityRank ?? 1e6))
+    .filter((it) => !seen.has(it.partner!.name) && !!seen.add(it.partner!.name))
+    .slice(0, 4)
+    .map((it) => ({ name: short(it.partner!.name), rank: it.partner!.affinityRank }));
+  const stack: StackData = {
+    town: town.name,
+    commitments: (specs?.specs ?? []).map((s) => ({ topic: s.topic, value: `${s.value} ${s.unit}`, note: s.note })),
+    places,
+    // One item per program area, so the board shows the range of the program.
+    items: partnerItems
+      .filter((it, i, all) => all.findIndex((x) => x.bucket === it.bucket) === i)
+      .slice(0, 3)
+      .map((it) => ({ kind: it.title.split(/: | at |, /)[0], partner: short(it.partner!.name), amount: money(it.amount) })),
+    memoHref: facts.memoHref,
+    ballotHref: facts.ballotHref,
+    auditHref,
+  };
+
+  const objections = objectionsFor(
+    facts,
+    {
+      novelPct: t.gnNovelPct,
+      changedPct: t.affinityChangedPct,
+      changedLine: heroProof ? `${heroProof.gnPicksChangedByAffinity} of ${heroProof.gnPicks} in ${town.name}` : undefined,
+    },
+    town.sponsor,
+  );
+  const film = HERO_VIDEO.ready;
+
   return (
     <div className="gn-landing">
       <AppHeader towns={false} />
+      <LandingEffects />
 
       <main>
-        <section className="lp-hero" aria-labelledby="hero-h">
+        <section className={`lp-hero lp-grain ${film ? "has-film" : ""}`} aria-labelledby="hero-h">
+          {film && <HeroBackdrop media={HERO_VIDEO} />}
           <div className="lp-wrap lp-hero-grid">
             <div className="lp-hero-copy">
-              <p className="lp-kicker lp-for">For community-affairs teams</p>
+              <p className="lp-kicker lp-for">For community-affairs teams at data centers, fabs and plants</p>
               <h1 id="hero-h" className="lp-h1">
-                Red-pen the generic community plan.
+                A community-benefits plan built from the host town, <span className="lp-tone">not a template.</span>
               </h1>
               <p className="lp-lede">
-                When a data center, fab or nuclear plant comes to town, its community fund usually buys a generic plan.
-                Good Neighbor red-pens that plan against what the town actually over-indexes on, and hands back a
-                costed program of local partners, each traceable to a Qloo signal.
+                {PRODUCT_NAME} checks a data center’s or plant’s draft plan line by line. It keeps the real local institutions,
+                swaps generic items for venues and suppliers residents actually use (ranked by Qloo’s local taste data), and
+                costs every item from your fund.
               </p>
               <div className="lp-ctas">
                 <Link href={auditHref} className="lp-btn lp-btn-primary">
-                  Open the {town.name} audit <Chevron />
+                  Open the {town.name} audit
+                  <span className="lp-btn-sq" aria-hidden="true">
+                    <Chevron />
+                  </span>
                 </Link>
-                <Link href="/proof" className="lp-btn lp-btn-quiet">
-                  See the proof
+                <Link href="/judges" className="lp-btn lp-btn-quiet">
+                  Guided path <span className="lp-btn-meta">2 min</span>
                 </Link>
               </div>
-              <p className="lp-guide">
-                New here?{" "}
-                <Link href="/judges" className="lp-textlink">
-                  Start with the 90-second tour <Chevron />
-                </Link>
-              </p>
             </div>
 
             <AuditPreview
@@ -184,42 +185,81 @@ export default async function Home() {
               verdicts={audit.map((r) => r.verdict)}
             />
           </div>
+          <MotionToggle className="lp-motion-corner" />
         </section>
 
-        <ProofBand rows={proofRows} townCount={TOWNS.length === 6 ? "six" : String(TOWNS.length)} />
-        <HowItWorks points={points} town={townLabel} outputs={outputs} draft={audit.map((r) => ({ text: r.text, kept: isKept(r.verdict) }))} />
-        <TownGrid towns={TOWNS} partners={partnersByTown} picks={picksByTown} heroSlug={HERO_TOWN.slug} />
-        <Guardrails />
+        {specs && (
+          <Chapter n="01" name="Commitments first" id="ch-01" labelledBy="ch-01-h">
+            <div className="lp-section-head">
+              <h2 id="ch-01-h" className="lp-h2">
+                Jobs, water, power and tax come first. The program sits on top.
+              </h2>
+              <p className="lp-section-lede">
+                In {town.name}, {town.sponsor}’s material commitments open the committee memo, each from cited public reporting.{" "}
+                {PRODUCT_NAME} never trades them for programs.
+              </p>
+            </div>
+            <SpecBand specs={specs.specs} town={town.name} asOf={specs.asOf} />
+          </Chapter>
+        )}
 
-        <section className="lp-close" aria-labelledby="close-h">
+        <Chapter n="02" name="How it works" id="ch-02" labelledBy="ch-02-h">
+          <div className="lp-section-head">
+            <h2 id="ch-02-h" className="lp-h2">
+              Generic plan in. <span className="lp-tone">A costed, local program out.</span>
+            </h2>
+            <p className="lp-section-lede">
+              Three layers, from the ground up: the facility and its draft, the town and the places locals favour, and the program
+              built from them. Drawn from the {town.name} run.
+            </p>
+          </div>
+          <HostStack data={stack} nextId="ch-03" />
+        </Chapter>
+
+        <Chapter n="03" name="The evidence" id="ch-03" labelledBy="proof-h" tone="is-ink">
+          <ProofBand paired={paired} stats={stats} townCount={TOWNS.length === 6 ? "six" : String(TOWNS.length)} />
+        </Chapter>
+
+        <Chapter n="04" name="Any host town" id="ch-04" labelledBy="towns-h">
+          <TownGrid towns={TOWNS} partners={partnersByTown} picks={picksByTown} heroSlug={HERO_TOWN.slug} />
+        </Chapter>
+
+        <Chapter n="05" name="Questions" id="ch-05" labelledBy="ch-05-h">
+          <div className="lp-section-head">
+            <h2 id="ch-05-h" className="lp-h2">
+              Fair questions, answered by the product itself.
+            </h2>
+            <p className="lp-section-lede">Open any of them: the answer is the live screen, not a claim on this page.</p>
+          </div>
+          <Objections items={objections} />
+          <Guardrails />
+        </Chapter>
+
+        <section
+          className={`lp-close ${film ? "has-film" : "lp-grain"}`}
+          aria-labelledby="close-h"
+          style={film ? ({ "--poster": `url(${HERO_VIDEO.poster})`, "--poster-p": `url(${HERO_VIDEO.portraitPoster})` } as React.CSSProperties) : undefined}
+        >
           <div className="lp-wrap lp-close-inner">
             <h2 id="close-h" className="lp-h2">
-              See the red pen on a real plan.
+              See a real plan, <span className="lp-tone">checked line by line.</span>
             </h2>
             <div className="lp-ctas">
               <Link href={auditHref} className="lp-btn lp-btn-primary">
-                Open the {town.name} audit <Chevron />
+                Open the {town.name} audit
+                <span className="lp-btn-sq" aria-hidden="true">
+                  <Chevron />
+                </span>
               </Link>
               <Link href={`/memo/${town.slug}`} className="lp-btn lp-btn-quiet">
-                Read the commitments memo
+                Read the committee memo
               </Link>
             </div>
           </div>
         </section>
       </main>
 
-      <footer className="lp-footer">
-        <div className="lp-wrap lp-footer-inner">
-          <span className="lp-brand">
-            <span aria-hidden="true" className="lp-brand-mark" /> Good Neighbor
-          </span>
-          <span>Qloo signals are aggregate for a town. Costs come from a per-session model and your fund, not from Qloo.</span>
-          <nav aria-label="Footer" className="lp-footer-nav">
-            <Link href="/proof">Proof</Link>
-            <Link href="/judges">Start here</Link>
-          </nav>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

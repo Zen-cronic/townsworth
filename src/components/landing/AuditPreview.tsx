@@ -12,12 +12,16 @@ const usd = (n: number) =>
   new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n);
 
 function strikeReason(row: AuditRow) {
-  if (row.verdict === "generic") return "Generic: names nothing local";
+  if (row.verdict === "generic") return "Not local: could fit any town";
   const named = row.reasons[0]?.match(/"([^"]+)"/)?.[1];
-  return named ? `Unverified: “${named}” not found locally` : "Unverified: partner not found locally";
+  return named ? `Can’t confirm: “${named}” not found locally` : "Can’t confirm: partner not found locally";
 }
 
-// A live excerpt of the hero town's audit, rendered on the server from today's run.
+// Provenance reads in plain words on the landing; the town page keeps the full signal.
+export const plainSignal = (signal: string) => signal.replace(/^Qloo place/, "Local favourite");
+
+// A live excerpt of the hero town's check, rendered on the server from today's run. With motion
+// allowed, the struck line replays on a loop: the line, the strike, the reason, the replacement.
 export function AuditPreview({
   rows,
   townLabel,
@@ -28,7 +32,9 @@ export function AuditPreview({
   total,
   added,
   verdicts,
+  showGaps = false,
 }: {
+  showGaps?: boolean;
   rows: PreviewRow[];
   verdicts: AuditRow["verdict"][];
   townLabel: string;
@@ -39,16 +45,15 @@ export function AuditPreview({
   total: number;
   added: number;
 }) {
-  let strikeIndex = 0;
   return (
-    <figure className="lp-preview" aria-label={`Excerpt of the ${townLabel} plan audit`}>
+    <figure className="lp-preview" data-replay aria-label={`Excerpt of the ${townLabel} line-by-line check`}>
       <div className="lp-preview-head">
         <div>
           <p className="lp-kicker">
             {townLabel} · {facility}
           </p>
-          <p className="lp-preview-title">Draft plan, item by item</p>
-          <p className="lp-byline">Draft written by OpenAI with no Qloo access, the way a consultant would</p>
+          <p className="lp-preview-title">The draft plan, checked line by line</p>
+          <p className="lp-byline">Written by AI alone (OpenAI, no Qloo data), the way a consultant would</p>
         </div>
         <dl className="lp-tally">
           <div>
@@ -60,7 +65,7 @@ export function AuditPreview({
             <dd className="is-hivis">{struck}</dd>
           </div>
           <div>
-            <dt>of</dt>
+            <dt>Lines</dt>
             <dd>{total}</dd>
           </div>
         </dl>
@@ -73,7 +78,7 @@ export function AuditPreview({
           const from = (rows[i - 1]?.n ?? 0) + 1;
           const skipped = verdicts.slice(from - 1, row.n - 1);
           const gap =
-            skipped.length > 0 ? (
+            showGaps && skipped.length > 0 ? (
               <li key={`gap-${row.n}`} className="lp-row lp-gap" aria-label={`Items ${from} to ${row.n - 1}`}>
                 <span className="lp-num">
                   {String(from).padStart(2, "0")}
@@ -92,7 +97,7 @@ export function AuditPreview({
                 ? [`Kept: ${row.named}`, "institution, couldn’t verify here · confirm with the committee"]
                 : row.verdict === "mechanism"
                   ? ["Kept · grant mechanism", "Qloo suggests the applicants"]
-                  : [`Kept: ${row.matched?.name ?? "local signal"}`, row.matched?.source === "osm" ? "verified on OpenStreetMap" : "a Qloo place within 15 km"];
+                  : [`Kept: ${row.matched?.name ?? "matches a local favourite"}`, row.matched?.source === "osm" ? "verified on OpenStreetMap" : "a local place from Qloo, within 15 km"];
             return [
               gap,
               <li key={row.n} className="lp-row is-kept">
@@ -111,7 +116,6 @@ export function AuditPreview({
             ];
           }
           const r = row.replacement!;
-          const delay = 500 + strikeIndex++ * 520;
           const meta = [
             r.partner?.distanceKm != null ? `${r.partner.distanceKm} km from site` : null,
             r.partner?.neighbouring ? "Neighbouring community" : null,
@@ -119,7 +123,7 @@ export function AuditPreview({
           ].filter(Boolean);
           return [
             gap,
-            <li key={row.n} className="lp-row is-struck" style={{ "--d": `${delay}ms` } as React.CSSProperties}>
+            <li key={row.n} className="lp-row is-struck">
               <span className="lp-num">{n}</span>
               <div className="lp-row-draft">
                 <p className="lp-draft" title={row.text}>
@@ -142,7 +146,7 @@ export function AuditPreview({
                   {r.provenance[0] && (
                     <span className="lp-chip">
                       <span aria-hidden="true" className="lp-dot" />
-                      {r.provenance[0].signal}
+                      {plainSignal(r.provenance[0].signal)}
                     </span>
                   )}
                 </div>
@@ -150,7 +154,7 @@ export function AuditPreview({
             </li>,
           ];
         })}
-        {(() => {
+        {showGaps && (() => {
           const last = rows[rows.length - 1]?.n ?? 0;
           const rest = verdicts.slice(last);
           if (!rest.length) return null;
@@ -174,7 +178,7 @@ export function AuditPreview({
           + {added} local partners the draft never named
         </span>
         <Link href={href} className="lp-textlink">
-          See the full audit <Chevron />
+          See every line <Chevron />
         </Link>
       </figcaption>
     </figure>
