@@ -157,9 +157,12 @@ export function borda(items: BallotItem[], ballots: Ballot[]): Tally {
   return { rows, ballots: valid, maxPoints: valid * Math.max(0, n - 1) };
 }
 
+// Spreadsheet apps run a cell that starts with =, +, -, @, tab or CR as a formula; a leading quote keeps it text.
+export const guardFormula = (s: string) => (/^[=+\-@\t\r]/.test(s) ? `'${s}` : s);
+
 const csvCell = (v: string | number) => {
-  const s = String(v);
-  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+  const s = typeof v === "string" ? guardFormula(v) : String(v);
+  return /[",\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 };
 
 export function tallyCsv(tally: Tally, basis: string): string {

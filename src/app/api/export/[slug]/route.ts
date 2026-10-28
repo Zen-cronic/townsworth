@@ -1,7 +1,13 @@
 import { runTown } from "@/lib/run";
+import { guardFormula } from "@/lib/ballot";
 import { BUCKETS, ROLE_LABEL } from "@/lib/plan";
+import { fundParam } from "../../fund";
+import { foldLine, icsText } from "../ics";
 
-const csvCell = (v: unknown) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+const csvCell = (v: unknown) => {
+  const s = typeof v === "string" ? guardFormula(v) : String(v ?? "");
+  return `"${s.replace(/"/g, '""')}"`;
+};
 
 // Month 1 of the program is the first month after today.
 function monthDate(month: number) {
@@ -13,7 +19,7 @@ function monthDate(month: number) {
 export async function GET(req: Request, { params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const url = new URL(req.url);
-  const run = await runTown(slug, Number(url.searchParams.get("fund")) || undefined);
+  const run = await runTown(slug, fundParam(url));
   if (!run) return new Response("Unknown town", { status: 404 });
   const format = url.searchParams.get("format") ?? "csv";
   const { town, program } = run;
@@ -26,15 +32,17 @@ export async function GET(req: Request, { params }: { params: Promise<{ slug: st
           `UID:${town.slug}-${it.id}-${k}@good-neighbor`,
           `DTSTAMP:${monthDate(0)}`,
           `DTSTART:${monthDate(m)}`,
-          `SUMMARY:${it.title.replace(/[,;]/g, " ")}`,
-          `DESCRIPTION:${BUCKETS[it.bucket].label}. Draft date: confirm with the partner. Sponsor-labelled program item.`,
+          `SUMMARY:${icsText(it.title)}`,
+          `DESCRIPTION:${icsText(`${BUCKETS[it.bucket].label}. Draft date: confirm with the partner. Sponsor-labelled program item.`)}`,
           "END:VEVENT",
-        ].join("\r\n"),
+        ]
+          .map(foldLine)
+          .join("\r\n"),
       ),
     );
-    const body = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Good Neighbor//EN", ...events, "END:VCALENDAR"].join("\r\n");
+    const body = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Good Neighbor//EN", ...events, "END:VCALENDAR"].join("\r\n") + "\r\n";
     return new Response(body, {
-      headers: { "Content-Type": "text/calendar", "Content-Disposition": `attachment; filename="${town.slug}-program.ics"` },
+      headers: { "Content-Type": "text/calendar; charset=utf-8", "Content-Disposition": `attachment; filename="${town.slug}-program.ics"` },
     });
   }
 
