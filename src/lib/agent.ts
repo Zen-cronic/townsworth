@@ -232,6 +232,8 @@ export async function runAgent(run: TownRun) {
     model: createOpenAI({ apiKey: process.env.OPENAI_API_KEY })(AGENT_MODEL),
     tools,
     stopWhen: isStepCount(10),
+    abortSignal: AbortSignal.timeout(45_000),
+    maxRetries: 1,
     output: Output.object({ schema: outputSchema }),
     system: [
       `You are the community-program assistant for ${town.sponsor}, which funds the community program around its ${town.facility} in ${town.name}, ${town.region}.`,
@@ -340,7 +342,10 @@ export async function runAgent(run: TownRun) {
       : undefined;
 
   const summaryOk = !forbiddenTopic(output.summary);
+  // Whether the result is safe to cache: every OpenStreetMap check answered and no template stood in.
+  const cacheable = ![...checks.values()].some((c) => c.unavailable) && !drafts.some((d) => d.checked === "replaced");
   return {
+    cacheable,
     model: AGENT_MODEL,
     sponsor: town.sponsor,
     sponsorSource: town.sponsorSource,

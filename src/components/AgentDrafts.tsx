@@ -22,7 +22,7 @@ interface AgentResult {
 }
 
 const emlHref = (d: AgentDraft) =>
-  `data:message/rfc822;charset=utf-8,${encodeURIComponent(`Subject: ${d.subject}\r\nContent-Type: text/plain; charset=utf-8\r\n\r\n${d.body}`)}`;
+  `data:message/rfc822;charset=utf-8,${encodeURIComponent(`Subject: ${d.subject.replace(/[\r\n]+/g, " ")}\r\nContent-Type: text/plain; charset=utf-8\r\n\r\n${d.body}`)}`;
 
 const TASTE_LABEL: Record<string, string> = { brand: "brands", artist: "artists", tv_show: "TV", podcast: "podcasts" };
 
@@ -64,14 +64,23 @@ function Rule({ ok, children }: { ok: boolean; children: React.ReactNode }) {
 export function AgentDrafts({ slug, fund }: { slug: string; fund: number }) {
   const [state, setState] = useState<"idle" | "loading" | "done" | "error">("idle");
   const [result, setResult] = useState<AgentResult | null>(null);
+  const [errorText, setErrorText] = useState<string | null>(null);
 
   async function run() {
     setState("loading");
+    setErrorText(null);
     try {
       const res = await fetch(`/api/agent/${slug}?fund=${fund}`, { method: "POST" });
       const data: AgentResult = await res.json();
+      // A rate limit (429) or an early return with no drafts carries a message worth showing as-is.
+      if (!res.ok || (data.error && !data.drafts?.length)) {
+        setResult(null);
+        setErrorText(data.error ?? null);
+        setState("error");
+        return;
+      }
       setResult(data);
-      setState(res.ok ? "done" : "error");
+      setState("done");
     } catch {
       setResult(null);
       setState("error");
@@ -124,8 +133,8 @@ export function AgentDrafts({ slug, fund }: { slug: string; fund: number }) {
           <div className="flex gap-3 border-t border-hairline px-5 py-4 text-sm sm:px-6">
             <Notice className="mt-0.5 h-4 w-4 text-hivis-text" />
             <p>
-              <span className="font-medium">The drafting agent is unavailable right now.</span>{" "}
-              <span className="text-muted">The program, the partner sheet and the calendar still work. Try again in a moment.</span>
+              <span className="font-medium">{errorText ?? "The drafting agent is unavailable right now."}</span>{" "}
+              <span className="text-muted">The program, the partner sheet and the calendar still work.{errorText ? "" : " Try again in a moment."}</span>
             </p>
           </div>
         )}
