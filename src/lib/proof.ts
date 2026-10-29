@@ -43,6 +43,14 @@ export interface TownProof {
   // Each pick the distance-only ranking would not make, next to the one it would make instead.
   swaps: PickSwap[];
   thin: boolean;
+  // Some of this town's Qloo calls failed on this request, so its row is computed from partial data.
+  failed: boolean;
+}
+
+// Towns whose Qloo calls did not all answer on this request. Their figures are computed from partial
+// data, so every page that shows the totals says so instead of showing shifted numbers silently.
+export function failedTownNames(runs: ({ town: { name: string }; profile: { failedCalls: readonly unknown[] } } | null)[]): string[] {
+  return runs.filter((r) => r && r.profile.failedCalls.length > 0).map((r) => r!.town.name);
 }
 
 export async function computeProof() {
@@ -80,6 +88,7 @@ export async function computeProof() {
       gnReplacementsRanked: added.filter((it) => ownPlaces.has(norm(it!.partner!.name)) && it!.partner!.affinityRank != null).length,
       swaps: run.program.picks.swaps.filter((s) => !distancePicks.has(s.qloo.id)),
       thin: run.profile.thin,
+      failed: run.profile.failedCalls.length > 0,
     });
     llmWords.push(contentWords(baseline.map((b) => b.item).join(" "), [town.name, town.region, ...llmPartners]));
     gnPartnerSets.push(new Set(gnPartners.map(norm)));
@@ -106,6 +115,7 @@ export async function computeProof() {
   const sum = (f: (t: TownProof) => number) => towns.reduce((s, t) => s + f(t), 0);
   return {
     towns,
+    failedTowns: failedTownNames(runs),
     totals: {
       llmVerifiedPct: pct(sum((t) => t.llmVerified) / Math.max(1, sum((t) => t.llmNamed))),
       llmInstitutionalPct: pct(sum((t) => t.llmInstitutional) / Math.max(1, sum((t) => t.llmNamed))),
