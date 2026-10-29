@@ -18,7 +18,6 @@ import { HERO_VIDEO } from "@/components/landing/media";
 import { MotionToggle } from "@/components/landing/MotionToggle";
 import { type Objection, Objections } from "@/components/landing/Objections";
 import { ProofBand, type ProofStat } from "@/components/landing/ProofBand";
-import { SiteFooter } from "@/components/landing/SiteFooter";
 import { SpecBand } from "@/components/landing/SpecBand";
 import { specsFor } from "@/components/landing/specs";
 import { TownGrid, type TownPick } from "@/components/landing/TownGrid";
@@ -105,7 +104,8 @@ export default async function Home() {
       signal: signal ? { name: signal.x.entity.name, type: SIGNAL_TYPE[signal.type] } : undefined,
     };
   });
-  const townLabel = `${town.name}, ${town.region}`;
+  const REGION_SHORT: Record<string, string> = { Wisconsin: "WI", "New York": "NY", Ohio: "OH", Texas: "TX", Ontario: "ON", Wyoming: "WY" };
+  const heroLabel = `${town.name}, ${REGION_SHORT[town.region] ?? town.region} · ${FACILITY_LABEL[town.facility].toLowerCase()}`;
 
   // The stack: cited commitments, the partner places by local affinity, and the costed items they feed.
   const specs = specsFor(town.slug);
@@ -155,9 +155,11 @@ export default async function Home() {
                 A community-benefits plan built from the host town, <span className="lp-tone">not a template.</span>
               </h1>
               <p className="lp-lede">
-                {PRODUCT_NAME} checks a data center’s or plant’s draft plan (the community-benefits plan, or CBA, a facility funds)
-                line by line. It keeps the institutions the plan already names, adds the local places residents actually go that AI
-                alone never names, and costs each item.
+                {PRODUCT_NAME} checks a data center’s or plant’s{" "}
+                <abbr title="The community-benefits plan, or CBA, that a facility funds" className="lp-abbr">
+                  community-benefits plan
+                </abbr>{" "}
+                line by line. It keeps the institutions, adds the places residents actually go, and costs each item.
               </p>
               <div className="lp-ctas">
                 <Link href={auditHref} className="lp-btn lp-btn-primary">
@@ -172,17 +174,7 @@ export default async function Home() {
               </div>
             </div>
 
-            <AuditPreview
-              rows={preview}
-              townLabel={townLabel}
-              facility={FACILITY_LABEL[town.facility]}
-              href={auditHref}
-              kept={kept.length}
-              struck={struck.length}
-              total={rows.length}
-              added={qlooAdds.length}
-              verdicts={audit.map((r) => r.verdict)}
-            />
+            <AuditPreview row={preview[0]} townLabel={heroLabel} href={auditHref} kept={kept.length} struck={struck.length} added={qlooAdds.length} />
           </div>
           <MotionToggle className="lp-motion-corner" />
         </section>
@@ -252,7 +244,6 @@ export default async function Home() {
         </section>
       </main>
 
-      <SiteFooter />
     </div>
   );
 }
