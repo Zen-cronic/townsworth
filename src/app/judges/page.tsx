@@ -17,6 +17,10 @@ export const metadata: Metadata = {
   description: `See ${PRODUCT_NAME} work in two minutes: a finished example, the committee memo, the resident ballot, any host town, and the evidence with its limits.`,
 };
 
+// Rendered per request so a build-time Qloo hiccup is never frozen into the page; Qloo responses
+// still come from the data cache.
+export const dynamic = "force-dynamic";
+
 interface Step {
   title: string;
   body: string;

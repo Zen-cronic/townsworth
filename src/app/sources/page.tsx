@@ -13,6 +13,10 @@ export const metadata: Metadata = {
   description: `Every figure on ${PRODUCT_NAME} with its source: material commitments, the evidence and its method, fund figures and the business case.`,
 };
 
+// Rendered per request so a build-time Qloo hiccup is never frozen into the page; Qloo responses
+// still come from the data cache.
+export const dynamic = "force-dynamic";
+
 // Figures from the business case, each with the public source it was read from.
 const MARKET: { k: string; text: string; source: string; url: string }[] = [
   {

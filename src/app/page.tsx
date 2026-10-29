@@ -37,6 +37,10 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", title: TITLE, description: DESCRIPTION, images: ["/landing/og.png"] },
 };
 
+// Rendered per request so a build-time Qloo hiccup is never frozen into the page; Qloo responses
+// still come from the data cache.
+export const dynamic = "force-dynamic";
+
 const FACILITY_LABEL = { "data center": "Data center", fab: "Chip fab", nuclear: "Nuclear plant", plant: "Plant" } as const;
 
 export default async function Home() {
