@@ -111,11 +111,11 @@ function Applicants({ items }: { items: ProgramItem[] }) {
   return (
     <p className="pl-[1.375rem] text-xs leading-6 text-muted">
       <span className="font-medium text-ink">Suggested applicants:</span>{" "}
-      {named.map((a, i) => {
+      {named.map((a) => {
         const signal = a.provenance[0]?.signal ?? "";
         const rank = signal.match(LOCAL_AFFINITY)?.[1] ?? a.partner!.affinityRank;
         return (
-          <span key={a.id}>
+          <span key={a.id} className="block">
             <span className="text-ink">{shortOrg(a.partner!.name)}</span>
             {rank != null && (
               <>
@@ -123,7 +123,6 @@ function Applicants({ items }: { items: ProgramItem[] }) {
                 <Chip className="align-middle">#{rank} local affinity</Chip>
               </>
             )}
-            {i < named.length - 1 && " · "}
           </span>
         );
       })}
