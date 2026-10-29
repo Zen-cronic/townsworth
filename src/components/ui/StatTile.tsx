@@ -16,13 +16,13 @@ export function StatTile({
     <div className="ui-stat">
       <p className={`ui-stat-v ${tone ? `is-${tone}` : ""}`}>{value}</p>
       <p className="ui-stat-k">{label}</p>
+      {children}
       {more && (
         <details className="ui-more">
           <summary>Details</summary>
           <div>{more}</div>
         </details>
       )}
-      {children}
     </div>
   );
 }

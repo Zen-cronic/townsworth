@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { IBM_Plex_Mono, Public_Sans } from "next/font/google";
 import "./globals.css";
 import "./landing.css";
+import "./charts.css";
 import { SiteFooter } from "@/components/landing/SiteFooter";
 
 const publicSans = Public_Sans({ variable: "--font-public-sans", subsets: ["latin"] });
