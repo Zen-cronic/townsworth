@@ -19,12 +19,12 @@ export function objectionsFor(f: HeroFacts, proof: { novelPct: number; changedPc
     {
       q: "Couldn’t ChatGPT do this?",
       a: `AI alone mostly names the college, the district and the chamber. ${proof.novelPct}% of our local partners never appear in its plans.`,
-      href: "/proof#finding-03",
+      href: "/proof#finding-3",
     },
     {
       q: "Isn’t this just a nearby-places list?",
       a: `Ordering the same places by distance changes ${proof.changedPct}% of the picks${proof.changedLine ? ` (${proof.changedLine})` : ""}. Modest, and measured.`,
-      href: "/proof#finding-04",
+      href: "/proof#finding-4",
     },
     {
       q: "Does it strike real institutions?",

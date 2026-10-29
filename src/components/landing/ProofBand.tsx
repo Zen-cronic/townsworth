@@ -31,12 +31,12 @@ export function ProofBand({
         <div className="lp-proof-title">
           <p className="lp-kicker">Would AI alone write the same plan? We tested it.</p>
           <h2 id="proof-h" className="lp-h2 lp-proof-h">
-            <span className="lp-fill">AI alone names the institutions. Qloo adds the places the town actually goes.</span>
+            <span className="lp-fill">AI alone names the institutions.</span>{" "}
+            <span className="lp-tone">Qloo adds the places the town actually goes.</span>
           </h2>
         </div>
         <p className="lp-section-lede">
-          For each of the {townCount} host towns, a model with no Qloo data wrote the plan a consultant would, frozen before we
-          measured. Then we compared it with what {PRODUCT_NAME} proposes. Recomputed on every load.
+          AI alone against {PRODUCT_NAME} in {townCount} host towns, with plans frozen before we measured.
         </p>
       </div>
 
@@ -69,11 +69,9 @@ export function ProofBand({
       </ul>
 
       <p className="lp-proof-foot">
-        Verified means found on Qloo or OpenStreetMap within 25 km; unverified is not proof of invented. Institutions are good partners
-        too, and a partner’s willingness is not confirmed. Six towns, one model: a directional check, not a statistical study, and it does
-        not show that residents prefer the program.{" "}
-        <Link href="/proof" className="lp-textlink">
-          Read the method and the per-town table <Chevron />
+        A directional check, not a study; unverified is not proof of invented.{" "}
+        <Link href="/proof#limits" className="lp-textlink">
+          Method and limits <Chevron />
         </Link>
       </p>
     </>

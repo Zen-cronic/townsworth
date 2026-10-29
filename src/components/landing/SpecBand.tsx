@@ -17,7 +17,12 @@ export function SpecBand({ specs, town, asOf }: { specs: Spec[]; town: string; a
           </a>
         </li>
       ))}
-      <li className="lp-spec-foot">From public reporting as of {asOf}. Every figure and its source is on the sources page.</li>
+      <li className="lp-spec-foot">
+        As of {asOf}.{" "}
+        <a href="/sources#commitments" className="lp-textlink">
+          All sources
+        </a>
+      </li>
     </ul>
   );
 }

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { isKept, type AuditRow } from "@/lib/audit";
-import { BUCKETS, costLine, ROLE_LABEL } from "@/lib/plan";
+import { BUCKETS, costLine, ROLE_LABEL, type ProgramItem } from "@/lib/plan";
 import { Chevron } from "./Chevron";
 import { clip } from "./clip";
 
@@ -18,7 +18,42 @@ function strikeReason(row: AuditRow) {
 }
 
 // Provenance reads in plain words on the landing; the town page keeps the full signal.
-export const plainSignal = (signal: string) => signal.replace(/^Qloo place/, "Local favourite");
+export const plainSignal = (signal: string) =>
+  signal.replace(/^(?:Qloo place|Local favourite) · #(\d+) by local affinity$/, "#$1 local affinity").replace(/^Qloo place/, "Local place");
+
+// The local partner card: what replaces a struck line, or what is added next to a kept one.
+function SwapCard({ item: r, label }: { item: ProgramItem; label?: string }) {
+  const meta = [
+    r.partner?.distanceKm != null ? `${r.partner.distanceKm} km from site` : null,
+    r.partner?.neighbouring ? "Neighbouring community" : null,
+    r.partner?.rating ? `Rated ${r.partner.rating.toFixed(1)}` : null,
+  ].filter(Boolean);
+  return (
+    <div className="lp-swap">
+      <p className="lp-swap-bucket">
+        {label ? `${label} · ` : ""}
+        {BUCKETS[r.bucket].label}
+      </p>
+      <p className="lp-swap-title">{r.title}</p>
+      {meta.length > 0 && <p className="lp-swap-meta">{meta.join(" · ")}</p>}
+      <p className="lp-swap-meta">
+        {r.role ? `${ROLE_LABEL[r.role]} · ` : ""}
+        {costLine({ ...r, partner: undefined })}
+      </p>
+      <div className="lp-swap-foot">
+        <span className="lp-amount">
+          {usd(r.amount)} <span>item budget</span>
+        </span>
+        {r.provenance[0] && (
+          <span className="lp-chip">
+            <span aria-hidden="true" className="lp-dot" />
+            {plainSignal(r.provenance[0].signal)}
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
 
 // A live excerpt of the hero town's check, rendered on the server from today's run. With motion
 // allowed, the struck line replays on a loop: the line, the strike, the reason, the replacement.
@@ -55,6 +90,12 @@ export function AuditPreview({
           <p className="lp-preview-title">The draft plan, checked line by line</p>
           <p className="lp-byline">Written by AI alone (OpenAI, no Qloo data), the way a consultant would</p>
         </div>
+      </div>
+      <div className="lp-preview-lead">
+        <p className="lp-added">
+          <span className="lp-added-n">+{added}</span>
+          <span className="lp-added-t">local partners the draft never named, added to the program</span>
+        </p>
         <dl className="lp-tally">
           <div>
             <dt>Kept</dt>
@@ -73,7 +114,7 @@ export function AuditPreview({
 
       <ol className="lp-rows">
         {rows.map((row, i) => {
-          const n = String(row.n).padStart(2, "0");
+          const n = String(row.n);
           // Items between this row and the previous one are summarised, so the numbering never jumps.
           const from = (rows[i - 1]?.n ?? 0) + 1;
           const skipped = verdicts.slice(from - 1, row.n - 1);
@@ -81,8 +122,8 @@ export function AuditPreview({
             showGaps && skipped.length > 0 ? (
               <li key={`gap-${row.n}`} className="lp-row lp-gap" aria-label={`Items ${from} to ${row.n - 1}`}>
                 <span className="lp-num">
-                  {String(from).padStart(2, "0")}
-                  {skipped.length > 1 ? `–${String(row.n - 1).padStart(2, "0")}` : ""}
+                  {String(from)}
+                  {skipped.length > 1 ? `–${row.n - 1}` : ""}
                 </span>
                 <p>
                   {skipped.every(isKept)
@@ -96,7 +137,7 @@ export function AuditPreview({
               row.verdict === "institution"
                 ? [`Kept: ${row.named}`, "institution, couldn’t verify here · confirm with the committee"]
                 : row.verdict === "mechanism"
-                  ? ["Kept · grant mechanism", "Qloo suggests the applicants"]
+                  ? [`Kept · ${row.keptLabel ?? "grant mechanism"}`, row.keptNote ?? "Qloo suggests the applicants"]
                   : [`Kept: ${row.matched?.name ?? "matches a local favourite"}`, row.matched?.source === "osm" ? "verified on OpenStreetMap" : "a local place from Qloo, within 15 km"];
             return [
               gap,
@@ -112,45 +153,22 @@ export function AuditPreview({
                   {label}
                   <span className="lp-keep-src">{source}</span>
                 </p>
+                {row.alongside && <SwapCard item={row.alongside} label="Added alongside" />}
               </li>,
             ];
           }
           const r = row.replacement!;
-          const meta = [
-            r.partner?.distanceKm != null ? `${r.partner.distanceKm} km from site` : null,
-            r.partner?.neighbouring ? "Neighbouring community" : null,
-            r.partner?.rating ? `Rated ${r.partner.rating.toFixed(1)}` : null,
-          ].filter(Boolean);
           return [
             gap,
             <li key={row.n} className="lp-row is-struck">
               <span className="lp-num">{n}</span>
               <div className="lp-row-draft">
                 <p className="lp-draft" title={row.text}>
-                  <del className="lp-strike">{clip(row.text, 88)}</del>
+                  <del className="lp-strike">{row.text}</del>
                 </p>
                 <p className="lp-reason">{strikeReason(row)}</p>
               </div>
-              <div className="lp-swap">
-                <p className="lp-swap-bucket">{BUCKETS[r.bucket].label}</p>
-                <p className="lp-swap-title">{r.title}</p>
-                {meta.length > 0 && <p className="lp-swap-meta">{meta.join(" · ")}</p>}
-                <p className="lp-swap-meta">
-                  {r.role ? `${ROLE_LABEL[r.role]} · ` : ""}
-                  {costLine({ ...r, partner: undefined })}
-                </p>
-                <div className="lp-swap-foot">
-                  <span className="lp-amount">
-                    {usd(r.amount)} <span>item budget</span>
-                  </span>
-                  {r.provenance[0] && (
-                    <span className="lp-chip">
-                      <span aria-hidden="true" className="lp-dot" />
-                      {plainSignal(r.provenance[0].signal)}
-                    </span>
-                  )}
-                </div>
-              </div>
+              <SwapCard item={r} />
             </li>,
           ];
         })}
@@ -163,7 +181,7 @@ export function AuditPreview({
           return (
             <li className="lp-row lp-gap" aria-label={`Items ${last + 1} to ${verdicts.length}`}>
               <span className="lp-num">
-                {String(last + 1).padStart(2, "0")}–{String(verdicts.length).padStart(2, "0")}
+                {last + 1}–{verdicts.length}
               </span>
               <p>
                 {restStruck} more struck, {restKept} kept, in the full audit
@@ -174,9 +192,7 @@ export function AuditPreview({
       </ol>
 
       <figcaption className="lp-preview-foot">
-        <span>
-          + {added} local partners the draft never named
-        </span>
+        <span>The institutions the draft names stay in.</span>
         <Link href={href} className="lp-textlink">
           See every line <Chevron />
         </Link>

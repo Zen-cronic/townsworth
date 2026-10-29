@@ -21,9 +21,9 @@ export interface StackData {
 // Projection: x runs to the right-front, y to the left-front, z up.
 const C = 0.866;
 const S = 0.5;
-const VW = 760;
+const VW = 840; // wide margins either side of the slabs hold the callout labels
 const VH = 422;
-const OX = 380;
+const OX = 420;
 const OY = 110;
 const L = 290;
 const T = 12;
@@ -132,10 +132,10 @@ function FacilityLayer({ data }: { data: StackData }) {
   const struck = 2;
   const tank = P(238, 196, 0);
   const at = {
-    Jobs: P(115, 130, 30),
-    Power: P(272, 66, 8),
-    Water: [tank[0] + 22, tank[1] - 20] as Pt,
-    Tax: P(16, 250, 0),
+    Jobs: P(60, 134, 10),
+    Power: P(272, 46, 8),
+    Water: [tank[0] + 22, tank[1] - 4] as Pt,
+    Tax: P(20, 276, 0),
   } as Record<string, Pt>;
   const sides: Record<string, "l" | "r"> = { Jobs: "l", Tax: "l", Power: "r", Water: "r" };
   return (
@@ -295,7 +295,7 @@ function ProgramLayer({ data }: { data: StackData }) {
           side: sides[i],
           tone: "ok" as const,
           k: it.amount,
-          v: it.partner ? `${it.kind} · ${it.partner}` : it.kind,
+          v: it.kind,
         }))}
       />
     </>
@@ -305,21 +305,21 @@ function ProgramLayer({ data }: { data: StackData }) {
 export function HostStack({ data, nextId }: { data: StackData; nextId: string }) {
   const steps = [
     {
-      n: "01 · In",
+      n: "In",
       title: "Bring the draft",
-      body: "The plan you already have, from a consultant or from AI. The facility’s jobs, power, water and tax commitments sit underneath it, untouched.",
+      body: "The plan you already have. The facility’s commitments stay underneath it.",
       layer: <FacilityLayer data={data} />,
     },
     {
-      n: "02 · Signals",
+      n: "Signals",
       title: "See where the town actually goes",
-      body: `Qloo ranks the places within 15 km of ${data.town} by how strongly locals favour them. Lines that could fit any town are struck; the institutions the draft names stay.`,
+      body: `Qloo ranks the places within 15 km of ${data.town} by how strongly locals favour them.`,
       layer: <TownLayer data={data} />,
     },
     {
-      n: "03 · Out",
+      n: "Out",
       title: "Get a costed program for the committee",
-      body: "Every item has a host venue or supplier, a session count and a cost from your fund. Residents rank the shortlist before anything is booked.",
+      body: "Each item gets a venue or supplier and a cost from your fund. Residents rank it.",
       layer: <ProgramLayer data={data} />,
       links: (
         <span className="st-links">
@@ -359,6 +359,8 @@ export function HostStack({ data, nextId }: { data: StackData; nextId: string })
           ))}
         </ol>
       </div>
+      {/* Scroll distance for the short hold while the connectors draw; only present when scrubbing. */}
+      <div className="st-hold" aria-hidden="true" />
     </div>
   );
 }

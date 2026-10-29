@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { HERO_TOWN } from "@/lib/towns";
+import { PilotLink } from "@/components/PilotLink";
 import { PRODUCT_NAME } from "./brand";
 
 const REPO = "https://github.com/Zen-cronic/good-neighbor";
@@ -40,6 +41,7 @@ export function SiteFooter() {
             <span aria-hidden="true" className="lp-brand-mark" /> {PRODUCT_NAME}
           </span>
           <p>Community programs a host town recognizes as its own, checked line by line and costed from the fund.</p>
+          <PilotLink className="lp-textlink lp-footer-pilot" />
           <p className="lp-footer-note">
             Qloo taste data is aggregate for a town, never about a person. Costs come from a per-session model and your fund, not from Qloo.
           </p>

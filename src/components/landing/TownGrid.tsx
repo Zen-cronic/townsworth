@@ -63,7 +63,7 @@ export function TownGrid({
             Open any host town. The picks change because the town does.
           </h2>
           <p className="lp-section-lede">
-            Every pick comes from that town’s own Qloo taste data. Fund figures are illustrative until you enter your own.
+            Every pick comes from that town’s own Qloo taste data.
           </p>
         </div>
 
@@ -117,8 +117,7 @@ export function TownGrid({
               Or type any town
             </h3>
             <p>
-              Any US or Canadian host town gets the same line-by-line check, memo and exports, from Qloo taste data at its coordinates.
-              With no frozen AI-written plan, the consultant template is checked first; AI alone can write one live.
+              Any US or Canadian host town gets the same check, memo and exports.
             </p>
           </div>
           <TownSearchForm idPrefix="landing" />

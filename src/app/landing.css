@@ -11,9 +11,9 @@
   --l-hairline: var(--hairline, #e2dfd7);
   --l-hivis: var(--hivis, #d9480f);
   --l-hivis-text: var(--hivis-text, #a33409);
-  --l-ok: var(--ok, #2f7d4f);
-  --l-ok-text: var(--ok-text, #276a43);
-  --l-ok-wash: var(--ok-wash, #e1eee5);
+  --l-ok: var(--ok, #2b5d8a);
+  --l-ok-text: var(--ok-text, #24507a);
+  --l-ok-wash: var(--ok-wash, #e2ebf3);
   --l-amber-text: #7a5500;
   --l-amber-wash: var(--amber-wash, #f5ecd3);
   --l-side: #e8e5de;
@@ -275,23 +275,25 @@ a:focus-visible .lp-chev {
   inset: 0;
   z-index: -1;
   overflow: hidden;
-  background: var(--l-ink) var(--poster) center / cover no-repeat;
+  background: var(--l-ink) var(--poster) center bottom / contain no-repeat;
 }
 @media (orientation: portrait) {
   .lp-film {
     background-image: var(--poster-p);
   }
 }
+/* Contain, not cover: the drawing's labels stay inside the frame and the ink ground fills the rest. */
 .lp-film-media {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  object-position: center bottom;
 }
 .lp-film-shade {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(90deg, rgb(34 33 31 / 0.72) 0%, rgb(34 33 31 / 0.45) 40%, rgb(34 33 31 / 0) 72%),
+    linear-gradient(90deg, rgb(34 33 31 / 0.9) 0%, rgb(34 33 31 / 0.84) 38%, rgb(34 33 31 / 0.3) 56%, rgb(34 33 31 / 0) 72%),
     linear-gradient(0deg, rgb(34 33 31 / 0.6) 0%, transparent 40%),
     linear-gradient(270deg, rgb(34 33 31 / 0.55) 0%, transparent 14%),
     linear-gradient(180deg, rgb(34 33 31 / 0.45) 0%, transparent 18%);
@@ -310,7 +312,7 @@ a:focus-visible .lp-chev {
   min-height: min(calc(100svh - var(--l-hdr)), 980px);
   display: grid;
   align-items: end;
-  padding: 80px 0 72px;
+  padding: 80px 0 120px;
   color: var(--l-paper);
 }
 .has-film .lp-hero-grid {
@@ -377,6 +379,36 @@ a:focus-visible .lp-chev {
   gap: 16px;
   padding: 18px 22px 16px;
   border-bottom: 1px solid var(--l-hairline);
+}
+/* Lead figure: what the check adds, ahead of what it strikes. */
+.lp-preview-lead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px 24px;
+  padding: 16px 22px;
+  border-bottom: 1px solid var(--l-hairline);
+  background: var(--l-ok-wash);
+}
+.lp-added {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  max-width: 24em;
+}
+.lp-added-n {
+  font-size: 2.5rem;
+  line-height: 1;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  color: var(--l-ok-text);
+}
+.lp-added-t {
+  font-size: 0.9375rem;
+  line-height: 1.35;
+  font-weight: 600;
+  color: var(--l-ink);
 }
 .lp-preview-title {
   margin-top: 4px;
@@ -633,7 +665,7 @@ a:focus-visible .lp-chev {
   background: #8f8a80;
 }
 .lp-legend .is-gn::before {
-  background: #4fae74;
+  background: #6f9fd0;
 }
 .lp-h2h {
   list-style: none;
@@ -693,7 +725,7 @@ a:focus-visible .lp-chev {
   background: #8f8a80;
 }
 .lp-h2h-line.is-gn .lp-h2h-fill {
-  background: #4fae74;
+  background: #6f9fd0;
 }
 .lp-h2h-val {
   text-align: right;
@@ -706,7 +738,7 @@ a:focus-visible .lp-chev {
 }
 .lp-h2h-line.is-gn .lp-h2h-val {
   font-weight: 700;
-  color: #7fd19e;
+  color: #8fb6dd;
 }
 .lp-h2h-line.is-gn .lp-h2h-who {
   color: var(--l-paper);
@@ -883,9 +915,7 @@ a:focus-visible .lp-chev {
   align-content: start;
 }
 .lp-rail-list p {
-  color: var(--l-muted);
-  font-size: 0.9375rem;
-  line-height: 1.55;
+  font-size: 1rem;
 }
 
 .lp-replay-note {
@@ -902,7 +932,7 @@ a:focus-visible .lp-chev {
 .lp-preview:is([data-play="on"], [data-play="off"]) .is-struck .lp-reason {
   animation: lp-r-reason 9s ease-out infinite;
 }
-.lp-preview:is([data-play="on"], [data-play="off"]) .is-struck .lp-swap {
+.lp-preview:is([data-play="on"], [data-play="off"]) .lp-swap {
   animation: lp-r-swap 9s var(--l-ease) infinite;
 }
 .lp-preview[data-play="off"] * {
@@ -957,7 +987,7 @@ a:focus-visible .lp-chev {
   }
 }
 /* Start each loop mid-hold, so the first thing anyone sees is the finished line. */
-.lp-preview .is-struck :is(.lp-strike, .lp-reason, .lp-swap) {
+.lp-preview :is(.lp-strike, .lp-reason, .lp-swap) {
   animation-delay: -3.2s !important;
 }
 
@@ -994,10 +1024,7 @@ a:focus-visible .lp-chev {
   text-transform: uppercase;
   color: var(--l-muted);
 }
-.lp-ch-tab span {
-  font-weight: 500;
-  color: var(--l-ink);
-}
+
 /* The concave fillet where the tab meets the sheet edge. */
 .lp-ch-tab::after {
   content: "";
@@ -1028,7 +1055,13 @@ a:focus-visible .lp-chev {
     position: sticky;
     top: min(var(--l-hdr), calc(100vh - var(--h, 100000px)));
   }
-  /* The last chapter scrolls normally, so the closing band never covers it. */
+  /* The stack chapter has its own short hold, and the last chapter must never be covered by the
+     closing band, so both scroll normally. */
+  #ch-02 {
+    position: relative;
+    top: auto;
+    padding-bottom: 152px;
+  }
   #ch-05 {
     position: relative;
     top: auto;
@@ -1153,7 +1186,7 @@ a:focus-visible .lp-chev {
   display: block;
   width: 100%;
   height: auto;
-  aspect-ratio: 760 / 422;
+  aspect-ratio: 840 / 422;
 }
 .st-art polygon,
 .st-art line,
@@ -1246,7 +1279,8 @@ a:focus-visible .lp-chev {
   stroke: #a9a49a !important;
 }
 .st-skip,
-.st-rise {
+.st-rise,
+.st-hold {
   display: none;
 }
 .st-cue {
@@ -1311,7 +1345,7 @@ a:focus-visible .lp-chev {
 @media (min-width: 900px) {
   .st-steps {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) min(64%, calc((100vh - 140px) * 0.92));
+    grid-template-columns: minmax(0, 1fr) min(66%, calc((100vh - 170px) * 1.02));
     grid-template-rows: repeat(3, auto);
     column-gap: 48px;
   }
@@ -1345,11 +1379,11 @@ a:focus-visible .lp-chev {
   }
   .st-layer.is-1 {
     z-index: 2;
-    margin-top: 26.316%;
+    margin-top: 23.81%;
   }
   .st-layer.is-0 {
     z-index: 1;
-    margin-top: 52.632%;
+    margin-top: 47.62%;
   }
   .st-art {
     overflow: visible;
@@ -1364,47 +1398,66 @@ a:focus-visible .lp-chev {
     display: block;
     pointer-events: none;
   }
+  /* Labels sit in a fixed column beyond each side of the slabs; the leader runs to the marker. */
   .st-co {
+    --zone: 17.5%;
     position: absolute;
-    top: var(--y);
-    transform: translateY(-50%);
-  }
-  .st-co.is-l {
     left: 0;
-    width: var(--x);
-  }
-  .st-co.is-r {
-    left: var(--x);
     right: 0;
-    flex-direction: row-reverse;
-  }
-  .st-co.is-l .st-co-text {
-    text-align: right;
+    top: var(--y);
+    height: 0;
+    display: block;
   }
   .st-co-text {
-    flex: 0 1 auto;
-    max-width: 10.5rem;
-    padding: 2px 6px;
-    background: rgb(251 250 247 / 0.92);
-    border-radius: 2px;
+    position: absolute;
+    top: 0;
+    width: var(--zone);
+    transform: translateY(-50%);
+    font-size: 12px;
+    line-height: 1.4;
+    color: rgb(34 33 31 / 0.62);
   }
-  .lp-ch:nth-of-type(odd) .st-co-text {
-    background: rgb(239 237 232 / 0.92);
+  .st-co-text b {
+    display: block;
+  }
+  .st-co.is-l .st-co-text {
+    left: 0;
+    text-align: right;
+  }
+  .st-co.is-r .st-co-text {
+    right: 0;
+    text-align: left;
   }
   .st-co-lead {
+    position: absolute;
+    top: 0;
     display: block;
-    flex: 1 1 auto;
-    min-width: 16px;
-    border-top: 1px solid var(--l-ink);
+    border-top: 1px solid rgb(34 33 31 / 0.45);
+  }
+  .st-co.is-l .st-co-lead {
+    left: calc(var(--zone) + 8px);
+    right: calc(100% - var(--x) + 8px);
+  }
+  .st-co.is-r .st-co-lead {
+    left: calc(var(--x) + 8px);
+    right: calc(var(--zone) + 8px);
   }
   .st-co-mark {
-    order: 0;
+    position: absolute;
+    top: 0;
+    left: var(--x);
     width: 10px;
     height: 10px;
+    transform: translate(-50%, -50%);
     outline: 2px solid #fff;
   }
   .st-co.is-ok .st-co-lead {
-    border-top-color: var(--l-ok);
+    border-top-color: rgb(43 93 138 / 0.6);
+  }
+  /* The step being drawn is marked with an ink rule; every step stays fully legible. */
+  .st-copy {
+    padding-left: 20px;
+    border-left: 2px solid var(--l-hairline);
   }
 }
 
@@ -1415,24 +1468,29 @@ a:focus-visible .lp-chev {
     --dy: 0%;
   }
   .st-layer.is-2 {
-    --dy: 11.85%;
+    --dy: 7%;
   }
   .st-layer.is-0 {
-    --dy: -11.85%;
+    --dy: -7%;
   }
   .st-rise {
     transform-box: fill-box;
     transform-origin: 50% 100%;
   }
 
+  /* Ranges start as the track enters from below, so a still of the page (or a visit that never
+     scrolls here) shows the finished, separated state; fill runs forwards only. */
   @supports (animation-timeline: view()) {
     .st-scroll {
-      height: 175vh;
       view-timeline: --stack block;
     }
     .st-stage {
       position: sticky;
       top: calc(var(--l-hdr) + 24px);
+    }
+    .st-hold {
+      display: block;
+      height: 28vh;
     }
     .st-skip {
       position: absolute;
@@ -1453,32 +1511,30 @@ a:focus-visible .lp-chev {
     }
     .st-layer.is-2,
     .st-layer.is-0 {
-      animation: st-sep linear both;
+      animation: st-sep linear forwards;
       animation-timeline: --stack;
-      animation-range: contain 0% contain 50%;
+      animation-range: cover 0% cover 44%;
     }
     .st-rise {
-      animation: st-draw linear both;
+      animation: st-draw linear forwards;
       animation-timeline: --stack;
-      animation-range: contain 45% contain 75%;
+      animation-range: cover 0% cover 54%;
     }
-    .st-co {
-      animation: st-show linear both;
-      animation-timeline: --stack;
-      animation-range: contain 60% contain 85%;
-    }
-    .st-copy {
-      animation: st-show linear both;
+    .st-step.is-0 .st-copy,
+    .st-step.is-1 .st-copy {
+      animation: st-active linear forwards;
       animation-timeline: --stack;
     }
     .st-step.is-0 .st-copy {
-      animation-range: contain 0% contain 15%;
+      animation-range: cover 22% cover 40%;
     }
     .st-step.is-1 .st-copy {
-      animation-range: contain 25% contain 45%;
+      animation-range: cover 38% cover 48%;
     }
     .st-step.is-2 .st-copy {
-      animation-range: contain 50% contain 70%;
+      animation: st-active-last linear forwards;
+      animation-timeline: --stack;
+      animation-range: cover 46% cover 52%;
     }
   }
 
@@ -1493,17 +1549,11 @@ a:focus-visible .lp-chev {
     .st-rise {
       transition: transform 600ms var(--l-ease) 800ms;
     }
-    .st-co {
-      transition: opacity 400ms ease-out 1100ms;
-    }
     [data-armed]:not([data-open]) .st-layer {
       transform: translateY(var(--dy));
     }
     [data-armed]:not([data-open]) .st-rise {
       transform: scaleY(0);
-    }
-    [data-armed]:not([data-open]) .st-co {
-      opacity: 0;
     }
   }
 }
@@ -1516,11 +1566,30 @@ a:focus-visible .lp-chev {
   }
 }
 @keyframes st-draw {
-  from {
+  0%,
+  78% {
     transform: scaleY(0);
   }
-  to {
+  100% {
     transform: none;
+  }
+}
+@keyframes st-active {
+  0%,
+  100% {
+    border-left-color: var(--l-hairline);
+  }
+  12%,
+  88% {
+    border-left-color: var(--l-ink);
+  }
+}
+@keyframes st-active-last {
+  from {
+    border-left-color: var(--l-hairline);
+  }
+  to {
+    border-left-color: var(--l-ink);
   }
 }
 @keyframes st-show {
@@ -1537,18 +1606,19 @@ a:focus-visible .lp-chev {
   @supports (animation-timeline: view()) {
     .lp-fill {
       color: transparent;
-      background:
-        linear-gradient(var(--l-paper), var(--l-paper)) 0 0 / 0% 100% no-repeat,
-        #77726a;
+      background: linear-gradient(var(--l-paper), var(--l-paper)) 0 0 / 100% 100% no-repeat, #77726a;
       -webkit-background-clip: text;
       background-clip: text;
-      animation: lp-fill linear both;
+      animation: lp-fill linear forwards;
       animation-timeline: view();
-      animation-range: entry 80% cover 50%;
+      animation-range: entry 0% cover 45%;
     }
   }
 }
 @keyframes lp-fill {
+  from {
+    background-size: 0% 100%, auto;
+  }
   to {
     background-size: 100% 100%, auto;
   }
@@ -1590,11 +1660,9 @@ a:focus-visible .lp-chev {
   line-height: 1;
   font-weight: 500;
   letter-spacing: -0.045em;
-  color: #7fd19e;
+  color: var(--l-paper);
 }
-.lp-stats .is-llm .lp-stat-v {
-  color: #dcd8cf;
-}
+
 .lp-stat-k {
   margin-top: 8px;
   font-weight: 600;
@@ -1764,6 +1832,9 @@ a:focus-visible .lp-chev {
   max-width: 26em;
   line-height: 1.55;
 }
+.lp-footer-pilot {
+  width: fit-content;
+}
 .lp-footer-note {
   font-size: 0.8125rem;
 }
@@ -1860,7 +1931,6 @@ a:focus-visible .lp-chev {
 .gp-path {
   padding: 72px 0 96px;
   background: var(--l-paper);
-  box-shadow: 0 -18px 32px -28px rgb(34 33 31 / 0.45);
 }
 .gp-layout {
   display: grid;
@@ -1901,16 +1971,12 @@ a:focus-visible .lp-chev {
 }
 .gp-rail a span {
   flex: none;
-  display: grid;
-  place-items: center;
-  width: 24px;
-  height: 24px;
+  margin: 0 7px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   background: var(--l-paper);
-  box-shadow: 0 0 0 1px var(--l-rule);
-  font-family: var(--l-mono);
-  font-size: 11px;
-  color: var(--l-ink);
+  box-shadow: 0 0 0 1.5px var(--l-muted);
 }
 .gp-rail a:hover span {
   box-shadow: 0 0 0 1px var(--l-ink);
@@ -1925,8 +1991,8 @@ a:focus-visible .lp-chev {
 .gp-step {
   scroll-margin-top: calc(var(--l-hdr) + 24px);
   display: grid;
-  grid-template-columns: 56px minmax(0, 1fr);
-  gap: 0 24px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
   padding: 32px;
   border-radius: 8px;
   background: #fff;
@@ -1988,7 +2054,6 @@ a:focus-visible .lp-chev {
 .src-body {
   padding: 64px 0 96px;
   background: var(--l-paper);
-  box-shadow: 0 -18px 32px -28px rgb(34 33 31 / 0.45);
 }
 .src-layout {
   display: grid;
@@ -2238,11 +2303,17 @@ a:focus-visible .lp-chev {
   .lp-lede {
     font-size: 1.0625rem;
   }
-  .lp-ctas .lp-btn {
+  .lp-ctas .lp-btn,
+  .lp-hero-copy .lp-ctas .lp-btn {
     flex: 1 1 100%;
   }
-  .lp-preview-head {
+  .lp-preview-head,
+  .lp-preview-lead {
     padding: 16px;
+  }
+  .lp-motion-corner {
+    right: 16px;
+    bottom: 16px;
   }
   .lp-h2h-line {
     grid-template-columns: 6.75rem minmax(0, 1fr) 4.25rem;

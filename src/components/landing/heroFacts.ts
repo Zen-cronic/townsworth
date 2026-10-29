@@ -2,7 +2,7 @@ import "server-only";
 import { isKept } from "@/lib/audit";
 import type { TownRun } from "@/lib/run";
 
-const pad2 = (n: number) => String(n).padStart(2, "0");
+const num = (n: number) => String(n);
 
 // Deep-link targets in the example town, found from today's run so the anchors always land on a
 // real line: the strongest swap, and an institution the check keeps.
@@ -26,14 +26,14 @@ export function heroFacts(run: TownRun) {
     resultsHref: `/ballot/${town.slug}/results`,
     swap: swap
       ? {
-          line: pad2(swap.i + 1),
-          href: `${town_}#line-${pad2(swap.i + 1)}`,
+          line: num(swap.i + 1),
+          href: `${town_}#line-${num(swap.i + 1)}`,
           title: swap.r.replacement!.title,
           partner: swap.r.replacement!.partner!.name,
           rank: swap.r.replacement!.partner!.affinityRank,
         }
       : undefined,
-    institution: inst ? { line: pad2(inst.i + 1), href: `${town_}#line-${pad2(inst.i + 1)}`, name: inst.r.named ?? "" } : undefined,
+    institution: inst ? { line: num(inst.i + 1), href: `${town_}#line-${num(inst.i + 1)}`, name: inst.r.named ?? "" } : undefined,
   };
 }
 

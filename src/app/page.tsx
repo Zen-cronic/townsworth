@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { preload } from "react-dom";
 import { AppHeader } from "@/components/AppHeader";
 import { AuditPreview, type PreviewRow } from "@/components/landing/AuditPreview";
+import { PilotLink } from "@/components/PilotLink";
 import { PRODUCT_NAME } from "@/components/landing/brand";
 import { Chapter } from "@/components/landing/Chapter";
 import { Chevron } from "@/components/landing/Chevron";
@@ -15,7 +16,7 @@ import { HostStack, type StackData } from "@/components/landing/HostStack";
 import { LandingEffects } from "@/components/landing/LandingEffects";
 import { HERO_VIDEO } from "@/components/landing/media";
 import { MotionToggle } from "@/components/landing/MotionToggle";
-import { Objections, objectionsFor } from "@/components/landing/Objections";
+import { type Objection, Objections } from "@/components/landing/Objections";
 import { ProofBand, type ProofStat } from "@/components/landing/ProofBand";
 import { SiteFooter } from "@/components/landing/SiteFooter";
 import { SpecBand } from "@/components/landing/SpecBand";
@@ -27,7 +28,7 @@ import { money, runTown } from "@/lib/run";
 import { HERO_TOWN, TOWNS } from "@/lib/towns";
 
 const TITLE = `${PRODUCT_NAME}: a community-benefits plan built from the host town`;
-const DESCRIPTION = `${PRODUCT_NAME} checks a facility's draft community plan line by line, keeps the real local institutions, swaps generic items for venues and suppliers residents use (ranked by Qloo's local taste data), and costs every item from the fund.`;
+const DESCRIPTION = `${PRODUCT_NAME} checks a facility's draft community plan line by line, keeps the real local institutions, keeps the institutions it already names, adds the local places residents go that AI alone never names (Qloo's local taste data), and costs each item.`;
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -62,7 +63,8 @@ export default async function Home() {
         Number(!!a.replacement!.partner!.neighbouring) - Number(!!b.replacement!.partner!.neighbouring) ||
         (a.replacement!.partner!.affinityRank ?? 1e6) - (b.replacement!.partner!.affinityRank ?? 1e6),
     );
-  const preview = [swaps[0] ?? struck.find((r) => r.replacement)]
+  // With nothing struck, the card shows a kept institution and the local partner added alongside it.
+  const preview = [swaps[0] ?? struck.find((r) => r.replacement) ?? kept.find((r) => r.alongside?.partner) ?? kept[0]].filter(Boolean)
     .filter((r): r is PreviewRow => !!r)
     .filter((r, i, all) => all.findIndex((x) => x.n === r.n) === i)
     .sort((a, b) => a.n - b.n);
@@ -71,23 +73,22 @@ export default async function Home() {
   const heroProofEarly = proof.towns.find((p) => p.slug === HERO_TOWN.slug);
   const paired = {
     measure: "Partners that are institutions",
-    note: "Colleges, districts, chambers and city departments. Lower means more of the places residents actually go.",
+    note: "Lower means more of the places residents actually go.",
     llm: t.llmInstitutionalPct,
     gn: t.gnInstitutionalPct,
   };
   const stats: ProofStat[] = [
-    { pct: t.gnNovelPct, arm: "gn", label: "of our local partners AI alone never named", note: "Qloo isn’t re-deriving what the model already knows." },
-    { pct: t.llmVerifiedPct, arm: "llm", label: "of the partners AI alone named could be confirmed", note: "Checked against Qloo and OpenStreetMap within 25 km." },
+    { pct: t.gnNovelPct, arm: "gn", label: "of our local partners AI alone never named", note: "Qloo adds what the model doesn’t know." },
+    { pct: t.llmVerifiedPct, arm: "llm", label: "of the partners AI alone named could be confirmed", note: "On Qloo or OpenStreetMap, within 25 km." },
     {
       pct: t.affinityChangedPct,
       arm: "gn",
       label: "of picks change without Qloo’s taste ranking",
-      note: `Same places ordered by distance instead${heroProofEarly ? `: ${heroProofEarly.gnPicksChangedByAffinity} of ${heroProofEarly.gnPicks} in ${HERO_TOWN.name}` : ""}. Modest, and measured.`,
+      note: `Ordered by distance instead${heroProofEarly ? `: ${heroProofEarly.gnPicksChangedByAffinity} of ${heroProofEarly.gnPicks} in ${HERO_TOWN.name}` : ""}. Modest, and measured.`,
     },
   ];
 
   const partnersByTown = Object.fromEntries(proof.towns.map((p) => [p.slug, p.gnPartners]));
-  const heroProof = proof.towns.find((p) => p.slug === town.slug);
 
   // Each town's own top pick and the taste that stands out most, so the cards differ the way the plans do.
   const SIGNAL_TYPE = { brand: "brand", artist: "artist", tv_show: "TV show", podcast: "podcast" } as const;
@@ -130,15 +131,13 @@ export default async function Home() {
     auditHref,
   };
 
-  const objections = objectionsFor(
-    facts,
-    {
-      novelPct: t.gnNovelPct,
-      changedPct: t.affinityChangedPct,
-      changedLine: heroProof ? `${heroProof.gnPicksChangedByAffinity} of ${heroProof.gnPicks} in ${town.name}` : undefined,
-    },
-    town.sponsor,
-  );
+  // Four questions on the landing, one line each; the guided path carries the full list.
+  const objections: Objection[] = [
+    { q: "Couldn’t ChatGPT do this?", a: `It names the institutions; ${t.gnNovelPct}% of our local partners it never names.`, href: "/proof#finding-3" },
+    { q: "Isn’t this a nearby-places list?", a: `Ordering by distance changes ${t.affinityChangedPct}% of picks: modest, and measured.`, href: "/proof#finding-4" },
+    { q: "Does it replace jobs, water or tax commitments?", a: "No. They open the memo; the program sits on top.", href: `${facts.memoHref}#commitments` },
+    { q: "Are the votes and dollars real?", a: "The tally is simulated and predicts nothing; funds are illustrative.", href: `${facts.resultsHref}#simulated` },
+  ];
   const film = HERO_VIDEO.ready;
 
   return (
@@ -156,9 +155,9 @@ export default async function Home() {
                 A community-benefits plan built from the host town, <span className="lp-tone">not a template.</span>
               </h1>
               <p className="lp-lede">
-                {PRODUCT_NAME} checks a data center’s or plant’s draft plan line by line. It keeps the real local institutions,
-                swaps generic items for venues and suppliers residents actually use (ranked by Qloo’s local taste data), and
-                costs every item from your fund.
+                {PRODUCT_NAME} checks a data center’s or plant’s draft plan (the community-benefits plan, or CBA, a facility funds)
+                line by line. It keeps the institutions the plan already names, adds the local places residents actually go that AI
+                alone never names, and costs each item.
               </p>
               <div className="lp-ctas">
                 <Link href={auditHref} className="lp-btn lp-btn-primary">
@@ -189,47 +188,43 @@ export default async function Home() {
         </section>
 
         {specs && (
-          <Chapter n="01" name="Commitments first" id="ch-01" labelledBy="ch-01-h">
+          <Chapter name="Commitments" id="ch-01" labelledBy="ch-01-h">
             <div className="lp-section-head">
               <h2 id="ch-01-h" className="lp-h2">
                 Jobs, water, power and tax come first. The program sits on top.
               </h2>
               <p className="lp-section-lede">
-                In {town.name}, {town.sponsor}’s material commitments open the committee memo, each from cited public reporting.{" "}
-                {PRODUCT_NAME} never trades them for programs.
+                {town.sponsor}’s commitments in {town.name} open the memo, each with its source.
               </p>
             </div>
             <SpecBand specs={specs.specs} town={town.name} asOf={specs.asOf} />
           </Chapter>
         )}
 
-        <Chapter n="02" name="How it works" id="ch-02" labelledBy="ch-02-h">
+        <Chapter name="How it works" id="ch-02" labelledBy="ch-02-h">
           <div className="lp-section-head">
             <h2 id="ch-02-h" className="lp-h2">
               Generic plan in. <span className="lp-tone">A costed, local program out.</span>
             </h2>
-            <p className="lp-section-lede">
-              Three layers, from the ground up: the facility and its draft, the town and the places locals favour, and the program
-              built from them. Drawn from the {town.name} run.
-            </p>
+            <p className="lp-section-lede">Three layers, drawn from the {town.name} run.</p>
           </div>
           <HostStack data={stack} nextId="ch-03" />
         </Chapter>
 
-        <Chapter n="03" name="The evidence" id="ch-03" labelledBy="proof-h" tone="is-ink">
+        <Chapter name="Evidence" id="ch-03" labelledBy="proof-h" tone="is-ink">
           <ProofBand paired={paired} stats={stats} townCount={TOWNS.length === 6 ? "six" : String(TOWNS.length)} />
         </Chapter>
 
-        <Chapter n="04" name="Any host town" id="ch-04" labelledBy="towns-h">
+        <Chapter name="Host towns" id="ch-04" labelledBy="towns-h">
           <TownGrid towns={TOWNS} partners={partnersByTown} picks={picksByTown} heroSlug={HERO_TOWN.slug} />
         </Chapter>
 
-        <Chapter n="05" name="Questions" id="ch-05" labelledBy="ch-05-h">
+        <Chapter name="Questions" id="ch-05" labelledBy="ch-05-h">
           <div className="lp-section-head">
             <h2 id="ch-05-h" className="lp-h2">
-              Fair questions, answered by the product itself.
+              Fair questions.
             </h2>
-            <p className="lp-section-lede">Open any of them: the answer is the live screen, not a claim on this page.</p>
+            <p className="lp-section-lede">Each answer opens the live screen.</p>
           </div>
           <Objections items={objections} />
           <Guardrails />
@@ -251,9 +246,7 @@ export default async function Home() {
                   <Chevron />
                 </span>
               </Link>
-              <Link href={`/memo/${town.slug}`} className="lp-btn lp-btn-quiet">
-                Read the committee memo
-              </Link>
+              <PilotLink className="lp-btn lp-btn-quiet" />
             </div>
           </div>
         </section>
