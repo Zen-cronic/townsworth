@@ -1,6 +1,6 @@
 import type { QlooEntity } from "./qloo";
 import type { TownProfile } from "./profile";
-import { haversineKm } from "./geo";
+import { haversineKm, SEARCH_RADIUS_KM } from "./geo";
 import { cleanName, OPEN_GRANT_ID, type Bucket, type ProgramItem } from "./plan";
 import { isInstitution, namedPartner } from "./baselineData";
 
@@ -126,7 +126,7 @@ export function osmVerifies(named: string, osmName: string | undefined, townName
 // 25 km, sharing a distinctive name word (the OpenStreetMap rule), at least 60% name-token overlap
 // (the Qloo-places rule), and adding no distinctive word of its own, so "Racine Zoo Beach" doesn't
 // verify "Racine Zoo". The hit's own city and suffixes such as "campus" don't count as new words.
-export const SEARCH_RADIUS_KM = 25;
+export { SEARCH_RADIUS_KM };
 const NEUTRAL_SUFFIX = new Set("campus branch location main downtown north south east west inc llc ltd".split(" "));
 
 export function matchSearchHit(

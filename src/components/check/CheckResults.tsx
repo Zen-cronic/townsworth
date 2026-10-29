@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import type { AuditRow, Verdict } from "@/lib/audit";
+import { SEARCH_RADIUS_KM } from "@/lib/geo";
 import { BUCKETS, costLine, ROLE_LABEL, type ProgramItem } from "@/lib/plan";
 import type { CheckResult } from "@/lib/userPlan";
 import { Check, Chevron, Notice } from "@/components/dashboard/Icons";
@@ -121,7 +122,7 @@ function Kept({ row }: { row: AuditRow }) {
       <p className="mt-1 text-[15px] leading-snug">{row.matched?.name ?? "Matches a local favourite"}</p>
       <p className="mt-0.5 text-xs text-muted">
         {row.matched
-          ? [row.matched.source === "osm" ? "Verified on OpenStreetMap" : row.matched.source === "qloo-search" ? "Qloo knows this place, within 25 km" : "A local place in Qloo's data, within 15 km", km(row.matched.distanceKm) && `${km(row.matched.distanceKm)} away`]
+          ? [row.matched.source === "osm" ? "Verified on OpenStreetMap" : row.matched.source === "qloo-search" ? `Qloo knows this place, within ${SEARCH_RADIUS_KM} km` : "A local place in Qloo's data, within 15 km", km(row.matched.distanceKm) && `${km(row.matched.distanceKm)} away`]
               .filter(Boolean)
               .join(" · ")
           : row.termHits[0]}
@@ -236,7 +237,7 @@ export function CheckResults({ result }: { result: CheckResult }) {
               <span className="font-mono text-xs tabular-nums">
                 {secs(result.ms)} total
                 {osm.checked > 0 && ` · ${plural(osm.checked, "name", "names")} looked up on OpenStreetMap`}
-                {qlooSearch.checked > 0 && ` · ${plural(qlooSearch.checked, "name", "names")} searched in Qloo, ${qlooSearch.verified} found within 25 km`}
+                {qlooSearch.checked > 0 && ` · ${plural(qlooSearch.checked, "name", "names")} searched in Qloo, ${qlooSearch.verified} found within ${SEARCH_RADIUS_KM} km`}
               </span>
             </p>
             {parse.notice && <Note tone="amber">{parse.notice}</Note>}

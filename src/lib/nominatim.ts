@@ -1,5 +1,5 @@
 import "server-only";
-import { haversineKm } from "./geo";
+import { haversineKm, SEARCH_RADIUS_KM } from "./geo";
 import { CA_PROVINCES, customSlug, inCountry, presetNear, US_STATES, type FacilityCode, type Town } from "./towns";
 
 // OpenStreetMap Nominatim, per its usage policy: identify the app, at most one request a second
@@ -124,7 +124,7 @@ export interface OsmCheck {
 }
 
 // The same check the frozen baseline used (scripts/freeze-baseline.ts): a bounded box around
-// the town, up to three hits, and a match only within 25 km.
+// the town, up to three hits, and a match only within SEARCH_RADIUS_KM (25 km).
 export async function osmLookup(name: string, town: { lat: number; lon: number }, opts: { noStore?: boolean } = {}): Promise<OsmCheck> {
   const d = 0.25;
   const params = new URLSearchParams({
@@ -143,7 +143,7 @@ export async function osmLookup(name: string, town: { lat: number; lon: number }
   if (!res) return { status: 429, found: false };
   if (!res.ok) return { status: res.status, found: false };
   const hits = (await res.json()) as { display_name: string; lat: string; lon: string }[];
-  const near = hits.find((h) => haversineKm(town, { lat: Number(h.lat), lon: Number(h.lon) }) <= 25);
+  const near = hits.find((h) => haversineKm(town, { lat: Number(h.lat), lon: Number(h.lon) }) <= SEARCH_RADIUS_KM);
   return near
     ? {
         status: 200,
