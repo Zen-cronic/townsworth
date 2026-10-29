@@ -16,6 +16,48 @@ const EXAMPLES: [string, string, string][] = [
   ["St. Thomas, ON", "plant", "PowerCo"],
 ];
 
+const ICON = "h-5 w-5";
+const STEPS: { title: string; note: string; icon: React.ReactNode }[] = [
+  {
+    title: "Type the town",
+    note: "and the company funding it",
+    icon: (
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" className={ICON} aria-hidden>
+        <path d="M10 18s6-5.2 6-10a6 6 0 1 0-12 0c0 4.8 6 10 6 10Z" />
+        <circle cx="10" cy="8" r="2.2" />
+      </svg>
+    ),
+  },
+  {
+    title: "Each line checked",
+    note: "kept, or struck and replaced",
+    icon: (
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" className={ICON} aria-hidden>
+        <path d="M3 5.5l1.6 1.6L7.5 4M3 13.5l1.6 1.6 2.9-3.1M10 6h7M10 14h7" />
+      </svg>
+    ),
+  },
+  {
+    title: "A costed memo",
+    note: "with a partner sheet and calendar",
+    icon: (
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" className={ICON} aria-hidden>
+        <path d="M5 2.5h7l3 3v12H5z" />
+        <path d="M8 9h4M8 12h4M8 15h2.5" />
+      </svg>
+    ),
+  },
+  {
+    title: "Residents rank",
+    note: "on an anonymous ballot",
+    icon: (
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" className={ICON} aria-hidden>
+        <path d="M4 16V11M10 16V5M16 16V8M2.5 16.5h15" />
+      </svg>
+    ),
+  },
+];
+
 export default async function FindPage({ searchParams }: { searchParams: Promise<{ q?: string; facility?: string; company?: string }> }) {
   const sp = await searchParams;
   const q = cleanTownQuery(sp.q);
@@ -30,28 +72,31 @@ export default async function FindPage({ searchParams }: { searchParams: Promise
       <main className="mx-auto max-w-[760px] px-4 pb-24 pt-6 sm:px-6 sm:pt-10">
         <p className="lp-kicker">Any host town</p>
         <h1 className="lp-h1 mt-3">Type any town</h1>
-        <p className="lp-lede mt-3">Any US or Canadian town gets the same check, memo and exports. Start from the consultant template, or have AI write a draft live.</p>
+        <p className="lp-lede mt-3">Any US or Canadian town gets the same check, memo and exports.</p>
 
         <div className="ui-card mt-8 p-4 sm:p-6">
           <TownSearchForm q={q} facility={facility} company={company} idPrefix="find" autoFocus={!q} />
         </div>
 
         {result === null && (
-          <p className="mt-5 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted">
-            Try
-            {EXAMPLES.map(([name, f, co], i) => (
-              <span key={name} className="flex items-center gap-2">
-                {i > 0 && (
-                  <span aria-hidden className="text-rule">
-                    ·
-                  </span>
-                )}
-                <Link href={`/find?q=${encodeURIComponent(name)}&facility=${f}&company=${encodeURIComponent(co)}`} className="text-ink underline decoration-rule underline-offset-4 hover:decoration-ink">
-                  {name}
-                </Link>
-              </span>
-            ))}
-          </p>
+          <section aria-labelledby="try-h" className="mt-6">
+            <h2 id="try-h" className="font-mono text-[11px] uppercase tracking-wider text-muted">
+              Or try one
+            </h2>
+            <ul className="find-try mt-2">
+              {EXAMPLES.map(([name, f, co]) => (
+                <li key={name}>
+                  <Link href={`/find?q=${encodeURIComponent(name)}&facility=${f}&company=${encodeURIComponent(co)}`}>
+                    <span className="find-try-t">{name}</span>
+                    <span className="find-try-m">
+                      {FACILITY_CHOICES.find((c) => c.code === f)?.label} · {co}
+                    </span>
+                    <Chevron className="find-try-c h-3.5 w-3.5" />
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
         )}
 
         {result && !result.ok && (
@@ -116,6 +161,16 @@ export default async function FindPage({ searchParams }: { searchParams: Promise
             </ol>
           </section>
         )}
+
+        <ol className="find-steps mt-10" aria-label="What you get">
+          {STEPS.map((st) => (
+            <li key={st.title}>
+              <span className="find-step-i">{st.icon}</span>
+              <span className="find-step-t">{st.title}</span>
+              <span className="find-step-n">{st.note}</span>
+            </li>
+          ))}
+        </ol>
 
         <p className="mt-10 text-xs leading-relaxed text-muted">
           Town search by OpenStreetMap Nominatim (© OpenStreetMap contributors). Only the town name you type is sent to it; only the

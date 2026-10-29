@@ -6,6 +6,7 @@ import { LiveDataNotice } from "@/components/LiveDataNotice";
 import { PRODUCT_NAME } from "@/components/landing/brand";
 import { Chevron } from "@/components/landing/Chevron";
 import { commitmentsFor } from "@/lib/commitments";
+import { splitFigures } from "@/components/charts";
 import { computeProof } from "@/lib/proof";
 import { TOWNS } from "@/lib/towns";
 
@@ -72,15 +73,55 @@ const SECTIONS = [
   ["data", "Data and media"],
 ] as const;
 
+const TOPICS = ["Jobs", "Power", "Water", "Noise & light", "Tax"] as const;
+
+// A percentage figure with its bar(s): survey blue for this product, quiet olive for AI alone.
+function PctBars({ bars }: { bars: { label: string; pct: number; tone: "gn" | "llm" }[] }) {
+  return (
+    <span className="src-bars ch-anim" aria-hidden>
+      {bars.map((b) => (
+        <span key={b.label} className="src-bar">
+          <span className="src-bar-who">{b.label}</span>
+          <span className="src-bar-t">
+            <span className={`ch-hbar ${b.tone === "llm" ? "is-quiet" : ""}`} style={{ width: `${Math.max(b.pct, 1)}%` }} />
+          </span>
+          <b className={b.tone === "gn" ? "is-ok" : ""}>{b.pct}%</b>
+        </span>
+      ))}
+    </span>
+  );
+}
+
 export default async function SourcesPage() {
   const { totals: t, baseline, towns, failedTowns } = await computeProof();
-  const figures: { k: string; text: string }[] = [
-    { k: "Institutions", text: `${t.llmInstitutionalPct}% of the partners AI alone named are institutions, against ${t.gnInstitutionalPct}% of ${PRODUCT_NAME}'s local partners.` },
-    { k: "Confirmed", text: `${t.llmVerifiedPct}% of the partners AI alone named could be confirmed on Qloo or OpenStreetMap within 25 km. Unverified is not proof of invented.` },
-    { k: "New", text: `${t.gnNovelPct}% of ${PRODUCT_NAME}'s local partners never appear in the AI-alone plans.` },
-    { k: "Ranking", text: `${t.affinityChangedPct}% of picks change when the same candidates are ordered by distance instead of Qloo's local affinity.` },
-    { k: "Wiring", text: `Partners appear in their own town's Qloo places ${t.controlOwnPct}% of the time and another town's ${t.controlCrossPct}%. This holds by construction and is not a finding.` },
+  const figures: { k: string; text: string; bars: { label: string; pct: number; tone: "gn" | "llm" }[] }[] = [
+    {
+      k: "Institutions",
+      text: `${t.llmInstitutionalPct}% of the partners AI alone named are institutions, against ${t.gnInstitutionalPct}% of ${PRODUCT_NAME}'s local partners.`,
+      bars: [
+        { label: "AI alone", pct: t.llmInstitutionalPct, tone: "llm" },
+        { label: PRODUCT_NAME, pct: t.gnInstitutionalPct, tone: "gn" },
+      ],
+    },
+    {
+      k: "Confirmed",
+      text: `${t.llmVerifiedPct}% of the partners AI alone named could be confirmed on Qloo or OpenStreetMap within 25 km. Unverified is not proof of invented.`,
+      bars: [{ label: "AI alone", pct: t.llmVerifiedPct, tone: "llm" }],
+    },
+    { k: "New", text: `${t.gnNovelPct}% of ${PRODUCT_NAME}'s local partners never appear in the AI-alone plans.`, bars: [{ label: PRODUCT_NAME, pct: t.gnNovelPct, tone: "gn" }] },
+    {
+      k: "Ranking",
+      text: `${t.affinityChangedPct}% of picks change when the same candidates are ordered by distance instead of Qloo's local affinity.`,
+      bars: [{ label: PRODUCT_NAME, pct: t.affinityChangedPct, tone: "gn" }],
+    },
+    {
+      k: "Wiring",
+      text: `Partners appear in their own town's Qloo places ${t.controlOwnPct}% of the time and another town's ${t.controlCrossPct}%. This holds by construction and is not a finding.`,
+      bars: [],
+    },
   ];
+  const cited = TOWNS.map((town) => ({ town, c: commitmentsFor(town.slug) }));
+  const maxCited = Math.max(1, ...cited.map(({ c }) => c?.items.length ?? 0));
 
   return (
     <div className="gn-landing">
@@ -114,15 +155,58 @@ export default async function SourcesPage() {
                 <h2 id="commitments-h" className="lp-h2">
                   Material commitments
                 </h2>
-                <p>
-                  Jobs, power, water, noise and tax, per preset town, as reported. Each memo opens with these; check every figure against the
-                  developer&apos;s filings before it goes to a committee.
-                </p>
+                <p>Cited public reporting per preset town. Check each figure against the developer&apos;s filings before it goes to a committee.</p>
+                <figure className="src-matrix">
+                  <table>
+                    <caption className="sr-only">Cited figures per town and topic</caption>
+                    <thead>
+                      <tr>
+                        <th scope="col">
+                          <span className="sr-only">Town</span>
+                        </th>
+                        {TOPICS.map((k) => (
+                          <th key={k} scope="col">
+                            {k}
+                          </th>
+                        ))}
+                        <th scope="col" className="src-matrix-total">
+                          Cited
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {cited.map(({ town, c }) => {
+                        const total = c?.items.length ?? 0;
+                        return (
+                          <tr key={town.slug}>
+                            <th scope="row">
+                              <a href={`#src-${town.slug}`}>{town.name}</a>
+                            </th>
+                            {TOPICS.map((k) => {
+                              const n = c?.items.filter((it) => it.topic === k).length ?? 0;
+                              return (
+                                <td key={k} className={n ? `is-cited is-n${Math.min(n, 3)}` : "is-empty"}>
+                                  <span>{n || <span aria-label="none">·</span>}</span>
+                                </td>
+                              );
+                            })}
+                            <td className="src-matrix-total">
+                              <span className="src-matrix-bar ch-anim" aria-hidden>
+                                <span className="ch-hbar" style={{ width: `${(total / maxCited) * 100}%` }} />
+                              </span>
+                              <b>{total}</b>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </figure>
                 {TOWNS.map((town) => {
                   const c = commitmentsFor(town.slug);
                   if (!c) return null;
                   return (
-                    <details key={town.slug} className="src-town" open={town.slug === TOWNS[0].slug}>
+                    <details key={town.slug} id={`src-${town.slug}`} className="src-town scroll-mt-28" open={town.slug === TOWNS[0].slug}>
                       <summary>
                         <span className="lp-h3">
                           {town.name}, {town.region}
@@ -137,7 +221,7 @@ export default async function SourcesPage() {
                           <li key={i}>
                             <span className="src-k">{it.topic}</span>
                             <span>
-                              {it.text}
+                              {splitFigures(it.text).map((part, j) => (j % 2 ? <b key={j} className="memo-fig">{part}</b> : part))}
                               <br />
                               <a href={it.url} target="_blank" rel="noopener noreferrer">
                                 {it.source}
@@ -165,7 +249,10 @@ export default async function SourcesPage() {
                   {figures.map((f) => (
                     <li key={f.k}>
                       <span className="src-k">{f.k}</span>
-                      <span>{f.text}</span>
+                      <span>
+                        {f.bars.length > 0 && <PctBars bars={f.bars} />}
+                        {f.text}
+                      </span>
                     </li>
                   ))}
                   <li>
