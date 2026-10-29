@@ -66,6 +66,29 @@ const NON_LOCAL_CATEGORY = /^(fast food restaurant|department store|shopping mal
 // Qloo names use typographic apostrophes ("Culver’s"); the chain list is written with straight ones.
 export const isChain = (name: string) => CHAINS.test(name.replace(/[\u2018\u2019]/g, "'"));
 
+// National platforms and megabrands. They show up in local taste lists everywhere, so they are never
+// a local signal: not in the theme vocabulary, not "distinct", not offered to the outreach agent.
+const MEGABRANDS = new Set([
+  "instagram", "facebook", "tiktok", "youtube", "youtube tv", "youtube music", "netflix", "spotify", "amazon", "amazon prime",
+  "amazon prime video", "prime video", "google", "apple", "apple music", "apple tv", "starbucks", "mcdonald's", "walmart", "target",
+  "costco", "meta", "whatsapp", "messenger", "snapchat", "twitter", "x", "pinterest", "reddit", "linkedin", "twitch", "discord",
+  "hulu", "disney", "disney+", "disney plus", "hbo", "hbo max", "max", "paramount+", "peacock", "espn", "uber", "uber eats", "lyft",
+  "doordash", "grubhub", "airbnb", "nike", "adidas", "coca-cola", "pepsi", "red bull", "monster energy", "chick-fil-a", "dunkin'",
+  "dunkin", "subway", "taco bell", "wendy's", "burger king", "home depot", "the home depot", "lowe's", "best buy", "kroger", "cvs",
+  "walgreens", "samsung", "microsoft", "tesla", "ebay", "etsy", "shein", "temu", "sephora", "ulta", "ulta beauty", "victoria's secret",
+  "old navy", "gap", "h&m", "zara", "ikea", "chipotle", "panera", "panera bread", "domino's", "pizza hut", "kfc", "playstation",
+  "xbox", "nintendo", "marvel", "nfl", "nba", "mlb", "nhl",
+]);
+
+// Lower case, straight apostrophes: the key for the megabrand list and the national top-50 name set.
+export const brandKey = (name: string) => name.replace(/[‘’]/g, "'").trim().toLowerCase();
+
+// `national` holds brandKey() of every name in the national top-50 brand list, when the caller has it.
+export function isMegabrand(name: string, national?: Set<string>): boolean {
+  const key = brandKey(name);
+  return MEGABRANDS.has(key) || !!national?.has(key);
+}
+
 export function isLocalPartner(e: QlooEntity): boolean {
   if (isChain(e.name) || /haunted|skydiv/i.test(e.name)) return false;
   return !categories(e).some((c) => NON_LOCAL_CATEGORY.test(c));

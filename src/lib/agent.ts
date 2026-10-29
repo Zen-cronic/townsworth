@@ -2,7 +2,7 @@ import "server-only";
 import { createOpenAI } from "@ai-sdk/openai";
 import { generateText, isStepCount, Output, tool } from "ai";
 import { z } from "zod";
-import { categories, splitSafe } from "./filters";
+import { categories, isChain, isLocalPartner, isMegabrand, splitSafe } from "./filters";
 import { osmLookup } from "./nominatim";
 import { BUCKETS, cleanName, type ProgramItem } from "./plan";
 import { placesNear } from "./qloo";
@@ -16,7 +16,7 @@ import { companyFormHref, namesSponsor, sponsorSignature, type Town } from "./to
 export const AGENT_MODEL = process.env.OPENAI_MODEL || "gpt-5.4-mini";
 const MAX_CHECKS = 6;
 
-const outputSchema = z.object({
+export const agentOutputSchema = z.object({
   summary: z.string().describe("Four plain sentences for the memo: what the program funds and why it fits this town"),
   drafts: z
     .array(
@@ -24,7 +24,10 @@ const outputSchema = z.object({
         itemId: z.string().describe("The itemId from get_program"),
         partner: z.string().describe("Exact partner name as returned by get_program"),
         reason: z.string().describe("One line: why you chose this partner"),
-        localSignal: z.string().describe("The one local signal used in the email, copied exactly from local_taste or local_places"),
+        localSignal: z
+          .string()
+          .nullable()
+          .describe("The local place or favourite the email mentions, copied exactly from local_taste or local_places; null when the email mentions none"),
         subject: z.string(),
         body: z.string().describe("Short, warm email. Under 150 words. Names the sponsor in the first paragraph and ends with the exact signature line."),
       }),
@@ -140,6 +143,16 @@ export function templateDraft(town: SponsorTown & Pick<Town, "region">, item: Pi
 
 const lower = (s: string) => s.toLowerCase().trim();
 
+// What local_taste offers the agent: distinct names only, never a national platform, megabrand,
+// chain, or political or religious topic.
+export function localTasteNames(list: { distinct?: boolean; entity?: { name?: string } }[]): string[] {
+  return list
+    .filter((s) => s?.distinct && s.entity?.name)
+    .map((s) => s.entity!.name!)
+    .filter((n) => !forbiddenTopic(n) && !isMegabrand(n) && !isChain(n))
+    .slice(0, 8);
+}
+
 export async function runAgent(run: TownRun) {
   const { town, program, profile } = run;
   const items: ProgramItem[] = Array.isArray(program?.items) ? program.items : [];
@@ -186,7 +199,8 @@ export async function runAgent(run: TownRun) {
       inputSchema: z.object({ radiusKm: z.number().min(1).max(25).default(15) }),
       execute: async ({ radiusKm }) => {
         const res = await placesNear(town.lat, town.lon, radiusKm * 1000, 20);
-        const kept = splitSafe(res.entities).kept;
+        // Chains and national brands are not local context.
+        const kept = splitSafe(res.entities).kept.filter((e) => isLocalPartner(e) && !isMegabrand(cleanName(e.name)));
         return kept.map((e) => {
           const name = cleanName(e.name);
           signals.add(lower(name));
@@ -195,15 +209,11 @@ export async function runAgent(run: TownRun) {
       },
     }),
     local_taste: tool({
-      description: "What this town distinctly over-indexes on (aggregate Qloo affinities). Pick one to mention in each email.",
+      description:
+        "What this town distinctly over-indexes on (aggregate Qloo affinities), national platforms and megabrands removed. Mention one only when it is a practical reason for the event.",
       inputSchema: z.object({ type: z.enum(["brand", "artist", "tv_show", "podcast"]) }),
       execute: async ({ type }) => {
-        const list = profile?.taste?.[type] ?? [];
-        const names = list
-          .filter((s) => s?.distinct && s.entity?.name)
-          .map((s) => s.entity.name)
-          .filter((n) => !forbiddenTopic(n))
-          .slice(0, 8);
+        const names = localTasteNames(profile?.taste?.[type] ?? []);
         names.forEach((n) => signals.add(lower(n)));
         return names;
       },
@@ -234,13 +244,13 @@ export async function runAgent(run: TownRun) {
     stopWhen: isStepCount(10),
     abortSignal: AbortSignal.timeout(45_000),
     maxRetries: 1,
-    output: Output.object({ schema: outputSchema }),
+    output: Output.object({ schema: agentOutputSchema }),
     system: [
       `You are the community-program assistant for ${town.sponsor}, which funds the community program around its ${town.facility} in ${town.name}, ${town.region}.`,
       "1. Call get_program. 2. Call local_taste (at least once) and optionally local_places for local context.",
       "3. Choose up to 3 partners yourself from the program items that have a partner, from at least two different buckets, and give a one-line reason for each.",
       "4. Call check_partner for each chosen partner. It checks OpenStreetMap, which is independent of Qloo. If it returns found:false, drop that partner (list it in dropped with the reason) and choose another if one fits; call check_partner on the replacement too before drafting. Only draft to partners check_partner returned found:true for.",
-      "5. Draft one email per kept partner. Work exactly one genuine local signal from local_taste or local_places into each email, naturally, as something people in town love (never call it a signal or data), and put it in localSignal exactly as the tool returned it. Never use a political or religious signal.",
+      "5. Draft one email per kept partner. Mention a local place or favourite from local_taste or local_places only when it is a genuinely practical reason for this event with this partner (for example: many families already spend weekends at a named local place, so a Saturday session nearby is easy to reach). If none is, leave it out and set localSignal to null; an email without one is fine. Mention at most one, never as praise or flattery of the town, never phrased as 'people here clearly value X', and never call it a signal or data. When you use one, put it in localSignal exactly as the tool returned it. Never use a political or religious signal.",
       `Every email must name ${town.sponsor} in its first paragraph, and must end with "Best," followed by this exact last line: "${signature}".`,
       "Be warm and plain, and offer a short call. Never mention dollar amounts or budgets: the program amount is the item's budget, not a payment to the partner.",
       "Never mention votes, elections, zoning, land use, project permits, hearings, council business, project approval, politics or religion. Event logistics are fine. Never invent facts that no tool returned.",
@@ -280,7 +290,8 @@ export async function runAgent(run: TownRun) {
     seen.add(lower(name));
 
     const independent = checks.get(lower(name)) ?? (await independentCheck(name, "code"));
-    const sig = d.localSignal?.trim();
+    const sig = d.localSignal?.trim() || undefined;
+    // True only when a signal is present, came from a tool this run, isn't the partner itself and is in the email.
     const signalVerified = !!sig && signals.has(lower(sig)) && lower(sig) !== lower(name) && lower(d.body).includes(lower(sig));
     const rules = checkDraft(d, town, true);
     const base = {

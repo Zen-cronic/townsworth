@@ -1,6 +1,6 @@
 import "server-only";
 import { placesNear, tasteNational, tasteNear, type EntityType, type QlooCall, type QlooEntity } from "./qloo";
-import { isChain, isLocalPartner, signalTags, splitSafe, type ExclusionReason } from "./filters";
+import { brandKey, isChain, isLocalPartner, isMegabrand, signalTags, splitSafe, type ExclusionReason } from "./filters";
 import type { Town } from "./towns";
 
 type TasteType = Exclude<EntityType, "place">;
@@ -18,6 +18,9 @@ export interface PlaceMeta {
   // Undefined for top-up places that Qloo returned without a local affinity score.
   affinityRank?: number;
   host: boolean;
+  // Strictly in the host municipality: same postal city (or the town named in the address) and
+  // within the host radius. Grants prefer these before any neighbouring place.
+  inTown: boolean;
   city?: string;
 }
 
@@ -72,16 +75,22 @@ const COMMON_WORDS = new Set(
     .split(" "),
 );
 
-function addTheme(vocab: Map<string, string[]>, term: string, source: string, fromTag: boolean) {
+export function addTheme(vocab: Map<string, string[]>, term: string, source: string, fromTag: boolean, national: Set<string>) {
   const display = term.trim();
   const key = display.toLowerCase();
   const words = key.split(/\s+/).filter(Boolean);
-  if (key.length < 3 || GENERIC_THEMES.test(key) || isChain(display)) return;
+  if (key.length < 3 || GENERIC_THEMES.test(key) || isChain(display) || isMegabrand(display, national)) return;
   // Tags are descriptors ("country", "polka"), so only multi-word tags can stand as a theme.
   if (words.length < 2 && (fromTag || COMMON_WORDS.has(key))) return;
   const sources = vocab.get(display) ?? [];
   if (!sources.includes(source)) sources.push(source);
   vocab.set(display, sources);
+}
+
+// Distinct: absent from the national top 50 and every big-metro list, and not a national platform or
+// megabrand (Instagram, Starbucks...) or a name on the national top-50 brand list.
+export function isDistinct(name: string, nationalRank: number | null, metroHits: number, nationalBrands: Set<string>) {
+  return nationalRank === null && metroHits === 0 && !isMegabrand(name, nationalBrands);
 }
 
 const normCity = (s?: string) => (s ?? "").toLowerCase().replace(/^(village|town|city|township) of /, "").replace(/[^a-z]+/g, " ").trim();
@@ -125,15 +134,18 @@ export async function buildProfile(town: Town): Promise<TownProfile> {
   );
   const placeMeta = new Map<string, PlaceMeta>(
     ranked.map((e, i) => {
-      const inTown = !!host && (normCity(e.city) === host || ` ${normCity(e.address)} `.includes(` ${host} `));
+      const sameCity = !!host && (normCity(e.city) === host || ` ${normCity(e.address)} `.includes(` ${host} `));
+      const near = (e.distanceM ?? 1e9) <= HOST_RADIUS_M;
       return [
         e.id,
-        { affinityRank: e.affinity != null ? i + 1 : undefined, host: inTown || (e.distanceM ?? 1e9) <= HOST_RADIUS_M, city: e.city },
+        { affinityRank: e.affinity != null ? i + 1 : undefined, host: sameCity || near, inTown: sameCity && near, city: e.city },
       ];
     }),
   );
   const affinityRanked = placesRes.entities.filter((e) => e.affinity != null).length;
 
+  // Anything in the national top-50 brand list is national, whatever its entity type.
+  const nationalBrands = new Set(nationalRes[TASTE_TYPES.indexOf("brand")].entities.map((e) => brandKey(e.name)));
   const taste = {} as Record<TasteType, Signal[]>;
   TASTE_TYPES.forEach((t, i) => {
     const split = splitSafe(localRes[i].entities);
@@ -143,7 +155,7 @@ export async function buildProfile(town: Town): Promise<TownProfile> {
     taste[t] = split.kept.map((entity, k) => {
       const nationalRank = nationalIndex.get(entity.id) ?? null;
       const metroHits = refSets.filter((s) => s.has(entity.id)).length;
-      return { entity, rank: k + 1, nationalRank, metroHits, distinct: nationalRank === null && metroHits === 0 };
+      return { entity, rank: k + 1, nationalRank, metroHits, distinct: isDistinct(entity.name, nationalRank, metroHits, nationalBrands) };
     });
   });
 
@@ -161,8 +173,8 @@ export async function buildProfile(town: Town): Promise<TownProfile> {
   const themeVocabulary = new Map<string, string[]>();
   for (const t of TASTE_TYPES.filter((x) => strength[x].local)) {
     for (const s of taste[t].filter((x) => x.distinct)) {
-      addTheme(themeVocabulary, s.entity.name, s.entity.name, false);
-      for (const tag of signalTags(s.entity).slice(0, 6)) addTheme(themeVocabulary, tag.name, s.entity.name, true);
+      addTheme(themeVocabulary, s.entity.name, s.entity.name, false, nationalBrands);
+      for (const tag of signalTags(s.entity).slice(0, 6)) addTheme(themeVocabulary, tag.name, s.entity.name, true, nationalBrands);
     }
   }
 
