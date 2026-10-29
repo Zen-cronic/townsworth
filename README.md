@@ -1,6 +1,6 @@
 # Good Neighbor
 
-**When a data center, chip fab or nuclear plant comes to town, its community fund usually buys a generic plan. Good Neighbor checks that plan line by line against the places the host town actually goes, ranked by Qloo's local affinity (how strongly locals favour them). It keeps the institutions the plan already names, adds the local places residents actually go that AI alone never names (90% of its local partners, per `/proof`), and returns a costed, resident-ranked 24-month program of local partners and host venues. Every item is traceable to its Qloo signal.**
+**When a data center, chip fab or nuclear plant comes to town, its community fund usually buys a generic plan. Good Neighbor checks that plan line by line against the places the host town actually goes, ranked by Qloo's local affinity (how strongly locals favour them). It keeps the institutions the plan already names, adds the local places residents actually go that AI alone never names (84% of its local partners, per `/proof`), and returns a costed, resident-ranked 24-month program of local partners and host venues. Every item is traceable to its Qloo signal.**
 
 For community-affairs teams at hyperscalers, developers, fabs and utilities.
 
@@ -10,13 +10,13 @@ We asked OpenAI `gpt-5.4-mini`, with no Qloo access, to write the community plan
 | Finding | Value |
 |---|---|
 | Partners AI alone named that we could confirm exist (Qloo or OpenStreetMap, 25 km) | 51% |
-| Partners that are institutions: AI alone vs Good Neighbor | 74% vs 29% |
-| Good Neighbor local partners AI alone never named | 90% |
-| Picks that change without Qloo's taste ranking (same places ordered by distance) | 12% (4 of 12 in Mount Pleasant) |
+| Partners that are institutions: AI alone vs Good Neighbor | 74% vs 35% |
+| Good Neighbor local partners AI alone never named | 84% |
+| Picks that change without Qloo's taste ranking (same places ordered by distance) | 3% (1 of 30 across six towns) |
 
 A wiring check (partners found in their own town's Qloo places 100% vs another town's 0%) holds by construction. It confirms the wiring and is not a finding.
 
-**What it shows:** AI alone knows a town's institutions (the college, the district, the library, the chamber), and Good Neighbor keeps them. Qloo adds the places the town actually goes, and those are mostly places AI alone never names. The affinity row is honest and modest: once venue fit and host-community rules apply, Qloo's ranking changes about one pick in eight. **What it doesn't show:** that residents value the program more, or anything about acceptance or approval. It's six towns and one model, so read it as a directional check.
+**What it shows:** AI alone knows a town's institutions (the college, the district, the library, the chamber), and Good Neighbor keeps them. Qloo adds the places the town actually goes, and those are mostly places AI alone never names. The affinity row is honest and modest: once venue fit and host-community rules apply, Qloo's ranking changes about one pick in 30. Figures are live and can move a point or two as Qloo's data updates. **What it doesn't show:** that residents value the program more, or anything about acceptance or approval. It's six towns and one model, so read it as a directional check.
 
 **Live app:** https://good-neighbor-rho.vercel.app (no login).
 
