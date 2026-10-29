@@ -7,6 +7,9 @@ import { Check, Chevron, Notice } from "@/components/dashboard/Icons";
 import { secondaryCta } from "@/components/dashboard/ui";
 import { Card, Chip, PageBand, SectionHeader, SplitCta, StatTile } from "@/components/ui";
 import { cadenceLower, formatPhone, km, quotedName } from "@/components/dashboard/format";
+import { ClampMore } from "@/components/ui/ClampMore";
+import { keptBreakdown } from "@/components/ui/keptBreakdown";
+import { kindOf, LOCAL_AFFINITY, shortOrg, shortSignal, shortTermHit } from "@/components/ui/labels";
 
 const FACILITY_LABEL: Record<string, string> = {
   "data center": "Data center",
@@ -46,12 +49,6 @@ const TASTE_LABEL = { brand: "Brands", artist: "Artists", tv_show: "TV", podcast
 
 // Draft lines are referred to plainly ("Line 4"), and anchored as #line-4.
 const num = (n: number) => String(n);
-
-// The signal in short form ("#6 local affinity").
-const shortSignal = (signal?: string) =>
-  signal ? signal.replace(/^(?:Qloo place|Local favourite) · #(\d+) by local affinity$/, "#$1 local affinity").replace(/^Qloo /, "") : "Qloo signal";
-const shortOrg = (name: string) => name.replace(/ Economic Development Corporation$/, " EDC").split(" | ")[0];
-const kindOf = (item: ProgramItem) => item.title.split(/ hosted at |: | at |, /)[0];
 
 // Everything behind "Why": the signals, the facts about the partner, and how the cost is built.
 function Why({ item, gloss }: { item: ProgramItem; gloss?: string }) {
@@ -96,7 +93,7 @@ function Proposal({ item, label, gloss }: { item: ProgramItem; label: string; gl
         {label} <span className="font-normal normal-case tracking-normal text-muted">· {BUCKETS[item.bucket].label}</span>
       </p>
       <p className="mt-1 text-[15px] font-medium leading-snug">
-        {kindOf(item)}
+        {kindOf(item.title)}
         {item.partner && <span> · {shortOrg(item.partner.name)}</span>}
       </p>
       <p className="mt-0.5 font-mono text-xs tabular-nums text-muted">{meta.join(" · ")}</p>
@@ -107,8 +104,37 @@ function Proposal({ item, label, gloss }: { item: ProgramItem; label: string; gl
   );
 }
 
+// Grant mechanisms: Qloo's grant candidates on one line, each with its affinity rank.
+function Applicants({ items }: { items: ProgramItem[] }) {
+  const named = items.filter((a) => a.partner);
+  if (!named.length) return null;
+  return (
+    <p className="pl-[1.375rem] text-xs leading-6 text-muted">
+      <span className="font-medium text-ink">Suggested applicants:</span>{" "}
+      {named.map((a, i) => {
+        const signal = a.provenance[0]?.signal ?? "";
+        const rank = signal.match(LOCAL_AFFINITY)?.[1] ?? a.partner!.affinityRank;
+        return (
+          <span key={a.id}>
+            <span className="text-ink">{shortOrg(a.partner!.name)}</span>
+            {rank != null && (
+              <>
+                {" "}
+                <Chip className="align-middle">#{rank} local affinity</Chip>
+              </>
+            )}
+            {i < named.length - 1 && " · "}
+          </span>
+        );
+      })}
+    </p>
+  );
+}
+
 // Kept lines: a check, a short verdict, the partner. Details sit behind the draft text's "more".
 function Kept({ row, sameAs }: { row: AuditRow; sameAs?: string }) {
+  // A line kept on a local signal has no partner: it names the matched theme instead.
+  const bySignal = row.verdict === "grounded" && !row.matched && row.keptAs !== "host";
   const [name, how] =
     row.verdict === "institution"
       ? [shortOrg(row.named ?? "Institution"), "institution, couldn't verify here"]
@@ -116,20 +142,31 @@ function Kept({ row, sameAs }: { row: AuditRow; sameAs?: string }) {
         ? [row.keptLabel ?? "grant mechanism", "kept as drafted"]
         : row.keptAs === "host"
           ? [row.keptLabel ?? "host community", "kept as drafted"]
-          : [row.matched?.name ?? "local favourite", row.matched ? `${row.matched.source === "osm" ? "OpenStreetMap" : "Qloo"}${km(row.matched.distanceKm) ? ` · ${km(row.matched.distanceKm)}` : ""}` : "local favourite"];
+          : bySignal
+            ? ["matches a local favourite", shortTermHit(row.termHits[0])]
+            : [row.matched?.name ?? "local partner", `${row.matched?.source === "osm" ? "OpenStreetMap" : "Qloo"}${km(row.matched?.distanceKm) ? ` · ${km(row.matched?.distanceKm)}` : ""}`];
+  const note = sameAs ? `same as line ${sameAs}` : how;
   return (
-    <p className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 pt-0.5 text-sm leading-snug">
-      <Check className="h-3.5 w-3.5 shrink-0 translate-y-0.5 text-ok" />
-      <span className="font-medium text-ok-text">Kept</span>
-      <span className="font-medium">{name}</span>
-      <span className="font-mono text-xs text-muted">{sameAs ? `same as line ${sameAs}` : how}</span>
-    </p>
+    <>
+      <p className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 pt-0.5 text-sm leading-snug">
+        <Check className="h-3.5 w-3.5 shrink-0 translate-y-0.5 text-ok" />
+        <span className="font-medium text-ok-text">Kept</span>
+        {bySignal && (
+          <span aria-hidden className="-mx-1 text-muted">
+            ·
+          </span>
+        )}
+        <span className="font-medium">{name}</span>
+        {note && <span className="font-mono text-xs text-muted">{note}</span>}
+      </p>
+      {row.applicants && row.applicants.length > 0 && <Applicants items={row.applicants} />}
+    </>
   );
 }
 
 const ROW = "grid grid-cols-[2rem_minmax(0,1fr)] gap-x-3 gap-y-2.5 border-b border-hairline py-4 last:border-b-0 md:grid-cols-[2.25rem_minmax(0,1fr)_minmax(0,1fr)] md:gap-x-6";
 
-// The draft text, clamped to two lines; "more" opens it in place.
+// The draft text, clamped to two lines; "more" shows only when the clamp cuts text, and opens it in place.
 function DraftText({ text, struck }: { text: string; struck: boolean }) {
   return (
     <details className="group">
@@ -137,7 +174,7 @@ function DraftText({ text, struck }: { text: string; struck: boolean }) {
         <span className={`line-clamp-2 text-[15px] leading-relaxed group-open:line-clamp-none ${struck ? "text-muted" : "text-ink"}`}>
           <span className={struck ? "strike" : ""}>{text}</span>
         </span>
-        {text.length > 110 && <span className="text-xs text-muted underline decoration-rule underline-offset-2 group-open:hidden">more</span>}
+        <ClampMore className="text-xs text-muted underline decoration-rule underline-offset-2 group-open:hidden" />
       </summary>
     </details>
   );
@@ -233,7 +270,7 @@ function QlooCalls({ calls }: { calls: TownRun["profile"]["calls"] }) {
           Qloo calls: {calls.length} · {failed ? `${failed} failed` : "all OK"}
         </Chip>
       </summary>
-      <table className="mt-2 w-full max-w-md text-left font-mono text-[11px] text-[#d6d2c9]">
+      <table className="ui-band-muted mt-2 w-full max-w-md text-left font-mono text-[11px]">
         <thead>
           <tr className="border-b border-white/15">
             <th className="py-1 pr-3 font-medium">Call</th>
@@ -243,7 +280,7 @@ function QlooCalls({ calls }: { calls: TownRun["profile"]["calls"] }) {
         </thead>
         <tbody>
           {calls.map((c, i) => (
-            <tr key={i} className={c.ok ? "" : "text-[#f2a37f]"}>
+            <tr key={i} className={c.ok ? "" : "ui-band-alert"}>
               <td className="py-0.5 pr-3">{c.label}</td>
               <td className="py-0.5 pr-3 text-right tabular-nums">{c.status || "no answer"}</td>
               <td className="py-0.5 text-right tabular-nums">{c.count}</td>
@@ -261,9 +298,7 @@ export function TownView({ run }: { run: TownRun }) {
   const { town, profile, program, audit, source, qlooAdds, draft } = run;
 
   const flagged = audit.filter((a) => !isKept(a.verdict)).length;
-  const keptPartners = audit.filter((a) => a.verdict === "grounded" && a.matched).length;
-  const keptInstitutions = audit.filter((a) => a.verdict === "institution").length;
-  const keptMechanisms = audit.filter((a) => a.verdict === "mechanism").length;
+  const kept = keptBreakdown(audit);
   const partnerPlaces = program.items.filter((it) => it.partner).length;
   const failed = profile.failedCalls.length;
 
@@ -285,7 +320,7 @@ export function TownView({ run }: { run: TownRun }) {
     return undefined;
   });
   // The first "#N local affinity" chip on the page carries a one-time gloss inside its "Why".
-  const glossIndex = audit.findIndex((r) => /^(?:Qloo place|Local favourite) · #\d+ by local affinity$/.test((r.replacement ?? r.alongside)?.provenance[0]?.signal ?? ""));
+  const glossIndex = audit.findIndex((r) => LOCAL_AFFINITY.test((r.replacement ?? r.alongside)?.provenance[0]?.signal ?? ""));
   const glossRank = glossIndex >= 0 ? (audit[glossIndex].replacement ?? audit[glossIndex].alongside)!.provenance[0].signal.match(/#(\d+)/)?.[1] : undefined;
   const gloss = glossRank ? `#${glossRank} of ${profile.placeCount} places within 15 km, ranked by Qloo for how strongly locals favour them.` : undefined;
   const topPlaces = [...profile.localPlaces]
@@ -336,12 +371,12 @@ export function TownView({ run }: { run: TownRun }) {
         </div>
         {failed > 0 && (
           <p role="alert" className="ui-band-note">
-            <span className="font-semibold text-[#f2a37f]">Qloo didn&apos;t answer ({failed} of {profile.calls.length} calls); this is not thin data.</span> Reload in a minute.
+            <span className="ui-band-alert font-semibold">Qloo didn&apos;t answer ({failed} of {profile.calls.length} calls); this is not thin data.</span> Reload in a minute.
           </p>
         )}
         {profile.thin && (
           <p role="note" className="ui-band-note">
-            <span className="font-semibold text-[#f0d98c]">Limited local data:</span> {profile.localPlaces.length} places within 15 km; add the partners residents name.{" "}
+            <span className="ui-band-warn font-semibold">Limited local data:</span> {profile.localPlaces.length} places within 15 km; add the partners residents name.{" "}
             <Link href="/proof#limits">Limits</Link>
           </p>
         )}
@@ -356,17 +391,12 @@ export function TownView({ run }: { run: TownRun }) {
             more={<>{qlooAdds.length} the draft never named. Each is traced to Qloo&apos;s taste data.</>}
           />
           <StatTile
-            value={`${audit.length - flagged} of ${audit.length}`}
+            value={`${kept.total} of ${audit.length}`}
             label={flagged ? `lines kept (${flagged} struck)` : "lines kept, none struck"}
             more={
               <>
-                {flagged > 0 && <>{flagged} struck as not local or unconfirmed. </>}Kept: {[
-                  plural(keptPartners, "verified local partner", "verified local partners"),
-                  keptInstitutions > 0 && plural(keptInstitutions, "institution to confirm", "institutions to confirm"),
-                  keptMechanisms > 0 && plural(keptMechanisms, "commitment kept as drafted", "commitments kept as drafted"),
-                ]
-                  .filter(Boolean)
-                  .join(", ")}.
+                {flagged > 0 && <>{flagged} struck as not local or unconfirmed. </>}
+                {kept.parts.length > 0 && <>Kept: {kept.parts.join(", ")}.</>}
               </>
             }
           />
@@ -482,7 +512,7 @@ export function TownView({ run }: { run: TownRun }) {
                 <li key={it.id} className="grid gap-2 px-5 py-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:px-6">
                   <div className="min-w-0">
                     <p className="font-medium leading-snug">
-                      {kindOf(it)}
+                      {kindOf(it.title)}
                       {it.partner && <span> · {shortOrg(it.partner.name)}</span>}
                     </p>
                     <p className="font-mono text-xs tabular-nums text-muted">
