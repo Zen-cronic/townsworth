@@ -85,60 +85,62 @@ export default async function ProofPage() {
     <>
       <AppHeader page="proof" />
       <main className="ui-page">
-        <header className="max-w-3xl">
-          <p className="lp-kicker">Evidence · {towns.length} host towns · recomputed on every load</p>
-          <h1 className="lp-h1 mt-3">
-            Qloo grounds the AI plan <span className="lp-tone">in where the town actually goes.</span>
-          </h1>
-          <p className="lp-lede mt-4">
-            {totals.llmVerifiedPct}% of the partners AI alone named could be confirmed ({totals.llmVerified} of {totals.llmNamed}). {replacementsLine}
-          </p>
-          <LiveDataNotice towns={failedTowns} className="mt-3" />
-          <details className="ui-more mt-3">
-            <summary>How the test was set up</summary>
-            <div>
-              For each of {towns.length} host towns we asked the same model, with no Qloo access, to write the community plan a consultant would write,
-              and froze those plans before measuring. Then we compared them with what {PRODUCT_NAME} proposes from Qloo&apos;s local taste data.
-            </div>
-          </details>
-        </header>
+        <div className="lg:grid lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:items-start lg:gap-12">
+          <header className="max-w-3xl">
+            <p className="lp-kicker">Evidence · {towns.length} host towns · recomputed on every load</p>
+            <h1 className="lp-h1 mt-3">
+              Qloo grounds the AI plan <span className="lp-tone">in where the town actually goes.</span>
+            </h1>
+            <p className="lp-lede mt-4">
+              {totals.llmVerifiedPct}% of the partners AI alone named could be confirmed ({totals.llmVerified} of {totals.llmNamed}). {replacementsLine}
+            </p>
+            <LiveDataNotice towns={failedTowns} className="mt-3" />
+            <details className="ui-more mt-3">
+              <summary>How the test was set up</summary>
+              <div>
+                For each of {towns.length} host towns we asked the same model, with no Qloo access, to write the community plan a consultant would write,
+                and froze those plans before measuring. Then we compared them with what {PRODUCT_NAME} proposes from Qloo&apos;s local taste data.
+              </div>
+            </details>
+          </header>
 
-        {/* Findings */}
-        <section id="findings" aria-label="Findings" className="mt-8 grid scroll-mt-24 gap-px overflow-hidden rounded-lg bg-hairline shadow-[0_0_0_1px_var(--hairline)] md:grid-cols-2 lg:grid-cols-4">
-          <Finding
-            n="1"
-            big={`${totals.llmVerifiedPct}%`}
-            label="of the partners AI alone named could be confirmed"
-            bars={[{ label: "Verified", pct: totals.llmVerifiedPct, tone: "llm" }]}
-            note={`Verified against Qloo or OpenStreetMap within 25 km. In well-mapped towns the LLM mostly names real institutions${
-              kemmerer ? `; in thin-data Kemmerer only ${kemmerer.llmVerified} of ${kemmerer.llmNamed} could be verified` : ""
-            }. Unverified is not proof of invented.`}
-          />
-          <Finding
-            n="2"
-            big={`${totals.llmInstitutionalPct}% vs ${totals.gnInstitutionalPct}%`}
-            label={`of partners are institutions: AI alone vs ${PRODUCT_NAME}`}
-            bars={[
-              { label: "AI alone", pct: totals.llmInstitutionalPct, tone: "llm" },
-              { label: "Good Neighbor", pct: totals.gnInstitutionalPct, tone: "gn" },
-            ]}
-            note="AI alone reaches for the college, the district, the library and the chamber. Qloo surfaces the places residents actually go."
-          />
-          <Finding
-            n="3"
-            big={`${totals.gnNovelPct}%`}
-            label={`of ${PRODUCT_NAME}'s local partners AI alone never named`}
-            bars={[{ label: "Never named", pct: totals.gnNovelPct, tone: "gn" }]}
-            note="Qloo isn't re-deriving what the model already knows. It adds a layer the model doesn't have."
-          />
-          <Finding
-            n="4"
-            big={`${totals.affinityChangedPct}%`}
-            label="of picks change without Qloo's taste ranking (ordered by distance, like a nearby-places directory)"
-            bars={[{ label: "Changed", pct: totals.affinityChangedPct, tone: "gn" }]}
-            note="Same candidate places, same venue-fit and host-community rules; only the order differs: Qloo's local affinity vs distance from the site. The share of Good Neighbor's picks a distance-only directory would not make."
-          />
-        </section>
+          {/* Findings */}
+          <section id="findings" aria-label="Findings" className="mt-8 grid scroll-mt-24 gap-px overflow-hidden rounded-lg bg-hairline shadow-[0_0_0_1px_var(--hairline)] md:grid-cols-2 lg:mt-1">
+            <Finding
+              n="1"
+              big={`${totals.llmVerifiedPct}%`}
+              label="of the partners AI alone named could be confirmed"
+              bars={[{ label: "Verified", pct: totals.llmVerifiedPct, tone: "llm" }]}
+              note={`Verified against Qloo or OpenStreetMap within 25 km. In well-mapped towns the LLM mostly names real institutions${
+                kemmerer ? `; in thin-data Kemmerer only ${kemmerer.llmVerified} of ${kemmerer.llmNamed} could be verified` : ""
+              }. Unverified is not proof of invented.`}
+            />
+            <Finding
+              n="2"
+              big={`${totals.llmInstitutionalPct}% vs ${totals.gnInstitutionalPct}%`}
+              label={`of partners are institutions: AI alone vs ${PRODUCT_NAME}`}
+              bars={[
+                { label: "AI alone", pct: totals.llmInstitutionalPct, tone: "llm" },
+                { label: "Good Neighbor", pct: totals.gnInstitutionalPct, tone: "gn" },
+              ]}
+              note="AI alone reaches for the college, the district, the library and the chamber. Qloo surfaces the places residents actually go."
+            />
+            <Finding
+              n="3"
+              big={`${totals.gnNovelPct}%`}
+              label={`of ${PRODUCT_NAME}'s local partners AI alone never named`}
+              bars={[{ label: "Never named", pct: totals.gnNovelPct, tone: "gn" }]}
+              note="Qloo isn't re-deriving what the model already knows. It adds a layer the model doesn't have."
+            />
+            <Finding
+              n="4"
+              big={`${totals.affinityChangedPct}%`}
+              label="of picks change without Qloo's taste ranking (ordered by distance, like a nearby-places directory)"
+              bars={[{ label: "Changed", pct: totals.affinityChangedPct, tone: "gn" }]}
+              note="Same candidate places, same venue-fit and host-community rules; only the order differs: Qloo's local affinity vs distance from the site. The share of Good Neighbor's picks a distance-only directory would not make."
+            />
+          </section>
+        </div>
 
         {/* What Qloo changes */}
         <section id="what-qloo-changes" aria-labelledby="qloo-changes" className="mt-6 scroll-mt-24 ui-card">

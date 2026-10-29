@@ -1,4 +1,4 @@
-// Shared class strings. Orange is the red pen only; actions are ink.
+// Shared class strings. Pink is the strike only; actions are ink.
 export const primaryCta =
   "inline-flex items-center gap-1.5 rounded-md bg-ink px-4 py-2 text-sm font-semibold text-paper transition-colors duration-150 hover:bg-ink/85 active:bg-ink/75";
 

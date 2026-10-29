@@ -186,13 +186,13 @@ function AuditLine({ row, index, sameAs, gloss }: { row: AuditRow; index: number
   const kept = isKept(row.verdict);
   const missing = row.verdict === "unverified" ? quotedName(row.reasons[0]) : undefined;
   return (
-    <li id={`line-${num(index + 1)}`} className={`${ROW} audit-row row-edge ${kept ? "is-kept" : "is-struck"} scroll-mt-24`}>
+    <li id={`line-${num(index + 1)}`} className={`${ROW} audit-row row-edge ${kept ? "is-kept" : "is-struck"}${row.verdict === "unverified" ? " is-unsure" : ""} scroll-mt-24`}>
       <span className="pt-0.5 font-mono text-xs tabular-nums text-muted">{num(index + 1)}</span>
       <div>
         <DraftText text={row.text} struck={!kept} />
         {!kept && (
           <p className="mt-1.5 flex flex-wrap items-center gap-2">
-            <Chip tone="pen">{row.verdict === "unverified" ? "Can't confirm" : "Not local"}</Chip>
+            {row.verdict === "unverified" ? <Chip tone="unsure">Can&apos;t confirm</Chip> : <Chip tone="pen">Not local</Chip>}
             {missing && <span className="text-xs text-muted">&ldquo;{missing}&rdquo; not found</span>}
           </p>
         )}
@@ -471,7 +471,7 @@ export function TownView({ run }: { run: TownRun }) {
           <details className="group border-b border-hairline bg-concrete/50 px-5 py-2.5 text-xs text-muted sm:px-6">
             <summary className="flex cursor-pointer flex-wrap items-center gap-2">
               <Chip tone="pen">Not local</Chip>
-              <Chip tone="pen">Can&apos;t confirm</Chip>
+              <Chip tone="unsure">Can&apos;t confirm</Chip>
               <Chip>Kept</Chip>
               <span className="inline-flex items-center gap-0.5 font-medium text-ink underline decoration-rule underline-offset-2 group-hover:decoration-ink">
                 What do these mean?

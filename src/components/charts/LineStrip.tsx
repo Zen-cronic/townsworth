@@ -2,7 +2,7 @@ import type { LineComposition, LineState } from "./chartData";
 
 const WORD: Record<LineState, string> = { kept: "kept", generic: "struck, not local", unverified: "struck, can't confirm" };
 
-// One cell per draft line in draft order: blue kept, red struck (hatched red when the partner
+// One cell per draft line in draft order: green kept, pink struck (hatched pink when the partner
 // couldn't be confirmed). Each cell links to its line when `anchorOf` is set. A legend with counts
 // sits below, so colour is never the only key.
 export function LineStrip({

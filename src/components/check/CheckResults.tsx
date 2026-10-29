@@ -137,7 +137,7 @@ function AuditLine({ row, index }: { row: AuditRow; index: number }) {
   const kept = isKept(row.verdict);
   const missing = row.verdict === "unverified" ? quotedName(row.reasons[0]) : undefined;
   return (
-    <li data-testid="check-row" data-verdict={row.verdict} className={`${ROW} audit-row row-edge ${kept ? "is-kept" : "is-struck"} break-inside-avoid`}>
+    <li data-testid="check-row" data-verdict={row.verdict} className={`${ROW} audit-row row-edge ${kept ? "is-kept" : "is-struck"}${row.verdict === "unverified" ? " is-unsure" : ""} break-inside-avoid`}>
       <span className="pt-0.5 font-mono text-xs tabular-nums text-muted">{pad2(index + 1)}</span>
       <div className="min-w-0">
         <p className={`text-[15px] leading-relaxed ${kept ? "text-ink" : "text-muted"}`}>
@@ -149,7 +149,7 @@ function AuditLine({ row, index }: { row: AuditRow; index: number }) {
           {kept ? (
             <StatusPill tone="ok">Kept</StatusPill>
           ) : (
-            <StatusPill tone="flag">{row.verdict === "unverified" ? "Can't confirm" : "Not local"}</StatusPill>
+            <StatusPill tone={row.verdict === "unverified" ? "unsure" : "flag"}>{row.verdict === "unverified" ? "Can't confirm" : "Not local"}</StatusPill>
           )}
           <span className="text-xs text-muted">{BUCKETS[row.bucket].label}</span>
           {missing && <span className="text-xs text-muted">· &ldquo;{missing}&rdquo; not found locally</span>}
@@ -310,7 +310,7 @@ export function CheckResults({ result }: { result: CheckResult }) {
         <details className="group border-b border-hairline bg-concrete/50 px-5 py-2.5 text-xs text-muted sm:px-6">
           <summary className="flex cursor-pointer flex-wrap items-center gap-2">
             <Chip tone="pen">Not local</Chip>
-            <Chip tone="pen">Can&apos;t confirm</Chip>
+            <Chip tone="unsure">Can&apos;t confirm</Chip>
             <Chip>Kept</Chip>
             <span className="font-medium text-ink underline decoration-rule underline-offset-2 group-hover:decoration-ink">What do these mean?</span>
           </summary>
@@ -323,7 +323,7 @@ export function CheckResults({ result }: { result: CheckResult }) {
           </div>
           <div className="flex items-start gap-2">
             <dt>
-              <StatusPill tone="flag">Can&apos;t confirm</StatusPill>
+              <StatusPill tone="unsure">Can&apos;t confirm</StatusPill>
             </dt>
             <dd className="pt-0.5">Names a partner that isn&apos;t an institution and isn&apos;t found in Qloo or OpenStreetMap. It may exist; it can&apos;t be checked here.</dd>
           </div>

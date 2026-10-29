@@ -1,0 +1,243 @@
+/* Paint marks and type, applied after the base sheets. The look follows the marks a utility locator
+   sprays on concrete and asphalt before anyone digs: survey pink is the one strong accent and means
+   struck; green is the kept mark; green paint on warm asphalt carries the hero. Kept is a ring and
+   struck is a cross, so the two differ in shape as well as colour. Selectors carry :root so they
+   outrank the single-class rules they refine. */
+
+/* Labels: sentence case in the body face, never tracked capitals. */
+:root .lp-kicker,
+:root .lp-ch-tab,
+:root .lp-swap-bucket,
+:root .uppercase.tracking-wider {
+  font-family: var(--font-body), system-ui, sans-serif;
+  text-transform: none;
+  letter-spacing: 0;
+}
+:root .lp-kicker {
+  font-size: 0.875rem;
+  line-height: 1.35;
+  font-weight: 600;
+}
+:root .lp-swap-bucket,
+:root .uppercase.tracking-wider {
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* Type: Archivo throughout; display sizes open up to the wide cut. */
+:root :is(.lp-h1, .lp-h2, .lp-h3, .ui-h3, .ui-band-h, .lp-stat-v, .ui-stat-v, .lp-proof-title, .gp-entry-t),
+:root main :is(h1, h2, h3) {
+  font-family: var(--font-display), system-ui, sans-serif;
+}
+:root :is(.lp-h1, .lp-h2, .ui-band-h, .lp-stat-v, .ui-stat-v),
+:root main :is(h1, h2) {
+  font-stretch: 116%;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+:root :is(.lp-h3, .ui-h3, .gp-entry-t),
+:root main h3 {
+  font-stretch: 108%;
+  font-weight: 700;
+}
+:root .lp-tone {
+  font-weight: 500;
+}
+/* On a phone the wide cut sets the hero headline too tall; the normal width keeps it to four lines. */
+@media (max-width: 520px) {
+  :root .lp-hero .lp-h1 {
+    font-stretch: 100%;
+    font-size: 2.375rem;
+    letter-spacing: -0.03em;
+  }
+}
+/* Headline figures in the heading face, with tabular numerals. */
+:root :is(.ui-stat-v, [id^="finding-"] > p:first-child),
+:root :is(.ui-stat-v, [id^="finding-"] > p:first-child) * {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+}
+:root [id^="finding-"] > p:first-child,
+:root [id^="finding-"] > p:first-child * {
+  font-weight: 750;
+  font-stretch: 108%;
+  letter-spacing: -0.02em;
+}
+
+/* Browser surfaces */
+:root {
+  accent-color: var(--ink);
+  caret-color: var(--ink);
+  scrollbar-color: var(--line-quiet) var(--concrete);
+}
+:root ::selection {
+  background: var(--hivis-wash);
+  color: var(--ink);
+}
+
+/* The brand mark is ink, never the strike colour. */
+:root .bg-hivis.grid.place-items-center,
+:root .lp-brand-mark {
+  background: var(--ink);
+}
+:root .lp-for::before {
+  display: none;
+}
+:root .lp-motion {
+  border-radius: 2px;
+}
+
+/* Square-cornered sheets, cards, buttons and chips; sheets lift off the field with a rule and shadow. */
+:root #findings {
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px var(--rule), 0 12px 28px -20px color-mix(in srgb, var(--ink) 32%, transparent);
+}
+:root :is(.lp-btn, .lp-btn-sq, .lp-preview, .lp-town, .ui-card, .ui-chip, .lp-chip, .lp-badge, .gn-proposal, .lp-swap) {
+  border-radius: 2px;
+}
+:root .lp-preview {
+  border: 1.5px solid var(--ink);
+}
+:root .ui-card {
+  box-shadow: 0 0 0 1px var(--rule), 0 1px 2px color-mix(in srgb, var(--ink) 6%, transparent), 0 12px 28px -20px color-mix(in srgb, var(--ink) 32%, transparent);
+}
+:root .doc-sheet {
+  border: 1px solid var(--rule);
+  border-top: 6px solid var(--ink);
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--ink) 8%, transparent), 0 18px 36px -22px color-mix(in srgb, var(--ink) 40%, transparent);
+}
+
+/* Chips: the body face, and a short paint dash in place of the dot. */
+:root :is(.ui-chip, .lp-chip) {
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: 12px;
+}
+:root :is(.ui-chip-dot, .lp-dot) {
+  width: 10px;
+  height: 3px;
+  border-radius: 0;
+}
+/* "Can't confirm" is struck too, but less certain: a dashed outline and an open ring instead of a fill. */
+:root .ui-chip.is-unsure {
+  color: var(--hivis-text);
+  background: transparent;
+  box-shadow: inset 0 0 0 1px transparent;
+  outline: 1.5px dashed var(--hivis);
+  outline-offset: -1.5px;
+}
+:root .ui-chip.is-unsure .ui-chip-dot {
+  width: 9px;
+  height: 9px;
+  border: 1.5px solid var(--hivis);
+  border-radius: 50%;
+  background: transparent;
+}
+
+/* Struck: a thick pink survey stroke through the text. */
+:root :is(.strike, .lp-strike) {
+  background-size: 100% 3px;
+  background-position: 0 56%;
+}
+@keyframes paint-strike {
+  from { background-size: 0% 3px; }
+  to { background-size: 100% 3px; }
+}
+:root .strike {
+  animation-name: paint-strike;
+}
+@keyframes paint-r-strike {
+  0%, 6% { background-size: 0% 3px; }
+  15%, 92% { background-size: 100% 3px; }
+  98%, 100% { background-size: 0% 3px; }
+}
+:root .lp-preview:is([data-play="on"], [data-play="off"]) .is-struck .lp-strike {
+  animation-name: paint-r-strike;
+}
+
+/* Gutter: kept is a painted ring, struck a painted cross, "can't confirm" a dashed ring. */
+:root .audit-row > span:first-child,
+:root .audit-row > details > summary > span:first-child {
+  color: var(--ink);
+  font-weight: 500;
+}
+:root .audit-row > span:first-child::before,
+:root .audit-row > details > summary > span:first-child::before {
+  width: 11px;
+  height: 11px;
+  border: 2.5px solid var(--ok);
+  border-radius: 50%;
+  background: none;
+}
+:root .audit-row.is-struck > span:first-child::before,
+:root .audit-row.is-struck > details > summary > span:first-child::before {
+  border: 0;
+  border-radius: 0;
+  width: 12px;
+  height: 12px;
+  background:
+    linear-gradient(45deg, transparent 39%, var(--hivis) 39% 61%, transparent 61%),
+    linear-gradient(-45deg, transparent 39%, var(--hivis) 39% 61%, transparent 61%);
+}
+:root .audit-row.is-struck.is-unsure > span:first-child::before {
+  width: 11px;
+  height: 11px;
+  border: 2px dashed var(--hivis);
+  border-radius: 50%;
+  background: none;
+}
+
+/* Anchor jumps land below the sticky header; the first line also keeps the legend above it in view. */
+:root .audit-row {
+  scroll-margin-top: calc(var(--l-hdr) + 16px);
+}
+:root .audit-row:first-child {
+  scroll-margin-top: calc(var(--l-hdr) + 72px);
+}
+
+:root .lp-ch-tab {
+  font-stretch: 116%;
+  font-weight: 800;
+  font-size: 13px;
+  color: var(--ink);
+}
+
+/* The hero and closing drawing: the site plan redrawn as green locate paint on warm asphalt.
+   The filter keeps only the drawing's light linework and recolours it; the dark ground drops out. */
+:root .lp-film {
+  background-image: none;
+  isolation: isolate;
+}
+:root .lp-film::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--poster) center bottom / contain no-repeat;
+}
+@media (orientation: portrait) {
+  :root .lp-film::before {
+    background-image: var(--poster-p);
+  }
+}
+:root .lp-film::before,
+:root .lp-film-media {
+  filter: url("#gn-paint-lines");
+  opacity: 0.7;
+}
+/* On a phone the drawing's labels land between the buttons and the card; the field stays plain. */
+@media (max-width: 640px) {
+  :root .lp-film::before,
+  :root .lp-film-media {
+    display: none;
+  }
+}
+
+@media print {
+  :root .lp-film::before {
+    display: none;
+  }
+  :root .doc-sheet {
+    border: 0;
+    border-top: 6px solid var(--ink);
+    box-shadow: none;
+  }
+}

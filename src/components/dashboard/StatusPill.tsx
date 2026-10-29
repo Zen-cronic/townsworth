@@ -1,7 +1,8 @@
-type Tone = "flag" | "ok" | "warn" | "neutral";
+type Tone = "flag" | "unsure" | "ok" | "warn" | "neutral";
 
 const TONE: Record<Tone, string> = {
   flag: "border-hivis/30 bg-hivis-wash text-hivis-text",
+  unsure: "border-dashed border-hivis bg-transparent text-hivis-text",
   ok: "border-ok/25 bg-ok-wash text-ok-text",
   warn: "border-amber/30 bg-amber-wash text-amber",
   neutral: "border-hairline bg-concrete text-muted",
@@ -9,6 +10,7 @@ const TONE: Record<Tone, string> = {
 
 const DOT: Record<Tone, string> = {
   flag: "bg-hivis",
+  unsure: "border border-hivis bg-transparent",
   ok: "bg-ok",
   warn: "bg-amber",
   neutral: "bg-muted",

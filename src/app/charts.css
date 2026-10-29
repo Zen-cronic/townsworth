@@ -1,6 +1,6 @@
 /* Charts (src/components/charts). Every colour aliases a palette token in globals.css.
-   Red is the pen: it marks struck lines only. Blue marks what is kept or added. Program areas use
-   the map's own inks (water blue, ochre, woodland, contour brown, pale field) in a fixed order whose
+   Pink marks struck lines only. Green marks what is kept or added. Program areas use the locate
+   paint colours (green, gas yellow, asphalt, water blue, pale concrete) in a fixed order whose
    neighbours stay distinct under the common colour-vision deficiencies; every mark also carries a
    label, so colour is never the only key. */
 :root {
@@ -390,7 +390,7 @@
   .row-edge { box-shadow: none; }
 }
 
-/* What the town favours: the taste strip on the woodland band. */
+/* What the town favours: the taste strip on the asphalt band. */
 .taste-panel {
   position: relative;
   overflow: hidden;
@@ -445,8 +445,6 @@
 .taste-types dt {
   font-family: var(--font-data), ui-monospace, monospace;
   font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
   color: var(--band-muted);
 }
 .taste-types dd {
@@ -583,7 +581,7 @@
   align-content: start;
   gap: 8px;
   padding: 20px;
-  border-radius: 8px;
+  border-radius: 2px;
   background: var(--ok-wash);
   box-shadow: inset 0 3px 0 var(--ok);
 }
@@ -707,8 +705,6 @@
   font-family: var(--font-data), ui-monospace, monospace;
   font-size: 11px;
   font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
   color: var(--muted);
   text-align: center;
   white-space: nowrap;
@@ -866,10 +862,10 @@
   padding: 12px 36px 12px 14px;
   border-radius: 6px;
   background: var(--paper);
-  box-shadow: 0 0 0 1px var(--hairline), inset 3px 0 0 var(--contour);
+  box-shadow: 0 0 0 1px var(--hairline);
   transition: box-shadow 150ms;
 }
-.find-try a:hover { box-shadow: 0 0 0 1px var(--ink), inset 3px 0 0 var(--contour); }
+.find-try a:hover { box-shadow: 0 0 0 1px var(--ink); }
 .find-try-t { font-weight: 600; }
 .find-try-m {
   font-family: var(--font-data), ui-monospace, monospace;

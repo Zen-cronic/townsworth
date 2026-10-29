@@ -1,49 +1,50 @@
 @import "tailwindcss";
 
-/* Topo palette: map-paper ground, woodland-green bands, contour-brown rules, water blue and the
-   survey red pen. Red is the pen (struck) and nothing else; water blue marks what is kept or added.
-   Red vs blue stays distinguishable with the common colour-vision deficiencies. Every text pair
-   below passes WCAG AA on the surfaces it is used on. Every colour in the app derives from these. */
+/* Locate palette: the marks a utility locator paints on concrete and asphalt before anyone digs.
+   Concrete grounds, asphalt bands, survey pink for a struck line and nothing else, green paint for
+   what is kept or added. Pink and green stay apart for the common colour-vision deficiencies, and the
+   gutter marks also differ in shape. Every text pair below passes WCAG AA on the surfaces it is used
+   on. Every colour in the app derives from these. */
 :root {
-  --concrete: #e9ecdc;
-  --paper: #fafbf3;
-  --card: #fdfdf8;
-  --ink: #1d2118;
-  --ink-deep: #10140c;
-  --muted: #525849;
-  --rule: #c9c1a4;
-  --hairline: #dedac4;
-  --side: #e0e2cf;
-  --side-2: #cfd2b9;
-  --line-quiet: #8c8f76;
-  --line-faint: #b4b49c;
-  --line-fainter: #cfcdb6;
-  --hivis: #cc3a1e;
-  --hivis-text: #a3291a;
-  --hivis-wash: #f7dbd1;
-  --ok: #1f6592;
-  --ok-text: #1a5781;
-  --ok-wash: #d8e9f2;
-  --amber: #6b4a12;
-  --amber-mark: #a97f22;
-  --amber-rule: #dcc890;
-  --amber-wash: #efe5c8;
-  --contour: #a5672f;
-  --focus: #1d2118;
-  /* Dark band (hero, evidence, town header) and the tones that sit on it. */
-  --band: #22321e;
-  --band-text: #f3f4ea;
-  --band-soft: #dde1cf;
-  --band-muted: #c6ccb5;
-  --band-quiet: #8a957b;
-  --band-ok: #93c7e9;
-  --band-pen: #f6a58f;
-  --band-amber: #e6c88c;
-  --band-contour: #c08447;
-  /* Type roles. Themes swap the faces behind these three names. */
-  --font-body: var(--font-public-sans);
-  --font-display: var(--font-public-sans);
-  --font-data: var(--font-plex-mono);
+  --concrete: #e5e4de;
+  --paper: #f8f7f3;
+  --card: #fdfdfb;
+  --ink: #1b1c1e;
+  --ink-deep: #0e0f10;
+  --muted: #4b4d50;
+  --rule: #a3a29a;
+  --hairline: #cfcec7;
+  --side: #e9e8e3;
+  --side-2: #cbcac2;
+  --line-quiet: #85857f;
+  --line-faint: #adaca5;
+  --line-fainter: #c6c5be;
+  --hivis: #c41a6b;
+  --hivis-text: #a8125a;
+  --hivis-wash: #f6dce8;
+  --ok: #3a6e00;
+  --ok-text: #2f5a00;
+  --ok-wash: #e0ebcd;
+  --amber: #5f4b00;
+  --amber-mark: #d9ad00;
+  --amber-rule: #e2cd70;
+  --amber-wash: #f4e8b0;
+  --contour: #2b6a9e;
+  --focus: #1b1c1e;
+  /* Warm asphalt band (hero, evidence, town header) and the paint that sits on it. */
+  --band: #28261f;
+  --band-text: #f5f3ec;
+  --band-soft: #dedbd1;
+  --band-muted: #bcb8ac;
+  --band-quiet: #8e8a7f;
+  --band-ok: #a4dc63;
+  --band-pen: #ff7ab5;
+  --band-amber: #f2cd3c;
+  --band-contour: #f5f3ec;
+  /* Type roles: Archivo for text and headings; figures use its tabular numerals. */
+  --font-body: var(--font-archivo);
+  --font-display: var(--font-archivo);
+  --font-data: var(--font-archivo);
   --sheet-shadow: 0 1px 2px color-mix(in srgb, var(--ink) 6%, transparent), 0 8px 24px -12px color-mix(in srgb, var(--ink) 18%, transparent);
 }
 
@@ -86,7 +87,7 @@ body {
   outline-offset: 2px;
 }
 
-/* A document sheet: paper on concrete with a contour-brown top rule, like a printed form. */
+/* A document sheet: paper on concrete with a top rule, like a printed form. */
 .doc-sheet {
   background: var(--paper);
   border: 1px solid var(--rule);
@@ -118,7 +119,7 @@ details[open] > summary .chev { transform: rotate(90deg); }
   to { background-position: -100% 0; }
 }
 
-/* Signature moment: the red-pen strike sweeping across a generic item. */
+/* Signature moment: the survey-pink strike sweeping across a generic item. */
 .strike {
   background-image: linear-gradient(var(--hivis), var(--hivis));
   background-repeat: no-repeat;
