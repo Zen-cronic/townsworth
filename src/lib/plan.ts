@@ -1,6 +1,7 @@
 import type { QlooEntity } from "./qloo";
 import { categories, signalTags } from "./filters";
 import type { PlaceMeta, Signal, TownProfile } from "./profile";
+import type { LensOutcome } from "./reach";
 
 // Deterministic program builder. Qloo supplies the local candidates and ranks them by local
 // affinity; fixed policy decides venues, schedule and cost. Costs come from a per-event model
@@ -95,10 +96,16 @@ export interface Program {
   costNote: string;
   // Partner picks under Qloo affinity ranking vs a distance-only ranking of the same candidates.
   picks: { affinity: string[]; distance: string[]; swaps: PickSwap[] };
+  // Age-group check, set by applyReach (src/lib/reach.ts) after the program is costed. The sessions
+  // it adds live in `reachItems`, never in `items`: they are earmarked from `unassigned` (the
+  // reserve), so `items`, `totalAllocated` and `unassigned` keep their meaning and every count.
+  reach?: LensOutcome[];
+  reachItems?: ProgramItem[];
+  reachEarmarked?: number;
 }
 
 // Per-event cost model (USD). Each unit cost is the budget to run one session, not a payment to a partner.
-const UNIT = {
+export const UNIT = {
   training: { cost: 9000, unit: "session", basis: "instructor $3,000 · participant stipends $2,500 · childcare $1,500 · venue hire and food $2,000" },
   procurement: { cost: 6000, unit: "session", basis: "bid-readiness coach $2,500 · venue hire $1,500 · food $1,000 · materials and translation $1,000" },
   music: { cost: 30000, unit: "event", basis: "stage and sound $12,000 · local performers $8,000 · permits and security $6,000 · accessibility $4,000" },
@@ -117,28 +124,33 @@ const MAX_NAMED_GRANTEES = 4;
 // reused only when no other hall-type venue is left.
 const SUPPLIER_HOSTS = 2;
 // Non-grant items never take more than this share of the fund; above it, unit costs scale down.
-const NON_GRANT_CEILING = 0.7;
+export const NON_GRANT_CEILING = 0.7;
 
 // Training-night hosts: places with room for a workforce evening. Event venues inside restaurants,
 // orchards, farms, petting zoos and diners don't qualify. Breweries are a fallback for adult sessions.
 const HALL = /^(banquet hall|conference center|convention center|community center|auditorium|library|public library|college|community college|university|public university|performing arts theater|meeting planning service|cultural center|civic center|event venue)$/i;
 const ADULT_VENUE = /^(brewery|brewpub|beer garden|beer hall)$/i;
 const NOT_A_TRAINING_HOST = /orchard|farm|petting zoo|\bzoo\b|diner|fast food|amusement|gift shop|ice cream|golf|country club/i;
-const DINING_NAME = /restaurant|cocktail|brew|\bpub\b|grill|\bbar\b|caf[eé]|kitchen|diner|tavern|saloon|pizza|bbq|barbecue|steak|taco|eatery|bistro/i;
-const DINING = /restaurant|diner|cafe|coffee|pizza|grill|eatery|steak house|takeout|buffet|pub\b|\bbar\b|mexican|american|italian/i;
+export const DINING_NAME = /restaurant|cocktail|brew|\bpub\b|grill|\bbar\b|caf[eé]|kitchen|diner|tavern|saloon|pizza|bbq|barbecue|steak|taco|eatery|bistro/i;
+export const DINING = /restaurant|diner|cafe|coffee|pizza|grill|eatery|steak house|takeout|buffet|pub\b|\bbar\b|mexican|american|italian/i;
 
 const INSTITUTION = /^(museum|art museum|history museum|park|city park|zoo|botanical garden|historical landmark|university|public university|college|non profit organization|library|hiking area|nature preserve|community center|festival|performing arts theater|aquarium|arboretum)$/i;
 
 export const OPEN_GRANT_ID = "grants-open";
 
-const km = (m?: number) => (m == null ? undefined : Math.round(m / 100) / 10);
+// Items added by the age-group check carry this id prefix. They are paid from the reserve and kept
+// out of the audit's like-for-like swaps and the /proof partner figures.
+export const REACH_PREFIX = "reach-";
+export const isReachItem = (item: Pick<ProgramItem, "id">) => item.id.startsWith(REACH_PREFIX);
 
-const hasCategory = (e: QlooEntity, re: RegExp) => categories(e).some((c) => re.test(c));
+export const km = (m?: number) => (m == null ? undefined : Math.round(m / 100) / 10);
+
+export const hasCategory = (e: QlooEntity, re: RegExp) => categories(e).some((c) => re.test(c));
 
 // Qloo place names sometimes carry a "| City" suffix; the distance already says where it is.
 export const cleanName = (name: string) => name.split(" | ")[0].trim();
 
-const usd = (n: number) => `$${n.toLocaleString("en-US")}`;
+export const usd = (n: number) => `$${n.toLocaleString("en-US")}`;
 
 function trainingTier(e: QlooEntity): number | null {
   const cats = categories(e);
@@ -151,7 +163,7 @@ function trainingTier(e: QlooEntity): number | null {
   return null;
 }
 
-function partnerOf(e: QlooEntity, meta?: PlaceMeta): Partner {
+export function partnerOf(e: QlooEntity, meta?: PlaceMeta): Partner {
   return {
     name: cleanName(e.name),
     address: e.address,
@@ -166,7 +178,7 @@ function partnerOf(e: QlooEntity, meta?: PlaceMeta): Partner {
   };
 }
 
-function placeProvenance(e: QlooEntity, why: string, profile: TownProfile): Provenance[] {
+export function placeProvenance(e: QlooEntity, why: string, profile: TownProfile): Provenance[] {
   const meta = profile.placeMeta.get(e.id);
   const tags = categories(e).slice(0, 2).concat(signalTags(e).filter((t) => t.type === "urn:tag:ambience:qloo").slice(0, 1).map((t) => t.name)).join(", ");
   const where = meta && !meta.host ? `neighbouring community${meta.city ? ` (${meta.city})` : ""}` : "host community";
@@ -309,7 +321,7 @@ export function cadenceOf(months: number[]): string {
 const QUARTERLY_TRAINING = [2, 5, 8, 11, 14, 17, 20, 23];
 const QUARTERLY_SUPPLIER = [3, 6, 9, 12, 15, 18, 21, 24];
 
-function costed(base: Omit<ProgramItem, "amount" | "cadence">): ProgramItem {
+export function costed(base: Omit<ProgramItem, "amount" | "cadence">): ProgramItem {
   return { ...base, amount: base.sessions * base.unitCost, cadence: cadenceOf(base.months) };
 }
 

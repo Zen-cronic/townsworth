@@ -1,6 +1,7 @@
 import "server-only";
-import { placesNear, tasteNational, tasteNear, type EntityType, type QlooCall, type QlooEntity } from "./qloo";
+import { lifeStageAudiences, placesForLens, placesNear, tasteNational, tasteNear, type EntityType, type QlooCall, type QlooEntity } from "./qloo";
 import { brandKey, isChain, isLocalPartner, isMegabrand, signalTags, splitSafe, type ExclusionReason } from "./filters";
+import { LENSES, PARENTS_AUDIENCE, type LensData, type LensKey } from "./reach";
 import type { Town } from "./towns";
 
 type TasteType = Exclude<EntityType, "place">;
@@ -52,6 +53,11 @@ export interface TownProfile {
   failedCalls: QlooCall[];
   distinctShare: number;
   thin: boolean;
+  // Each age-group lens: the top places Qloo ranks for that group within the same radius. Optional,
+  // and its calls are kept apart: a failed lens call is reported as "couldn't check" and never
+  // counts toward `failedCalls`.
+  lenses?: LensData[];
+  lensCalls?: QlooCall[];
 }
 
 const TASTE_TYPES: TasteType[] = ["brand", "artist", "tv_show", "podcast"];
@@ -95,6 +101,37 @@ export function isDistinct(name: string, nationalRank: number | null, metroHits:
 
 const normCity = (s?: string) => (s ?? "").toLowerCase().replace(/^(village|town|city|township) of /, "").replace(/[^a-z]+/g, " ").trim();
 
+const LENS_TAKE = 15;
+
+// The three lens queries. The life-stage id is looked up from Qloo's audience list on each run, and
+// only that one life stage is used. Any failure leaves the lens unchecked; it never throws.
+export async function fetchLenses(town: Pick<Town, "lat" | "lon">): Promise<{ lenses: LensData[]; lensCalls: QlooCall[] }> {
+  const calls: QlooCall[] = [];
+  const lenses: LensData[] = [];
+  const record = (key: LensKey, res: { entities: QlooEntity[]; call: QlooCall } | null) => {
+    if (res) calls.push(res.call);
+    lenses.push({ key, ok: !!res?.call.ok, ids: res?.call.ok ? res.entities.slice(0, LENS_TAKE).map((e) => e.id) : [] });
+  };
+  try {
+    const [young, older, groups] = await Promise.all([
+      placesForLens(`places for ${LENSES[0].label}`, { "signal.demographics.age": "24_and_younger" }, town.lat, town.lon, 15000, LENS_TAKE),
+      placesForLens(`places for ${LENSES[1].label}`, { "signal.demographics.age": "55_and_older" }, town.lat, town.lon, 15000, LENS_TAKE),
+      lifeStageAudiences(),
+    ]);
+    calls.push(groups.call);
+    const parents = groups.audiences.find((a) => PARENTS_AUDIENCE.name.test(a.name) && a.id.startsWith(PARENTS_AUDIENCE.idPrefix));
+    const families = parents
+      ? await placesForLens(`places for ${LENSES[2].label}`, { "signal.demographics.audiences": parents.id }, town.lat, town.lon, 15000, LENS_TAKE)
+      : null;
+    record("young-adults", young);
+    record("older", older);
+    record("families", families);
+  } catch {
+    for (const l of LENSES) if (!lenses.some((x) => x.key === l.key)) lenses.push({ key: l.key, ok: false, ids: [] });
+  }
+  return { lenses, lensCalls: calls };
+}
+
 export async function buildProfile(town: Town): Promise<TownProfile> {
   const refs = REFERENCE_METROS[town.country].filter(([lat, lon]) => Math.hypot(lat - town.lat, lon - town.lon) > 0.5);
   const [placesRes, localRes, nationalRes, refRes] = await Promise.all([
@@ -103,6 +140,9 @@ export async function buildProfile(town: Town): Promise<TownProfile> {
     Promise.all(TASTE_TYPES.map((t) => tasteNational(t, town.country, NATIONAL_TAKE))),
     Promise.all(TASTE_TYPES.map((t) => Promise.all(refs.map(([lat, lon]) => tasteNear(t, lat, lon, 20))))),
   ]);
+  // The lens queries start once the town's own calls are done, so on a cold cache they never
+  // compete with the calls the program depends on.
+  const lensRes = await fetchLenses(town);
 
   // Thin towns: Qloo ranks only the places that have a local affinity score. Top the list up with
   // the plain radius query; those extra places rank after every affinity-ranked one, by distance.
@@ -198,5 +238,7 @@ export async function buildProfile(town: Town): Promise<TownProfile> {
     failedCalls,
     distinctShare,
     thin: !failedCalls.length && (localPlaces.length < 15 || allSignals.length < 40),
+    lenses: lensRes.lenses,
+    lensCalls: lensRes.lensCalls,
   };
 }

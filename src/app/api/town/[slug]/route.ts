@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { buildProfile } from "@/lib/profile";
 import { buildProgram } from "@/lib/plan";
 import { auditPlan, GENERIC_AGENCY_PLAN } from "@/lib/audit";
+import { applyReach } from "@/lib/reach";
 import { townBySlug } from "@/lib/towns";
 import { fundParam } from "../../fund";
 
@@ -16,6 +17,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ slug: st
   const profile = await buildProfile(town);
   const program = buildProgram(profile, fund);
   const audit = auditPlan(GENERIC_AGENCY_PLAN.map((text) => ({ text })), profile, program.items);
+  applyReach(profile, program);
   return NextResponse.json({
     town,
     thin: profile.thin,
@@ -26,5 +28,6 @@ export async function GET(req: Request, { params }: { params: Promise<{ slug: st
     program,
     audit,
     calls: profile.calls,
+    lensCalls: profile.lensCalls,
   });
 }

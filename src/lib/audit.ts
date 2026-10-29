@@ -1,6 +1,6 @@
 import type { QlooEntity } from "./qloo";
 import type { TownProfile } from "./profile";
-import { cleanName, OPEN_GRANT_ID, type Bucket, type ProgramItem } from "./plan";
+import { cleanName, isReachItem, OPEN_GRANT_ID, type Bucket, type ProgramItem } from "./plan";
 import { isInstitution, namedPartner } from "./baselineData";
 
 // The audit verdict is deterministic. A model may help extract a named partner from free text,
@@ -22,6 +22,8 @@ export interface AuditInput {
   named?: string | null;
   // Pre-computed OpenStreetMap check for the named partner (frozen with the baseline).
   osm?: { found: boolean; osmName?: string; km?: number } | null;
+  // /check only: a Qloo name search for the named partner near the site that passed matchSearchHit.
+  qloo?: { name: string; km: number } | null;
 }
 
 // Why a kept line was kept, for display. `keptLabel` is the short name, `keptNote` one plain clause.
@@ -34,7 +36,7 @@ export interface AuditRow {
   bucket: Bucket;
   verdict: Verdict;
   reasons: string[];
-  matched?: { name: string; distanceKm?: number; source: "qloo" | "osm" };
+  matched?: { name: string; distanceKm?: number; source: "qloo" | "osm" | "qloo-search" };
   termHits: string[];
   // Struck lines: the like-for-like Qloo item that replaces it.
   replacement?: ProgramItem;
@@ -78,9 +80,16 @@ function bucketOf(text: string): Bucket {
 const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9 ]+/g, " ").replace(/\s+/g, " ").trim();
 const tokens = (s: string) => norm(s).split(" ").filter((t) => t.length > 2);
 
+// Share of name tokens two names have in common, over the longer name's token count.
+function nameOverlap(named: string, candidate: string): number {
+  const want = new Set(tokens(named));
+  const have = new Set(tokens(candidate));
+  return [...have].filter((t) => want.has(t)).length / Math.max(have.size, want.size, 1);
+}
+
 // Partners are matched only against Qloo places within the radius (never national taste brands),
 // by exact name or at least 60% token overlap. No substring test: "Art Museum" is not every museum.
-function findPartner(named: string, profile: TownProfile): QlooEntity | undefined {
+export function findPartner(named: string, profile: TownProfile): QlooEntity | undefined {
   const target = norm(named);
   const want = new Set(tokens(named));
   if (!target || !want.size) return undefined;
@@ -88,8 +97,7 @@ function findPartner(named: string, profile: TownProfile): QlooEntity | undefine
   for (const e of profile.places) {
     const name = norm(cleanName(e.name));
     if (name === target) return e;
-    const have = new Set(tokens(cleanName(e.name)));
-    const overlap = [...have].filter((t) => want.has(t)).length / Math.max(have.size, want.size, 1);
+    const overlap = nameOverlap(named, cleanName(e.name));
     if (overlap >= 0.6 && (!best || overlap > best.score || (overlap === best.score && (e.distanceM ?? 1e9) < (best.e.distanceM ?? 1e9)))) {
       best = { e, score: overlap };
     }
@@ -103,7 +111,7 @@ const FORM_WORDS = new Set("the and for village town city county township board 
 // distinctive name word (not the host town's name, not "village", "board"...). A settlement result
 // ("Franksville" for "Village of Mount Pleasant") or a different body ("Metropolitan Water Board" for
 // "Clay Town Board") doesn't count. A name with no distinctive word must match exactly.
-function osmVerifies(named: string, osmName: string | undefined, townName: string): boolean {
+export function osmVerifies(named: string, osmName: string | undefined, townName: string): boolean {
   if (!osmName) return true;
   const townWords = new Set(tokens(townName));
   const distinctive = (s: string) => new Set(tokens(s).filter((t) => !FORM_WORDS.has(t) && !townWords.has(t)));
@@ -111,6 +119,43 @@ function osmVerifies(named: string, osmName: string | undefined, townName: strin
   if (!a.size) return norm(named) === norm(osmName);
   const b = distinctive(osmName);
   return [...a].some((t) => b.has(t));
+}
+
+// A Qloo /search hit verifies a named partner only when it is the same place near the site: within
+// 25 km, sharing a distinctive name word (the OpenStreetMap rule), at least 60% name-token overlap
+// (the Qloo-places rule), and adding no distinctive word of its own, so "Racine Zoo Beach" doesn't
+// verify "Racine Zoo". The hit's own city and suffixes such as "campus" don't count as new words.
+export const SEARCH_RADIUS_KM = 25;
+const NEUTRAL_SUFFIX = new Set("campus branch location main downtown north south east west inc llc ltd".split(" "));
+
+const haversineKm = (a: { lat: number; lon: number }, b: { lat: number; lon: number }) => {
+  const rad = Math.PI / 180;
+  const h = Math.sin(((b.lat - a.lat) * rad) / 2) ** 2 + Math.cos(a.lat * rad) * Math.cos(b.lat * rad) * Math.sin(((b.lon - a.lon) * rad) / 2) ** 2;
+  return 6371 * 2 * Math.asin(Math.sqrt(h));
+};
+
+export function matchSearchHit(
+  named: string,
+  hits: QlooEntity[],
+  town: { name: string; lat: number; lon: number },
+): { name: string; km: number } | null {
+  const townWords = new Set(tokens(town.name));
+  const own = new Set(tokens(named));
+  let best: { name: string; km: number; score: number } | null = null;
+  for (const e of hits) {
+    if (!e.location) continue;
+    const name = cleanName(e.name);
+    const km = Math.round(haversineKm(town, e.location) * 10) / 10;
+    if (km > SEARCH_RADIUS_KM || !osmVerifies(named, name, town.name)) continue;
+    const exact = norm(name) === norm(named);
+    const score = exact ? 2 : nameOverlap(named, name);
+    if (score < 0.6) continue;
+    const cityWords = new Set([...tokens(e.city ?? ""), ...tokens(addressCity(e.address) ?? "")]);
+    const extra = tokens(name).filter((t) => !own.has(t) && !FORM_WORDS.has(t) && !townWords.has(t) && !cityWords.has(t) && !NEUTRAL_SUFFIX.has(t));
+    if (!exact && extra.length) continue;
+    if (!best || score > best.score || (score === best.score && km < best.km)) best = { name, km, score };
+  }
+  return best && { name: best.name, km: best.km };
 }
 
 // A grant-making mechanism: the line describes how grants are decided, not who gets them.
@@ -279,15 +324,16 @@ export function auditPlan(inputs: AuditInput[], profile: TownProfile, program: P
   const used = new Set<string>();
   const townName = profile.town.name;
   const community = hostCommunityNames(profile);
-  // Like-for-like swaps and additions come from Qloo-picked items, never the open grant cycle.
+  // Like-for-like swaps and additions come from Qloo-picked items, never the open grant cycle or a
+  // session added by the age-group check.
   const nextInBucket = (bucket: Bucket) => {
-    const item = program.find((p) => p.bucket === bucket && p.id !== OPEN_GRANT_ID && !used.has(p.id));
+    const item = program.find((p) => p.bucket === bucket && p.id !== OPEN_GRANT_ID && !isReachItem(p) && !used.has(p.id));
     if (item) used.add(item.id);
     return item;
   };
-  const grantCandidates = program.filter((p) => p.bucket === "grants" && p.partner);
+  const grantCandidates = program.filter((p) => p.bucket === "grants" && p.partner && !isReachItem(p));
 
-  return inputs.map(({ text, named: rawNamed, osm }) => {
+  return inputs.map(({ text, named: rawNamed, osm, qloo }) => {
     const mechanism = mechanismOf(text);
     const inKind = !mechanism && IN_KIND.test(text);
     const bucket: Bucket = mechanism ? MECHANISM[mechanism].bucket : inKind ? (MENTORING.test(text) ? "training" : "events") : bucketOf(text);
@@ -316,6 +362,11 @@ export function auditPlan(inputs: AuditInput[], profile: TownProfile, program: P
         verdict = "grounded";
         keptAs = "partner";
         reasons.push(`"${named}" is a real local organisation (found on OpenStreetMap${osm.km != null ? `, ${osm.km} km away` : ""})`);
+      } else if (qloo) {
+        matched = { name: qloo.name, distanceKm: qloo.km, source: "qloo-search" };
+        verdict = "grounded";
+        keptAs = "partner";
+        reasons.push(`Qloo knows this place · ${qloo.km} km`);
       } else if (isInstitution(named)) {
         verdict = "institution";
         keptAs = "institution";

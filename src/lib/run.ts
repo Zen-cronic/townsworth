@@ -4,7 +4,8 @@ import { auditPlan, GENERIC_AGENCY_PLAN, isKept, type AuditInput, type AuditRow 
 import { baselineFor, BASELINE, isInstitution } from "./baselineData";
 import { liveLlmDraft } from "./liveDraft";
 import { buildProfile, type TownProfile } from "./profile";
-import { buildProgram, runWith, type Bucket, type Program, type ProgramItem } from "./plan";
+import { buildProgram, isReachItem, runWith, type Bucket, type Program, type ProgramItem } from "./plan";
+import { applyReach } from "./reach";
 import { townBySlug } from "./towns";
 
 export type PlanSource = "llm" | "agency";
@@ -36,14 +37,15 @@ export function auditDraft(inputs: AuditInput[], profile: TownProfile, program: 
   const RUN_WITH: Bucket[] = ["training", "procurement", "events", "channels"];
   for (const bucket of RUN_WITH) {
     const lead = audit.find((a) => a.bucket === bucket && isKept(a.verdict) && a.named && isInstitution(a.named));
-    if (lead?.named) program.items.filter((it) => it.bucket === bucket).forEach((it) => runWith(it, lead.named!));
+    if (lead?.named) program.items.filter((it) => it.bucket === bucket && !isReachItem(it)).forEach((it) => runWith(it, lead.named!));
   }
 
-  // Partners Qloo surfaces that the audited draft never named.
+  // Partners Qloo surfaces that the audited draft never named. Age-group sessions are listed by the
+  // age-group check, not here.
   const draftText = norm(inputs.map((i) => `${i.named ?? ""} ${i.text}`).join(" "));
   const usedIds = new Set(audit.flatMap((a) => [a.replacement?.id, a.alongside?.id]).filter(Boolean));
   const qlooAdds: ProgramItem[] = program.items.filter(
-    (it) => !usedIds.has(it.id) && it.partner && !draftText.includes(norm(it.partner.name)),
+    (it) => !usedIds.has(it.id) && !isReachItem(it) && it.partner && !draftText.includes(norm(it.partner.name)),
   );
 
   return { audit, qlooAdds };
@@ -85,6 +87,8 @@ export const runTown = cache(async (slug: string, fund?: number, source: PlanSou
     draft.notice = `The live AI-written draft didn't finish (${liveResult.reason.slice(0, 100)}), so this checks the consultant template instead.`;
   }
   const { audit, qlooAdds } = auditDraft(inputs, profile, program);
+  // After the audit, so the age-group sessions never become a swap or a run-with target.
+  applyReach(profile, program);
 
   return { town, profile, program, audit, source: used, qlooAdds, draft };
 });

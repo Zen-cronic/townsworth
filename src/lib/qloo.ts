@@ -146,11 +146,12 @@ async function withSlot<T>(fn: () => Promise<T>): Promise<T> {
 // request with `export const dynamic = "force-dynamic"`, or uses request data that makes it dynamic
 // anyway; warm renders still read the cached responses here and stay fast. When a call does fail,
 // the profile records it in `failedCalls` and the pages say so instead of showing partial figures.
-async function fetchWithRetry(url: string, key: string): Promise<Response> {
+// `noStore` skips the data cache entirely: used for lookups built from user-pasted text, which must
+// not outlive the request.
+async function fetchWithRetry(url: string, key: string, noStore = false): Promise<Response> {
+  const caching: RequestInit = noStore ? { cache: "no-store" } : { next: { revalidate: 60 * 60 * 24 } };
   for (let attempt = 0; ; attempt++) {
-    const res = await withSlot(() =>
-      fetch(url, { headers: { "X-Api-Key": key, Accept: "application/json" }, next: { revalidate: 60 * 60 * 24 } }),
-    );
+    const res = await withSlot(() => fetch(url, { headers: { "X-Api-Key": key, Accept: "application/json" }, ...caching }));
     const transient = (res.status === 502 || res.status === 503) && attempt < 1;
     if (!transient && (res.status !== 429 || attempt >= 3)) return res;
     await new Promise((r) => setTimeout(r, 400 * 2 ** attempt));
@@ -213,4 +214,73 @@ export function placesNear(lat: number, lon: number, radiusM = 15000, take = 50,
   params.take = String(take);
   const km = Math.round(radiusM / 1000);
   return insights(ranked ? `places within ${km} km, ranked by local affinity` : `places within ${km} km, by distance (top-up)`, params, "place");
+}
+
+// Age-group and life-stage views of the same places query. Each lens re-ranks the places within the
+// radius for one aggregate group; no individual is scored. Only these parameter names are ever sent.
+export type LensSignal = { "signal.demographics.age": "24_and_younger" | "55_and_older" } | { "signal.demographics.audiences": string };
+
+export function placesForLens(label: string, signal: LensSignal, lat: number, lon: number, radiusM = 15000, take = 15) {
+  return insights(label, {
+    "filter.type": "urn:entity:place",
+    "filter.location": point(lat, lon),
+    "filter.location.radius": String(radiusM),
+    "signal.location": point(lat, lon),
+    ...signal,
+    take: String(take),
+  }, "place");
+}
+
+export interface QlooAudience {
+  id: string;
+  name: string;
+}
+
+// The life-stage list, so the "Parents With Young Children" id is read from Qloo at runtime.
+export async function lifeStageAudiences(): Promise<{ audiences: QlooAudience[]; call: QlooCall }> {
+  const key = process.env.QLOO_API_KEY;
+  if (!key) throw new Error("QLOO_API_KEY is not set");
+  const params = { "filter.parents.types": "urn:audience:life_stage", take: "50" };
+  const started = Date.now();
+  let status = 0;
+  let audiences: QlooAudience[] = [];
+  try {
+    const res = await fetchWithRetry(`${BASE}/v2/audiences?${new URLSearchParams(params)}`, key);
+    status = res.status;
+    const body = res.ok ? await res.json() : null;
+    const raw: { id?: unknown; name?: unknown }[] = body?.results?.audiences ?? [];
+    audiences = raw
+      .filter((a): a is { id: string; name: string } => typeof a?.id === "string" && typeof a?.name === "string")
+      .map((a) => ({ id: a.id, name: a.name }));
+  } catch {
+    // No answer: status 0, reported as a failed lens call.
+  }
+  const ok = status >= 200 && status < 300;
+  return { audiences, call: { label: "life-stage groups", params, status, ok, count: audiences.length, ms: Date.now() - started } };
+}
+
+export interface QlooSearchResult {
+  entities: QlooEntity[];
+  status: number;
+  ok: boolean;
+}
+
+// Name lookup for one venue a pasted plan mentions, near the site. Never cached: the query comes
+// from user text. The radius filter is a hint to Qloo's ranking, so callers still check distance.
+export async function searchPlaces(query: string, lat: number, lon: number, radiusKm = 25, take = 5): Promise<QlooSearchResult> {
+  const key = process.env.QLOO_API_KEY;
+  if (!key) return { entities: [], status: 0, ok: false };
+  const params = { query, types: "urn:entity:place", "filter.location": `${lat},${lon}`, "filter.radius": String(radiusKm), take: String(take) };
+  let status = 0;
+  let raw: RawEntity[] = [];
+  try {
+    const res = await fetchWithRetry(`${BASE}/search?${new URLSearchParams(params)}`, key, true);
+    status = res.status;
+    const body = res.ok ? await res.json() : null;
+    raw = Array.isArray(body?.results) ? body.results : [];
+  } catch {
+    // No answer: the caller leaves the line as it was.
+  }
+  const ok = status >= 200 && status < 300;
+  return { entities: raw.filter((r) => typeof r?.entity_id === "string" && typeof r?.name === "string").map((r) => parseEntity(r, "place")), status, ok };
 }

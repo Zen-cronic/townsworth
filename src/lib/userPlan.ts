@@ -1,20 +1,59 @@
 import "server-only";
 import { createOpenAI } from "@ai-sdk/openai";
 import { generateText, Output } from "ai";
-import type { AuditInput, AuditRow } from "./audit";
+import { findPartner, matchSearchHit, osmVerifies, type AuditInput, type AuditRow } from "./audit";
 import { LIVE_MODEL } from "./liveDraft";
 import { osmLookup } from "./nominatim";
-import { buildProfile } from "./profile";
+import { buildProfile, type TownProfile } from "./profile";
+import { searchPlaces } from "./qloo";
 import { buildProgram, type ProgramItem } from "./plan";
+import { applyReach, type LensOutcome } from "./reach";
 import { auditDraft } from "./run";
 import type { Town } from "./towns";
 import { groundModelItems, modelPlanSchema, SHORT_INPUT, splitPlanLines, userPlanMessage, userPlanPrompt, userPlanSchema } from "./userPlanParse";
 
 // "Check your own plan": the pasted text is split into items (OpenAI, then grounded against the
-// text), each named organisation is looked up on OpenStreetMap, and the same deterministic audit
-// as /town runs. The text is never logged, cached or stored; only the town's coordinates go to Qloo.
+// text), each named organisation is looked up on OpenStreetMap and by name in Qloo near the site,
+// and the same deterministic audit as /town runs. The text is never logged, cached or stored; Qloo
+// receives the town's coordinates and the venue names the plan mentions, never the plan text.
 
 const OSM_PARTNERS = 8;
+const SEARCH_PARTNERS = 8;
+
+export interface SearchChecks {
+  matches: Map<string, { name: string; km: number } | null>;
+  checked: number;
+  failures: number;
+  ms: number;
+}
+
+// Qloo name search for up to 8 distinct named partners that neither Qloo's places near the site nor
+// OpenStreetMap already confirm. Uncached, through the shared Qloo limiter; a failed search leaves
+// the line as it was. Never used for the preset towns' frozen plans.
+export async function qlooSearchChecks(inputs: AuditInput[], profile: TownProfile, town: Town): Promise<SearchChecks> {
+  const started = Date.now();
+  const names = new Map<string, string>();
+  for (const input of inputs) {
+    const key = input.named ? normName(input.named) : "";
+    if (!key || key === normName(town.name) || names.has(key) || names.size >= SEARCH_PARTNERS) continue;
+    if (findPartner(input.named!, profile)) continue;
+    if (input.osm?.found && osmVerifies(input.named!, input.osm.osmName, town.name)) continue;
+    names.set(key, input.named!);
+  }
+  const results = await Promise.all(
+    [...names].map(async ([key, named]) => {
+      const res = await searchPlaces(named, town.lat, town.lon);
+      return [key, res.ok ? matchSearchHit(named, res.entities, town) : undefined] as const;
+    }),
+  );
+  const matches = new Map<string, { name: string; km: number } | null>();
+  let failures = 0;
+  for (const [key, m] of results) {
+    if (m === undefined) failures++;
+    matches.set(key, m ?? null);
+  }
+  return { matches, checked: names.size, failures, ms: Date.now() - started };
+}
 
 export interface PlanParse {
   inputs: AuditInput[];
@@ -74,9 +113,11 @@ export interface CheckResult {
   annualFund: number;
   parse: { method: PlanParse["method"]; model?: string; ms: number; notice?: string; truncated?: boolean; items: number };
   osm: { checked: number; failures: number; ms: number };
+  // Qloo name lookups for named partners (optional for older payloads).
+  qlooSearch?: { checked: number; verified: number; failures: number; ms: number };
   audit: AuditRow[];
   qlooAdds: ProgramItem[];
-  program: { items: ProgramItem[]; totalAllocated: number; unassigned: number; twoYearFund: number; costNote: string };
+  program: { items: ProgramItem[]; totalAllocated: number; unassigned: number; twoYearFund: number; costNote: string; reach?: LensOutcome[]; reachItems?: ProgramItem[]; reachEarmarked?: number };
   profile: { thin: boolean; localPlaces: number; excluded: number; failedCalls: number; calls: { label: string; status: number; ok: boolean; count: number }[] };
   ms: number;
 }
@@ -86,7 +127,7 @@ const normName = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim
 export async function runUserPlan(town: Town, fund: number | undefined, text: string): Promise<CheckResult> {
   const started = Date.now();
   const annualFund = fund && fund > 0 ? fund : town.defaultAnnualFund;
-  // Qloo sees only the town's coordinates; its responses are data-cached per town.
+  // The town profile uses only the town's coordinates and is data-cached per town.
   const [profile, parse] = await Promise.all([buildProfile(town), parsePlan(text, town)]);
   const program = buildProgram(profile, annualFund);
 
@@ -98,15 +139,21 @@ export async function runUserPlan(town: Town, fund: number | undefined, text: st
     if (!key || key === normName(town.name) || checks.has(key) || checks.size >= OSM_PARTNERS) continue;
     checks.set(key, await osmLookup(input.named!, town, { noStore: true }));
   }
-  const inputs = parse.inputs.map((i) => ({ ...i, osm: i.named ? (checks.get(normName(i.named)) ?? null) : null }));
+  const withOsm = parse.inputs.map((i) => ({ ...i, osm: i.named ? (checks.get(normName(i.named)) ?? null) : null }));
   const failures = [...checks.values()].filter((c) => c.status !== 200).length;
+  const osmMs = Date.now() - osmStarted;
+
+  const search = await qlooSearchChecks(withOsm, profile, town);
+  const inputs = withOsm.map((i) => ({ ...i, qloo: i.named ? (search.matches.get(normName(i.named)) ?? null) : null }));
 
   const { audit, qlooAdds } = auditDraft(inputs, profile, program);
+  applyReach(profile, program);
   return {
     town,
     annualFund,
     parse: { method: parse.method, model: parse.model, ms: parse.ms, notice: parse.notice, truncated: parse.truncated, items: parse.inputs.length },
-    osm: { checked: checks.size, failures, ms: Date.now() - osmStarted },
+    osm: { checked: checks.size, failures, ms: osmMs },
+    qlooSearch: { checked: search.checked, verified: [...search.matches.values()].filter(Boolean).length, failures: search.failures, ms: search.ms },
     audit,
     qlooAdds,
     program: {
@@ -115,6 +162,9 @@ export async function runUserPlan(town: Town, fund: number | undefined, text: st
       unassigned: program.unassigned,
       twoYearFund: program.twoYearFund,
       costNote: program.costNote,
+      reach: program.reach,
+      reachItems: program.reachItems,
+      reachEarmarked: program.reachEarmarked,
     },
     profile: {
       thin: profile.thin,

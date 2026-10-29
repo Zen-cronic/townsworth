@@ -1,6 +1,8 @@
 import "server-only";
 import { BASELINE, BASELINE_SHA256, baselineFor, isInstitution, namedPartner } from "./baselineData";
-import { cleanName, type PickSwap } from "./plan";
+import type { AuditRow } from "./audit";
+import { cleanName, isReachItem, type PickSwap, type ProgramItem } from "./plan";
+import { reachSummary, type ReachSummary } from "./reach";
 import { runTown } from "./run";
 import { TOWNS } from "./towns";
 
@@ -45,12 +47,25 @@ export interface TownProof {
   thin: boolean;
   // Some of this town's Qloo calls failed on this request, so its row is computed from partial data.
   failed: boolean;
+  // Age-group check: lenses a program partner already covers, and the venues it adds.
+  reach: ReachSummary;
 }
 
 // Towns whose Qloo calls did not all answer on this request. Their figures are computed from partial
 // data, so every page that shows the totals says so instead of showing shifted numbers silently.
 export function failedTownNames(runs: ({ town: { name: string }; profile: { failedCalls: readonly unknown[] } } | null)[]): string[] {
   return runs.filter((r) => r && r.profile.failedCalls.length > 0).map((r) => r!.town.name);
+}
+
+// The partners a town's figures count: program items with a named place, minus the sessions the
+// age-group check adds (those are reported on their own row, so they can't move these figures).
+export function programPartners(items: ProgramItem[]): string[] {
+  return items.filter((it) => !isReachItem(it)).map((it) => it.partner?.name).filter((p): p is string => !!p);
+}
+
+// The partners the check puts in: swaps for struck lines and items added alongside kept ones.
+export function checkAdditions(audit: AuditRow[]): ProgramItem[] {
+  return audit.flatMap((r) => [r.replacement, r.alongside]).filter((it): it is ProgramItem => !!it?.partner && !isReachItem(it));
 }
 
 export async function computeProof() {
@@ -67,10 +82,10 @@ export async function computeProof() {
     const named = run.audit.filter((_, k) => namedPartner(baseline[k]?.partner));
     const llmPartners = baseline.map((b) => namedPartner(b.partner)).filter((p): p is string => !!p);
     const distancePicks = new Set(run.program.picks.distance);
-    const gnPartners = run.program.items.map((it) => it.partner?.name).filter((p): p is string => !!p);
+    const gnPartners = programPartners(run.program.items);
     const llmText = norm(baseline.map((b) => `${b.partner ?? ""} ${b.item}`).join(" "));
     const ownPlaces = new Set(run.profile.places.map((p) => norm(cleanName(p.name))));
-    const added = run.audit.flatMap((r) => [r.replacement, r.alongside]).filter((it) => it?.partner);
+    const added = checkAdditions(run.audit);
 
     towns.push({
       slug: town.slug,
@@ -89,6 +104,7 @@ export async function computeProof() {
       swaps: run.program.picks.swaps.filter((s) => !distancePicks.has(s.qloo.id)),
       thin: run.profile.thin,
       failed: run.profile.failedCalls.length > 0,
+      reach: reachSummary(run.program.reach),
     });
     llmWords.push(contentWords(baseline.map((b) => b.item).join(" "), [town.name, town.region, ...llmPartners]));
     gnPartnerSets.push(new Set(gnPartners.map(norm)));
@@ -132,6 +148,9 @@ export async function computeProof() {
       gnReplacementsLocalPct: pct(sum((t) => t.gnReplacementsLocal) / Math.max(1, sum((t) => t.gnReplacements))),
       gnReplacementsRankedPct: pct(sum((t) => t.gnReplacementsRanked) / Math.max(1, sum((t) => t.gnReplacements))),
       gnReplacementsAllRanked: sum((t) => t.gnReplacementsRanked) === sum((t) => t.gnReplacements),
+      reachAdded: sum((t) => t.reach.added.length),
+      reachCovered: sum((t) => t.reach.covered.length),
+      reachUnchecked: sum((t) => t.reach.unchecked),
     },
     baseline: { model: BASELINE.model, promptVersion: BASELINE.promptVersion, createdAt: BASELINE.createdAt, sha256: BASELINE_SHA256 },
   };
