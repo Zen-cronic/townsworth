@@ -1,7 +1,8 @@
 @import "tailwindcss";
 
-/* Hi-vis field kit: concrete, charcoal, safety orange. Orange is for marks and fills;
-   orange text uses the deeper tone to pass WCAG AA on the concrete background. */
+/* Hi-vis field kit: concrete, charcoal, safety orange and survey blue. Orange is the red pen
+   (struck) and nothing else; survey blue marks what is kept or added. Orange vs blue stays
+   distinguishable with the common colour-vision deficiencies. Text tones pass WCAG AA on concrete. */
 :root {
   --concrete: #efede8;
   --paper: #fbfaf7;
@@ -12,9 +13,9 @@
   --hivis: #d9480f;
   --hivis-text: #a33409;
   --hivis-wash: #fbe3d6;
-  --ok: #2f7d4f;
-  --ok-text: #276a43;
-  --ok-wash: #e1eee5;
+  --ok: #2b5d8a;
+  --ok-text: #24507a;
+  --ok-wash: #e2ebf3;
   --amber: #9a6b00;
   --amber-wash: #f5ecd3;
   --focus: #22211f;

@@ -1,13 +1,14 @@
 import { BUCKETS, type Bucket } from "@/lib/plan";
 import { money } from "@/lib/run";
 
-// Charcoal steps keep the split calm; orange stays reserved for marks.
+// Charcoal steps keep the split calm; orange stays reserved for marks. Each step is far enough
+// from its neighbours to tell apart at a glance.
 const SHADE: Record<Bucket, string> = {
-  training: "bg-ink",
-  procurement: "bg-ink/70",
-  grants: "bg-ink/45",
-  events: "bg-ink/25",
-  channels: "bg-rule",
+  training: "bg-[#22211f]",
+  procurement: "bg-[#6f6b63]",
+  grants: "bg-[#a9a49a]",
+  events: "bg-[#d6d1c7]",
+  channels: "bg-[#ebe8e1] ring-1 ring-inset ring-rule",
 };
 
 export function AllocationBar({ totals, total }: { totals: { b: Bucket; amount: number }[]; total: number }) {
