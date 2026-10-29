@@ -40,8 +40,29 @@ The guided path is at `/judges`.
 ## How Qloo drives it
 - `GET /v2/insights` with `filter.type=urn:entity:place` + `filter.location=POINT(lon lat)` + radius **+ `signal.location=POINT(...)`** gives the candidate local places, **ranked by Qloo's local affinity**, with categories, rating, event space and distance. Partners are chosen host community first, then by affinity rank ("#4 by local affinity of 50 Qloo places within 15 km"). Distance only breaks ties.
 - `signal.location=POINT(...)` for brands, artists, TV and podcasts gives the tastes that stand out locally. "Distinct" means it's absent from the national top 50 and from every big-metro reference list. Taste types that still lean national are shown as such and don't drive program items.
-- About 25 Insights calls per town. The town page shows the call log ("Qloo calls: 25 · all OK"), and a Qloo error is reported as an error, never as thin data.
+- About 25 Insights calls per town, plus four for the age-group check. The town page shows the call log ("Qloo calls: 25 · all OK"), and a Qloo error is reported as an error, never as thin data.
 - Point queries, not town names: in our tests, town-name queries silently resolved to the wrong place for 6 of 22 hosts.
+
+## How Good Neighbor uses Qloo
+Every production call is server-side REST against the Insights API. Each one changes something you can see in the product.
+
+| Call | Key parameters | What it changes |
+|---|---|---|
+| `GET /v2/insights` (places) | `filter.type=urn:entity:place`, `filter.location=POINT(lon lat)`, `filter.location.radius=15000`, `signal.location=POINT(lon lat)`, `take=50` | The candidate venues and grant applicants, ranked by local affinity. Thin towns get one by-distance top-up without `signal.location`. |
+| `GET /v2/insights` (taste) | `filter.type=urn:entity:brand\|artist\|tv_show\|podcast`, `signal.location=POINT(lon lat)`, `take=20` | What the town favours: event themes, a local team's watch party, where to announce the program. |
+| `GET /v2/insights` (national baseline) | same types, `signal.location.query=United States\|Canada`, `take=50`, plus the same taste query at big-metro reference points | What is distinctly local: anything in the national top 50 or a big-metro list doesn't count as a local signal. |
+| `GET /v2/audiences` | `filter.parents.types=urn:audience:life_stage` | Looks up the "Parents With Young Children" life stage at runtime, for the families check. |
+| `GET /v2/insights` (age groups) | the places query with `take=15` and one of `signal.demographics.age=24_and_younger`, `signal.demographics.age=55_and_older`, `signal.demographics.audiences=<life-stage id>` | Whether the program includes a place young adults (under 25), older residents and families with young children favour. If none of its partners is in a group's top 15, one session at that group's best-ranked hall, library, park, museum, zoo, school or college is earmarked from the reserve. Only these three groups are ever queried. |
+| `GET /search` (`/check` only) | `query=<venue name>`, `types=urn:entity:place`, `filter.location=<lat>,<lon>`, `filter.radius=25`, `take=5`, never cached | A venue a pasted plan names becomes verified ("Qloo knows this place · N km") when Qloo has the same place within 25 km. Up to 8 names per check; the plan text itself is never sent. |
+
+To repeat a town's calls by hand, Qloo's CLI takes the same parameters (point it at the API host the app uses first):
+
+```bash
+export QLOO_BASE_URL=https://hackathon.api.qloo.com QLOO_TRUSTED_BASE_URL=https://hackathon.api.qloo.com
+npx -y @qloo/qloo-harness api insights -t place --json \
+  --params '{"filter.location":"POINT(-87.8836 42.7117)","filter.location.radius":15000,"signal.location":"POINT(-87.8836 42.7117)","signal.demographics.age":"55_and_older","take":15}'
+npx -y @qloo/qloo-harness api search -q "Racine Zoo" -t place -n 5 --json --params '{"filter.location":"42.7117,-87.8836","filter.radius":25}'
+```
 
 ## The trust split
 - **The model proposes; code decides.** Partner choice, bucket, allocation and every audit verdict are deterministic rules over Qloo fields.
@@ -54,7 +75,8 @@ The guided path is at `/judges`.
   Failing drafts are replaced with a labelled template.
 
 ## Guardrails (Qloo SAFE_USE)
-- Aggregate signals only. No personal data is sent to Qloo, and residents' ballot data never leaves the app.
+- Aggregate signals only. No personal data is sent to Qloo, and residents' ballot data never leaves the app. On `/check`, Qloo receives the town's coordinates and the venue names the pasted plan mentions, never the plan text.
+- The age-group check uses only Qloo's aggregate place affinities for three groups (young adults under 25, older residents, families with young children). No resident is scored, and no other demographic is ever requested.
 - Political and religious results are excluded from plan items. Identity and inclusivity tags are never used as signals; businesses carrying them stay eligible.
 - Not persuasion: nothing is timed to a vote, hearing or permit. Material commitments (jobs, power, water, noise, tax) come first. For the preset towns they're pre-filled from cited public reporting (`data/commitments.json`); everywhere else they're entered from the developer's filings.
 - Disclosure: every outreach draft and the resident ballot name the funding company.
@@ -65,6 +87,7 @@ The guided path is at `/judges`.
 - Partner availability and willingness are not confirmed. Drafts are drafts; nothing is sent.
 - Metro-suburb artist signals are weak (they lean national). Places and brands carry the local signal.
 - The six towns are presets with known coordinates, and only they are in the /proof measurement. Typed-in towns are geocoded with OpenStreetMap Nominatim. Their live LLM drafts are labelled live and never enter the frozen proof set.
+- The age-group check says whether the program includes places each group favours in aggregate, not who would attend. Sessions it adds are earmarked from the reserve and change none of the figures above.
 - The resident ballot's tally is simulated (seeded random ballots). It shows how the ranking works and predicts nothing about real residents.
 
 ## Integrations
