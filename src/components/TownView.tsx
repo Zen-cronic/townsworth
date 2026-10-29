@@ -71,7 +71,7 @@ function Why({ item, gloss }: { item: ProgramItem; gloss?: string }) {
           <Chevron className="chev h-3 w-3" />
         </span>
       </summary>
-      <div className="mt-2 space-y-1.5 border-l-2 border-ok/40 pl-3 leading-relaxed text-muted">
+      <div className="mt-2 space-y-1.5 border-l border-ok/40 pl-3 leading-relaxed text-muted">
         {gloss && <p>{gloss}</p>}
         {item.provenance.map((pv, i) => (
           <p key={i}>
@@ -91,7 +91,7 @@ function Why({ item, gloss }: { item: ProgramItem; gloss?: string }) {
 function Proposal({ item, label, gloss }: { item: ProgramItem; label: string; gloss?: string }) {
   const meta = [item.runWith && `with ${shortOrg(item.runWith)}`, km(item.partner?.distanceKm), money(item.amount)].filter(Boolean);
   return (
-    <div className="slide-in rounded-md border border-ok/25 border-l-[3px] border-l-ok bg-card px-3.5 py-3">
+    <div className="gn-proposal slide-in rounded-md border border-ok/40 bg-card px-3.5 py-3">
       <p className="text-[11px] font-medium uppercase tracking-wider text-ok-text">
         {label} <span className="font-normal normal-case tracking-normal text-muted">· {BUCKETS[item.bucket].label}</span>
       </p>
@@ -227,7 +227,7 @@ function NoSwapGroup({ rows }: { rows: { row: AuditRow; index: number }[] }) {
             </span>
           </span>
         </summary>
-        <ol className="mt-3 space-y-2 border-l-2 border-hairline pl-4 md:ml-[3.75rem]">
+        <ol className="mt-3 space-y-2 border-l border-hairline pl-4 md:ml-[3.75rem]">
           {rows.map(({ row, index }) => (
             <li key={index} className="grid grid-cols-[2rem_minmax(0,1fr)] gap-x-3 text-sm">
               <span className="font-mono text-xs tabular-nums text-muted">{num(index + 1)}</span>

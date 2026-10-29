@@ -176,7 +176,7 @@ export function BallotResults({ slug, townName, items }: { slug: string; townNam
       )}
 
       {/* Decision */}
-      <p className="mt-8 border-l-2 border-ink pl-3 text-base font-semibold leading-snug">The community committee decides; the ranking informs it.</p>
+      <p className="mt-8 border-l border-ink pl-3 text-base font-semibold leading-snug">The community committee decides; the ranking informs it.</p>
 
       <div className="mt-6 flex flex-wrap items-center gap-2">
         <Link href={`/memo/${slug}`} className={`${primaryCta} min-h-11`}>

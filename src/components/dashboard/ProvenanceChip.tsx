@@ -11,7 +11,7 @@ export function ProvenanceChip({ item }: { item: ProgramItem }) {
         <span className="text-muted/80">Why</span>
         <Chevron className="chev h-3 w-3" />
       </summary>
-      <ul className="mt-2 space-y-1 border-l-2 border-ok/40 pl-3 leading-relaxed text-muted">
+      <ul className="mt-2 space-y-1 border-l border-ok/40 pl-3 leading-relaxed text-muted">
         {item.provenance.map((p, i) => (
           <li key={i}>
             <span className="font-mono text-ink">{p.signal}</span>: {p.detail}

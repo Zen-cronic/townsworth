@@ -40,6 +40,10 @@
   --band-pen: #f6a58f;
   --band-amber: #e6c88c;
   --band-contour: #c08447;
+  /* Type roles. Themes swap the faces behind these three names. */
+  --font-body: var(--font-public-sans);
+  --font-display: var(--font-public-sans);
+  --font-data: var(--font-plex-mono);
   --sheet-shadow: 0 1px 2px color-mix(in srgb, var(--ink) 6%, transparent), 0 8px 24px -12px color-mix(in srgb, var(--ink) 18%, transparent);
 }
 
@@ -66,14 +70,14 @@
   --color-amber: var(--amber);
   --color-amber-wash: var(--amber-wash);
   --color-focus: var(--focus);
-  --font-sans: var(--font-public-sans);
-  --font-mono: var(--font-plex-mono);
+  --font-sans: var(--font-body);
+  --font-mono: var(--font-data);
 }
 
 body {
   background: var(--concrete);
   color: var(--ink);
-  font-family: var(--font-public-sans), system-ui, sans-serif;
+  font-family: var(--font-body), system-ui, sans-serif;
 }
 
 /* Keyboard focus: one consistent ring on every interactive element. */

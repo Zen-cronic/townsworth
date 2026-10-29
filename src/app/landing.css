@@ -27,8 +27,8 @@
   --l-band-ok: var(--band-ok);
   --l-band-pen: var(--band-pen);
   --l-band-amber: var(--band-amber);
-  --l-mono: var(--font-plex-mono), ui-monospace, "SFMono-Regular", Menlo, monospace;
-  --l-sans: var(--font-public-sans), system-ui, sans-serif;
+  --l-mono: var(--font-data), ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --l-sans: var(--font-body), system-ui, sans-serif;
   --l-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
   /* Sticky header height, measured: 53px below 768px, 55px from 768px where the header search
      shows; the host-community row adds 37px. Set per variant below. */
@@ -242,20 +242,6 @@ a:focus-visible .lp-chev {
 /* Hero */
 .lp-hero {
   padding: 64px 0 120px;
-}
-/* Survey grid: engineering paper behind the hero, faded at the edges. */
-.lp-hero::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background-image:
-    linear-gradient(var(--l-hairline) 1px, transparent 1px),
-    linear-gradient(90deg, var(--l-hairline) 1px, transparent 1px);
-  background-size: 32px 32px;
-  background-position: -1px -1px;
-  mask-image: radial-gradient(ellipse 70% 80% at 72% 40%, #000 20%, transparent 75%);
-  opacity: 0.8;
 }
 .lp-hero-grid {
   position: relative;
@@ -551,8 +537,7 @@ a:focus-visible .lp-chev {
   box-decoration-break: slice;
 }
 .lp-swap {
-  border: 1px solid var(--l-hairline);
-  border-left: 2px solid var(--l-ok);
+  border: 1px solid color-mix(in srgb, var(--l-ok) 40%, var(--l-hairline));
   border-radius: 4px;
   background: var(--l-card);
   padding: 12px 14px;
@@ -1632,10 +1617,6 @@ a:focus-visible .lp-chev {
 @media (prefers-reduced-motion: no-preference) {
   @supports (animation-timeline: view()) {
     .lp-fill {
-      color: transparent;
-      background: linear-gradient(var(--l-paper), var(--l-paper)) 0 0 / 100% 100% no-repeat, var(--l-band-quiet);
-      -webkit-background-clip: text;
-      background-clip: text;
       animation: lp-fill linear forwards;
       animation-timeline: view();
       animation-range: entry 0% cover 45%;
@@ -1644,10 +1625,10 @@ a:focus-visible .lp-chev {
 }
 @keyframes lp-fill {
   from {
-    background-size: 0% 100%, auto;
+    color: var(--l-band-quiet);
   }
   to {
-    background-size: 100% 100%, auto;
+    color: var(--l-paper);
   }
 }
 
@@ -2048,8 +2029,7 @@ a:focus-visible .lp-chev {
 .gp-notice {
   margin-top: 4px;
   padding: 12px 16px;
-  border-left: 2px solid var(--l-ok);
-  border-radius: 0 4px 4px 0;
+  border-radius: 4px;
   background: var(--l-concrete);
   color: var(--l-ink) !important;
   font-size: 0.9375rem;

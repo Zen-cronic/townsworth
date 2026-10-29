@@ -28,7 +28,7 @@ const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one :
 
 const CARD = {
   kept: "rounded-md border border-hairline bg-paper px-3.5 py-3",
-  proposed: "slide-in rounded-md border border-ok/30 border-l-[3px] border-l-ok bg-paper px-3.5 py-3 shadow-[0_1px_2px_color-mix(in_srgb,var(--ink)_5%,transparent)]",
+  proposed: "gn-proposal slide-in rounded-md border border-ok/40 bg-paper px-3.5 py-3 shadow-[0_1px_2px_color-mix(in_srgb,var(--ink)_5%,transparent)]",
   none: "rounded-md border border-dashed border-rule px-3.5 py-3",
 };
 

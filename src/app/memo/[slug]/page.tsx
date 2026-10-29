@@ -332,7 +332,7 @@ export default async function MemoPage({
               </tfoot>
             </table>
 
-            <div id="fund-note" className="mt-6 scroll-mt-24 border-l-2 border-rule pl-3 text-xs leading-relaxed text-muted">
+            <div id="fund-note" className="mt-6 scroll-mt-24 border-l border-rule pl-3 text-xs leading-relaxed text-muted">
               <p>
                 <strong className="font-semibold text-ink">Annual fund {money(program.annualFund)}.</strong> {town.fundNote}
               </p>
