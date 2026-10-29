@@ -31,7 +31,7 @@ export function profileOf(places: QlooEntity[], opts: { artists?: string[]; voca
     localPlaces: places,
     placeCount: places.length,
     affinityRanked: places.length,
-    placeMeta: new Map(places.map((p, i) => [p.id, { affinityRank: i + 1, host: true, city: town.name }])),
+    placeMeta: new Map(places.map((p, i) => [p.id, { affinityRank: i + 1, host: true, inTown: true, city: town.name }])),
     taste,
     strength: { brand: strength(false), artist: strength(taste.artist.length > 0), tv_show: strength(false), podcast: strength(false) },
     excluded: [],

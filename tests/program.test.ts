@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { buildProgram, type Program } from "../src/lib/plan";
+import { buildProgram, OPEN_GRANT_ID, type Program } from "../src/lib/plan";
 import { NORMAL_PLACES, profileOf } from "./fixtures";
 
 function assertReconciles(p: Program, annualFund: number) {
@@ -29,10 +29,20 @@ test("a small fund scales unit costs down and still reconciles", () => {
   assert.match(p.costNote, /scaled down/);
 });
 
-test("a thin profile with no places: nothing itemized, the whole fund unassigned", () => {
+test("a thin profile with no places: only the open grant cycle is itemized, the rest is reserve", () => {
   const fund = 500_000;
   const p = buildProgram(profileOf([], { thin: true }), fund);
+  assert.deepEqual(p.items.map((i) => i.id), [OPEN_GRANT_ID]);
+  assert.equal(p.items[0].partner, undefined);
+  assert.equal(p.unassigned, 2 * fund - p.items[0].amount);
+  assertReconciles(p, fund);
+});
+
+test("when Qloo failed, nothing is itemized, not even the open cycle", () => {
+  const fund = 500_000;
+  const profile = profileOf([], { thin: true });
+  profile.failedCalls = [{ label: "places", params: {}, status: 0, ok: false, count: 0, ms: 0 }];
+  const p = buildProgram(profile, fund);
   assert.equal(p.items.length, 0);
-  assert.equal(p.unassigned, 2 * fund);
   assertReconciles(p, fund);
 });
