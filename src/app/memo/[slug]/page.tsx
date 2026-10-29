@@ -5,7 +5,8 @@ import { notFound } from "next/navigation";
 import { AgentDrafts } from "@/components/AgentDrafts";
 import { AppHeader } from "@/components/AppHeader";
 import { PilotLink } from "@/components/PilotLink";
-import { AllocationBar } from "@/components/dashboard/AllocationBar";
+import { FundBar, LineStrip, SessionTimeline, fundSplit, lineComposition, sessionsByBucket, splitFigures } from "@/components/charts";
+import { Figure } from "@/components/dashboard/Figure";
 import { Chevron, ChevronLeft, Download } from "@/components/dashboard/Icons";
 import { PrintButton } from "@/components/dashboard/PrintButton";
 import { parseFund, secondaryCta } from "@/components/dashboard/ui";
@@ -39,6 +40,36 @@ function SectionTitle({ n, children, note }: { n: string; children: React.ReactN
         {children}
       </h2>
       {note && <p className="mt-0.5 pl-7 text-sm text-muted">{note}</p>}
+    </div>
+  );
+}
+
+// Amounts in a cited commitment are set in the figure face so they can be scanned.
+function Figures({ text }: { text: string }) {
+  const parts = splitFigures(text);
+  return (
+    <>
+      {parts.map((p, i) =>
+        i % 2 === 1 ? (
+          <b key={i} className="memo-fig">
+            {p}
+          </b>
+        ) : (
+          p
+        ),
+      )}
+    </>
+  );
+}
+
+function MemoFigure({ value, label, tone, children }: { value: string; label: string; tone?: "pen" | "ok"; children?: React.ReactNode }) {
+  return (
+    <div className="memo-cell">
+      <p className={`memo-cell-v ${tone ? `is-${tone}` : ""}`}>
+        <Figure value={value} />
+      </p>
+      <p className="memo-cell-k">{label}</p>
+      {children}
     </div>
   );
 }
@@ -80,6 +111,10 @@ export default async function MemoPage({
   const byBucket = (Object.keys(BUCKETS) as Bucket[])
     .map((b) => ({ b, items: program.items.filter((i) => i.bucket === b) }))
     .map((g) => ({ ...g, amount: g.items.reduce((s, i) => s + i.amount, 0) }));
+  const comp = lineComposition(audit);
+  const fundParts = fundSplit(program.items, program.unassigned);
+  const sessions = sessionsByBucket(program.items);
+  const struck = generic + unverified;
   const exportBase = `/api/export/${town.slug}?fund=${program.annualFund}`;
   const prepared = new Intl.DateTimeFormat("en-US", { day: "numeric", month: "long", year: "numeric", timeZone: "America/Toronto" }).format(new Date());
 
@@ -146,13 +181,17 @@ export default async function MemoPage({
                 </div>
               ))}
             </dl>
-            <p className="mt-5 leading-relaxed">
+            <div className="memo-figs mt-6">
+              <MemoFigure value={`${struck} of ${audit.length}`} label={struck === 1 ? "draft line struck" : "draft lines struck"} tone={struck ? "pen" : undefined}>
+                {audit.length > 0 && <LineStrip comp={comp} size="sm" />}
+              </MemoFigure>
+              <MemoFigure value={String(program.items.length)} label={`program items, ${partnerPlaces} with a local partner`} tone="ok" />
+              <MemoFigure value={money(program.totalAllocated)} label="itemized over 24 months" />
+              <MemoFigure value={money(program.unassigned)} label="held in reserve for the committee" />
+            </div>
+            <p className="mt-4 text-sm leading-relaxed text-muted">
               <StruckSummary generic={generic} unverified={unverified} total={audit.length} />
-              {keptInstitutions > 0 && `; ${keptInstitutions} ${keptInstitutions === 1 ? "institution stays" : "institutions stay"} for the committee to confirm`}.{" "}
-              <strong className="font-semibold">{program.items.length} program items</strong> ({partnerPlaces} with a local partner):{" "}
-              <strong className="font-mono font-medium tabular-nums">{money(program.totalAllocated)}</strong> itemized and{" "}
-              <strong className="font-mono font-medium tabular-nums">{money(program.unassigned)}</strong> held in reserve, of the {money(program.twoYearFund)}{" "}
-              24-month fund.
+              {keptInstitutions > 0 && `; ${keptInstitutions} ${keptInstitutions === 1 ? "institution stays" : "institutions stay"} for the committee to confirm`}.
             </p>
           </header>
 
@@ -161,6 +200,18 @@ export default async function MemoPage({
             <SectionTitle n="1" note="The cultural program below is in addition to these, never instead of them.">
               Material commitments, from the developer&apos;s filings
             </SectionTitle>
+            <ul className="memo-topics mt-4" aria-label="Material commitments by topic">
+              {MATERIAL.map(([k]) => {
+                const n = commitments?.items.filter((c) => c.topic === k).length ?? 0;
+                return (
+                  <li key={k} className={n ? "is-cited" : "is-missing"}>
+                    <span className="memo-topic-k">{k}</span>
+                    <span className="memo-topic-v">{n ? n : "–"}</span>
+                    <span className="memo-topic-n">{n ? (n === 1 ? "cited figure" : "cited figures") : "not yet entered"}</span>
+                  </li>
+                );
+              })}
+            </ul>
             {commitments && (
               <dl className="mt-4 divide-y divide-hairline rounded-md border border-hairline text-sm">
                 {MATERIAL.filter(([k]) => commitments.items.some((c) => c.topic === k)).map(([k]) => (
@@ -171,7 +222,7 @@ export default async function MemoPage({
                         .filter((c) => c.topic === k)
                         .map((c, i) => (
                           <p key={i} className="leading-relaxed">
-                            {c.text}{" "}
+                            <Figures text={c.text} />{" "}
                             <a href={c.url} target="_blank" rel="noopener noreferrer" className="text-xs text-muted underline decoration-rule underline-offset-2 [overflow-wrap:anywhere] hover:text-ink">
                               {c.source}
                             </a>
@@ -208,9 +259,17 @@ export default async function MemoPage({
             <SectionTitle n="2" note={`${program.items.length} program items across ${byBucket.filter((g) => g.items.length).length} areas; ${partnerPlaces} name a local partner.`}>
               The program
             </SectionTitle>
-            <div className="mt-4">
-              <AllocationBar totals={byBucket.map(({ b, amount }) => ({ b, amount }))} total={program.totalAllocated} />
+            <div className="mt-5">
+              <FundBar parts={fundParts.parts} total={fundParts.total} caption={`The ${money(fundParts.total)} 24-month fund by program area`} />
             </div>
+            {sessions.length > 0 && (
+              <div className="mt-6 break-inside-avoid border-t border-hairline pt-4">
+                <h3 className="text-sm font-semibold">Sessions over the 24 months</h3>
+                <div className="mt-3">
+                  <SessionTimeline rows={sessions} />
+                </div>
+              </div>
+            )}
 
             <table className="mt-6 w-full text-sm">
               <thead>
