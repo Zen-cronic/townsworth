@@ -21,6 +21,7 @@ import { ProofBand, type ProofStat } from "@/components/landing/ProofBand";
 import { SpecBand } from "@/components/landing/SpecBand";
 import { specsFor } from "@/components/landing/specs";
 import { TownGrid, type TownPick } from "@/components/landing/TownGrid";
+import { kindOf } from "@/components/ui/labels";
 import { isKept } from "@/lib/audit";
 import { computeProof } from "@/lib/proof";
 import { money, runTown } from "@/lib/run";
@@ -63,10 +64,7 @@ export default async function Home() {
         (a.replacement!.partner!.affinityRank ?? 1e6) - (b.replacement!.partner!.affinityRank ?? 1e6),
     );
   // With nothing struck, the card shows a kept institution and the local partner added alongside it.
-  const preview = [swaps[0] ?? struck.find((r) => r.replacement) ?? kept.find((r) => r.alongside?.partner) ?? kept[0]].filter(Boolean)
-    .filter((r): r is PreviewRow => !!r)
-    .filter((r, i, all) => all.findIndex((x) => x.n === r.n) === i)
-    .sort((a, b) => a.n - b.n);
+  const preview: PreviewRow | undefined = swaps[0] ?? struck.find((r) => r.replacement) ?? kept.find((r) => r.alongside?.partner) ?? kept[0];
 
   const t = proof.totals;
   const heroProofEarly = proof.towns.find((p) => p.slug === HERO_TOWN.slug);
@@ -100,7 +98,7 @@ export default async function Home() {
       .flatMap((type) => r.profile.taste[type].filter((x) => x.distinct).map((x) => ({ type, x })))
       .sort((a, b) => a.x.rank - b.x.rank)[0];
     picksByTown[TOWNS[i].slug] = {
-      pick: top?.partner ? { kind: top.title.split(/: | at /)[0], partner: top.partner.name, km: top.partner.distanceKm } : undefined,
+      pick: top?.partner ? { kind: kindOf(top.title), partner: top.partner.name, km: top.partner.distanceKm } : undefined,
       signal: signal ? { name: signal.x.entity.name, type: SIGNAL_TYPE[signal.type] } : undefined,
     };
   });
@@ -125,7 +123,7 @@ export default async function Home() {
     items: partnerItems
       .filter((it, i, all) => all.findIndex((x) => x.bucket === it.bucket) === i)
       .slice(0, 3)
-      .map((it) => ({ kind: it.title.split(/: | at |, /)[0], partner: short(it.partner!.name), amount: money(it.amount) })),
+      .map((it) => ({ kind: kindOf(it.title), partner: short(it.partner!.name), amount: money(it.amount) })),
     memoHref: facts.memoHref,
     ballotHref: facts.ballotHref,
     auditHref,
@@ -174,7 +172,7 @@ export default async function Home() {
               </div>
             </div>
 
-            <AuditPreview row={preview[0]} townLabel={heroLabel} href={auditHref} kept={kept.length} struck={struck.length} added={qlooAdds.length} />
+            <AuditPreview row={preview} townLabel={heroLabel} href={auditHref} kept={kept.length} struck={struck.length} added={qlooAdds.length} />
           </div>
           <MotionToggle className="lp-motion-corner" />
         </section>

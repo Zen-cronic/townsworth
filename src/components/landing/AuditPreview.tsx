@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { isKept, type AuditRow } from "@/lib/audit";
 import type { ProgramItem } from "@/lib/plan";
+import { kindOf, shortOrg, shortSignal } from "@/components/ui/labels";
 import { Chevron } from "./Chevron";
 import { clip } from "./clip";
 
@@ -11,13 +12,6 @@ export interface PreviewRow extends AuditRow {
 const usd = (n: number) =>
   new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n);
 
-// Provenance reads in plain words on the landing; the town page keeps the full signal.
-export const plainSignal = (signal: string) =>
-  signal.replace(/^(?:Qloo place|Local favourite) · #(\d+) by local affinity$/, "#$1 local affinity").replace(/^Qloo place/, "Local place");
-
-// Short names for display: "Racine County Economic Development Corporation" reads "Racine County EDC".
-export const shortOrg = (name: string) => name.replace(/ Economic Development Corporation$/, " EDC").split(/ \| /)[0];
-
 function verdictLabel(row: AuditRow) {
   if (!isKept(row.verdict)) return row.verdict === "generic" ? "Struck · not local" : "Struck · can’t confirm";
   if (row.verdict === "institution") return `Kept · ${shortOrg(row.named ?? "institution")}`;
@@ -27,7 +21,7 @@ function verdictLabel(row: AuditRow) {
 
 // The local partner: what it is and where, one meta line, and the Qloo signal.
 function SwapCard({ item: r }: { item: ProgramItem }) {
-  const kind = r.title.split(/ hosted at |: | at |, /)[0];
+  const kind = kindOf(r.title);
   const meta = [r.runWith && `with ${shortOrg(r.runWith)}`, r.partner?.distanceKm != null && `${r.partner.distanceKm} km`, usd(r.amount)].filter(Boolean);
   return (
     <div className="lp-swap">
@@ -39,7 +33,7 @@ function SwapCard({ item: r }: { item: ProgramItem }) {
       {r.provenance[0] && (
         <span className="lp-chip">
           <span aria-hidden="true" className="lp-dot" />
-          {plainSignal(r.provenance[0].signal)}
+          {shortSignal(r.provenance[0].signal)}
         </span>
       )}
     </div>
