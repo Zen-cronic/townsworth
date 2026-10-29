@@ -27,8 +27,8 @@ export interface SearchChecks {
 }
 
 // Qloo name search for up to 8 distinct named partners that neither Qloo's places near the site nor
-// OpenStreetMap already confirm. Uncached, through the shared Qloo limiter; a failed search leaves
-// the line as it was. Never used for the preset towns' frozen plans.
+// OpenStreetMap already confirm. Uncached, through the shared Qloo limiter; a failed search (an error
+// answer, no answer or a thrown error) leaves the line as it was and is counted in `failures`. Never used for the preset towns' frozen plans.
 export async function qlooSearchChecks(inputs: AuditInput[], profile: TownProfile, town: Town): Promise<SearchChecks> {
   const started = Date.now();
   const names = new Map<string, string>();
@@ -41,8 +41,8 @@ export async function qlooSearchChecks(inputs: AuditInput[], profile: TownProfil
   }
   const results = await Promise.all(
     [...names].map(async ([key, named]) => {
-      const res = await searchPlaces(named, town.lat, town.lon);
-      return [key, res.ok ? matchSearchHit(named, res.entities, town) : undefined] as const;
+      const res = await searchPlaces(named, town.lat, town.lon).catch(() => null);
+      return [key, res?.ok ? matchSearchHit(named, res.entities, town) : undefined] as const;
     }),
   );
   const matches = new Map<string, { name: string; km: number } | null>();

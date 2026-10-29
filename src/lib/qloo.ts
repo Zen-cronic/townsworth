@@ -1,4 +1,5 @@
 import "server-only";
+import { SEARCH_RADIUS_KM } from "./geo";
 
 // Thin server-side client for the Qloo Insights API (hackathon environment).
 // Responses are cached privately by Next's data cache; never write them to the repo.
@@ -159,7 +160,8 @@ async function fetchWithRetry(url: string, key: string, noStore = false): Promis
 }
 
 // One Qloo GET, shared by every endpoint: the key check, timing and status. A missing key throws (a
-// configuration error, never "no results"); a request with no answer comes back as status 0.
+// configuration error, never "no results"); a request with no answer, or a 2xx whose body isn't
+// JSON, comes back as status 0, so it is reported as a failed call rather than as no results.
 async function qlooGet<T>(path: string, params: Record<string, string>, { noStore = false } = {}) {
   const key = process.env.QLOO_API_KEY;
   if (!key) throw new Error("QLOO_API_KEY is not set");
@@ -168,8 +170,8 @@ async function qlooGet<T>(path: string, params: Record<string, string>, { noStor
   let body: T | null = null;
   try {
     const res = await fetchWithRetry(`${BASE}${path}?${new URLSearchParams(params)}`, key, noStore);
-    status = res.status;
     body = res.ok ? ((await res.json()) as T) : null;
+    status = res.status;
   } catch {
     // No answer at all: keep status 0 so the UI reports an error rather than thin data.
   }
@@ -178,8 +180,9 @@ async function qlooGet<T>(path: string, params: Record<string, string>, { noStor
 
 // A failed call is recorded as an error, never silently treated as "no results" (thin data).
 async function insights(label: string, params: Record<string, string>, type: EntityType): Promise<QlooResult> {
-  const res = await qlooGet<{ results?: { entities?: RawEntity[] } }>("/v2/insights", params);
-  const entities = (res.body?.results?.entities ?? []).map((r) => parseEntity(r, type));
+  const res = await qlooGet<{ results?: { entities?: unknown } }>("/v2/insights", params);
+  const raw = (Array.isArray(res.body?.results?.entities) ? res.body.results.entities : []) as RawEntity[];
+  const entities = raw.filter((r) => typeof r?.entity_id === "string" && typeof r?.name === "string").map((r) => parseEntity(r, type));
   return { entities, call: { label, params, status: res.status, ok: res.ok, count: entities.length, ms: res.ms } };
 }
 
@@ -243,8 +246,9 @@ export interface QlooAudience {
 // The life-stage list, so the "Parents With Young Children" id is read from Qloo at runtime.
 export async function lifeStageAudiences(): Promise<{ audiences: QlooAudience[]; call: QlooCall }> {
   const params = { "filter.parents.types": "urn:audience:life_stage", take: "50" };
-  const res = await qlooGet<{ results?: { audiences?: { id?: unknown; name?: unknown }[] } }>("/v2/audiences", params);
-  const audiences = (res.body?.results?.audiences ?? [])
+  const res = await qlooGet<{ results?: { audiences?: unknown } }>("/v2/audiences", params);
+  const list = (Array.isArray(res.body?.results?.audiences) ? res.body.results.audiences : []) as { id?: unknown; name?: unknown }[];
+  const audiences = list
     .filter((a): a is { id: string; name: string } => typeof a?.id === "string" && typeof a?.name === "string")
     .map((a) => ({ id: a.id, name: a.name }));
   return { audiences, call: { label: "life-stage groups", params, status: res.status, ok: res.ok, count: audiences.length, ms: res.ms } };
@@ -258,7 +262,7 @@ export interface QlooSearchResult {
 
 // Name lookup for one venue a pasted plan mentions, near the site. Never cached: the query comes
 // from user text. The radius filter is a hint to Qloo's ranking, so callers still check distance.
-export async function searchPlaces(query: string, lat: number, lon: number, radiusKm = 25, take = 5): Promise<QlooSearchResult> {
+export async function searchPlaces(query: string, lat: number, lon: number, radiusKm = SEARCH_RADIUS_KM, take = 5): Promise<QlooSearchResult> {
   const params = { query, types: "urn:entity:place", "filter.location": `${lat},${lon}`, "filter.radius": String(radiusKm), take: String(take) };
   const res = await qlooGet<{ results?: unknown }>("/search", params, { noStore: true });
   const raw = (Array.isArray(res.body?.results) ? res.body.results : []) as RawEntity[];

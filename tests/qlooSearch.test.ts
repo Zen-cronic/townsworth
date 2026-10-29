@@ -74,6 +74,18 @@ test("searchPlaces is never cached and sends only the name and the site", async 
   });
 });
 
+test("a search that throws (no key) counts as a failure instead of failing the check", async () => {
+  const key = process.env.QLOO_API_KEY;
+  delete process.env.QLOO_API_KEY;
+  try {
+    const profile = profileOf(NORMAL_PLACES);
+    const search = await qlooSearchChecks([{ text: "Family day with Riverside Roller Rink", named: "Riverside Roller Rink", osm: { found: false } }], profile, profile.town);
+    assert.deepEqual([search.checked, search.failures], [1, 1]);
+  } finally {
+    if (key !== undefined) process.env.QLOO_API_KEY = key;
+  }
+});
+
 test("a failed search leaves the line unverified and doesn't throw; known places are not searched", async () => {
   process.env.QLOO_API_KEY ??= "test-key";
   const urls: string[] = [];
