@@ -1,28 +1,57 @@
 import Link from "next/link";
 import { TOWNS } from "@/lib/towns";
 import { HeaderTownSearch } from "@/components/TownSearchForm";
+import { PRODUCT_NAME } from "@/components/landing/brand";
 
 const navLink =
   "rounded-md px-2.5 py-1.5 text-sm transition-colors duration-150 hover:bg-concrete hover:text-ink active:bg-hairline";
 
-// `towns={false}` hides the host-community switcher (the landing page shows only the wordmark and nav).
-export function AppHeader({ active, page, towns = true }: { active?: string; page?: "proof" | "judges"; towns?: boolean }) {
+// One header on every page: the wordmark and primary links on top, and on product pages a thin
+// second row that switches host community. Opaque paper, so nothing shows through when scrolled.
+export function AppHeader({ active, page, towns = true }: { active?: string; page?: "proof" | "judges" | "check"; towns?: boolean }) {
+  const searchIcon = (
+    <svg aria-hidden viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-4 w-4">
+      <circle cx="7" cy="7" r="4.25" />
+      <path d="m10.25 10.25 3 3" strokeLinecap="round" />
+    </svg>
+  );
+  const current = (p: string) => (page === p ? "page" : undefined);
   return (
-    <header className="no-print sticky top-0 z-30 border-b border-rule bg-paper/[0.98] backdrop-blur">
-      <div className="mx-auto flex max-w-[1200px] flex-wrap items-center gap-x-5 gap-y-2 px-4 py-2.5 sm:px-6">
-        <Link href="/" className="flex items-center gap-2 rounded-md py-1 pr-1 font-semibold tracking-tight">
+    <header className="no-print sticky top-0 z-30 border-b border-hairline bg-paper">
+      <div className="mx-auto flex max-w-[1240px] items-center gap-x-4 px-4 py-2.5 sm:px-8">
+        <Link href="/" className="flex shrink-0 items-center gap-2 whitespace-nowrap rounded-md py-1 pr-1 font-semibold tracking-tight">
           <span aria-hidden className="grid h-5 w-5 place-items-center rounded-[4px] bg-hivis">
             <span className="h-[3px] w-2.5 rounded-full bg-paper" />
           </span>
-          Good Neighbor
+          {PRODUCT_NAME}
         </Link>
+        <nav aria-label="Primary" className="ml-auto flex items-center gap-0.5 text-muted">
+          <HeaderTownSearch />
+          <Link href="/find" title="Try any town" className={`${navLink} inline-flex items-center md:hidden`}>
+            {searchIcon}
+            <span className="sr-only">Try any town</span>
+          </Link>
+          <Link href="/check" aria-current={current("check")} className={`${navLink} ${page === "check" ? "text-ink" : ""}`}>
+            <span className="sm:hidden">Check</span>
+            <span className="hidden sm:inline">Check your plan</span>
+          </Link>
+          <Link href="/proof" aria-current={current("proof")} className={`${navLink} ${page === "proof" ? "text-ink" : ""}`}>
+            Proof
+          </Link>
+          <Link href="/judges" aria-current={current("judges")} className={`${navLink} ${page === "judges" ? "text-ink" : ""}`}>
+            <span className="sm:hidden">Tour</span>
+            <span className="hidden sm:inline">Guided path</span>
+          </Link>
+        </nav>
+      </div>
 
-        {towns && (
+      {towns && (
+        <div className="border-t border-hairline bg-concrete/60">
           <nav
             aria-label="Host communities"
-            className="no-scrollbar fade-x order-3 -mx-4 flex w-[calc(100%+2rem)] items-center gap-0.5 overflow-x-auto px-4 pb-0.5 lg:order-2 lg:mx-0 lg:w-auto lg:px-0"
+            className="no-scrollbar fade-x mx-auto flex max-w-[1240px] items-center gap-0.5 overflow-x-auto px-4 py-1 sm:px-8"
           >
-            <span className="mr-1 hidden shrink-0 text-xs text-muted/80 xl:inline">Host community</span>
+            <span className="mr-2 hidden shrink-0 font-mono text-[11px] uppercase tracking-wider text-muted sm:inline">Host community</span>
             {TOWNS.map((t) => {
               const on = active === t.slug;
               return (
@@ -31,60 +60,20 @@ export function AppHeader({ active, page, towns = true }: { active?: string; pag
                   href={`/town/${t.slug}`}
                   aria-current={on ? "page" : undefined}
                   title={`${t.name}, ${t.region}`}
-                  className={`shrink-0 rounded-md px-2.5 py-1.5 text-sm transition-colors duration-150 ${
-                    on
-                      ? "font-medium text-ink underline decoration-ink decoration-2 underline-offset-[7px]"
-                      : "text-muted hover:bg-concrete hover:text-ink active:bg-hairline"
+                  className={`shrink-0 rounded-md px-2.5 py-1 text-sm transition-colors duration-150 ${
+                    on ? "bg-paper font-medium text-ink shadow-[0_0_0_1px_var(--hairline)]" : "text-muted hover:bg-paper hover:text-ink"
                   }`}
                 >
                   {t.name}
                 </Link>
               );
             })}
-            <Link
-              href="/find"
-              className="shrink-0 rounded-md px-2.5 py-1.5 text-sm text-ink underline decoration-rule underline-offset-[7px] transition-colors duration-150 hover:bg-concrete active:bg-hairline md:hidden"
-            >
+            <Link href="/find" className="shrink-0 rounded-md px-2.5 py-1 text-sm text-ink underline decoration-rule underline-offset-4 hover:bg-paper">
               Any town
             </Link>
           </nav>
-        )}
-
-        <nav aria-label="Primary" className="order-2 ml-auto flex items-center gap-0.5 text-muted lg:order-3">
-          <HeaderTownSearch />
-          {/* Phones: the town search is an icon link to /find */}
-          <Link href="/find" title="Try any town" className={`${navLink} inline-flex items-center md:hidden`}>
-            <svg aria-hidden viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-4 w-4">
-              <circle cx="7" cy="7" r="4.25" />
-              <path d="m10.25 10.25 3 3" strokeLinecap="round" />
-            </svg>
-            <span className="sr-only">Try any town</span>
-          </Link>
-          {/* At lg the six towns leave no room for the input, so the search is an icon link */}
-          <Link href="/find" title="Try any town" className={`${navLink} hidden items-center lg:inline-flex xl:hidden`}>
-            <svg aria-hidden viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-4 w-4">
-              <circle cx="7" cy="7" r="4.25" />
-              <path d="m10.25 10.25 3 3" strokeLinecap="round" />
-            </svg>
-            <span className="sr-only">Try any town</span>
-          </Link>
-          <Link href="/check" className={navLink}>
-            <span className="sm:hidden">Check</span>
-            <span className="hidden sm:inline">Check your plan</span>
-          </Link>
-          <Link href="/proof" aria-current={page === "proof" ? "page" : undefined} className={`${navLink} ${page === "proof" ? "text-ink" : ""}`}>
-            Proof
-          </Link>
-          <Link
-            href="/judges"
-            aria-current={page === "judges" ? "page" : undefined}
-            className={`${navLink} ${page === "judges" ? "text-ink" : ""}`}
-          >
-            <span className="sm:hidden">Guide</span>
-            <span className="hidden sm:inline">Guided path</span>
-          </Link>
-        </nav>
-      </div>
+        </div>
+      )}
     </header>
   );
 }

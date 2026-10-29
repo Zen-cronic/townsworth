@@ -2379,3 +2379,381 @@ a:focus-visible .lp-chev {
     transition: none !important;
   }
 }
+
+/* Compact hero card (overrides above): one featured line, one partner, one signal. */
+.lp-preview .lp-preview-head {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+.lp-preview-title {
+  font-size: 1.125rem;
+}
+.lp-preview-open {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  background: var(--l-ink);
+  color: var(--l-paper);
+  transition: background-color 150ms;
+}
+.lp-preview-open:hover {
+  background: #000;
+}
+.lp-preview-lead {
+  align-items: center;
+}
+.lp-preview .lp-tally {
+  display: block;
+  font-family: var(--l-mono);
+  font-size: 13px;
+  color: var(--l-muted);
+}
+.lp-preview .lp-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+  padding: 18px 22px 22px;
+  border-bottom: 0;
+}
+.lp-preview .lp-row > * {
+  grid-column: 1;
+}
+.lp-preview .lp-draft {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--l-muted);
+}
+.lp-preview .lp-swap {
+  gap: 6px;
+}
+.lp-preview .lp-swap .lp-chip {
+  width: fit-content;
+  margin-top: 4px;
+}
+
+/* Shared UI: the same tokens, type and shells on every page (src/components/ui). */
+.ui-head {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 4fr);
+  gap: 12px 48px;
+  align-items: end;
+  margin-bottom: 32px;
+}
+.ui-head.is-sm {
+  margin-bottom: 16px;
+  align-items: center;
+}
+.ui-head-main {
+  display: grid;
+  gap: 8px;
+}
+.ui-head-aside {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+.ui-head-aside .lp-section-lede {
+  text-align: right;
+}
+.ui-h3 {
+  font-size: 1.375rem;
+  line-height: 1.2;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+.ui-card {
+  background: var(--l-paper);
+  border-radius: 8px;
+  box-shadow: 0 0 0 1px var(--l-hairline), 0 1px 2px rgb(34 33 31 / 0.05);
+}
+.ui-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: var(--l-concrete);
+  box-shadow: inset 0 0 0 1px var(--l-hairline);
+  font-family: var(--l-mono);
+  font-size: 11.5px;
+  line-height: 1.3;
+  color: var(--l-ink);
+}
+.ui-chip-dot {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--l-ok);
+}
+.ui-chip.is-pen {
+  color: var(--l-hivis-text);
+  background: var(--hivis-wash, #fbe3d6);
+  box-shadow: none;
+}
+.ui-chip.is-pen .ui-chip-dot {
+  background: var(--l-hivis);
+}
+.ui-chip.is-warn {
+  color: var(--l-amber-text);
+  background: var(--l-amber-wash);
+  box-shadow: none;
+}
+.ui-chip.is-warn .ui-chip-dot {
+  background: #c9a640;
+}
+.ui-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+.ui-stat {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  padding: 20px 24px;
+  border-radius: 8px;
+  background: var(--l-paper);
+  box-shadow: 0 0 0 1px var(--l-hairline), 0 1px 2px rgb(34 33 31 / 0.05);
+}
+.ui-stat-v {
+  font-size: clamp(2rem, 1.6rem + 1vw, 2.75rem);
+  line-height: 1;
+  font-weight: 500;
+  letter-spacing: -0.04em;
+}
+.ui-stat-v.is-pen {
+  color: var(--l-hivis-text);
+}
+.ui-stat-v.is-ok {
+  color: var(--l-ok-text);
+}
+.ui-stat-k {
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+.ui-more summary {
+  width: fit-content;
+  cursor: pointer;
+  font-size: 0.8125rem;
+  color: var(--l-muted);
+  text-decoration: underline;
+  text-decoration-color: var(--l-rule);
+  text-underline-offset: 3px;
+  transition: color 150ms;
+}
+.ui-more summary:hover {
+  color: var(--l-ink);
+}
+.ui-more > div {
+  margin-top: 8px;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  color: var(--l-muted);
+}
+
+/* Dark page-header band (town, check) */
+.ui-band {
+  background: var(--l-ink);
+  color: var(--l-paper);
+  padding: 48px 0 40px;
+}
+.ui-band::after {
+  opacity: 0.08;
+}
+.ui-band-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px 48px;
+}
+.ui-band-main {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+  max-width: 760px;
+}
+.ui-band .lp-kicker {
+  color: #b9b4aa;
+}
+.ui-band-h {
+  font-size: clamp(2rem, 1.4rem + 1.8vw, 3rem);
+  line-height: 1.05;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+.ui-band-note {
+  font-size: 0.875rem;
+  color: #d6d2c9;
+}
+.ui-band-note a {
+  color: var(--l-paper);
+  text-decoration: underline;
+  text-decoration-color: rgb(251 250 247 / 0.4);
+  text-underline-offset: 3px;
+}
+.ui-band .ui-chip {
+  background: rgb(251 250 247 / 0.08);
+  box-shadow: inset 0 0 0 1px rgb(251 250 247 / 0.16);
+  color: #e6e2da;
+}
+.ui-band .ui-chip-dot {
+  background: #6f9fd0;
+}
+.ui-band .ui-chip.is-warn {
+  color: #f0d98c;
+}
+.ui-band :where(a, button, input, summary):focus-visible {
+  outline-color: var(--l-paper);
+}
+.ui-fund {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+.ui-fund label {
+  display: grid;
+  gap: 6px;
+  font-size: 0.75rem;
+  color: #b9b4aa;
+}
+.ui-fund-input {
+  display: flex;
+  align-items: center;
+  height: 44px;
+  padding-left: 12px;
+  border-radius: 6px;
+  background: rgb(251 250 247 / 0.06);
+  box-shadow: inset 0 0 0 1px rgb(251 250 247 / 0.24);
+  font-family: var(--l-mono);
+}
+.ui-fund-input:focus-within {
+  box-shadow: inset 0 0 0 1px var(--l-paper);
+}
+.ui-fund-input input {
+  width: 8.5rem;
+  padding: 0 10px 0 6px;
+  background: transparent;
+  color: var(--l-paper);
+  font-variant-numeric: tabular-nums;
+  outline: none;
+}
+.ui-fund button {
+  height: 44px;
+  padding: 0 16px;
+  border-radius: 6px;
+  background: var(--l-paper);
+  color: var(--l-ink);
+  font-weight: 650;
+  font-size: 0.9375rem;
+  cursor: pointer;
+  transition: background-color 150ms;
+}
+.ui-fund button:hover {
+  background: #fff;
+}
+/* Re-plan is the quiet action next to the fund; the memo is the primary one. */
+.ui-fund button {
+  background: transparent;
+  color: var(--l-paper);
+  box-shadow: inset 0 0 0 1px rgb(251 250 247 / 0.4);
+}
+.ui-fund button:hover {
+  background: rgb(251 250 247 / 0.08);
+}
+.ui-fund .ui-band-cta {
+  margin-left: 8px;
+  background: var(--l-paper);
+  color: var(--l-ink);
+}
+.ui-fund .ui-band-cta:hover {
+  background: #fff;
+}
+.ui-fund .ui-band-cta .lp-btn-sq {
+  background: var(--l-ink);
+  color: var(--l-paper);
+}
+.ui-fund {
+  flex-wrap: wrap;
+}
+@media (max-width: 600px) {
+  .ui-fund .ui-band-cta {
+    margin-left: 0;
+  }
+}
+
+/* Page body container shared by inner pages */
+.ui-page {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 40px 32px 96px;
+}
+.ui-section {
+  margin-top: 56px;
+}
+.ui-note {
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  color: var(--l-muted);
+}
+.ui-note a {
+  color: var(--l-ink);
+  text-decoration: underline;
+  text-decoration-color: var(--l-rule);
+  text-underline-offset: 3px;
+}
+.ui-note a:hover {
+  text-decoration-color: currentColor;
+}
+
+@media (max-width: 820px) {
+  .ui-head {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .ui-head-aside {
+    justify-content: flex-start;
+  }
+  .ui-head-aside .lp-section-lede {
+    text-align: left;
+  }
+  .ui-stats {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 600px) {
+  .ui-page {
+    padding: 24px 16px 72px;
+  }
+  .ui-band {
+    padding: 32px 0 28px;
+  }
+  .ui-stat {
+    padding: 16px 18px;
+  }
+  .ui-fund-input input {
+    width: 7rem;
+  }
+}
+@media print {
+  .ui-band {
+    background: #fff;
+    color: var(--l-ink);
+  }
+}
+
+.lp-abbr {
+  text-decoration: underline dotted;
+  text-decoration-color: currentColor;
+  text-underline-offset: 4px;
+  cursor: help;
+}

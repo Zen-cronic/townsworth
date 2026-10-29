@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Mono, Public_Sans } from "next/font/google";
 import "./globals.css";
+import "./landing.css";
+import { SiteFooter } from "@/components/landing/SiteFooter";
 
 const publicSans = Public_Sans({ variable: "--font-public-sans", subsets: ["latin"] });
 const plexMono = IBM_Plex_Mono({ variable: "--font-plex-mono", subsets: ["latin"], weight: ["400", "500"] });
@@ -14,7 +16,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body className={`${publicSans.variable} ${plexMono.variable} antialiased`}>{children}</body>
+      <body className={`${publicSans.variable} ${plexMono.variable} gn-landing antialiased`}>
+        {children}
+        <SiteFooter />
+      </body>
     </html>
   );
 }

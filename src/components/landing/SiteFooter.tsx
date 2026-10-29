@@ -34,7 +34,7 @@ const COLUMNS: { title: string; links: { href: string; label: string; external?:
 
 export function SiteFooter() {
   return (
-    <footer className="lp-footer">
+    <footer className="lp-footer no-print">
       <div className="lp-wrap lp-footer-grid">
         <div className="lp-footer-brand">
           <span className="lp-brand">

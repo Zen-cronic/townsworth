@@ -64,7 +64,7 @@ body {
 
 .no-scrollbar { scrollbar-width: none; }
 /* Scroll cue on the town switcher where it overflows (below the lg breakpoint). */
-.fade-x { mask-image: linear-gradient(to right, #000 calc(100% - 2.5rem), transparent); }
+.fade-x { mask-image: linear-gradient(to right, #000 calc(100% - 4rem), transparent); }
 @media (min-width: 64rem) { .fade-x { mask-image: none; } }
 .no-scrollbar::-webkit-scrollbar { display: none; }
 
