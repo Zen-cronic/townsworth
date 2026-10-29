@@ -10,6 +10,8 @@ import { cadenceLower, formatPhone, km, quotedName } from "@/components/dashboar
 import { ClampMore } from "@/components/ui/ClampMore";
 import { keptBreakdown } from "@/components/ui/keptBreakdown";
 import { kindOf, LOCAL_AFFINITY, shortOrg, shortSignal, shortTermHit } from "@/components/ui/labels";
+import { LiveDataNotice } from "@/components/LiveDataNotice";
+import { FundBar, LineStrip, PartnerDistance, PartnerDotStrip, SessionTimeline, fundSplit, lineComposition, partnerPoints, sessionsByBucket } from "@/components/charts";
 
 const FACILITY_LABEL: Record<string, string> = {
   "data center": "Data center",
@@ -183,7 +185,7 @@ function AuditLine({ row, index, sameAs, gloss }: { row: AuditRow; index: number
   const kept = isKept(row.verdict);
   const missing = row.verdict === "unverified" ? quotedName(row.reasons[0]) : undefined;
   return (
-    <li id={`line-${num(index + 1)}`} className={`${ROW} audit-row scroll-mt-24`}>
+    <li id={`line-${num(index + 1)}`} className={`${ROW} audit-row row-edge ${kept ? "is-kept" : "is-struck"} scroll-mt-24`}>
       <span className="pt-0.5 font-mono text-xs tabular-nums text-muted">{num(index + 1)}</span>
       <div>
         <DraftText text={row.text} struck={!kept} />
@@ -211,7 +213,7 @@ function AuditLine({ row, index, sameAs, gloss }: { row: AuditRow; index: number
 function NoSwapGroup({ rows }: { rows: { row: AuditRow; index: number }[] }) {
   const range = `${num(rows[0].index + 1)}–${num(rows[rows.length - 1].index + 1)}`;
   return (
-    <li id={`line-${num(rows[0].index + 1)}`} className="audit-row scroll-mt-24 border-b border-hairline py-4 last:border-b-0">
+    <li id={`line-${num(rows[0].index + 1)}`} className="audit-row row-edge is-struck scroll-mt-24 border-b border-hairline py-4 last:border-b-0">
       <details className="group">
         <summary className="grid cursor-pointer grid-cols-[2rem_minmax(0,1fr)] gap-x-3 md:grid-cols-[2.25rem_minmax(0,1fr)_minmax(0,1fr)] md:gap-x-6">
           <span className="whitespace-nowrap pt-0.5 font-mono text-xs tabular-nums text-muted">{range}</span>
@@ -300,6 +302,13 @@ export function TownView({ run }: { run: TownRun }) {
   const kept = keptBreakdown(audit);
   const partnerPlaces = program.items.filter((it) => it.partner).length;
   const failed = profile.failedCalls.length;
+  const comp = lineComposition(audit);
+  // Each line's fragment id; lines folded into a "struck, no swap" group share the group's anchor.
+  const anchors = audit.map((_, i) => `line-${num(i + 1)}`);
+  for (const seg of segment(audit)) if (seg.kind === "group") for (const r of seg.rows) anchors[r.index] = `line-${num(seg.rows[0].index + 1)}`;
+  const fund = fundSplit(program.items, program.unassigned);
+  const partners = partnerPoints(program.items);
+  const sessions = sessionsByBucket(program.items);
 
   const memoHref = `/memo/${town.slug}?fund=${program.annualFund}`;
   const planHref = (p: PlanSource) => `/town/${town.slug}?plan=${p}&fund=${program.annualFund}`;
@@ -384,31 +393,36 @@ export function TownView({ run }: { run: TownRun }) {
       <div className="ui-page">
         <section aria-label="Summary" className="ui-stats">
           <StatTile
-            value={partnerPlaces}
-            label="local partners Qloo found"
-            tone="ok"
-            more={<>{qlooAdds.length} the draft never named. Each is traced to Qloo&apos;s taste data.</>}
-          />
-          <StatTile
             value={`${kept.total} of ${audit.length}`}
-            label={flagged ? `lines kept (${flagged} struck)` : "lines kept, none struck"}
-            more={
-              <>
-                {flagged > 0 && <>{flagged} struck as not local or unconfirmed. </>}
-                {kept.parts.length > 0 && <>Kept: {kept.parts.join(", ")}.</>}
-              </>
-            }
-          />
+            label={flagged ? `lines kept, ${flagged} struck` : "lines kept, none struck"}
+            tone="ok"
+            more={kept.parts.length > 0 && <>Kept: {kept.parts.join(", ")}.</>}
+          >
+            {audit.length > 0 && <LineStrip comp={comp} anchorOf={(i) => anchors[i]} legend={false} />}
+          </StatTile>
+          <StatTile value={partnerPlaces} label="local partners Qloo found" tone="ok" more={<>{qlooAdds.length} the draft never named. Each is traced to Qloo&apos;s taste data.</>}>
+            {failed ? (
+              <LiveDataNotice towns={[town.name]} subject="the partner list" />
+            ) : partners.length ? (
+              <PartnerDotStrip points={partners} />
+            ) : (
+              <p className="ui-note">None in Qloo&apos;s places within 15 km. Add the partners residents name.</p>
+            )}
+          </StatTile>
           <StatTile
             value={money(program.totalAllocated)}
             label="costed from the fund"
             more={
               <>
-                {money(program.annualFund)} a year · {money(program.twoYearFund)} over 24 months. {money(program.unassigned)} held in reserve for the
-                committee. {town.fundNote}
+                {money(program.annualFund)} a year · {money(program.twoYearFund)} over 24 months. {town.fundNote}
               </>
             }
-          />
+          >
+            <FundBar parts={fund.parts} total={fund.total} size="sm" legend={false} caption={`The ${money(fund.total)} 24-month fund by program area`} />
+            <p className="font-mono text-[11px] tabular-nums text-muted">
+              {money(program.unassigned)} reserve <span className="ch-sw ch-k-reserve ml-1 align-[-1px]" aria-hidden />
+            </p>
+          </StatTile>
         </section>
 
         {/* The line-by-line check */}
@@ -502,13 +516,45 @@ export function TownView({ run }: { run: TownRun }) {
           </div>
         </Card>
 
+        {/* The fund and the partners, as charts */}
+        <section aria-label="Fund and partners" className={`ui-section grid gap-6 ${failed > 0 || partners.length > 0 ? "lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]" : ""}`}>
+          <Card className="px-5 py-5 sm:px-6">
+            <h2 className="ui-h3">Where the fund goes</h2>
+            <p className="mt-1 font-mono text-xs tabular-nums text-muted">{money(fund.total)} over 24 months</p>
+            <div className="mt-5">
+              <FundBar parts={fund.parts} total={fund.total} caption={`The ${money(fund.total)} 24-month fund by program area`} />
+            </div>
+            {sessions.length > 0 && (
+              <div className="mt-6 border-t border-hairline pt-5">
+                <h3 className="text-sm font-semibold">When it happens</h3>
+                <div className="mt-3">
+                  <SessionTimeline rows={sessions} />
+                </div>
+              </div>
+            )}
+          </Card>
+          {(failed > 0 || partners.length > 0) && (
+            <Card className="px-5 py-5 sm:px-6">
+              <h2 className="ui-h3">Local partners, by distance</h2>
+              <p className="mt-1 font-mono text-xs text-muted">Dot: distance from the site · #: Qloo local affinity rank · hollow: no rank</p>
+              <div className="mt-4">
+                {failed ? (
+                  <LiveDataNotice towns={[town.name]} subject="the partner list" />
+                ) : (
+                  <PartnerDistance points={partners} />
+                )}
+              </div>
+            </Card>
+          )}
+        </section>
+
         {/* More local partners */}
         <section aria-labelledby="adds-title" className="ui-section scroll-mt-24">
           <SectionHeader id="adds-title" size="sm" title="Qloo also suggests" lede={`${plural(qlooAdds.length, "local partner", "local partners")} the draft never named`} />
           {qlooAdds.length ? (
             <ul className="ui-card divide-y divide-hairline">
               {qlooAdds.map((it) => (
-                <li key={it.id} className="grid gap-2 px-5 py-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:px-6">
+                <li key={it.id} className="row-edge is-kept grid gap-2 px-5 py-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:px-6">
                   <div className="min-w-0">
                     <p className="font-medium leading-snug">
                       {kindOf(it.title)}
@@ -530,30 +576,35 @@ export function TownView({ run }: { run: TownRun }) {
         {/* What the town favours, and the guardrails in one line */}
         <section aria-labelledby="favours-title" className="ui-section">
           <SectionHeader id="favours-title" size="sm" title={`What ${town.name} favours`} lede="Qloo taste data, aggregate for the town" />
-          <div className="ui-card px-5 py-4 sm:px-6">
+          <div className="taste-panel lp-grain">
             {topPlaces.length > 0 && (
-              <p className="flex flex-wrap items-center gap-1.5">
-                <span className="mr-2 w-16 font-mono text-[11px] uppercase tracking-wider text-muted">Places</span>
+              <ol className="taste-places" aria-label="Places locals favour most, by Qloo affinity rank">
                 {topPlaces.map(({ p, meta }) => (
-                  <Chip key={p.id} tone="plain">
-                    {p.name.split(" | ")[0]}
-                    {meta?.affinityRank && <span className="text-muted">#{meta.affinityRank}</span>}
-                  </Chip>
+                  <li key={p.id}>
+                    {meta?.affinityRank ? <span className="taste-rank">#{meta.affinityRank}</span> : <span className="taste-rank is-none">by distance</span>}
+                    <span className="taste-name">{p.name.split(" | ")[0]}</span>
+                  </li>
                 ))}
-              </p>
+              </ol>
             )}
-            {tastes.map(({ t, items, local }) => (
-              <p key={t} className={`mt-2 flex flex-wrap items-center gap-1.5 ${local ? "" : "opacity-70"}`}>
-                <span className="mr-2 w-16 font-mono text-[11px] uppercase tracking-wider text-muted">{TASTE_LABEL[t]}</span>
-                {items.map((sig) => (
-                  <Chip key={sig.entity.id} tone="plain">
-                    {sig.entity.name}
-                  </Chip>
+            {tastes.length > 0 && (
+              <dl className="taste-types">
+                {tastes.map(({ t, items, local }) => (
+                  <div key={t} className={local ? "is-local" : "is-national"}>
+                    <dt>{TASTE_LABEL[t]}</dt>
+                    <dd>
+                      {items.map((sig) => (
+                        <span key={sig.entity.id} className="taste-chip">
+                          {sig.entity.name}
+                        </span>
+                      ))}
+                      {!local && <span className="taste-flag">leans national, not used</span>}
+                    </dd>
+                  </div>
                 ))}
-                {!local && <span className="text-xs text-muted">leans national, not used</span>}
-              </p>
-            ))}
-            {!tastes.length && !topPlaces.length && <p className="ui-note">Nothing stands out locally for {town.name}.</p>}
+              </dl>
+            )}
+            {!tastes.length && !topPlaces.length && <p className="text-sm">Nothing stands out locally for {town.name}.</p>}
           </div>
           <p className="ui-note mt-4">
             Guardrails: not tied to any vote or permit · residents rank · no political, religious or identity targeting ({profile.excluded.length} excluded by

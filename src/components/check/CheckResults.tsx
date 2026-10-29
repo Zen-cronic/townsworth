@@ -12,6 +12,8 @@ import { StatusPill } from "@/components/dashboard/StatusPill";
 import { cadenceLower, formatPhone, km, quotedName } from "@/components/dashboard/format";
 import { secondaryCta } from "@/components/dashboard/ui";
 import { CheckExports } from "./CheckExports";
+import { LiveDataNotice } from "@/components/LiveDataNotice";
+import { FundBar, LineStrip, PartnerDotStrip, fundSplit, lineComposition, partnerPoints } from "@/components/charts";
 
 // The audit of a pasted draft, rendered from the JSON the check route returns. Same verdict
 // vocabulary as the town pages; audit.ts stays out of the client bundle (it carries the baseline).
@@ -134,7 +136,7 @@ function AuditLine({ row, index }: { row: AuditRow; index: number }) {
   const kept = isKept(row.verdict);
   const missing = row.verdict === "unverified" ? quotedName(row.reasons[0]) : undefined;
   return (
-    <li data-testid="check-row" data-verdict={row.verdict} className={`${ROW} audit-row break-inside-avoid`}>
+    <li data-testid="check-row" data-verdict={row.verdict} className={`${ROW} audit-row row-edge ${kept ? "is-kept" : "is-struck"} break-inside-avoid`}>
       <span className="pt-0.5 font-mono text-xs tabular-nums text-muted">{pad2(index + 1)}</span>
       <div className="min-w-0">
         <p className={`text-[15px] leading-relaxed ${kept ? "text-ink" : "text-muted"}`}>
@@ -179,7 +181,7 @@ function Stat({ title, figure, tone, children }: { title: string; figure: string
       <p className={`mt-2 text-[1.625rem] leading-none sm:mt-3 sm:text-[2rem] ${tone === "flag" ? "text-hivis-text" : "text-ink"}`}>
         <Figure value={figure} />
       </p>
-      <div className="mt-2 text-sm leading-snug text-muted">{children}</div>
+      <div className="mt-3 text-sm leading-snug text-muted">{children}</div>
     </div>
   );
 }
@@ -206,6 +208,9 @@ export function CheckResults({ result }: { result: CheckResult }) {
   const partnerPlaces = program.items.filter((it) => it.partner).length;
   const swapPlaces = audit.filter((a) => a.replacement?.partner).length;
   const alongsidePlaces = audit.filter((a) => a.alongside?.partner).length;
+  const comp = lineComposition(audit);
+  const fund = fundSplit(program.items, program.unassigned);
+  const partners = partnerPoints(program.items);
   const secs = (ms: number) => `${Math.max(1, Math.round(ms / 1000))} s`;
 
   const parseLine =
@@ -259,9 +264,9 @@ export function CheckResults({ result }: { result: CheckResult }) {
 
         <div className="grid gap-px border-b border-rule bg-hairline sm:grid-cols-3">
           <Stat title="Lines that could fit any town" figure={`${flagged} of ${audit.length}`} tone="flag">
-            <p>draft items struck: they name nothing local, or a partner that can&apos;t be found and isn&apos;t an institution.</p>
+            {audit.length > 0 && <LineStrip comp={comp} />}
             <p className="mt-2 text-xs">
-              <span className="font-mono tabular-nums text-ok-text">{audit.length - flagged}</span> kept:{" "}
+              Kept:{" "}
               {[
                 plural(keptPartners, "verified local partner", "verified local partners"),
                 keptInstitutions > 0 && plural(keptInstitutions, "institution to confirm", "institutions to confirm"),
@@ -273,23 +278,23 @@ export function CheckResults({ result }: { result: CheckResult }) {
             </p>
           </Stat>
           <Stat title="Local partners Qloo found" figure={String(partnerPlaces)}>
-            <p>local partners in the program, each traced to Qloo&apos;s taste data.</p>
+            {profile.failedCalls > 0 ? <LiveDataNotice towns={[town.name]} subject="the partner list" /> : <PartnerDotStrip points={partners} />}
             <p className="mt-2 text-xs">
               <span className="font-mono tabular-nums text-ink">{swapPlaces}</span> swap into struck lines
               {alongsidePlaces > 0 && (
                 <>
                   {" "}
-                  · <span className="font-mono tabular-nums text-ink">{alongsidePlaces}</span> added alongside kept institutions
+                  · <span className="font-mono tabular-nums text-ink">{alongsidePlaces}</span> added alongside
                 </>
               )}{" "}
-              · <span className="font-mono tabular-nums text-ink">{qlooAdds.length}</span> more your draft never named
+              · <span className="font-mono tabular-nums text-ink">{qlooAdds.length}</span> your draft never named
             </p>
           </Stat>
           <Stat title="Costed for the committee" figure={money(program.totalAllocated)}>
-            <p>
-              itemized over 24 months across {plural(program.items.length, "program item", "program items")}. The other{" "}
-              <span className="font-mono tabular-nums text-ink">{money(program.unassigned)}</span> of the {money(program.twoYearFund)} fund is held in reserve
-              for the committee.
+            <FundBar parts={fund.parts} total={fund.total} size="sm" legend={false} caption={`The ${money(fund.total)} 24-month fund by program area`} />
+            <p className="mt-2 text-xs">
+              {plural(program.items.length, "item", "items")} over 24 months ·{" "}
+              <span className="font-mono tabular-nums text-ink">{money(program.unassigned)}</span> reserve
             </p>
           </Stat>
         </div>
@@ -348,6 +353,16 @@ export function CheckResults({ result }: { result: CheckResult }) {
         </div>
       </div>
 
+      <section aria-labelledby="fund-title" className="ui-card mt-8 break-inside-avoid px-5 py-5 sm:px-6">
+        <h3 id="fund-title" className="font-semibold tracking-tight">
+          Where the fund goes
+        </h3>
+        <p className="mt-0.5 font-mono text-xs tabular-nums text-muted">{money(fund.total)} over 24 months</p>
+        <div className="mt-4">
+          <FundBar parts={fund.parts} total={fund.total} caption={`The ${money(fund.total)} 24-month fund by program area`} />
+        </div>
+      </section>
+
       <section aria-labelledby="adds-title" className="mt-8 break-inside-avoid rounded-lg border border-rule bg-paper">
         <div className="flex flex-wrap items-end justify-between gap-3 border-b border-rule px-5 py-4 sm:px-6">
           <div className="max-w-2xl">
@@ -361,7 +376,7 @@ export function CheckResults({ result }: { result: CheckResult }) {
         {qlooAdds.length ? (
           <ul className="divide-y divide-hairline">
             {qlooAdds.map((it) => (
-              <li key={it.id} className="grid gap-x-4 gap-y-1 px-5 py-3 sm:px-6 md:grid-cols-[minmax(0,1fr)_auto]">
+              <li key={it.id} className="row-edge is-kept grid gap-x-4 gap-y-1 px-5 py-3 sm:px-6 md:grid-cols-[minmax(0,1fr)_auto]">
                 <div className="min-w-0">
                   <p className="font-medium leading-snug">{it.title}</p>
                   <p className="text-xs text-muted">
