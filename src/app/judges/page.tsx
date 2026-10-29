@@ -125,7 +125,7 @@ export default async function GuidedPath() {
                 {steps.map((s, i) => (
                   <li key={s.title}>
                     <a href={`#step-${i + 1}`}>
-                      <span>{i + 1}</span>
+                      <span aria-hidden="true" />
                       {s.title}
                     </a>
                   </li>
@@ -137,9 +137,6 @@ export default async function GuidedPath() {
               <ol className="gp-steps">
                 {steps.map((s, i) => (
                   <li key={s.title} id={`step-${i + 1}`} className="gp-step">
-                    <span className="gp-step-n" aria-hidden="true">
-                      {String(i + 1).padStart(2, "0")}
-                    </span>
                     <div className="gp-step-body">
                       <h2 className="lp-h2">{s.title}</h2>
                       <p>{s.body}</p>

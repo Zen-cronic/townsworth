@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AgentDrafts } from "@/components/AgentDrafts";
 import { AppHeader } from "@/components/AppHeader";
+import { PilotLink } from "@/components/PilotLink";
 import { AllocationBar } from "@/components/dashboard/AllocationBar";
 import { Chevron, ChevronLeft, Download } from "@/components/dashboard/Icons";
 import { PrintButton } from "@/components/dashboard/PrintButton";
@@ -77,15 +78,16 @@ export default async function MemoPage({
     <>
       <AppHeader active={slug} />
       <main className="mx-auto max-w-[920px] px-4 pb-24 pt-6 sm:px-6 sm:pt-8">
-        <div className="no-print mb-4 flex flex-wrap items-center gap-2">
+        <div className="no-print mb-4 grid gap-3">
           <Link
             href={`/town/${town.slug}?fund=${program.annualFund}`}
-            className="inline-flex items-center gap-1 rounded-md py-1.5 pr-2 text-sm text-muted transition-colors duration-150 hover:text-ink"
+            className="inline-flex w-fit items-center gap-1 rounded-md py-1.5 pr-2 text-sm text-muted transition-colors duration-150 hover:text-ink"
           >
             <ChevronLeft />
             Back to the audit
           </Link>
-          <span className="ml-auto flex flex-wrap gap-2">
+          {/* Exports line up with the memo's left edge */}
+          <span className="flex flex-wrap gap-2">
             <a href={`${exportBase}&format=csv`} className={toolButton}>
               <Download />
               Partner sheet (CSV)
@@ -285,6 +287,13 @@ export default async function MemoPage({
               </Link>
               <span className="text-xs leading-relaxed text-muted">Opens the anonymous resident ballot and a simulated committee tally.</span>
             </div>
+            <p className="no-print mt-6 text-sm text-muted">
+              Want this for your project?{" "}
+              <PilotLink
+                townName={town.name}
+                className="font-medium text-ink underline decoration-rule underline-offset-4 transition-colors duration-150 hover:decoration-ink"
+              />
+            </p>
           </section>
 
           <footer className="mt-12 flex flex-wrap justify-between gap-2 border-t border-hairline pt-4 text-[11px] text-muted">

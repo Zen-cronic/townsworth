@@ -9,7 +9,7 @@ import type { CheckResult } from "@/lib/userPlan";
 const VERDICT_LABEL = {
   grounded: "Kept",
   institution: "Kept (institution, couldn't verify here)",
-  mechanism: "Kept (grant mechanism)",
+  mechanism: "Kept (commitment as drafted)",
   generic: "Not local",
   unverified: "Can't confirm",
 } as const;

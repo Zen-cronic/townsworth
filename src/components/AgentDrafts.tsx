@@ -244,7 +244,11 @@ export function AgentDrafts({ slug, fund }: { slug: string; fund: number }) {
                         <Rule ok={!d.rules.topic}>{d.rules.topic ? `Mentioned ${d.rules.topic}` : "No land-use, vote, political or religious topics"}</Rule>
                         <Rule ok={d.rules.inProgram}>Partner is in the program</Rule>
                         {d.checked === "passed" && (
-                          <Rule ok={d.signalVerified}>{d.signalVerified ? `Local signal: ${d.localSignal}` : "No verified local signal"}</Rule>
+                          d.localSignal ? (
+                            <Rule ok={d.signalVerified}>{d.signalVerified ? `Local signal: ${d.localSignal}` : `Local signal not verified: ${d.localSignal}`}</Rule>
+                          ) : (
+                            <Rule ok>No local signal needed for this email</Rule>
+                          )
                         )}
                       </ul>
                     )}

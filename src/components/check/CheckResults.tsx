@@ -87,9 +87,9 @@ function Kept({ row }: { row: AuditRow }) {
       <div className={CARD.kept}>
         <Eyebrow tone="ok">
           <Check className="h-3 w-3" />
-          Kept <span className="font-normal normal-case tracking-normal text-muted">· grant mechanism</span>
+          Kept <span className="font-normal normal-case tracking-normal text-muted">· {row.keptLabel ?? "grant mechanism"}</span>
         </Eyebrow>
-        <p className="mt-1 text-[15px] leading-snug">How grants are decided stays as drafted.</p>
+        <p className="mt-1 text-[15px] leading-snug">{row.keptNote ? row.keptNote.charAt(0).toUpperCase() + row.keptNote.slice(1) + "." : "How grants are decided stays as drafted."}</p>
         {applicants.length > 0 && (
           <div className="mt-2 space-y-1.5">
             <p className="text-xs font-medium text-ink">Suggested applicants from Qloo:</p>
@@ -263,7 +263,7 @@ export function CheckResults({ result }: { result: CheckResult }) {
               {[
                 plural(keptPartners, "verified local partner", "verified local partners"),
                 keptInstitutions > 0 && plural(keptInstitutions, "institution to confirm", "institutions to confirm"),
-                keptMechanisms > 0 && plural(keptMechanisms, "grant mechanism", "grant mechanisms"),
+                keptMechanisms > 0 && plural(keptMechanisms, "commitment kept as drafted", "commitments kept as drafted"),
                 keptSignals > 0 && plural(keptSignals, "match to a local favourite", "matches to local favourites"),
               ]
                 .filter(Boolean)

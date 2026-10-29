@@ -4,7 +4,6 @@ import { BASELINE } from "@/lib/baselineData";
 import { BUCKETS, costLine, ROLE_LABEL, type ProgramItem } from "@/lib/plan";
 import { isKept, type AuditRow } from "@/lib/audit";
 import { Check, Chevron, Notice } from "@/components/dashboard/Icons";
-import { ProvenanceChip } from "@/components/dashboard/ProvenanceChip";
 import { Figure } from "@/components/dashboard/Figure";
 import { StatusPill } from "@/components/dashboard/StatusPill";
 import { primaryCta, secondaryCta } from "@/components/dashboard/ui";
@@ -46,7 +45,8 @@ function draftNote(run: TownRun): string {
 
 const TASTE_LABEL = { brand: "Brands", artist: "Artists", tv_show: "TV", podcast: "Podcasts" } as const;
 
-const pad2 = (n: number) => String(n).padStart(2, "0");
+// Draft lines are referred to plainly ("Line 4"), and anchored as #line-4.
+const num = (n: number) => String(n);
 
 // One card shell for every margin note; the tone changes, the shape doesn't.
 const SHELL = {
@@ -86,7 +86,36 @@ function PartnerFacts({ item }: { item: ProgramItem }) {
   );
 }
 
-function Proposal({ item, delay, label = "Proposed" }: { item: ProgramItem; delay: number; label?: string }) {
+// The signal in short form ("#6 local affinity"), with the full reasoning behind a separate "Why".
+const shortSignal = (signal?: string) =>
+  signal ? signal.replace(/^(?:Qloo place|Local favourite) · #(\d+) by local affinity$/, "#$1 local affinity").replace(/^Qloo /, "") : "Qloo signal";
+
+function Signal({ item, gloss }: { item: ProgramItem; gloss?: string }) {
+  return (
+    <details className="group text-xs">
+      <summary className="flex cursor-pointer flex-wrap items-center gap-x-2.5 gap-y-1">
+        <span className="inline-flex items-center gap-1.5 rounded border border-hairline bg-concrete px-2 py-1 font-mono text-muted">
+          <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-ok" />
+          {shortSignal(item.provenance[0]?.signal)}
+        </span>
+        <span className="inline-flex items-center gap-0.5 font-medium text-ink underline decoration-rule underline-offset-2 transition-colors duration-150 group-hover:decoration-ink">
+          Why
+          <Chevron className="chev h-3 w-3" />
+        </span>
+      </summary>
+      <ul className="mt-2 space-y-1 border-l-2 border-ok/40 pl-3 leading-relaxed text-muted">
+        {item.provenance.map((p, i) => (
+          <li key={i}>
+            <span className="font-mono text-ink">{p.signal}</span>: {p.detail}
+          </li>
+        ))}
+      </ul>
+      {gloss && <p className="mt-1.5 leading-relaxed text-muted group-open:hidden">{gloss}</p>}
+    </details>
+  );
+}
+
+function Proposal({ item, delay, label = "Proposed", gloss }: { item: ProgramItem; delay: number; label?: string; gloss?: string }) {
   const bucket = BUCKETS[item.bucket];
   return (
     <div className={SHELL.proposed} style={{ animationDelay: `${delay}ms` }}>
@@ -104,57 +133,65 @@ function Proposal({ item, delay, label = "Proposed" }: { item: ProgramItem; dela
       </p>
       {/* Tier 3: evidence */}
       <div className="mt-2.5">
-        <ProvenanceChip item={item} />
+        <Signal item={item} gloss={gloss} />
       </div>
     </div>
   );
 }
 
-function Kept({ row }: { row: AuditRow }) {
+// Kept lines are a single compact line: the check, the partner, how it was confirmed. No card.
+function KeptLine({ name, children }: { name: string; children?: React.ReactNode }) {
+  return (
+    <div className="flex gap-2 pt-0.5 text-sm leading-snug">
+      <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-ok" />
+      <p>
+        <span className="font-medium text-ok-text">Kept:</span> <span className="font-medium">{name}</span>
+        {children}
+      </p>
+    </div>
+  );
+}
+
+function Kept({ row, sameAs }: { row: AuditRow; sameAs?: string }) {
   if (row.verdict === "institution") {
     return (
-      <div className={SHELL.kept}>
-        <Eyebrow tone="ok">
-          <Check className="h-3 w-3" />
-          Kept <span className="font-normal normal-case tracking-normal text-muted">· institution, couldn&apos;t verify here</span>
-        </Eyebrow>
-        <p className="mt-1 text-[15px] leading-snug">{row.named}</p>
-        <p className="mt-0.5 text-xs text-muted">Not in Qloo&apos;s places or OpenStreetMap nearby. Confirm with the committee.</p>
-      </div>
+      <KeptLine name={row.named ?? "Institution"}>
+        <span className="text-muted"> · institution, couldn&apos;t verify here</span>
+        <span className="mt-0.5 block text-xs text-muted">
+          {sameAs ? `Same partner as line ${sameAs}. ` : "Not in Qloo's places or OpenStreetMap nearby. "}Confirm with the committee.
+        </span>
+      </KeptLine>
     );
   }
   if (row.verdict === "mechanism") {
     const names = (row.applicants ?? []).map((a) => a.partner?.name).filter(Boolean) as string[];
     return (
-      <div className={SHELL.kept}>
-        <Eyebrow tone="ok">
-          <Check className="h-3 w-3" />
-          Kept <span className="font-normal normal-case tracking-normal text-muted">· grant mechanism</span>
-        </Eyebrow>
-        <p className="mt-1 text-[15px] leading-snug">How grants are decided stays as drafted.</p>
+      <KeptLine name={row.keptLabel ?? "grant mechanism"}>
+        <span className="text-muted"> · {row.keptNote ?? "how grants are decided stays as drafted"}</span>
         {names.length > 0 && (
-          <p className="mt-1 text-xs leading-relaxed text-muted">
+          <span className="mt-0.5 block text-xs leading-relaxed text-muted">
             <span className="font-medium text-ink">Suggested applicants from Qloo:</span> {names.join(" · ")}
-          </p>
+          </span>
         )}
-      </div>
+      </KeptLine>
+    );
+  }
+  const how = row.matched
+    ? [row.matched.source === "osm" ? "verified on OpenStreetMap" : "a local place from Qloo, within 15 km", km(row.matched.distanceKm) && `${km(row.matched.distanceKm)} away`]
+        .filter(Boolean)
+        .join(" · ")
+    : row.termHits[0];
+  if (row.keptAs === "host") {
+    return (
+      <KeptLine name={row.keptLabel ?? "names the host community"}>
+        <span className="text-muted"> · {row.keptNote ?? "a local commitment, kept as drafted"}</span>
+      </KeptLine>
     );
   }
   return (
-    <div className={SHELL.kept}>
-      <Eyebrow tone="ok">
-        <Check className="h-3 w-3" />
-        Kept
-      </Eyebrow>
-      <p className="mt-1 text-[15px] leading-snug">{row.matched?.name ?? "Matches a local favourite"}</p>
-      <p className="mt-0.5 text-xs text-muted">
-        {row.matched
-          ? [row.matched.source === "osm" ? "Verified on OpenStreetMap" : "A local place from Qloo, within 15 km", km(row.matched.distanceKm) && `${km(row.matched.distanceKm)} away`]
-              .filter(Boolean)
-              .join(" · ")
-          : row.termHits[0]}
-      </p>
-    </div>
+    <KeptLine name={row.matched?.name ?? "matches a local favourite"}>
+      <span className="text-muted"> · {sameAs ? `same partner as line ${sameAs}` : how}</span>
+    </KeptLine>
   );
 }
 
@@ -171,14 +208,14 @@ function NoSwap({ plural }: { plural?: boolean }) {
 
 const ROW = "grid grid-cols-[2rem_minmax(0,1fr)] gap-x-3 gap-y-3 border-b border-hairline py-4 last:border-b-0 md:grid-cols-[2.25rem_minmax(0,1fr)_minmax(0,1fr)] md:gap-x-6";
 
-function AuditLine({ row, index }: { row: AuditRow; index: number }) {
+function AuditLine({ row, index, sameAs, gloss }: { row: AuditRow; index: number; sameAs?: string; gloss?: string }) {
   const kept = isKept(row.verdict);
   const missing = row.verdict === "unverified" ? quotedName(row.reasons[0]) : undefined;
   const delay = index * 70;
 
   return (
-    <li id={`line-${pad2(index + 1)}`} className={`${ROW} scroll-mt-24`}>
-      <span className="pt-0.5 font-mono text-xs tabular-nums text-muted">{pad2(index + 1)}</span>
+    <li id={`line-${num(index + 1)}`} className={`${ROW} scroll-mt-24`}>
+      <span className="pt-0.5 font-mono text-xs tabular-nums text-muted">{num(index + 1)}</span>
       <div>
         <p className={`text-[15px] leading-relaxed ${kept ? "text-ink" : "text-muted"}`}>
           <span className={kept ? "" : "strike"} style={kept ? undefined : { animationDelay: `${delay}ms` }}>
@@ -193,18 +230,18 @@ function AuditLine({ row, index }: { row: AuditRow; index: number }) {
         )}
       </div>
       <div className="col-start-2 space-y-2 md:col-start-3">
-        {kept ? <Kept row={row} /> : row.replacement ? <Proposal item={row.replacement} delay={delay + 260} /> : <NoSwap />}
-        {row.alongside && <Proposal item={row.alongside} delay={delay + 260} label="Added alongside" />}
+        {kept ? <Kept row={row} sameAs={sameAs} /> : row.replacement ? <Proposal item={row.replacement} delay={delay + 260} gloss={gloss} /> : <NoSwap />}
+        {row.alongside && <Proposal item={row.alongside} delay={delay + 260} label="Added alongside" gloss={kept ? gloss : undefined} />}
       </div>
     </li>
   );
 }
 
 function NoSwapGroup({ rows }: { rows: { row: AuditRow; index: number }[] }) {
-  const range = `${pad2(rows[0].index + 1)}–${pad2(rows[rows.length - 1].index + 1)}`;
+  const range = `${num(rows[0].index + 1)}–${num(rows[rows.length - 1].index + 1)}`;
   const unverified = rows.filter((r) => r.row.verdict === "unverified").length;
   return (
-    <li id={`line-${pad2(rows[0].index + 1)}`} className="scroll-mt-24 border-b border-hairline py-4 last:border-b-0">
+    <li id={`line-${num(rows[0].index + 1)}`} className="scroll-mt-24 border-b border-hairline py-4 last:border-b-0">
       <details className="group">
         <summary className="grid cursor-pointer grid-cols-[2rem_minmax(0,1fr)] gap-x-3 gap-y-3 md:grid-cols-[2.25rem_minmax(0,1fr)_minmax(0,1fr)] md:gap-x-6">
           <span className="whitespace-nowrap pt-0.5 font-mono text-xs tabular-nums text-muted">{range}</span>
@@ -228,7 +265,7 @@ function NoSwapGroup({ rows }: { rows: { row: AuditRow; index: number }[] }) {
             const missing = row.verdict === "unverified" ? quotedName(row.reasons[0]) : undefined;
             return (
               <li key={index} className="grid grid-cols-[2rem_minmax(0,1fr)] gap-x-3 text-sm">
-                <span className="font-mono text-xs tabular-nums text-muted">{pad2(index + 1)}</span>
+                <span className="font-mono text-xs tabular-nums text-muted">{num(index + 1)}</span>
                 <span>
                   <span className="strike text-muted">{row.text}</span>
                   {missing && <span className="mt-0.5 block text-xs text-muted">&ldquo;{missing}&rdquo; not found locally</span>}
@@ -265,14 +302,12 @@ function segment(audit: AuditRow[]): Segment[] {
 }
 
 function Story({
-  step,
   title,
   figure,
   tone,
   wide,
   children,
 }: {
-  step: string;
   title: string;
   figure: string;
   tone?: "flag";
@@ -281,9 +316,7 @@ function Story({
 }) {
   return (
     <div className={`flex flex-col bg-paper px-4 py-3.5 sm:px-6 sm:py-5 ${wide ? "sm:col-span-2 md:col-span-1" : ""}`}>
-      <p className="font-mono text-[11px] uppercase tracking-wider text-muted">
-        {step} · {title}
-      </p>
+      <p className="font-mono text-[11px] uppercase tracking-wider text-muted">{title}</p>
       <p className={`mt-2 text-[1.625rem] leading-none sm:mt-3 sm:text-[2rem] ${tone === "flag" ? "text-hivis-text" : "text-ink"}`}>
         <Figure value={figure} />
       </p>
@@ -367,6 +400,20 @@ export function TownView({ run }: { run: TownRun }) {
     .map((t) => ({ t, local: profile.strength[t].local, strength: profile.strength[t], items: profile.taste[t].filter((s) => s.distinct).slice(0, t === "brand" ? 4 : 3) }))
     .filter((g) => g.items.length)
     .sort((a, b) => Number(b.local) - Number(a.local));
+  // Kept lines that repeat an earlier line's partner say so instead of repeating its details.
+  const firstLine = new Map<string, number>();
+  const sameAs = audit.map((r, i) => {
+    if (!isKept(r.verdict) || r.verdict === "mechanism") return undefined;
+    const key = (r.matched?.name ?? r.named ?? "").toLowerCase();
+    if (!key) return undefined;
+    if (firstLine.has(key)) return num(firstLine.get(key)! + 1);
+    firstLine.set(key, i);
+    return undefined;
+  });
+  // The first "#N local affinity" chip on the page carries a one-time gloss.
+  const glossIndex = audit.findIndex((r) => /^(?:Qloo place|Local favourite) · #\d+ by local affinity$/.test((r.replacement ?? r.alongside)?.provenance[0]?.signal ?? ""));
+  const glossRank = glossIndex >= 0 ? (audit[glossIndex].replacement ?? audit[glossIndex].alongside)!.provenance[0].signal.match(/#(\d+)/)?.[1] : undefined;
+  const gloss = glossRank ? `#${glossRank} of ${profile.placeCount} places within 15 km, ranked by Qloo for how strongly locals favour them.` : undefined;
   const topPlaces = [...profile.localPlaces]
     .map((p) => ({ p, meta: profile.placeMeta.get(p.id) }))
     .sort((a, b) => (a.meta?.affinityRank ?? 1e6) - (b.meta?.affinityRank ?? 1e6))
@@ -398,7 +445,7 @@ export function TownView({ run }: { run: TownRun }) {
         <form className="no-print order-4 flex items-end gap-2 text-sm md:order-2" action={`/town/${town.slug}`}>
           <input type="hidden" name="plan" value={source} />
           <label className="flex flex-col gap-1">
-            <span className="text-xs text-muted">Annual community fund (USD)</span>
+            <span className="text-xs text-muted">Community fund a year (USD)</span>
             <span className="flex items-center rounded-md border border-rule bg-paper pl-3 transition-colors duration-150 focus-within:border-ink hover:border-ink/50">
               <span aria-hidden className="font-mono text-muted">$</span>
               <input
@@ -443,21 +490,21 @@ export function TownView({ run }: { run: TownRun }) {
         )}
 
         <div className="order-3 grid gap-px overflow-hidden rounded-lg border border-rule bg-hairline sm:grid-cols-2 md:order-4 md:col-span-2 md:grid-cols-3">
-          <Story step="01" title="Lines that could fit any town" figure={`${flagged} of ${audit.length}`} tone="flag">
+          <Story title="Lines that could fit any town" figure={`${flagged} of ${audit.length}`} tone="flag">
             <p>draft items struck: they name nothing local, or a partner that can&apos;t be found and isn&apos;t an institution.</p>
             <p className="mt-auto pt-2.5 text-xs">
               <span className="font-mono tabular-nums text-ok-text">{audit.length - flagged}</span> kept:{" "}
               {[
                 plural(keptPartners, "verified local partner", "verified local partners"),
                 keptInstitutions > 0 && plural(keptInstitutions, "institution to confirm", "institutions to confirm"),
-                keptMechanisms > 0 && plural(keptMechanisms, "grant mechanism", "grant mechanisms"),
+                keptMechanisms > 0 && plural(keptMechanisms, "commitment kept as drafted", "commitments kept as drafted"),
                 keptSignals > 0 && plural(keptSignals, "match to a local favourite", "matches to local favourites"),
               ]
                 .filter(Boolean)
                 .join(", ")}
             </p>
           </Story>
-          <Story step="02" title="Local partners Qloo found" figure={String(partnerPlaces)}>
+          <Story title="Local partners Qloo found" figure={String(partnerPlaces)}>
             <p>local partners in the program, each traced to Qloo&apos;s taste data.</p>
             <p className="mt-auto pt-2.5 text-xs">
               <span className="font-mono tabular-nums text-ink">{swapPlaces}</span> swap into struck lines ·{" "}
@@ -475,11 +522,15 @@ export function TownView({ run }: { run: TownRun }) {
               )}
             </p>
           </Story>
-          <Story step="03" title="Costed for the committee" figure={money(program.totalAllocated)} wide>
+          <Story title="Costed for the committee" figure={money(program.totalAllocated)} wide>
             <p>
-              itemized over 24 months across {plural(program.items.length, "program item", "program items")}, costed per session. The other{" "}
-              <span className="font-mono tabular-nums text-ink">{money(program.unassigned)}</span> of the {money(program.twoYearFund)} fund is
-              held in reserve for the committee.
+              itemized for the community program across {plural(program.items.length, "item", "items")}, costed per session.{" "}
+              <span className="font-mono tabular-nums text-ink">{money(program.unassigned)}</span> held in reserve for the committee: more grant cycles,
+              larger awards or items residents add.
+            </p>
+            <p className="mt-2 text-xs">
+              Fund: <span className="font-mono tabular-nums text-ink">{money(program.annualFund)}</span> a year ·{" "}
+              <span className="font-mono tabular-nums text-ink">{money(program.twoYearFund)}</span> over 24 months
             </p>
             <div className="no-print mt-auto pt-3">
               <Link href={memoHref} className={primaryCta}>
@@ -490,15 +541,13 @@ export function TownView({ run }: { run: TownRun }) {
           </Story>
           {example?.replacement && (
             <div className="hidden gap-x-4 gap-y-2 bg-concrete px-4 py-3 text-sm sm:col-span-2 sm:grid sm:px-6 md:col-span-3 md:grid-cols-[auto_minmax(0,1fr)_auto_minmax(0,1fr)] md:items-center">
-              <span className="font-mono text-[11px] uppercase tracking-wider text-muted">Line {pad2(exampleIndex + 1)}</span>
-              <span className="truncate text-muted">
-                <span className="strike">{example.text}</span>
-              </span>
+              <span className="font-mono text-[11px] uppercase tracking-wider text-muted">Line {num(exampleIndex + 1)}</span>
+              <span className="strike inline-block max-w-full justify-self-start truncate text-muted">{example.text}</span>
               <Chevron className="hidden h-3.5 w-3.5 text-muted md:block" />
               <span className="flex min-w-0 items-center gap-2">
                 <Check className="h-3.5 w-3.5 text-ok" />
                 <span className="truncate font-medium">{example.replacement.title}</span>
-                <span className="hidden shrink-0 font-mono text-xs text-muted xl:inline">{example.replacement.provenance[0]?.signal}</span>
+                <span className="hidden shrink-0 font-mono text-xs text-muted xl:inline">{shortSignal(example.replacement.provenance[0]?.signal)}</span>
               </span>
             </div>
           )}
@@ -547,30 +596,54 @@ export function TownView({ run }: { run: TownRun }) {
           </div>
         </div>
 
-        <dl className="grid gap-x-6 gap-y-2 border-b border-hairline bg-concrete/50 px-5 py-3 text-xs text-muted sm:px-6 md:grid-cols-3">
-          <div className="flex items-start gap-2">
-            <dt>
-              <StatusPill tone="flag">Not local</StatusPill>
-            </dt>
-            <dd className="pt-0.5">Names no local partner and matches nothing this town stands out for.</dd>
-          </div>
-          <div className="flex items-start gap-2">
-            <dt>
-              <StatusPill tone="flag">Can&apos;t confirm</StatusPill>
-            </dt>
-            <dd className="pt-0.5">Names a partner that isn&apos;t an institution and isn&apos;t found in Qloo or OpenStreetMap. It may exist; it can&apos;t be checked here.</dd>
-          </div>
-          <div className="flex items-start gap-2">
-            <dt className="flex items-center gap-1 pt-0.5 font-medium text-ok-text">
-              <Check className="h-3.5 w-3.5" />
-              Kept
-            </dt>
-            <dd className="pt-0.5">
-              Names a verified local partner or something the town stands out for, or an institution (EDC, district, college, department) we can&apos;t check
-              here: those stay, for the committee to confirm. Grant mechanisms stay too, with Qloo&apos;s suggested applicants.
-            </dd>
-          </div>
-        </dl>
+        {/* Verdict legend: one line, with the full definitions a click away */}
+        <div className="border-b border-hairline bg-concrete/50 px-5 py-3 text-xs text-muted sm:px-6">
+          <details className="group">
+            <summary className="flex cursor-pointer flex-wrap items-center gap-x-4 gap-y-2">
+              <span className="flex items-center gap-1.5">
+                <StatusPill tone="flag">Not local</StatusPill> could fit any town
+              </span>
+              <span className="flex items-center gap-1.5">
+                <StatusPill tone="flag">Can&apos;t confirm</StatusPill> named partner not found here
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="flex items-center gap-1 font-medium text-ok-text">
+                  <Check className="h-3.5 w-3.5" />
+                  Kept
+                </span>
+                verified, an institution, or a commitment kept as drafted (targets, panels, in-kind help)
+              </span>
+              <span className="inline-flex items-center gap-0.5 font-medium text-ink underline decoration-rule underline-offset-2 group-hover:decoration-ink">
+                What do these mean?
+                <Chevron className="chev h-3 w-3" />
+              </span>
+            </summary>
+        <dl className="mt-3 grid gap-x-6 gap-y-2 md:grid-cols-3">
+            <div className="flex items-start gap-2">
+              <dt>
+                <StatusPill tone="flag">Not local</StatusPill>
+              </dt>
+              <dd className="pt-0.5">Names no local partner and matches nothing this town stands out for.</dd>
+            </div>
+            <div className="flex items-start gap-2">
+              <dt>
+                <StatusPill tone="flag">Can&apos;t confirm</StatusPill>
+              </dt>
+              <dd className="pt-0.5">Names a partner that isn&apos;t an institution and isn&apos;t found in Qloo or OpenStreetMap. It may exist; it can&apos;t be checked here.</dd>
+            </div>
+            <div className="flex items-start gap-2">
+              <dt className="flex items-center gap-1 pt-0.5 font-medium text-ok-text">
+                <Check className="h-3.5 w-3.5" />
+                Kept
+              </dt>
+              <dd className="pt-0.5">
+                Names a verified local partner or something the town stands out for, or an institution (EDC, district, college, department) we can&apos;t check
+                here: those stay, for the committee to confirm. Grant mechanisms stay too, with Qloo&apos;s suggested applicants.
+              </dd>
+            </div>
+            </dl>
+          </details>
+        </div>
 
         <div className="hidden grid-cols-[2.25rem_minmax(0,1fr)_minmax(0,1fr)] gap-x-6 border-b border-hairline px-6 py-2 text-[11px] font-medium uppercase tracking-wider text-muted md:grid">
           <span>#</span>
@@ -582,7 +655,7 @@ export function TownView({ run }: { run: TownRun }) {
           <ol className="px-5 sm:px-6">
             {segment(audit).map((seg) =>
               seg.kind === "row" ? (
-                <AuditLine key={seg.index} row={seg.row} index={seg.index} />
+                <AuditLine key={seg.index} row={seg.row} index={seg.index} sameAs={sameAs[seg.index]} gloss={seg.index === glossIndex ? gloss : undefined} />
               ) : (
                 <NoSwapGroup key={`g${seg.rows[0].index}`} rows={seg.rows} />
               ),

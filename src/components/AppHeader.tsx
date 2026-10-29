@@ -8,7 +8,7 @@ const navLink =
 // `towns={false}` hides the host-community switcher (the landing page shows only the wordmark and nav).
 export function AppHeader({ active, page, towns = true }: { active?: string; page?: "proof" | "judges"; towns?: boolean }) {
   return (
-    <header className="no-print sticky top-0 z-30 border-b border-rule bg-paper/95 backdrop-blur supports-[backdrop-filter]:bg-paper/85">
+    <header className="no-print sticky top-0 z-30 border-b border-rule bg-paper/[0.98] backdrop-blur">
       <div className="mx-auto flex max-w-[1200px] flex-wrap items-center gap-x-5 gap-y-2 px-4 py-2.5 sm:px-6">
         <Link href="/" className="flex items-center gap-2 rounded-md py-1 pr-1 font-semibold tracking-tight">
           <span aria-hidden className="grid h-5 w-5 place-items-center rounded-[4px] bg-hivis">
@@ -67,6 +67,10 @@ export function AppHeader({ active, page, towns = true }: { active?: string; pag
               <path d="m10.25 10.25 3 3" strokeLinecap="round" />
             </svg>
             <span className="sr-only">Try any town</span>
+          </Link>
+          <Link href="/check" className={navLink}>
+            <span className="sm:hidden">Check</span>
+            <span className="hidden sm:inline">Check your plan</span>
           </Link>
           <Link href="/proof" aria-current={page === "proof" ? "page" : undefined} className={`${navLink} ${page === "proof" ? "text-ink" : ""}`}>
             Proof
