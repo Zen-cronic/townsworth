@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { LiveDataNotice } from "@/components/LiveDataNotice";
 import { PRODUCT_NAME } from "./brand";
 import { Chevron } from "./Chevron";
 
@@ -16,10 +17,12 @@ export function ProofBand({
   paired,
   stats,
   townCount,
+  failedTowns = [],
 }: {
   paired: { measure: string; note: string; llm: number; gn: number };
   stats: ProofStat[];
   townCount: string;
+  failedTowns?: string[];
 }) {
   const arms = [
     { key: "llm", who: "AI alone", pct: paired.llm },
@@ -38,6 +41,7 @@ export function ProofBand({
         <p className="lp-section-lede">
           AI alone against {PRODUCT_NAME} in {townCount} host towns, with plans frozen before we measured.
         </p>
+        <LiveDataNotice towns={failedTowns} />
       </div>
 
       <div className="lp-pair">

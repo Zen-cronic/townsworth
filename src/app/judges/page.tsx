@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AppHeader } from "@/components/AppHeader";
+import { LiveDataNotice } from "@/components/LiveDataNotice";
 import { PRODUCT_NAME } from "@/components/landing/brand";
 import { Chevron } from "@/components/landing/Chevron";
 import { heroFacts } from "@/components/landing/heroFacts";
@@ -17,9 +18,9 @@ export const metadata: Metadata = {
   description: `See ${PRODUCT_NAME} work in two minutes: a finished example, the committee memo, the resident ballot, any host town, and the evidence with its limits.`,
 };
 
-// Rendered per request so a build-time Qloo hiccup is never frozen into the page; Qloo responses
-// still come from the data cache.
+// Per request: never freeze a failed Qloo call into the page (see src/lib/qloo.ts).
 export const dynamic = "force-dynamic";
+export const maxDuration = 60;
 
 interface Step {
   title: string;
@@ -101,6 +102,7 @@ export default async function GuidedPath() {
               Five steps through a finished example, then a town of your choice. Every step opens the live product at the exact line
               that matters.
             </p>
+            <LiveDataNotice towns={proof.failedTowns} />
             <div className="gp-entrances">
               <Link href="#step-1" className="gp-entry is-primary">
                 <span className="lp-kicker">Start here</span>

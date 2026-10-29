@@ -2,6 +2,7 @@ import "../landing.css";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { AppHeader } from "@/components/AppHeader";
+import { LiveDataNotice } from "@/components/LiveDataNotice";
 import { PRODUCT_NAME } from "@/components/landing/brand";
 import { Chevron } from "@/components/landing/Chevron";
 import { commitmentsFor } from "@/lib/commitments";
@@ -13,9 +14,9 @@ export const metadata: Metadata = {
   description: `Every figure on ${PRODUCT_NAME} with its source: material commitments, the evidence and its method, fund figures and the business case.`,
 };
 
-// Rendered per request so a build-time Qloo hiccup is never frozen into the page; Qloo responses
-// still come from the data cache.
+// Per request: never freeze a failed Qloo call into the page (see src/lib/qloo.ts).
 export const dynamic = "force-dynamic";
+export const maxDuration = 60;
 
 // Figures from the business case, each with the public source it was read from.
 const MARKET: { k: string; text: string; source: string; url: string }[] = [
@@ -72,7 +73,7 @@ const SECTIONS = [
 ] as const;
 
 export default async function SourcesPage() {
-  const { totals: t, baseline, towns } = await computeProof();
+  const { totals: t, baseline, towns, failedTowns } = await computeProof();
   const figures: { k: string; text: string }[] = [
     { k: "Institutions", text: `${t.llmInstitutionalPct}% of the partners AI alone named are institutions, against ${t.gnInstitutionalPct}% of ${PRODUCT_NAME}'s local partners.` },
     { k: "Confirmed", text: `${t.llmVerifiedPct}% of the partners AI alone named could be confirmed on Qloo or OpenStreetMap within 25 km. Unverified is not proof of invented.` },
@@ -159,6 +160,7 @@ export default async function SourcesPage() {
                   plans were frozen on {baseline.createdAt.slice(0, 10)} before any measurement. The method, the per-town table and what the
                   test does not prove are on <Link href="/proof" className="lp-textlink">the evidence page</Link>.
                 </p>
+                <LiveDataNotice towns={failedTowns} />
                 <ul className="src-list">
                   {figures.map((f) => (
                     <li key={f.k}>

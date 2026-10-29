@@ -909,6 +909,9 @@ a:focus-visible .lp-chev {
   font-weight: 500;
   color: var(--l-ink);
 }
+.lp-town-foot .is-failed {
+  color: var(--l-hivis-text);
+}
 
 /* Guardrails */
 .lp-rails {
@@ -2813,4 +2816,47 @@ a:focus-visible .lp-chev {
   text-decoration-color: currentColor;
   text-underline-offset: 4px;
   cursor: help;
+}
+
+/* Live-data notice (src/components/LiveDataNotice.tsx): one line, only when a Qloo call failed on
+   this request. Uses the global tokens so it also works outside .gn-landing (the evidence page). */
+.live-notice {
+  max-width: 62em;
+  font-size: 0.875rem;
+  line-height: 1.55;
+  font-weight: 500;
+  color: var(--muted);
+  text-wrap: pretty;
+}
+.live-notice b {
+  font-weight: 650;
+  color: var(--hivis-text);
+}
+.live-notice a {
+  color: var(--ink);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: var(--rule);
+  text-underline-offset: 3px;
+}
+.is-ink .live-notice {
+  color: #c9c4ba;
+}
+.is-ink .live-notice b {
+  color: #f2a37f;
+}
+.is-ink .live-notice a {
+  color: var(--paper);
+  text-decoration-color: rgb(251 250 247 / 0.4);
+}
+/* In the hero card the notice takes the place of the lead figure. */
+.lp-preview-lead.is-degraded {
+  background: var(--hivis-wash, #fbe9e0);
+}
+.lp-section-head > .live-notice {
+  grid-column: 1 / -1;
+}
+.gp-hero .live-notice,
+.src-section .live-notice {
+  margin-top: 16px;
 }

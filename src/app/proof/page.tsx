@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { AppHeader } from "@/components/AppHeader";
+import { LiveDataNotice } from "@/components/LiveDataNotice";
 import { Figure } from "@/components/dashboard/Figure";
 import { Chevron } from "@/components/dashboard/Icons";
 import { StatusPill } from "@/components/dashboard/StatusPill";
@@ -13,7 +14,9 @@ export const metadata: Metadata = {
   description: "Checks a facility's draft community plan line by line against the places the host town actually goes (Qloo taste data), and returns a costed, resident-ranked program.",
 };
 
+// Per request: never freeze a failed Qloo call into the page (see src/lib/qloo.ts).
 export const dynamic = "force-dynamic";
+export const maxDuration = 60;
 
 type Bar = { label: string; pct: number; tone: "llm" | "gn" };
 
@@ -64,7 +67,7 @@ function Pick({ p }: { p?: PickRef }) {
 }
 
 export default async function ProofPage() {
-  const { towns, totals, baseline } = await computeProof();
+  const { towns, totals, baseline, failedTowns } = await computeProof();
   const num = "px-4 py-3 text-right font-mono tabular-nums";
   const changed = towns.filter((t) => t.swaps.length > 0);
   const kemmerer = towns.find((t) => t.slug === "kemmerer-wy");
@@ -89,6 +92,7 @@ export default async function ProofPage() {
           <p className="lp-lede mt-4">
             {totals.llmVerifiedPct}% of the partners AI alone named could be confirmed ({totals.llmVerified} of {totals.llmNamed}). {replacementsLine}
           </p>
+          <LiveDataNotice towns={failedTowns} className="mt-3" />
           <details className="ui-more mt-3">
             <summary>How the test was set up</summary>
             <div>
@@ -242,6 +246,11 @@ export default async function ProofPage() {
                           <StatusPill tone="warn">Thin data</StatusPill>
                         </span>
                       )}
+                      {t.failed && (
+                        <span className="ml-2">
+                          <StatusPill tone="flag">Qloo didn&apos;t answer</StatusPill>
+                        </span>
+                      )}
                     </td>
                     <td className={num}>{t.llmNamed}</td>
                     <td className={num}>
@@ -302,6 +311,10 @@ export default async function ProofPage() {
               <li>{towns.length === 6 ? "Six" : towns.length} towns and one model: a directional check, not a statistical study.</li>
               <li>Institutions are good partners too. The claim is that the LLM finds only them, not that they are wrong.</li>
               <li>A partner&apos;s availability or willingness is not confirmed by either arm.</li>
+              <li>
+                {PRODUCT_NAME}&apos;s side is recomputed from live Qloo calls on every visit. When a call fails, the page says which town it
+                hit; that town&apos;s figures are then computed from partial data, so reload before reading them.
+              </li>
             </ul>
           </div>
         </section>

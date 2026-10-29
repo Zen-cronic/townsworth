@@ -19,3 +19,8 @@ export const shortOrg = (name: string) => name.replace(/ Economic Development Co
 
 // What an item is, without where: "Supplier day hosted at Racine Civic Centre" reads "Supplier day".
 export const kindOf = (title: string) => title.split(/ hosted at |: | at |, /)[0];
+
+// "Abilene", "Abilene and Clay", "Abilene, Clay and Kemmerer".
+export function listNames(names: string[]) {
+  return names.length < 2 ? (names[0] ?? "") : `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`;
+}

@@ -50,11 +50,14 @@ export function TownGrid({
   partners,
   picks,
   heroSlug,
+  failedTowns = [],
 }: {
   towns: Town[];
   partners: Record<string, number>;
   picks: Record<string, TownPick>;
   heroSlug: string;
+  // Towns whose Qloo calls failed on this request: their count is not a finding, so it isn't shown.
+  failedTowns?: string[];
 }) {
   return (
     <>
@@ -91,7 +94,9 @@ export function TownGrid({
                 ) : (
                   <span className="lp-town-pick is-empty">
                     <span className="lp-town-pick-k">Top pick</span>
-                    <span className="lp-town-pick-v">Too few local places: enter partners from filings</span>
+                    <span className="lp-town-pick-v">
+                      {failedTowns.includes(t.name) ? "Not loaded: Qloo didn’t answer on this visit" : "Too few local places: enter partners from filings"}
+                    </span>
                   </span>
                 )}
                 {picks[t.slug]?.signal && (
@@ -100,9 +105,13 @@ export function TownGrid({
                   </span>
                 )}
                 <span className="lp-town-foot">
-                  <span>
-                    <b>{partners[t.slug] ?? 0}</b> local partners found
-                  </span>
+                  {failedTowns.includes(t.name) ? (
+                    <span className="is-failed">Partners not loaded; reload to retry</span>
+                  ) : (
+                    <span>
+                      <b>{partners[t.slug] ?? 0}</b> local partners found
+                    </span>
+                  )}
                   <Chevron />
                 </span>
               </Link>

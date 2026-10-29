@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { preload } from "react-dom";
 import { AppHeader } from "@/components/AppHeader";
 import { AuditPreview, type PreviewRow } from "@/components/landing/AuditPreview";
+import { LiveDataNotice } from "@/components/LiveDataNotice";
 import { PilotLink } from "@/components/PilotLink";
 import { PRODUCT_NAME } from "@/components/landing/brand";
 import { Chapter } from "@/components/landing/Chapter";
@@ -37,9 +38,9 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", title: TITLE, description: DESCRIPTION, images: ["/landing/og.png"] },
 };
 
-// Rendered per request so a build-time Qloo hiccup is never frozen into the page; Qloo responses
-// still come from the data cache.
+// Per request: never freeze a failed Qloo call into the page (see src/lib/qloo.ts).
 export const dynamic = "force-dynamic";
+export const maxDuration = 60;
 
 const FACILITY_LABEL = { "data center": "Data center", fab: "Chip fab", nuclear: "Nuclear plant", plant: "Plant" } as const;
 
@@ -52,6 +53,8 @@ export default async function Home() {
   ]);
   if (!run) notFound();
   const { town, audit, program, qlooAdds } = run;
+  // The hero run's Qloo calls failed on this request: the card and the stack say so instead of "+0".
+  const heroFailed = run.profile.failedCalls.length ? [town.name] : [];
   const facts = heroFacts(run);
   const auditHref = facts.townHref;
   if (HERO_VIDEO.ready) preload(HERO_VIDEO.poster, { as: "image", fetchPriority: "high" });
@@ -176,7 +179,7 @@ export default async function Home() {
               </div>
             </div>
 
-            <AuditPreview row={preview} townLabel={heroLabel} href={auditHref} kept={kept.length} struck={struck.length} added={qlooAdds.length} />
+            <AuditPreview row={preview} townLabel={heroLabel} href={auditHref} kept={kept.length} struck={struck.length} added={qlooAdds.length} failed={heroFailed} />
           </div>
           <MotionToggle className="lp-motion-corner" />
         </section>
@@ -201,16 +204,17 @@ export default async function Home() {
               Generic plan in. <span className="lp-tone">A costed, local program out.</span>
             </h2>
             <p className="lp-section-lede">Three layers, drawn from the {town.name} run.</p>
+            <LiveDataNotice towns={heroFailed} subject="these layers" />
           </div>
           <HostStack data={stack} nextId="ch-03" />
         </Chapter>
 
         <Chapter name="Evidence" id="ch-03" labelledBy="proof-h" tone="is-ink">
-          <ProofBand paired={paired} stats={stats} townCount={TOWNS.length === 6 ? "six" : String(TOWNS.length)} />
+          <ProofBand paired={paired} stats={stats} townCount={TOWNS.length === 6 ? "six" : String(TOWNS.length)} failedTowns={proof.failedTowns} />
         </Chapter>
 
         <Chapter name="Host towns" id="ch-04" labelledBy="towns-h">
-          <TownGrid towns={TOWNS} partners={partnersByTown} picks={picksByTown} heroSlug={HERO_TOWN.slug} />
+          <TownGrid towns={TOWNS} partners={partnersByTown} picks={picksByTown} heroSlug={HERO_TOWN.slug} failedTowns={proof.failedTowns} />
         </Chapter>
 
         <Chapter name="Questions" id="ch-05" labelledBy="ch-05-h">
@@ -219,6 +223,7 @@ export default async function Home() {
               Fair questions.
             </h2>
             <p className="lp-section-lede">Each answer opens the live screen.</p>
+            <LiveDataNotice towns={proof.failedTowns} subject="these answers" />
           </div>
           <Objections items={objections} />
           <Guardrails />

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { isKept, type AuditRow } from "@/lib/audit";
 import type { ProgramItem } from "@/lib/plan";
+import { LiveDataNotice } from "@/components/LiveDataNotice";
 import { kindOf, shortOrg, shortSignal } from "@/components/ui/labels";
 import { Chevron } from "./Chevron";
 import { clip } from "./clip";
@@ -42,6 +43,7 @@ function SwapCard({ item: r }: { item: ProgramItem }) {
 
 // A live excerpt of the hero town's check, rendered on the server from today's run. With motion
 // allowed, the featured line replays on a loop: the strike (if any), then the local partner.
+// When the run's Qloo calls failed (`failed` names the town), the lead says so instead of a "+0".
 export function AuditPreview({
   row,
   townLabel,
@@ -49,6 +51,7 @@ export function AuditPreview({
   kept,
   struck,
   added,
+  failed = [],
 }: {
   row?: PreviewRow;
   townLabel: string;
@@ -56,6 +59,7 @@ export function AuditPreview({
   kept: number;
   struck: number;
   added: number;
+  failed?: string[];
 }) {
   const partner = row && (isKept(row.verdict) ? row.alongside : row.replacement);
   return (
@@ -69,15 +73,21 @@ export function AuditPreview({
           <Chevron />
         </Link>
       </div>
-      <div className="lp-preview-lead">
-        <p className="lp-added">
-          <span className="lp-added-n">+{added}</span>
-          <span className="lp-added-t">local partners added</span>
-        </p>
-        <p className="lp-tally">
-          <span className="is-ok">{kept} kept</span> · <span className={struck ? "is-hivis" : ""}>{struck} struck</span>
-        </p>
-      </div>
+      {failed.length ? (
+        <div className="lp-preview-lead is-degraded">
+          <LiveDataNotice towns={failed} subject="this excerpt" />
+        </div>
+      ) : (
+        <div className="lp-preview-lead">
+          <p className="lp-added">
+            <span className="lp-added-n">+{added}</span>
+            <span className="lp-added-t">local partners added</span>
+          </p>
+          <p className="lp-tally">
+            <span className="is-ok">{kept} kept</span> · <span className={struck ? "is-hivis" : ""}>{struck} struck</span>
+          </p>
+        </div>
+      )}
       {row && (
         <div className={`lp-row ${isKept(row.verdict) ? "is-kept" : "is-struck"}`}>
           <p className="lp-draft" title={row.text}>
