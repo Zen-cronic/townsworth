@@ -1,6 +1,6 @@
 import "server-only";
 import { BASELINE, BASELINE_SHA256, baselineFor, isInstitution, namedPartner } from "./baselineData";
-import { cleanName } from "./plan";
+import { cleanName, type PickSwap } from "./plan";
 import { runTown } from "./run";
 import { TOWNS } from "./towns";
 
@@ -35,6 +35,13 @@ export interface TownProof {
   // Qloo-affinity partner picks that a distance-only pick of the same candidates would not make.
   gnPicks: number;
   gnPicksChangedByAffinity: number;
+  // The partners the check puts in (swaps for struck lines, items added alongside kept ones).
+  gnReplacements: number;
+  // ...that are in this town's Qloo places within 15 km, and that carry a Qloo local-affinity rank.
+  gnReplacementsLocal: number;
+  gnReplacementsRanked: number;
+  // Each pick the distance-only ranking would not make, next to the one it would make instead.
+  swaps: PickSwap[];
   thin: boolean;
 }
 
@@ -54,6 +61,8 @@ export async function computeProof() {
     const distancePicks = new Set(run.program.picks.distance);
     const gnPartners = run.program.items.map((it) => it.partner?.name).filter((p): p is string => !!p);
     const llmText = norm(baseline.map((b) => `${b.partner ?? ""} ${b.item}`).join(" "));
+    const ownPlaces = new Set(run.profile.places.map((p) => norm(cleanName(p.name))));
+    const added = run.audit.flatMap((r) => [r.replacement, r.alongside]).filter((it) => it?.partner);
 
     towns.push({
       slug: town.slug,
@@ -66,6 +75,10 @@ export async function computeProof() {
       gnAlsoNamedByLlm: gnPartners.filter((p) => llmText.includes(norm(p))).length,
       gnPicks: run.program.picks.affinity.length,
       gnPicksChangedByAffinity: run.program.picks.affinity.filter((id) => !distancePicks.has(id)).length,
+      gnReplacements: added.length,
+      gnReplacementsLocal: added.filter((it) => ownPlaces.has(norm(it!.partner!.name))).length,
+      gnReplacementsRanked: added.filter((it) => ownPlaces.has(norm(it!.partner!.name)) && it!.partner!.affinityRank != null).length,
+      swaps: run.program.picks.swaps.filter((s) => !distancePicks.has(s.qloo.id)),
       thin: run.profile.thin,
     });
     llmWords.push(contentWords(baseline.map((b) => b.item).join(" "), [town.name, town.region, ...llmPartners]));
@@ -103,6 +116,12 @@ export async function computeProof() {
       controlOwnPct: pct(mean(ownHits)),
       controlCrossPct: pct(mean(crossHits)),
       affinityChangedPct: pct(sum((t) => t.gnPicksChangedByAffinity) / Math.max(1, sum((t) => t.gnPicks))),
+      llmNamed: sum((t) => t.llmNamed),
+      llmVerified: sum((t) => t.llmVerified),
+      gnReplacements: sum((t) => t.gnReplacements),
+      gnReplacementsLocalPct: pct(sum((t) => t.gnReplacementsLocal) / Math.max(1, sum((t) => t.gnReplacements))),
+      gnReplacementsRankedPct: pct(sum((t) => t.gnReplacementsRanked) / Math.max(1, sum((t) => t.gnReplacements))),
+      gnReplacementsAllRanked: sum((t) => t.gnReplacementsRanked) === sum((t) => t.gnReplacements),
     },
     baseline: { model: BASELINE.model, promptVersion: BASELINE.promptVersion, createdAt: BASELINE.createdAt, sha256: BASELINE_SHA256 },
   };

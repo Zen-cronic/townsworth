@@ -4,6 +4,7 @@ import { AppHeader } from "@/components/AppHeader";
 import { Figure } from "@/components/dashboard/Figure";
 import { Chevron } from "@/components/dashboard/Icons";
 import { StatusPill } from "@/components/dashboard/StatusPill";
+import type { PickRef } from "@/lib/plan";
 import { computeProof } from "@/lib/proof";
 import { PRODUCT_NAME } from "@/components/landing/brand";
 
@@ -35,8 +36,7 @@ function Bars({ bars }: { bars: Bar[] }) {
 function Finding({ n, big, label, note, bars }: { n: string; big: string; label: string; note: string; bars?: Bar[] }) {
   return (
     <div id={`finding-${n}`} className="flex scroll-mt-24 flex-col bg-paper px-5 py-6 sm:px-6">
-      <p className="font-mono text-[11px] text-muted">{n}</p>
-      <p className="mt-2 text-[2.25rem] leading-none">
+      <p className="text-[2.25rem] leading-none">
         <Figure value={big} />
       </p>
       <p className="mt-3 font-medium leading-snug">{label}</p>
@@ -46,9 +46,33 @@ function Finding({ n, big, label, note, bars }: { n: string; big: string; label:
   );
 }
 
+function Pick({ p }: { p?: PickRef }) {
+  if (!p) return <span className="text-muted">No pick</span>;
+  return (
+    <span>
+      <span className="font-medium text-ink">{p.name}</span>
+      <span className="block font-mono text-[11px] tabular-nums text-muted">
+        {[p.distanceKm != null && `${p.distanceKm} km`, p.affinityRank != null ? `#${p.affinityRank} local affinity` : "no affinity score", p.city]
+          .filter(Boolean)
+          .join(" · ")}
+      </span>
+    </span>
+  );
+}
+
 export default async function ProofPage() {
   const { towns, totals, baseline } = await computeProof();
   const num = "px-4 py-3 text-right font-mono tabular-nums";
+  const changed = towns.filter((t) => t.swaps.length > 0);
+  const kemmerer = towns.find((t) => t.slug === "kemmerer-wy");
+  const replacementsLine =
+    totals.gnReplacements === 0
+      ? `${PRODUCT_NAME} put in no new partners in this run.`
+      : `${totals.gnReplacementsLocalPct === 100 ? "Every one" : `${totals.gnReplacementsLocalPct}%`} of the ${totals.gnReplacements} partners ${PRODUCT_NAME} puts in exists locally in Qloo's places${
+          totals.gnReplacementsAllRanked
+            ? " and is ranked by local affinity."
+            : `; ${totals.gnReplacementsRankedPct}% are ranked by local affinity, the rest listed by distance where Qloo has no affinity score.`
+        }`;
 
   return (
     <>
@@ -57,9 +81,12 @@ export default async function ProofPage() {
         <header className="max-w-3xl">
           <p className="font-mono text-[11px] uppercase tracking-wider text-muted">Evidence · {towns.length} host towns · recomputed on every load</p>
           <h1 className="mt-2 text-3xl font-semibold leading-tight tracking-tight md:text-[2.5rem]">
-            Would AI alone write the same plan? We tested {towns.length === 6 ? "six" : towns.length} towns.
+            Qloo grounds the AI plan in where the town actually goes.
           </h1>
-          <p className="mt-3 text-lg leading-relaxed text-muted">
+          <p className="mt-3 text-lg leading-relaxed text-ink">
+            {totals.llmVerifiedPct}% of the partners AI alone named could be confirmed ({totals.llmVerified} of {totals.llmNamed}). {replacementsLine}
+          </p>
+          <p className="mt-3 leading-relaxed text-muted">
             For each of {towns.length} host towns we asked the same model, with no Qloo access, to write the community plan a consultant would write,
             and froze those plans before measuring. Then we compared them with what {PRODUCT_NAME} proposes from Qloo&apos;s local taste data.
           </p>
@@ -68,14 +95,16 @@ export default async function ProofPage() {
         {/* Findings */}
         <section id="findings" aria-label="Findings" className="mt-8 grid scroll-mt-24 gap-px overflow-hidden rounded-lg border border-rule bg-hairline md:grid-cols-2 lg:grid-cols-4">
           <Finding
-            n="01"
+            n="1"
             big={`${totals.llmVerifiedPct}%`}
             label="of the partners AI alone named could be confirmed"
             bars={[{ label: "Verified", pct: totals.llmVerifiedPct, tone: "llm" }]}
-            note="Verified against Qloo or OpenStreetMap within 25 km. In well-mapped towns the LLM mostly names real institutions; in thin-data Kemmerer only 1 of 12 could be verified. Unverified is not proof of invented."
+            note={`Verified against Qloo or OpenStreetMap within 25 km. In well-mapped towns the LLM mostly names real institutions${
+              kemmerer ? `; in thin-data Kemmerer only ${kemmerer.llmVerified} of ${kemmerer.llmNamed} could be verified` : ""
+            }. Unverified is not proof of invented.`}
           />
           <Finding
-            n="02"
+            n="2"
             big={`${totals.llmInstitutionalPct}% vs ${totals.gnInstitutionalPct}%`}
             label={`of partners are institutions: AI alone vs ${PRODUCT_NAME}`}
             bars={[
@@ -85,19 +114,63 @@ export default async function ProofPage() {
             note="AI alone reaches for the college, the district, the library and the chamber. Qloo surfaces the places residents actually go."
           />
           <Finding
-            n="03"
+            n="3"
             big={`${totals.gnNovelPct}%`}
             label={`of ${PRODUCT_NAME}'s local partners AI alone never named`}
             bars={[{ label: "Never named", pct: totals.gnNovelPct, tone: "gn" }]}
             note="Qloo isn't re-deriving what the model already knows. It adds a layer the model doesn't have."
           />
           <Finding
-            n="04"
+            n="4"
             big={`${totals.affinityChangedPct}%`}
             label="of picks change without Qloo's taste ranking (ordered by distance, like a nearby-places directory)"
             bars={[{ label: "Changed", pct: totals.affinityChangedPct, tone: "gn" }]}
             note="Same candidate places, same venue-fit and host-community rules; only the order differs: Qloo's local affinity vs distance from the site. The share of Good Neighbor's picks a distance-only directory would not make."
           />
+        </section>
+
+        {/* What Qloo changes */}
+        <section id="what-qloo-changes" aria-labelledby="qloo-changes" className="mt-6 scroll-mt-24 rounded-lg border border-rule bg-paper">
+          <div className="border-b border-rule px-5 py-4 sm:px-6">
+            <h2 id="qloo-changes" className="font-semibold">What Qloo changes</h2>
+            <p className="mt-1 text-sm leading-relaxed text-muted">
+              Each pick Qloo&apos;s local-affinity ranking makes that a distance-only ranking of the same candidates would not, next to the pick the
+              distance ranking makes instead. Same venue-fit and host-community rules, recomputed on this load.
+            </p>
+          </div>
+          {changed.length === 0 ? (
+            <p className="px-5 py-4 text-sm text-muted sm:px-6">No picks change in this run: the distance-only ranking makes the same choices.</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[640px] text-sm">
+                <thead>
+                  <tr className="border-b border-hairline text-[11px] uppercase tracking-wider text-muted">
+                    <th scope="col" className="px-4 py-2.5 pl-5 text-left font-medium sm:pl-6">Town · slot</th>
+                    <th scope="col" className="px-4 py-2.5 text-left font-medium">Distance only</th>
+                    <th scope="col" className="px-4 py-2.5 pr-6 text-left font-medium">Ranked by Qloo</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-hairline">
+                  {changed.flatMap((t) =>
+                    t.swaps.map((s) => (
+                      <tr key={`${t.slug}-${s.slot}-${s.qloo.id}`}>
+                        <td className="px-4 py-3 pl-5 align-top sm:pl-6">
+                          <span className="font-medium">{t.name}</span>
+                          <span className="block text-xs text-muted">{s.slot}</span>
+                        </td>
+                        <td className="px-4 py-3 align-top">
+                          <Pick p={s.distance} />
+                        </td>
+                        <td className="px-4 py-3 pr-6 align-top">
+                          <Pick p={s.qloo} />
+                        </td>
+                      </tr>
+                    )),
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
         </section>
 
         {/* Wiring check */}
