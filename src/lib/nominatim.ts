@@ -1,4 +1,5 @@
 import "server-only";
+import { haversineKm } from "./geo";
 import { CA_PROVINCES, customSlug, inCountry, presetNear, US_STATES, type FacilityCode, type Town } from "./towns";
 
 // OpenStreetMap Nominatim, per its usage policy: identify the app, at most one request a second
@@ -115,12 +116,6 @@ export async function geocodeTowns(query: string, facility: FacilityCode): Promi
   return { ok: true, candidates };
 }
 
-function km(a: { lat: number; lon: number }, b: { lat: number; lon: number }) {
-  const r = (d: number) => (d * Math.PI) / 180;
-  const h = Math.sin(r(b.lat - a.lat) / 2) ** 2 + Math.cos(r(a.lat)) * Math.cos(r(b.lat)) * Math.sin(r(b.lon - a.lon) / 2) ** 2;
-  return 2 * 6371 * Math.asin(Math.sqrt(h));
-}
-
 export interface OsmCheck {
   status: number;
   found: boolean;
@@ -148,13 +143,13 @@ export async function osmLookup(name: string, town: { lat: number; lon: number }
   if (!res) return { status: 429, found: false };
   if (!res.ok) return { status: res.status, found: false };
   const hits = (await res.json()) as { display_name: string; lat: string; lon: string }[];
-  const near = hits.find((h) => km(town, { lat: Number(h.lat), lon: Number(h.lon) }) <= 25);
+  const near = hits.find((h) => haversineKm(town, { lat: Number(h.lat), lon: Number(h.lon) }) <= 25);
   return near
     ? {
         status: 200,
         found: true,
         osmName: near.display_name.split(",")[0],
-        km: Math.round(km(town, { lat: Number(near.lat), lon: Number(near.lon) }) * 10) / 10,
+        km: Math.round(haversineKm(town, { lat: Number(near.lat), lon: Number(near.lon) }) * 10) / 10,
       }
     : { status: 200, found: false };
 }

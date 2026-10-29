@@ -1,6 +1,7 @@
 import type { QlooEntity } from "./qloo";
 import type { TownProfile } from "./profile";
-import { cleanName, isReachItem, OPEN_GRANT_ID, type Bucket, type ProgramItem } from "./plan";
+import { haversineKm } from "./geo";
+import { cleanName, OPEN_GRANT_ID, type Bucket, type ProgramItem } from "./plan";
 import { isInstitution, namedPartner } from "./baselineData";
 
 // The audit verdict is deterministic. A model may help extract a named partner from free text,
@@ -127,12 +128,6 @@ export function osmVerifies(named: string, osmName: string | undefined, townName
 // verify "Racine Zoo". The hit's own city and suffixes such as "campus" don't count as new words.
 export const SEARCH_RADIUS_KM = 25;
 const NEUTRAL_SUFFIX = new Set("campus branch location main downtown north south east west inc llc ltd".split(" "));
-
-const haversineKm = (a: { lat: number; lon: number }, b: { lat: number; lon: number }) => {
-  const rad = Math.PI / 180;
-  const h = Math.sin(((b.lat - a.lat) * rad) / 2) ** 2 + Math.cos(a.lat * rad) * Math.cos(b.lat * rad) * Math.sin(((b.lon - a.lon) * rad) / 2) ** 2;
-  return 6371 * 2 * Math.asin(Math.sqrt(h));
-};
 
 export function matchSearchHit(
   named: string,
@@ -324,14 +319,13 @@ export function auditPlan(inputs: AuditInput[], profile: TownProfile, program: P
   const used = new Set<string>();
   const townName = profile.town.name;
   const community = hostCommunityNames(profile);
-  // Like-for-like swaps and additions come from Qloo-picked items, never the open grant cycle or a
-  // session added by the age-group check.
+  // Like-for-like swaps and additions come from Qloo-picked items, never the open grant cycle.
   const nextInBucket = (bucket: Bucket) => {
-    const item = program.find((p) => p.bucket === bucket && p.id !== OPEN_GRANT_ID && !isReachItem(p) && !used.has(p.id));
+    const item = program.find((p) => p.bucket === bucket && p.id !== OPEN_GRANT_ID && !used.has(p.id));
     if (item) used.add(item.id);
     return item;
   };
-  const grantCandidates = program.filter((p) => p.bucket === "grants" && p.partner && !isReachItem(p));
+  const grantCandidates = program.filter((p) => p.bucket === "grants" && p.partner);
 
   return inputs.map(({ text, named: rawNamed, osm, qloo }) => {
     const mechanism = mechanismOf(text);

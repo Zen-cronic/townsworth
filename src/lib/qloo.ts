@@ -158,25 +158,29 @@ async function fetchWithRetry(url: string, key: string, noStore = false): Promis
   }
 }
 
-async function insights(label: string, params: Record<string, string>, type: EntityType): Promise<QlooResult> {
+// One Qloo GET, shared by every endpoint: the key check, timing and status. A missing key throws (a
+// configuration error, never "no results"); a request with no answer comes back as status 0.
+async function qlooGet<T>(path: string, params: Record<string, string>, { noStore = false } = {}) {
   const key = process.env.QLOO_API_KEY;
   if (!key) throw new Error("QLOO_API_KEY is not set");
-  const url = `${BASE}/v2/insights?${new URLSearchParams(params)}`;
   const started = Date.now();
-  // A failed call is recorded as an error, never silently treated as "no results" (thin data).
   let status = 0;
-  let raw: RawEntity[] = [];
+  let body: T | null = null;
   try {
-    const res = await fetchWithRetry(url, key);
+    const res = await fetchWithRetry(`${BASE}${path}?${new URLSearchParams(params)}`, key, noStore);
     status = res.status;
-    const body = res.ok ? await res.json() : null;
-    raw = body?.results?.entities ?? [];
+    body = res.ok ? ((await res.json()) as T) : null;
   } catch {
     // No answer at all: keep status 0 so the UI reports an error rather than thin data.
   }
-  const entities = raw.map((r) => parseEntity(r, type));
-  const ok = status >= 200 && status < 300;
-  return { entities, call: { label, params, status, ok, count: entities.length, ms: Date.now() - started } };
+  return { status, ok: status >= 200 && status < 300, body, ms: Date.now() - started };
+}
+
+// A failed call is recorded as an error, never silently treated as "no results" (thin data).
+async function insights(label: string, params: Record<string, string>, type: EntityType): Promise<QlooResult> {
+  const res = await qlooGet<{ results?: { entities?: RawEntity[] } }>("/v2/insights", params);
+  const entities = (res.body?.results?.entities ?? []).map((r) => parseEntity(r, type));
+  return { entities, call: { label, params, status: res.status, ok: res.ok, count: entities.length, ms: res.ms } };
 }
 
 const point = (lat: number, lon: number) => `POINT(${lon} ${lat})`;
@@ -238,25 +242,12 @@ export interface QlooAudience {
 
 // The life-stage list, so the "Parents With Young Children" id is read from Qloo at runtime.
 export async function lifeStageAudiences(): Promise<{ audiences: QlooAudience[]; call: QlooCall }> {
-  const key = process.env.QLOO_API_KEY;
-  if (!key) throw new Error("QLOO_API_KEY is not set");
   const params = { "filter.parents.types": "urn:audience:life_stage", take: "50" };
-  const started = Date.now();
-  let status = 0;
-  let audiences: QlooAudience[] = [];
-  try {
-    const res = await fetchWithRetry(`${BASE}/v2/audiences?${new URLSearchParams(params)}`, key);
-    status = res.status;
-    const body = res.ok ? await res.json() : null;
-    const raw: { id?: unknown; name?: unknown }[] = body?.results?.audiences ?? [];
-    audiences = raw
-      .filter((a): a is { id: string; name: string } => typeof a?.id === "string" && typeof a?.name === "string")
-      .map((a) => ({ id: a.id, name: a.name }));
-  } catch {
-    // No answer: status 0, reported as a failed lens call.
-  }
-  const ok = status >= 200 && status < 300;
-  return { audiences, call: { label: "life-stage groups", params, status, ok, count: audiences.length, ms: Date.now() - started } };
+  const res = await qlooGet<{ results?: { audiences?: { id?: unknown; name?: unknown }[] } }>("/v2/audiences", params);
+  const audiences = (res.body?.results?.audiences ?? [])
+    .filter((a): a is { id: string; name: string } => typeof a?.id === "string" && typeof a?.name === "string")
+    .map((a) => ({ id: a.id, name: a.name }));
+  return { audiences, call: { label: "life-stage groups", params, status: res.status, ok: res.ok, count: audiences.length, ms: res.ms } };
 }
 
 export interface QlooSearchResult {
@@ -268,19 +259,8 @@ export interface QlooSearchResult {
 // Name lookup for one venue a pasted plan mentions, near the site. Never cached: the query comes
 // from user text. The radius filter is a hint to Qloo's ranking, so callers still check distance.
 export async function searchPlaces(query: string, lat: number, lon: number, radiusKm = 25, take = 5): Promise<QlooSearchResult> {
-  const key = process.env.QLOO_API_KEY;
-  if (!key) return { entities: [], status: 0, ok: false };
   const params = { query, types: "urn:entity:place", "filter.location": `${lat},${lon}`, "filter.radius": String(radiusKm), take: String(take) };
-  let status = 0;
-  let raw: RawEntity[] = [];
-  try {
-    const res = await fetchWithRetry(`${BASE}/search?${new URLSearchParams(params)}`, key, true);
-    status = res.status;
-    const body = res.ok ? await res.json() : null;
-    raw = Array.isArray(body?.results) ? body.results : [];
-  } catch {
-    // No answer: the caller leaves the line as it was.
-  }
-  const ok = status >= 200 && status < 300;
-  return { entities: raw.filter((r) => typeof r?.entity_id === "string" && typeof r?.name === "string").map((r) => parseEntity(r, "place")), status, ok };
+  const res = await qlooGet<{ results?: unknown }>("/search", params, { noStore: true });
+  const raw = (Array.isArray(res.body?.results) ? res.body.results : []) as RawEntity[];
+  return { entities: raw.filter((r) => typeof r?.entity_id === "string" && typeof r?.name === "string").map((r) => parseEntity(r, "place")), status: res.status, ok: res.ok };
 }
