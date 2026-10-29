@@ -1,6 +1,6 @@
 # Good Neighbor
 
-**When a data center, chip fab or nuclear plant comes to town, its community fund usually buys a generic plan. Good Neighbor checks that plan line by line against the places the host town actually goes, ranked by Qloo's local affinity (how strongly locals favour them). It keeps the institutions the plan already names, and returns a costed, resident-ranked 24-month program of local partners and host venues. Every item is traceable to its Qloo signal.**
+**When a data center, chip fab or nuclear plant comes to town, its community fund usually buys a generic plan. Good Neighbor checks that plan line by line against the places the host town actually goes, ranked by Qloo's local affinity (how strongly locals favour them). It keeps the institutions the plan already names, adds the local places residents actually go that AI alone never names (90% of its local partners, per `/proof`), and returns a costed, resident-ranked 24-month program of local partners and host venues. Every item is traceable to its Qloo signal.**
 
 For community-affairs teams at hyperscalers, developers, fabs and utilities.
 
