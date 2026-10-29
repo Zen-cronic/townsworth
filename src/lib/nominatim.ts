@@ -12,7 +12,8 @@ const MAX_WAIT_MS = 10_000;
 
 // The queue is module state, so the one-a-second spacing holds per server instance only.
 let nextSlot = 0;
-async function politeFetch(params: URLSearchParams): Promise<Response | null> {
+// `noStore` keeps the response out of the data cache, for queries built from user-pasted text.
+async function politeFetch(params: URLSearchParams, noStore = false): Promise<Response | null> {
   const now = Date.now();
   const wait = Math.max(0, nextSlot - now);
   if (wait > MAX_WAIT_MS) return null;
@@ -20,7 +21,7 @@ async function politeFetch(params: URLSearchParams): Promise<Response | null> {
   if (wait) await new Promise((r) => setTimeout(r, wait));
   return fetch(`${BASE}?${params}`, {
     headers: { "User-Agent": USER_AGENT, "Accept-Language": "en" },
-    next: { revalidate: 86400 },
+    ...(noStore ? { cache: "no-store" as const } : { next: { revalidate: 86400 } }),
   });
 }
 
@@ -129,7 +130,7 @@ export interface OsmCheck {
 
 // The same check the frozen baseline used (scripts/freeze-baseline.ts): a bounded box around
 // the town, up to three hits, and a match only within 25 km.
-export async function osmLookup(name: string, town: { lat: number; lon: number }): Promise<OsmCheck> {
+export async function osmLookup(name: string, town: { lat: number; lon: number }, opts: { noStore?: boolean } = {}): Promise<OsmCheck> {
   const d = 0.25;
   const params = new URLSearchParams({
     q: name,
@@ -140,7 +141,7 @@ export async function osmLookup(name: string, town: { lat: number; lon: number }
   });
   let res: Response | null;
   try {
-    res = await politeFetch(params);
+    res = await politeFetch(params, opts.noStore);
   } catch {
     return { status: 0, found: false };
   }
