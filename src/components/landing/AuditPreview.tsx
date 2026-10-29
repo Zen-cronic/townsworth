@@ -47,6 +47,7 @@ function SwapCard({ item: r }: { item: ProgramItem }) {
 export function AuditPreview({
   row,
   townLabel,
+  title = "AI-written draft, checked",
   href,
   kept,
   struck,
@@ -55,6 +56,7 @@ export function AuditPreview({
 }: {
   row?: PreviewRow;
   townLabel: string;
+  title?: string;
   href: string;
   kept: number;
   struck: number;
@@ -67,7 +69,7 @@ export function AuditPreview({
       <div className="lp-preview-head">
         <div>
           <p className="lp-kicker">{townLabel}</p>
-          <p className="lp-preview-title">AI-written draft, checked</p>
+          <p className="lp-preview-title">{title}</p>
         </div>
         <Link href={href} className="lp-preview-open" aria-label="Open the full line-by-line check">
           <Chevron />
@@ -81,7 +83,7 @@ export function AuditPreview({
         <div className="lp-preview-lead">
           <p className="lp-added">
             <span className="lp-added-n">+{added}</span>
-            <span className="lp-added-t">local partners added</span>
+            <span className="lp-added-t">{added === 1 ? "local partner added" : "local partners added"}</span>
           </p>
           <p className="lp-tally">
             <span className="is-ok">{kept} kept</span> · <span className={struck ? "is-hivis" : ""}>{struck} struck</span>

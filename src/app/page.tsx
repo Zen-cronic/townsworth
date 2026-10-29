@@ -46,21 +46,28 @@ const FACILITY_LABEL = { "data center": "Data center", fab: "Chip fab", nuclear:
 
 export default async function Home() {
   // Same arguments as computeProof, so every town run is shared within the request.
-  const [run, proof, townRuns] = await Promise.all([
+  const [run, template, proof, townRuns] = await Promise.all([
     runTown(HERO_TOWN.slug, undefined, "llm"),
+    runTown(HERO_TOWN.slug, undefined, "agency"),
     computeProof(),
     Promise.all(TOWNS.map((t) => runTown(t.slug, undefined, "llm"))),
   ]);
-  if (!run) notFound();
-  const { town, audit, program, qlooAdds } = run;
+  if (!run || !template) notFound();
+  const { town, program } = run;
   // The hero run's Qloo calls failed on this request: the card and the stack say so instead of "+0".
   const heroFailed = run.profile.failedCalls.length ? [town.name] : [];
   const facts = heroFacts(run);
   const auditHref = facts.townHref;
   if (HERO_VIDEO.ready) preload(HERO_VIDEO.poster, { as: "image", fetchPriority: "high" });
 
-  // Preview: the strongest swap alone: a struck line whose replacement is a host-community place, best affinity first.
-  const rows: PreviewRow[] = audit.map((r, i) => ({ ...r, n: i + 1 }));
+  // Preview: the consultant template checked against the hero town, so the card shows a struck line
+  // and its local replacement. The strongest swap: a host-community place, best affinity first.
+  const previewHref = `${auditHref}?plan=agency`;
+  const previewFailed = template.profile.failedCalls.length ? [town.name] : [];
+  const rows: PreviewRow[] = template.audit.map((r, i) => ({ ...r, n: i + 1 }));
+  // Local partner items in the program, counted as the town page's summary counts them; the template
+  // names nothing local, so the check brings in every one.
+  const templatePartners = template.program.items.filter((it) => it.partner).length;
   const kept = rows.filter((r) => isKept(r.verdict));
   const struck = rows.filter((r) => !isKept(r.verdict));
   const swaps = struck
@@ -179,7 +186,16 @@ export default async function Home() {
               </div>
             </div>
 
-            <AuditPreview row={preview} townLabel={heroLabel} href={auditHref} kept={kept.length} struck={struck.length} added={qlooAdds.length} failed={heroFailed} />
+            <AuditPreview
+              row={preview}
+              townLabel={heroLabel}
+              title="Consultant template, checked"
+              href={previewHref}
+              kept={kept.length}
+              struck={struck.length}
+              added={templatePartners}
+              failed={previewFailed}
+            />
           </div>
           <MotionToggle className="lp-motion-corner" />
         </section>
