@@ -8,7 +8,7 @@ import { LENSES, type LensStatus, type ReachSummary } from "@/lib/reach";
 
 const sentence = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
-function Cell({ status, place, ranked }: { status?: LensStatus; place?: string; ranked?: number }) {
+function Cell({ status, place, ranked, fit }: { status?: LensStatus; place?: string; ranked?: number; fit?: "reserve" | "ceiling" }) {
   if (!status) return <span className="text-muted">-</span>;
   if (status === "covered") return <StatusPill tone="ok">Included</StatusPill>;
   if (status === "added")
@@ -22,7 +22,7 @@ function Cell({ status, place, ranked }: { status?: LensStatus; place?: string; 
   return (
     <span className="flex flex-col items-start gap-1">
       <StatusPill tone="flag">Not reached</StatusPill>
-      <span className="text-xs text-muted">{status === "no-fit" ? `${place}: reserve too small` : ranked === 0 ? "No places ranked" : "No eligible host"}</span>
+      <span className="text-xs text-muted">{status === "no-fit" ? `${place}: ${fit === "ceiling" ? "non-grant cap reached" : "reserve too small"}` : ranked === 0 ? "No places ranked" : "No eligible host"}</span>
     </span>
   );
 }
@@ -33,7 +33,9 @@ export function ReachProof({ towns }: { towns: { slug: string; name: string; rea
   const added = towns.reduce((s, t) => s + t.reach.added.length, 0);
   const townsAdded = towns.filter((t) => t.reach.added.length).length;
   const unchecked = towns.reduce((s, t) => s + t.reach.unchecked, 0);
-  const notReached = checks - included - unchecked - towns.reduce((s, t) => s + t.reach.lenses.filter((l) => l.status === "added").length, 0);
+  const count = (status: LensStatus) => towns.reduce((s, t) => s + t.reach.lenses.filter((l) => l.status === status).length, 0);
+  const noHost = count("no-candidate");
+  const noFit = count("no-fit");
   if (!checks) return null;
   return (
     <section id="age-groups" aria-labelledby="age-groups-title" className="mt-6 scroll-mt-24 ui-card">
@@ -49,7 +51,8 @@ export function ReachProof({ towns }: { towns: { slug: string; name: string; rea
           <p className="mt-1 text-sm leading-relaxed text-muted">
             {added === 0 ? "None in this run" : `${added} ${added === 1 ? "venue" : "venues"} in ${townsAdded} ${townsAdded === 1 ? "town" : "towns"}`}.{" "}
             {included} of {checks} age-group checks were already met by the program as drafted
-            {notReached > 0 ? `; ${notReached} had no host the program could add` : ""}
+            {noHost > 0 ? `; ${noHost} had no eligible host` : ""}
+            {noFit > 0 ? `; ${noFit} had a host the budget couldn't cover` : ""}
             {unchecked > 0 ? `; ${unchecked} couldn't be checked on this load` : ""}. Qloo ranks the places within 15 km for young adults (under
             25), older residents and families with young children; a group is included when a program venue or grant applicant is in its top
             15. Added sessions are earmarked from the reserve and change no figure above.{" "}
@@ -79,7 +82,7 @@ export function ReachProof({ towns }: { towns: { slug: string; name: string; rea
                   const o = t.reach.lenses.find((x) => x.key === l.key);
                   return (
                     <td key={l.key} className="px-4 py-3 align-top last:pr-6">
-                      <Cell status={o?.status} place={o?.place} ranked={o?.ranked} />
+                      <Cell status={o?.status} place={o?.place} ranked={o?.ranked} fit={o?.fit} />
                     </td>
                   );
                 })}

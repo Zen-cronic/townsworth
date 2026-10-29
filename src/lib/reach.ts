@@ -49,6 +49,8 @@ export interface LensData {
   key: LensKey;
   ok: boolean;
   ids: string[];
+  // Qloo answered, but its life-stage list had no group by the expected name.
+  missing?: "audience";
 }
 
 export type LensStatus = "covered" | "added" | "no-fit" | "no-candidate" | "unchecked";
@@ -71,6 +73,11 @@ export interface LensOutcome {
   place?: LensPlace;
   itemId?: string;
   amount?: number;
+  // added: the venue already came in with the session added for this earlier group, so nothing more
+  // is earmarked.
+  sharedWith?: LensKey;
+  // no-fit: what the session didn't fit, the reserve or the cap on spending outside grants.
+  fit?: "reserve" | "ceiling";
   // How many places Qloo ranked for the group (0 in very thin towns).
   ranked?: number;
   note: string;
@@ -80,24 +87,28 @@ export interface LensOutcome {
 // A public beach counts as a park.
 const LENS_HOST =
   /^(banquet hall|community center|civic center|cultural center|conference center|convention center|auditorium|library|public library|museum|art museum|history museum|science museum|children's museum|park|city park|state park|county park|regional park|national park|nature preserve|beach|zoo|school|high school|middle school|elementary school|college|community college|technical college|university|public university)$/i;
-// Never a host for these sessions: dining, bars, gyms, clubs and farms (any category), or a place
-// that is retail first (its primary category or its name). A museum that also has a gift shop stays.
-const NOT_A_LENS_HOST = /bar\b|pub\b|brew|beer|winery|night club|lounge|gym|fitness|yoga|casino|hotel|motel|golf|country club|orchard|farm|petting zoo/i;
-const RETAIL = /store|shop\b|market|mall|outlet|boutique|supermarket|marina/i;
+// Never a host for these sessions: dining, bars, gyms, clubs and farms (any category, or a whole
+// word of the name), or a place that is retail first (its primary category, or a retail word in a
+// name with no host word). Whole words only, so "Farmington Community Library", "Brewster Ladies'
+// Library", "Sandbar Beach Park" and "Market Square Park" stay hosts. A museum with a gift shop stays.
+const NOT_A_LENS_HOST =
+  /\b(bars?|pubs?|brewery|breweries|brewing|brewpub|brewhouse|beer|winery|wineries|night ?club|lounge|gym|fitness|yoga|casino|hotel|motel|golf|country club|orchard|farms?|petting zoo)\b/i;
+const RETAIL = /\b(stores?|shops?|shoppes|market|marketplace|mall|outlet|boutique|supermarket|marina)\b/i;
+const HOST_WORD = /\b(park|library|museum|hall|center|centre|school|college|university|beach|zoo|preserve|auditorium)\b/i;
 
 export function isLensHost(e: QlooEntity): boolean {
   const cats = categories(e);
   const name = cleanName(e.name);
   if (!cats.some((c) => LENS_HOST.test(c))) return false;
   if (cats.some((c) => NOT_A_LENS_HOST.test(c)) || NOT_A_LENS_HOST.test(name)) return false;
-  if ((cats[0] && RETAIL.test(cats[0])) || RETAIL.test(name)) return false;
+  if ((cats[0] && RETAIL.test(cats[0])) || (RETAIL.test(name) && !HOST_WORD.test(name))) return false;
   if (hasCategory(e, DINING) || DINING_NAME.test(name) || isChain(e.name)) return false;
   return true;
 }
 
 // Bars, pubs, breweries and wineries: the program already runs them as adult (21+) evening venues.
 const ADULT_ONLY = /^(bar|pub|sports bar|brewery|brewpub|beer garden|beer hall|night club|winery|wine bar|cocktail bar|lounge|tavern)$/i;
-const ADULT_NAME = /\b(bar|pub|brew\w*|beer|tavern|saloon|taproom|winery)\b/i;
+const ADULT_NAME = /\b(bars?|pubs?|brew(ery|eries|ing|pub|house|s)?|beer|tavern|saloon|taproom|winery)\b/i;
 
 export function isAdultOnly(e: QlooEntity): boolean {
   return categories(e).some((c) => ADULT_ONLY.test(c)) || ADULT_NAME.test(cleanName(e.name));
@@ -116,6 +127,7 @@ function lensPlace(id: string, rank: number, profile: TownProfile): LensPlace {
 // `program.items`, `totalAllocated` and `unassigned` are left exactly as built, so every existing
 // count and the fund reconciliation (items + unassigned = 2x fund) are unchanged, and
 // `reachEarmarked` never exceeds `unassigned`. Without lens data the program is left untouched.
+// A later group whose top 15 holds a venue added for an earlier group shares that session.
 export function applyReach(profile: TownProfile, program: Program): Program {
   if (!profile.lenses) return program;
   const outcomes: LensOutcome[] = [];
@@ -124,6 +136,7 @@ export function applyReach(profile: TownProfile, program: Program): Program {
     return program;
   }
   const partnerIds = new Set(program.picks.affinity);
+  const addedBy = new Map<string, LensOutcome>();
   const reachItems: ProgramItem[] = [];
   const earmarked = () => reachItems.reduce((s, it) => s + it.amount, 0);
   const localById = new Map(profile.localPlaces.map((e) => [e.id, e]));
@@ -132,7 +145,13 @@ export function applyReach(profile: TownProfile, program: Program): Program {
     const data = profile.lenses.find((d) => d.key === lens.key);
     const base = { key: lens.key, label: lens.label };
     if (!data?.ok) {
-      outcomes.push({ ...base, status: "unchecked", note: `Qloo didn't answer for ${lens.label}, so this couldn't be checked. Nothing was added.` });
+      outcomes.push({
+        ...base,
+        status: "unchecked",
+        note: data?.missing
+          ? `Qloo's life-stage list has no "Parents With Young Children" group, so ${lens.label} couldn't be checked. Nothing was added.`
+          : `Qloo didn't answer for ${lens.label}, so this couldn't be checked. Nothing was added.`,
+      });
       continue;
     }
     const counts = (id: string) => {
@@ -143,6 +162,20 @@ export function applyReach(profile: TownProfile, program: Program): Program {
     const covered = data.ids.flatMap((id, i) => (counts(id) ? [lensPlace(id, i + 1, profile)] : []));
     if (covered.length) {
       outcomes.push({ ...base, status: "covered", partners: covered, note: `${covered[0].name} is #${covered[0].lensRank} for ${lens.label}.` });
+      continue;
+    }
+    const sharedAt = data.ids.findIndex((id) => addedBy.has(id));
+    if (sharedAt >= 0) {
+      const prior = addedBy.get(data.ids[sharedAt])!;
+      const place = { ...prior.place!, lensRank: sharedAt + 1 };
+      outcomes.push({
+        ...base,
+        status: "added",
+        place,
+        itemId: prior.itemId,
+        sharedWith: prior.key,
+        note: `${place.name} is #${place.lensRank} for ${lens.label} too, and the session added for ${prior.label} already puts it in the program.`,
+      });
       continue;
     }
     // The group's best eligible host: in Qloo's local list with a local-affinity rank, a hall,
@@ -164,12 +197,16 @@ export function applyReach(profile: TownProfile, program: Program): Program {
     const place = lensPlace(best.id, best.rank, profile);
     const nonGrant = program.items.filter((it) => it.bucket !== "grants").reduce((s, it) => s + it.amount, 0) + earmarked();
     const reserveLeft = program.unassigned - earmarked();
-    if (SESSION.cost > reserveLeft || nonGrant + SESSION.cost > program.twoYearFund * NON_GRANT_CEILING) {
+    const overReserve = SESSION.cost > reserveLeft;
+    if (overReserve || nonGrant + SESSION.cost > program.twoYearFund * NON_GRANT_CEILING) {
       outcomes.push({
         ...base,
         status: "no-fit",
         place,
-        note: `A session at ${place.name} (${usd(SESSION.cost)}) doesn't fit in the reserve (${usd(Math.max(0, reserveLeft))} left), so it was skipped.`,
+        fit: overReserve ? "reserve" : "ceiling",
+        note: overReserve
+          ? `A session at ${place.name} (${usd(SESSION.cost)}) doesn't fit in the reserve (${usd(Math.max(0, reserveLeft))} left), so it was skipped.`
+          : `A session at ${place.name} (${usd(SESSION.cost)}) would take spending outside grants past ${Math.round(NON_GRANT_CEILING * 100)}% of the fund, the program's cap, so it was skipped.`,
       });
       continue;
     }
@@ -195,7 +232,9 @@ export function applyReach(profile: TownProfile, program: Program): Program {
       ],
     });
     reachItems.push(item);
-    outcomes.push({ ...base, status: "added", place, itemId: item.id, amount: item.amount, note: `Added one session at ${place.name}, #${best.rank} for ${lens.label}.` });
+    const outcome: LensOutcome = { ...base, status: "added", place, itemId: item.id, amount: item.amount, note: `Added one session at ${place.name}, #${best.rank} for ${lens.label}.` };
+    outcomes.push(outcome);
+    addedBy.set(best.id, outcome);
   }
 
   program.reach = outcomes;
@@ -208,7 +247,7 @@ export function applyReach(profile: TownProfile, program: Program): Program {
 export function reachSummary(outcomes: LensOutcome[] | undefined) {
   const list = outcomes ?? [];
   return {
-    lenses: list.map((o) => ({ key: o.key, label: o.label, status: o.status, place: o.place?.name, ranked: o.ranked })),
+    lenses: list.map((o) => ({ key: o.key, label: o.label, status: o.status, place: o.place?.name, ranked: o.ranked, fit: o.fit })),
     covered: list.filter((o) => o.status === "covered").map((o) => o.key),
     added: [...new Set(list.filter((o) => o.status === "added").map((o) => o.place!.name))],
     unchecked: list.filter((o) => o.status === "unchecked").length,

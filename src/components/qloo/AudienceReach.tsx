@@ -1,6 +1,6 @@
 import { StatusPill } from "@/components/dashboard/StatusPill";
 import { Card } from "@/components/ui";
-import type { LensOutcome, LensStatus } from "@/lib/reach";
+import { LENSES, type LensOutcome, type LensStatus } from "@/lib/reach";
 
 // Age-group check for one town: does the program include places each group already uses?
 // Server component; reads `program.reach` as set by applyReach.
@@ -29,6 +29,18 @@ function Detail({ o }: { o: LensOutcome }) {
       </>
     );
   }
+  if (o.status === "added" && o.place && o.sharedWith) {
+    const via = LENSES.find((l) => l.key === o.sharedWith)?.label;
+    return (
+      <>
+        <span className="font-medium text-ink">{o.place.name}</span>
+        <span className="text-muted">
+          {" "}
+          is #{o.place.lensRank} for this group too. The session added for {via} is already there, so nothing more is earmarked.
+        </span>
+      </>
+    );
+  }
   if (o.status === "added" && o.place) {
     return (
       <>
@@ -47,6 +59,8 @@ function Detail({ o }: { o: LensOutcome }) {
 export function AudienceReach({ reach, className = "" }: { reach?: LensOutcome[]; className?: string }) {
   if (!reach?.length) return null;
   const included = reach.filter((o) => o.status === "covered").length;
+  const unchecked = reach.filter((o) => o.status === "unchecked").length;
+  const checked = reach.length - unchecked;
   return (
     <Card as="section" aria-labelledby="reach-title" className={`overflow-hidden ${className}`}>
       <div className="border-b border-rule px-5 py-4 sm:px-6">
@@ -55,9 +69,11 @@ export function AudienceReach({ reach, className = "" }: { reach?: LensOutcome[]
           Does the program include places the town&apos;s age groups use?
         </h2>
         <p className="mt-1 text-sm leading-relaxed text-muted">
-          {included === reach.length
-            ? "Yes, for all three groups, as drafted."
-            : `Included as drafted for ${included} of ${reach.length} groups.`}
+          {checked === 0
+            ? "Qloo didn't answer on this load, so no group could be checked. Check again in a minute."
+            : included === reach.length
+              ? "Yes, for all three groups, as drafted."
+              : `Included as drafted for ${included} of ${checked} ${checked === 1 ? "group" : "groups"} checked${unchecked ? `; ${unchecked} couldn't be checked` : ""}.`}
         </p>
       </div>
       <ul className="divide-y divide-hairline">

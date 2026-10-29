@@ -1,7 +1,7 @@
 import "server-only";
 import { BASELINE, BASELINE_SHA256, baselineFor, isInstitution, namedPartner } from "./baselineData";
 import type { AuditRow } from "./audit";
-import { cleanName, isReachItem, type PickSwap, type ProgramItem } from "./plan";
+import { cleanName, type PickSwap, type ProgramItem } from "./plan";
 import { reachSummary, type ReachSummary } from "./reach";
 import { runTown } from "./run";
 import { TOWNS } from "./towns";
@@ -57,15 +57,15 @@ export function failedTownNames(runs: ({ town: { name: string }; profile: { fail
   return runs.filter((r) => r && r.profile.failedCalls.length > 0).map((r) => r!.town.name);
 }
 
-// The partners a town's figures count: program items with a named place, minus the sessions the
-// age-group check adds (those are reported on their own row, so they can't move these figures).
+// The partners a town's figures count: program items with a named place. Age-group sessions live in
+// `program.reachItems`, never in `items`, so they can't move these figures.
 export function programPartners(items: ProgramItem[]): string[] {
-  return items.filter((it) => !isReachItem(it)).map((it) => it.partner?.name).filter((p): p is string => !!p);
+  return items.map((it) => it.partner?.name).filter((p): p is string => !!p);
 }
 
 // The partners the check puts in: swaps for struck lines and items added alongside kept ones.
 export function checkAdditions(audit: AuditRow[]): ProgramItem[] {
-  return audit.flatMap((r) => [r.replacement, r.alongside]).filter((it): it is ProgramItem => !!it?.partner && !isReachItem(it));
+  return audit.flatMap((r) => [r.replacement, r.alongside]).filter((it): it is ProgramItem => !!it?.partner);
 }
 
 export async function computeProof() {

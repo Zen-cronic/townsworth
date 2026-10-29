@@ -1,5 +1,5 @@
 import "server-only";
-import { lifeStageAudiences, placesForLens, placesNear, tasteNational, tasteNear, type EntityType, type QlooCall, type QlooEntity } from "./qloo";
+import { lifeStageAudiences, placesForLens, placesNear, tasteNational, tasteNear, type EntityType, type LensSignal, type QlooCall, type QlooEntity } from "./qloo";
 import { brandKey, isChain, isLocalPartner, isMegabrand, signalTags, splitSafe, type ExclusionReason } from "./filters";
 import { LENSES, PARENTS_AUDIENCE, type LensData, type LensKey } from "./reach";
 import type { Town } from "./towns";
@@ -104,45 +104,50 @@ const normCity = (s?: string) => (s ?? "").toLowerCase().replace(/^(village|town
 const LENS_TAKE = 15;
 
 // The three lens queries. The life-stage id is looked up from Qloo's audience list on each run, and
-// only that one life stage is used. Any failure leaves the lens unchecked; it never throws.
+// only that one life stage is used: the families query waits for that list, the two age queries
+// don't. Any failure leaves the lens unchecked; it never throws. A list that answers without the
+// expected group is reported as such, not as Qloo failing.
 export async function fetchLenses(town: Pick<Town, "lat" | "lon">): Promise<{ lenses: LensData[]; lensCalls: QlooCall[] }> {
   const calls: QlooCall[] = [];
   const lenses: LensData[] = [];
-  const record = (key: LensKey, res: { entities: QlooEntity[]; call: QlooCall } | null) => {
+  const lens = (i: number, signal: LensSignal) => placesForLens(`places for ${LENSES[i].label}`, signal, town.lat, town.lon, 15000, LENS_TAKE);
+  const record = (key: LensKey, res: { entities: QlooEntity[]; call: QlooCall } | null, missing?: "audience") => {
     if (res) calls.push(res.call);
-    lenses.push({ key, ok: !!res?.call.ok, ids: res?.call.ok ? res.entities.slice(0, LENS_TAKE).map((e) => e.id) : [] });
+    lenses.push({ key, ok: !!res?.call.ok, ids: res?.call.ok ? res.entities.slice(0, LENS_TAKE).map((e) => e.id) : [], ...(missing ? { missing } : {}) });
   };
   try {
-    const [young, older, groups] = await Promise.all([
-      placesForLens(`places for ${LENSES[0].label}`, { "signal.demographics.age": "24_and_younger" }, town.lat, town.lon, 15000, LENS_TAKE),
-      placesForLens(`places for ${LENSES[1].label}`, { "signal.demographics.age": "55_and_older" }, town.lat, town.lon, 15000, LENS_TAKE),
-      lifeStageAudiences(),
+    const families = lifeStageAudiences().then(async (groups) => {
+      const parents = groups.audiences.find((a) => PARENTS_AUDIENCE.name.test(a.name) && a.id.startsWith(PARENTS_AUDIENCE.idPrefix));
+      return { groups, res: parents ? await lens(2, { "signal.demographics.audiences": parents.id }) : null, missing: groups.call.ok && !parents };
+    });
+    const [young, older, fam] = await Promise.all([
+      lens(0, { "signal.demographics.age": "24_and_younger" }),
+      lens(1, { "signal.demographics.age": "55_and_older" }),
+      families,
     ]);
-    calls.push(groups.call);
-    const parents = groups.audiences.find((a) => PARENTS_AUDIENCE.name.test(a.name) && a.id.startsWith(PARENTS_AUDIENCE.idPrefix));
-    const families = parents
-      ? await placesForLens(`places for ${LENSES[2].label}`, { "signal.demographics.audiences": parents.id }, town.lat, town.lon, 15000, LENS_TAKE)
-      : null;
+    calls.push(fam.groups.call);
     record("young-adults", young);
     record("older", older);
-    record("families", families);
+    record("families", fam.res, fam.missing ? "audience" : undefined);
   } catch {
     for (const l of LENSES) if (!lenses.some((x) => x.key === l.key)) lenses.push({ key: l.key, ok: false, ids: [] });
   }
   return { lenses, lensCalls: calls };
 }
 
-export async function buildProfile(town: Town): Promise<TownProfile> {
+// `lenses: false` skips the age-group queries, for callers that never show them (/check).
+export async function buildProfile(town: Town, { lenses = true }: { lenses?: boolean } = {}): Promise<TownProfile> {
   const refs = REFERENCE_METROS[town.country].filter(([lat, lon]) => Math.hypot(lat - town.lat, lon - town.lon) > 0.5);
-  const [placesRes, localRes, nationalRes, refRes] = await Promise.all([
+  const main = Promise.all([
     placesNear(town.lat, town.lon, 15000, 50),
     Promise.all(TASTE_TYPES.map((t) => tasteNear(t, town.lat, town.lon, 20))),
     Promise.all(TASTE_TYPES.map((t) => tasteNational(t, town.country, NATIONAL_TAKE))),
     Promise.all(TASTE_TYPES.map((t) => Promise.all(refs.map(([lat, lon]) => tasteNear(t, lat, lon, 20))))),
   ]);
-  // The lens queries start once the town's own calls are done, so on a cold cache they never
-  // compete with the calls the program depends on.
-  const lensRes = await fetchLenses(town);
+  // The lens queries run alongside the town's own calls, queued after them in the shared Qloo limiter
+  // (6 in flight), so a cold load pays no extra round-trips. fetchLenses never rejects.
+  const lensPending = lenses ? fetchLenses(town) : null;
+  const [placesRes, localRes, nationalRes, refRes] = await main;
 
   // Thin towns: Qloo ranks only the places that have a local affinity score. Top the list up with
   // the plain radius query; those extra places rank after every affinity-ranked one, by distance.
@@ -222,6 +227,7 @@ export async function buildProfile(town: Town): Promise<TownProfile> {
   const distinctShare = allSignals.length ? allSignals.filter((s) => s.distinct).length / allSignals.length : 0;
   // Thin data is only a verdict when Qloo actually answered. A failed call is an error, shown as one.
   const failedCalls = calls.filter((c) => !c.ok);
+  const lensRes = lensPending ? await lensPending : null;
 
   return {
     town,
@@ -238,7 +244,6 @@ export async function buildProfile(town: Town): Promise<TownProfile> {
     failedCalls,
     distinctShare,
     thin: !failedCalls.length && (localPlaces.length < 15 || allSignals.length < 40),
-    lenses: lensRes.lenses,
-    lensCalls: lensRes.lensCalls,
+    ...(lensRes ? { lenses: lensRes.lenses, lensCalls: lensRes.lensCalls } : {}),
   };
 }

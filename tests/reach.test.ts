@@ -1,12 +1,9 @@
 // Age-group check. Every place and lens list here is hand-written; none of it is Qloo API output.
 import assert from "node:assert/strict";
 import { afterEach, test } from "node:test";
-import { auditPlan } from "../src/lib/audit";
-import { buildProgram, isReachItem, type Program } from "../src/lib/plan";
-import { fetchLenses, type TownProfile } from "../src/lib/profile";
-import { checkAdditions, programPartners } from "../src/lib/proof";
-import { applyReach, isLensHost, type LensData } from "../src/lib/reach";
-import { auditDraft } from "../src/lib/run";
+import { buildProgram, isReachItem, NON_GRANT_CEILING, type Program } from "../src/lib/plan";
+import { fetchLenses } from "../src/lib/profile";
+import { applyReach, isAdultOnly, isLensHost, reachSummary, type LensData } from "../src/lib/reach";
 import { entity, NORMAL_PLACES, profileOf } from "./fixtures";
 
 // Beyond NORMAL_PLACES (all of which the program uses): two eligible hosts the program doesn't pick
@@ -90,7 +87,20 @@ test("an adult-only partner doesn't cover families or young adults, but does cov
   applyReach(profile, program);
   const status = Object.fromEntries(program.reach!.map((o) => [o.key, o.status]));
   assert.deepEqual(status, { "young-adults": "added", older: "covered", families: "added" });
-  assert.deepEqual(program.reachItems!.map((it) => it.partner?.name), ["Sandy Point Beach", "Sandy Point Beach"]);
+  assertReconciles(program);
+});
+
+test("two groups that favour the same venue share one session: nothing is earmarked twice", () => {
+  const { profile, program } = withLenses(all(["p4", "p7"]));
+  applyReach(profile, program);
+  assert.deepEqual(program.reachItems!.map((it) => it.partner?.name), ["Sandy Point Beach"]);
+  const families = program.reach!.find((o) => o.key === "families")!;
+  assert.equal(families.status, "added");
+  assert.equal(families.sharedWith, "young-adults");
+  assert.equal(families.itemId, "reach-young-adults");
+  assert.equal(families.amount, undefined);
+  assert.equal(program.reachEarmarked, program.reachItems![0].amount);
+  assert.deepEqual(reachSummary(program.reach).added, ["Sandy Point Beach"]);
   assertReconciles(program);
 });
 
@@ -102,9 +112,24 @@ test("when the session doesn't fit in the reserve it is skipped and said so", ()
   assert.deepEqual(program.items.map((it) => it.id), before);
   assert.equal(program.unassigned, unassigned);
   assert.deepEqual(program.reachItems, []);
-  assert.ok(program.reach!.every((o) => o.status === "no-fit"));
+  assert.ok(program.reach!.every((o) => o.status === "no-fit" && o.fit === "reserve"));
   assert.match(program.reach![0].note, /doesn't fit in the reserve/);
   assertReconciles(program);
+});
+
+test("a session the reserve covers but the non-grant cap doesn't is skipped for the cap, not the reserve", () => {
+  const { profile, program } = withLenses(all(["p8"]));
+  // Lower the fund the cap is measured against so spending outside grants already sits at the cap;
+  // the reserve itself is unchanged and covers a session.
+  const nonGrant = program.items.filter((it) => it.bucket !== "grants").reduce((s, it) => s + it.amount, 0);
+  program.twoYearFund = Math.ceil(nonGrant / NON_GRANT_CEILING);
+  applyReach(profile, program);
+  const o = program.reach![0];
+  assert.equal(o.status, "no-fit");
+  assert.equal(o.fit, "ceiling");
+  assert.match(o.note, /past 70% of the fund, the program's cap/);
+  assert.doesNotMatch(o.note, /reserve/);
+  assert.deepEqual(program.reachItems, []);
 });
 
 test("no eligible host in the lens list: nothing added", () => {
@@ -124,7 +149,18 @@ test("a failed lens call is 'couldn't check': failedCalls untouched, nothing add
   assert.equal(profile.failedCalls.length, 0);
   assert.equal(profile.lensCalls!.filter((c) => !c.ok).length, 1);
   assert.equal(program.reach!.find((o) => o.key === "families")!.status, "unchecked");
+  assert.match(program.reach!.find((o) => o.key === "families")!.note, /^Qloo didn't answer/);
   assert.deepEqual(program.reachItems, []);
+});
+
+test("a life-stage list without the parents group is reported as such, not as Qloo failing", () => {
+  const lenses = all(["p1"]);
+  lenses[2] = { key: "families", ok: false, ids: [], missing: "audience" };
+  const { profile, program } = withLenses(lenses);
+  applyReach(profile, program);
+  const families = program.reach!.find((o) => o.key === "families")!;
+  assert.equal(families.status, "unchecked");
+  assert.match(families.note, /life-stage list has no "Parents With Young Children" group/);
 });
 
 test("when the town's own Qloo calls failed, every lens is unchecked and nothing is added", () => {
@@ -155,41 +191,17 @@ test("host rules: halls, parks, beaches, museums, schools; never dining, bars, g
   assert.ok(!isLensHost(entity("i", "Country Club", { cats: ["Banquet hall", "Country club"] })));
 });
 
-function reachProgram(): { profile: TownProfile; program: Program } {
-  const lenses = all(["p8"]);
-  const { profile, program } = withLenses(lenses);
-  applyReach(profile, program);
-  // reach- sessions never enter `items`. Put one at the front anyway, so each guard is exercised.
-  program.items.unshift(...program.reachItems!);
-  return { profile, program };
-}
-
-test("guards: even inside items, reach- sessions are never a like-for-like swap, an addition, a run-with target or a suggested partner", () => {
-  const { profile, program } = reachProgram();
-  assert.ok(isReachItem(program.items[0]));
-  const audit = auditPlan([{ text: "Host an annual community picnic at the county fairgrounds" }], profile, program.items);
-  assert.equal(audit[0].bucket, "events");
-  assert.ok(!audit[0].replacement || !isReachItem(audit[0].replacement));
-  const { audit: rows, qlooAdds } = auditDraft(
-    [
-      { text: "Fall festival run with the county EDC", named: "Racine County Economic Development Corporation", osm: { found: false } },
-      { text: "Jazz night in the park" },
-    ],
-    profile,
-    program,
-  );
-  assert.ok(!qlooAdds.some(isReachItem));
-  assert.ok(rows.every((r) => !(r.replacement && isReachItem(r.replacement)) && !(r.alongside && isReachItem(r.alongside))));
-  assert.ok(program.items.filter(isReachItem).every((it) => !it.runWith));
-});
-
-test("guards: even inside items, reach- sessions stay out of the /proof partner and replacement figures", () => {
-  const { program } = reachProgram();
-  const names = programPartners(program.items);
-  assert.ok(!names.includes("Westview High School"));
-  assert.equal(names.length, program.items.filter((it) => it.partner && !isReachItem(it)).length);
-  const fake = [{ text: "x", bucket: "events" as const, verdict: "generic" as const, reasons: [], termHits: [], replacement: program.items[0] }];
-  assert.equal(checkAdditions(fake).length, 0);
+test("host rules match whole words: a name fragment never disqualifies a real hall, library or park", () => {
+  assert.ok(isLensHost(entity("a", "Farmington Community Library", { cats: ["Public library"] })));
+  assert.ok(isLensHost(entity("b", "Brewster Ladies' Library", { cats: ["Library"] })));
+  assert.ok(isLensHost(entity("c", "Marina Park", { cats: ["Park"] })));
+  assert.ok(isLensHost(entity("d", "Market Square Park", { cats: ["Park"] })));
+  assert.ok(isLensHost(entity("e", "Sandbar Beach Park", { cats: ["Beach"] })));
+  assert.ok(!isAdultOnly(entity("f", "Brewster Ladies' Library", { cats: ["Library"] })));
+  // A whole retail or bar word still disqualifies a name with no host word.
+  assert.ok(!isLensHost(entity("g", "Harbor Market", { cats: ["Park"] })));
+  assert.ok(!isLensHost(entity("h", "Union Brewing Hall", { cats: ["Banquet hall"] })));
+  assert.ok(isAdultOnly(entity("i", "Union Brewing Hall", { cats: ["Banquet hall"] })));
 });
 
 const realFetch = globalThis.fetch;
@@ -229,5 +241,16 @@ test("lens fetch: the life-stage id is read at runtime; an audience failure is a
     url.includes("/v2/audiences") ? new Response("{}", { status: 500 }) : new Response(JSON.stringify(places))) as typeof fetch;
   const failed = await fetchLenses({ lat: 42.7, lon: -87.9 });
   assert.equal(failed.lenses.find((l) => l.key === "families")!.ok, false);
+  assert.equal(failed.lenses.find((l) => l.key === "families")!.missing, undefined);
   assert.equal(failed.lensCalls.filter((c) => !c.ok).length, 1);
+
+  // The list answers but the group is renamed: families is unchecked for that reason, and no call failed.
+  globalThis.fetch = (async (url: string) =>
+    url.includes("/v2/audiences")
+      ? new Response(JSON.stringify({ results: { audiences: [{ id: "urn:audience:life_stage:new_parents", name: "New Parents" }] } }))
+      : new Response(JSON.stringify(places))) as typeof fetch;
+  const renamed = await fetchLenses({ lat: 42.7, lon: -87.9 });
+  const fam = renamed.lenses.find((l) => l.key === "families")!;
+  assert.deepEqual([fam.ok, fam.missing], [false, "audience"]);
+  assert.equal(renamed.lensCalls.filter((c) => !c.ok).length, 0);
 });
