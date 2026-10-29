@@ -77,7 +77,7 @@ export default async function MemoPage({
   return (
     <>
       <AppHeader active={slug} />
-      <main className="mx-auto max-w-[920px] px-4 pb-24 pt-6 sm:px-6 sm:pt-8">
+      <main className="mx-auto max-w-[960px] px-4 pb-24 pt-8 sm:px-8 sm:pt-10">
         <div className="no-print mb-4 grid gap-3">
           <Link
             href={`/town/${town.slug}?fund=${program.annualFund}`}
@@ -129,15 +129,12 @@ export default async function MemoPage({
               ))}
             </dl>
             <p className="mt-5 leading-relaxed">
-              The draft plan had <strong className="font-semibold">{flagged} of {audit.length}</strong> items that name nothing local or a partner
-              that can&apos;t be verified.
-              {keptInstitutions > 0 &&
-                ` ${keptInstitutions} ${keptInstitutions === 1 ? "institution it names stays" : "institutions it names stay"} in, for the committee to confirm.`}{" "}
-              This memo sets out <strong className="font-semibold">{program.items.length} program items</strong> ({partnerPlaces} with a named local
-              partner) grounded in what {town.name} favours (Qloo taste data) and costed per session:{" "}
-              <strong className="font-mono font-medium tabular-nums">{money(program.totalAllocated)}</strong> itemized, and{" "}
-              <strong className="font-mono font-medium tabular-nums">{money(program.unassigned)}</strong> held in reserve for the committee, of the{" "}
-              {money(program.twoYearFund)} 24-month fund. Sponsor-labeled; prepared with aggregate Qloo taste data.
+              <strong className="font-semibold">{flagged} of {audit.length}</strong> draft lines name nothing local
+              {keptInstitutions > 0 && `; ${keptInstitutions} ${keptInstitutions === 1 ? "institution stays" : "institutions stay"} for the committee to confirm`}.{" "}
+              <strong className="font-semibold">{program.items.length} program items</strong> ({partnerPlaces} with a local partner):{" "}
+              <strong className="font-mono font-medium tabular-nums">{money(program.totalAllocated)}</strong> itemized and{" "}
+              <strong className="font-mono font-medium tabular-nums">{money(program.unassigned)}</strong> held in reserve, of the {money(program.twoYearFund)}{" "}
+              24-month fund.
             </p>
           </header>
 
@@ -258,10 +255,15 @@ export default async function MemoPage({
               </tfoot>
             </table>
 
-            <p id="fund-note" className="mt-6 scroll-mt-24 border-l-2 border-rule pl-3 text-xs leading-relaxed text-muted">
-              <strong className="font-semibold text-ink">Where the numbers come from.</strong> Annual fund: {money(program.annualFund)} (
-              {town.fundNote}). {program.costNote}
-            </p>
+            <div id="fund-note" className="mt-6 scroll-mt-24 border-l-2 border-rule pl-3 text-xs leading-relaxed text-muted">
+              <p>
+                <strong className="font-semibold text-ink">Annual fund {money(program.annualFund)}.</strong> {town.fundNote}
+              </p>
+              <details className="ui-more mt-1">
+                <summary>How each item is costed</summary>
+                <div>{program.costNote}</div>
+              </details>
+            </div>
           </section>
 
           {/* Guardrails */}

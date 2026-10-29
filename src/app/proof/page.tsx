@@ -41,7 +41,10 @@ function Finding({ n, big, label, note, bars }: { n: string; big: string; label:
       </p>
       <p className="mt-3 font-medium leading-snug">{label}</p>
       {bars && <Bars bars={bars} />}
-      <p className="mt-4 text-sm leading-relaxed text-muted">{note}</p>
+      <details className="ui-more mt-4">
+        <summary>How it&apos;s measured</summary>
+        <div>{note}</div>
+      </details>
     </div>
   );
 }
@@ -77,23 +80,26 @@ export default async function ProofPage() {
   return (
     <>
       <AppHeader page="proof" />
-      <main className="mx-auto max-w-[1200px] px-4 pb-24 pt-8 sm:px-6 sm:pt-10">
+      <main className="ui-page">
         <header className="max-w-3xl">
-          <p className="font-mono text-[11px] uppercase tracking-wider text-muted">Evidence · {towns.length} host towns · recomputed on every load</p>
-          <h1 className="mt-2 text-3xl font-semibold leading-tight tracking-tight md:text-[2.5rem]">
-            Qloo grounds the AI plan in where the town actually goes.
+          <p className="lp-kicker">Evidence · {towns.length} host towns · recomputed on every load</p>
+          <h1 className="lp-h1 mt-3">
+            Qloo grounds the AI plan <span className="lp-tone">in where the town actually goes.</span>
           </h1>
-          <p className="mt-3 text-lg leading-relaxed text-ink">
+          <p className="lp-lede mt-4">
             {totals.llmVerifiedPct}% of the partners AI alone named could be confirmed ({totals.llmVerified} of {totals.llmNamed}). {replacementsLine}
           </p>
-          <p className="mt-3 leading-relaxed text-muted">
-            For each of {towns.length} host towns we asked the same model, with no Qloo access, to write the community plan a consultant would write,
-            and froze those plans before measuring. Then we compared them with what {PRODUCT_NAME} proposes from Qloo&apos;s local taste data.
-          </p>
+          <details className="ui-more mt-3">
+            <summary>How the test was set up</summary>
+            <div>
+              For each of {towns.length} host towns we asked the same model, with no Qloo access, to write the community plan a consultant would write,
+              and froze those plans before measuring. Then we compared them with what {PRODUCT_NAME} proposes from Qloo&apos;s local taste data.
+            </div>
+          </details>
         </header>
 
         {/* Findings */}
-        <section id="findings" aria-label="Findings" className="mt-8 grid scroll-mt-24 gap-px overflow-hidden rounded-lg border border-rule bg-hairline md:grid-cols-2 lg:grid-cols-4">
+        <section id="findings" aria-label="Findings" className="mt-8 grid scroll-mt-24 gap-px overflow-hidden rounded-lg bg-hairline shadow-[0_0_0_1px_var(--hairline)] md:grid-cols-2 lg:grid-cols-4">
           <Finding
             n="1"
             big={`${totals.llmVerifiedPct}%`}
@@ -130,7 +136,7 @@ export default async function ProofPage() {
         </section>
 
         {/* What Qloo changes */}
-        <section id="what-qloo-changes" aria-labelledby="qloo-changes" className="mt-6 scroll-mt-24 rounded-lg border border-rule bg-paper">
+        <section id="what-qloo-changes" aria-labelledby="qloo-changes" className="mt-6 scroll-mt-24 ui-card">
           <div className="border-b border-rule px-5 py-4 sm:px-6">
             <h2 id="qloo-changes" className="font-semibold">What Qloo changes</h2>
             <p className="mt-1 text-sm leading-relaxed text-muted">
@@ -173,45 +179,39 @@ export default async function ProofPage() {
           )}
         </section>
 
-        {/* Wiring check */}
-        <section className="mt-6 grid gap-5 rounded-lg border border-dashed border-rule bg-paper px-5 py-5 sm:px-6 md:grid-cols-[14rem_1fr] md:items-center">
-          <div>
-            <h2 className="font-semibold">Wiring check: holds by construction</h2>
-            <p className="mt-2 font-mono text-2xl font-medium tabular-nums">
-              {totals.controlOwnPct}% vs {totals.controlCrossPct}%
+        {/* Two control checks, in the same figure style as the findings */}
+        <section aria-label="Control checks" className="mt-4 grid gap-px overflow-hidden rounded-lg bg-hairline shadow-[0_0_0_1px_var(--hairline)] sm:grid-cols-2">
+          <div className="bg-paper px-5 py-5 sm:px-6">
+            <p className="text-[1.75rem] leading-none">
+              <Figure value={`${totals.controlOwnPct}% vs ${totals.controlCrossPct}%`} />
             </p>
+            <p className="mt-2 font-medium leading-snug">Wiring check: partners found in their own town vs another</p>
+            <details className="ui-more mt-2">
+              <summary>What this measures</summary>
+              <div>
+                Partners are picked from the town&apos;s own list and the towns are far apart, so this has to hold. It checks the wiring (no town reads
+                another town&apos;s data); it is not evidence that Qloo improves the plan.
+              </div>
+            </details>
           </div>
-          <p className="text-sm leading-relaxed text-muted">
-            {PRODUCT_NAME}&apos;s local partners appear in their own town&apos;s Qloo places {totals.controlOwnPct}% of the time and in another
-            town&apos;s {totals.controlCrossPct}%. Partners are picked from the town&apos;s own list and the towns are far apart, so this has to hold.
-            It checks the wiring (no town reads another town&apos;s data); it is not evidence that Qloo improves the plan.
-          </p>
-        </section>
-
-        {/* Template check */}
-        <section className="mt-6 grid gap-5 rounded-lg border border-rule bg-paper px-5 py-5 sm:px-6 md:grid-cols-[14rem_1fr] md:items-center">
-          <div>
-            <h2 className="font-semibold">Template check</h2>
-            <div className="mt-2 flex items-baseline gap-4 font-mono tabular-nums">
-              <span>
-                <span className="text-2xl font-medium">{totals.llmPlanSimilarityPct}%</span>
-                <span className="ml-1 font-sans text-xs text-muted">AI alone</span>
-              </span>
-              <span>
-                <span className="text-2xl font-medium">{totals.gnPartnerOverlapPct}%</span>
-                <span className="ml-1 font-sans text-xs text-muted">Good Neighbor</span>
-              </span>
-            </div>
+          <div className="bg-paper px-5 py-5 sm:px-6">
+            <p className="text-[1.75rem] leading-none">
+              <Figure value={`${totals.llmPlanSimilarityPct}% vs ${totals.gnPartnerOverlapPct}%`} />
+            </p>
+            <p className="mt-2 font-medium leading-snug">Template check: plan overlap across towns, AI alone vs {PRODUCT_NAME}</p>
+            <details className="ui-more mt-2">
+              <summary>What this measures</summary>
+              <div>
+                AI-alone plans for different towns share {totals.llmPlanSimilarityPct}% of their content words (town and partner names removed);{" "}
+                {PRODUCT_NAME}&apos;s partner lists overlap {totals.gnPartnerOverlapPct}%. Different measures: AI alone writes one plan and fills in
+                names, while the Qloo plan is built from each town.
+              </div>
+            </details>
           </div>
-          <p className="text-sm leading-relaxed text-muted">
-            AI-alone plans for different towns share {totals.llmPlanSimilarityPct}% of their content words on average (town names and partner names removed).
-            Good Neighbor&apos;s partner lists for different towns overlap {totals.gnPartnerOverlapPct}%. Different measures; the point is that the LLM
-            writes one plan and fills in names, while the Qloo plan is built from each town.
-          </p>
         </section>
 
         {/* By town */}
-        <section aria-labelledby="by-town" className="mt-6 rounded-lg border border-rule bg-paper">
+        <section aria-labelledby="by-town" className="mt-6 ui-card">
           <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-rule px-5 py-4 sm:px-6">
             <h2 id="by-town" className="font-semibold">By town</h2>
             <p className="text-xs text-muted">Local partners are program items with a named local place. Open a town to see its line-by-line check.</p>
@@ -264,7 +264,7 @@ export default async function ProofPage() {
 
         {/* Method and limits */}
         <section className="mt-6 grid gap-6 md:grid-cols-2">
-          <div className="rounded-lg border border-rule bg-paper px-5 py-5 text-sm sm:px-6">
+          <div className="ui-card px-5 py-5 text-sm sm:px-6">
             <h2 className="font-semibold">How this was run</h2>
             <ul className="mt-3 space-y-2 text-muted">
               <li>Baseline: OpenAI {baseline.model}, frozen {baseline.createdAt.slice(0, 10)} before any measurement.</li>

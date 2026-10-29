@@ -7,7 +7,6 @@ import { PRODUCT_NAME } from "@/components/landing/brand";
 import { Chevron } from "@/components/landing/Chevron";
 import { heroFacts } from "@/components/landing/heroFacts";
 import { Objections, objectionsFor } from "@/components/landing/Objections";
-import { SiteFooter } from "@/components/landing/SiteFooter";
 import { SIMULATED_BALLOTS } from "@/lib/ballot";
 import { computeProof } from "@/lib/proof";
 import { runTown } from "@/lib/run";
@@ -174,7 +173,6 @@ export default async function GuidedPath() {
           </div>
         </section>
       </main>
-      <SiteFooter />
     </div>
   );
 }

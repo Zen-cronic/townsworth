@@ -28,15 +28,11 @@ export default async function FindPage({ searchParams }: { searchParams: Promise
     <>
       <AppHeader />
       <main className="mx-auto max-w-[760px] px-4 pb-24 pt-6 sm:px-6 sm:pt-10">
-        <p className="font-mono text-[11px] uppercase tracking-wider text-muted">Any host town</p>
-        <h1 className="mt-1 text-[1.75rem] font-semibold leading-tight tracking-tight md:text-[2.25rem]">Type any town</h1>
-        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
-          Any US or Canadian city, town or village. Qloo is queried at its coordinates, so you get the same audit, memo, exports and outreach
-          drafts as the six presets. There&apos;s no frozen LLM plan for a town you enter: the typical agency template is audited, and you can ask a
-          plain LLM to draft one live.
-        </p>
+        <p className="lp-kicker">Any host town</p>
+        <h1 className="lp-h1 mt-3">Type any town</h1>
+        <p className="lp-lede mt-3">Any US or Canadian town gets the same check, memo and exports. Start from the consultant template, or have AI write a draft live.</p>
 
-        <div className="mt-6 rounded-lg border border-rule bg-paper p-4 sm:p-5">
+        <div className="ui-card mt-8 p-4 sm:p-6">
           <TownSearchForm q={q} facility={facility} company={company} idPrefix="find" autoFocus={!q} />
         </div>
 

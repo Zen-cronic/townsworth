@@ -7,7 +7,7 @@ const field =
 
 export function HeaderTownSearch() {
   return (
-    <form action="/find" role="search" aria-label="Try any town" className="mr-1 hidden items-center md:flex lg:hidden xl:flex">
+    <form action="/find" role="search" aria-label="Try any town" className="mr-1 hidden items-center md:flex">
       <label className="sr-only" htmlFor="hdr-town">
         Try any US or Canadian town
       </label>

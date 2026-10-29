@@ -105,11 +105,8 @@ export function CheckForm({ town }: { town: Town }) {
 
   return (
     <>
-      <section aria-labelledby="step2-h" className="no-print mt-4 rounded-lg border border-rule bg-paper p-4 sm:p-5">
-        <p className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-wider text-muted">
-          <span className="grid h-5 w-5 place-items-center rounded-full border border-rule bg-paper text-[10px] text-ink">2</span>
-          Your draft
-        </p>
+      <section aria-labelledby="step2-h" className="no-print ui-card mt-4 p-4 sm:p-6">
+        <p className="lp-kicker">Your draft</p>
         <h2 id="step2-h" className="mt-2 text-lg font-semibold tracking-tight">
           Paste the plan for {town.name}
         </h2>

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Form from "next/form";
 import Link from "next/link";
 import { AppHeader } from "@/components/AppHeader";
+import { PageBand } from "@/components/ui";
 import { CheckForm } from "@/components/check/CheckForm";
 import { Chevron, Notice } from "@/components/dashboard/Icons";
 import { StatusPill } from "@/components/dashboard/StatusPill";
@@ -16,13 +17,8 @@ export const metadata: Metadata = {
 const field =
   "rounded-md border border-rule bg-paper text-ink transition-colors duration-150 placeholder:text-muted/80 hover:border-ink/50 focus:border-ink focus:outline-none";
 
-function StepLabel({ n, children }: { n: string; children: React.ReactNode }) {
-  return (
-    <p className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-wider text-muted">
-      <span className="grid h-5 w-5 place-items-center rounded-full border border-rule bg-paper text-[10px] text-ink">{n}</span>
-      {children}
-    </p>
-  );
+function StepLabel({ children }: { children: React.ReactNode }) {
+  return <p className="lp-kicker">{children}</p>;
 }
 
 // Step 1 picks the town with client-side GET navigations (next/form, Link), so the pasted text in
@@ -41,19 +37,17 @@ export default async function CheckPage({
 
   return (
     <>
-      <AppHeader />
-      <main className="mx-auto max-w-[1200px] px-4 pb-24 pt-6 sm:px-6 sm:pt-10">
-        <div className="no-print max-w-3xl">
-          <p className="font-mono text-[11px] uppercase tracking-wider text-muted">Your own draft</p>
-          <h1 className="mt-1 text-[1.75rem] font-semibold leading-tight tracking-tight md:text-[2.25rem]">Check your own plan</h1>
-          <p className="mt-2 text-sm leading-relaxed text-muted">
-            Paste the community plan you were sent. Each commitment is checked against what the host town actually favours in Qloo&apos;s taste
-            data, with the same fixed rules as the six preset towns: generic lines are struck and get a local, costed replacement.
-          </p>
+      <AppHeader towns={false} page="check" />
+      <main>
+        <div className="no-print">
+          <PageBand kicker="Your own draft" title="Check your own plan" titleId="check-h">
+            <p className="ui-band-note">Paste the plan you were sent. Each line is checked against the host town&apos;s Qloo taste data.</p>
+          </PageBand>
         </div>
+        <div className="ui-page">
 
-        <section aria-labelledby="step1-h" className="no-print mt-6 rounded-lg border border-rule bg-paper p-4 sm:p-5">
-          <StepLabel n="1">Host town</StepLabel>
+        <section aria-labelledby="step1-h" className="no-print ui-card p-4 sm:p-6">
+          <StepLabel>Host town</StepLabel>
           <h2 id="step1-h" className="mt-2 flex flex-wrap items-center gap-2 text-lg font-semibold tracking-tight">
             {town.name}, {town.region}
             {town.custom && <StatusPill tone="neutral">Entered by you</StatusPill>}
@@ -169,14 +163,11 @@ export default async function CheckPage({
 
         <CheckForm town={town} />
 
-        <p className="no-print mt-10 max-w-3xl text-xs leading-relaxed text-muted">
-          Town search by OpenStreetMap Nominatim (© OpenStreetMap contributors). Taste and place data from Qloo, queried at the town&apos;s
-          coordinates. The full program, memo, outreach drafts and resident ballot for a town live on its{" "}
-          <Link href={`/town/${town.slug}`} className="underline decoration-rule underline-offset-4 hover:decoration-ink">
-            town page
-          </Link>
-          .
+        <p className="no-print ui-note mt-10">
+          Town search © OpenStreetMap contributors · taste data from Qloo ·{" "}
+          <Link href={`/town/${town.slug}`}>memo and ballot on the town page</Link>
         </p>
+        </div>
       </main>
     </>
   );

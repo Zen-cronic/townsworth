@@ -4,7 +4,6 @@ import Link from "next/link";
 import { AppHeader } from "@/components/AppHeader";
 import { PRODUCT_NAME } from "@/components/landing/brand";
 import { Chevron } from "@/components/landing/Chevron";
-import { SiteFooter } from "@/components/landing/SiteFooter";
 import { commitmentsFor } from "@/lib/commitments";
 import { computeProof } from "@/lib/proof";
 import { TOWNS } from "@/lib/towns";
@@ -253,7 +252,6 @@ export default async function SourcesPage() {
           </div>
         </div>
       </main>
-      <SiteFooter />
     </div>
   );
 }

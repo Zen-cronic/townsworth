@@ -28,8 +28,8 @@ export function BallotShell({
           <ChevronLeft />
           Back to the memo
         </Link>
-        <p className="mt-4 font-mono text-[11px] uppercase tracking-wider text-muted">{kicker}</p>
-        <h1 className="mt-1.5 text-balance text-2xl font-semibold leading-tight tracking-tight sm:text-[1.75rem]">{title}</h1>
+        <p className="lp-kicker mt-6">{kicker}</p>
+        <h1 className="ui-h3 mt-2 sm:text-[2rem]">{title}</h1>
         {funder && <FundedBy {...funder} />}
         {children}
       </main>

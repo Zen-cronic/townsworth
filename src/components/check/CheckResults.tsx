@@ -7,6 +7,7 @@ import type { CheckResult } from "@/lib/userPlan";
 import { Check, Chevron, Notice } from "@/components/dashboard/Icons";
 import { Figure } from "@/components/dashboard/Figure";
 import { ProvenanceChip } from "@/components/dashboard/ProvenanceChip";
+import { Chip } from "@/components/ui";
 import { StatusPill } from "@/components/dashboard/StatusPill";
 import { cadenceLower, formatPhone, km, quotedName } from "@/components/dashboard/format";
 import { secondaryCta } from "@/components/dashboard/ui";
@@ -18,7 +19,8 @@ import { CheckExports } from "./CheckExports";
 const isKept = (v: Verdict) => v === "grounded" || v === "institution" || v === "mechanism";
 
 const money = (n: number) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n);
-const pad2 = (n: number) => String(n).padStart(2, "0");
+// Draft lines are numbered plainly.
+const pad2 = (n: number) => String(n);
 const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
 
 const CARD = {
@@ -168,11 +170,11 @@ function AuditLine({ row, index }: { row: AuditRow; index: number }) {
   );
 }
 
-function Stat({ step, title, figure, tone, children }: { step: string; title: string; figure: string; tone?: "flag"; children: React.ReactNode }) {
+function Stat({ title, figure, tone, children }: { title: string; figure: string; tone?: "flag"; children: React.ReactNode }) {
   return (
     <div className="flex flex-col bg-paper px-4 py-3.5 sm:px-6 sm:py-5">
       <p className="font-mono text-[11px] uppercase tracking-wider text-muted">
-        {step} · {title}
+        {title}
       </p>
       <p className={`mt-2 text-[1.625rem] leading-none sm:mt-3 sm:text-[2rem] ${tone === "flag" ? "text-hivis-text" : "text-ink"}`}>
         <Figure value={figure} />
@@ -256,7 +258,7 @@ export function CheckResults({ result }: { result: CheckResult }) {
         </div>
 
         <div className="grid gap-px border-b border-rule bg-hairline sm:grid-cols-3">
-          <Stat step="01" title="Lines that could fit any town" figure={`${flagged} of ${audit.length}`} tone="flag">
+          <Stat title="Lines that could fit any town" figure={`${flagged} of ${audit.length}`} tone="flag">
             <p>draft items struck: they name nothing local, or a partner that can&apos;t be found and isn&apos;t an institution.</p>
             <p className="mt-2 text-xs">
               <span className="font-mono tabular-nums text-ok-text">{audit.length - flagged}</span> kept:{" "}
@@ -270,7 +272,7 @@ export function CheckResults({ result }: { result: CheckResult }) {
                 .join(", ")}
             </p>
           </Stat>
-          <Stat step="02" title="Local partners Qloo found" figure={String(partnerPlaces)}>
+          <Stat title="Local partners Qloo found" figure={String(partnerPlaces)}>
             <p>local partners in the program, each traced to Qloo&apos;s taste data.</p>
             <p className="mt-2 text-xs">
               <span className="font-mono tabular-nums text-ink">{swapPlaces}</span> swap into struck lines
@@ -283,7 +285,7 @@ export function CheckResults({ result }: { result: CheckResult }) {
               · <span className="font-mono tabular-nums text-ink">{qlooAdds.length}</span> more your draft never named
             </p>
           </Stat>
-          <Stat step="03" title="Costed for the committee" figure={money(program.totalAllocated)}>
+          <Stat title="Costed for the committee" figure={money(program.totalAllocated)}>
             <p>
               itemized over 24 months across {plural(program.items.length, "program item", "program items")}. The other{" "}
               <span className="font-mono tabular-nums text-ink">{money(program.unassigned)}</span> of the {money(program.twoYearFund)} fund is held in reserve
@@ -292,7 +294,14 @@ export function CheckResults({ result }: { result: CheckResult }) {
           </Stat>
         </div>
 
-        <dl className="grid gap-x-6 gap-y-2 border-b border-hairline bg-concrete/50 px-5 py-3 text-xs text-muted sm:px-6 md:grid-cols-3">
+        <details className="group border-b border-hairline bg-concrete/50 px-5 py-2.5 text-xs text-muted sm:px-6">
+          <summary className="flex cursor-pointer flex-wrap items-center gap-2">
+            <Chip tone="pen">Not local</Chip>
+            <Chip tone="pen">Can&apos;t confirm</Chip>
+            <Chip>Kept</Chip>
+            <span className="font-medium text-ink underline decoration-rule underline-offset-2 group-hover:decoration-ink">What do these mean?</span>
+          </summary>
+        <dl className="mt-3 grid gap-x-6 gap-y-2 md:grid-cols-3">
           <div className="flex items-start gap-2">
             <dt>
               <StatusPill tone="flag">Not local</StatusPill>
@@ -316,6 +325,7 @@ export function CheckResults({ result }: { result: CheckResult }) {
             </dd>
           </div>
         </dl>
+        </details>
 
         <div className="hidden grid-cols-[2.25rem_minmax(0,1fr)_minmax(0,1fr)] gap-x-6 border-b border-hairline px-6 py-2 text-[11px] font-medium uppercase tracking-wider text-muted md:grid">
           <span>#</span>
@@ -334,7 +344,7 @@ export function CheckResults({ result }: { result: CheckResult }) {
         )}
 
         <div className="border-t border-rule bg-concrete/50 px-5 py-4 text-xs text-muted sm:px-6">
-          <p className="max-w-2xl">Amounts are item budgets drawn from your fund, never from Qloo. Qloo supplies the partners and the signals behind them.</p>
+          <p className="max-w-2xl">Amounts come from your fund, never from Qloo.</p>
         </div>
       </div>
 
@@ -376,34 +386,24 @@ export function CheckResults({ result }: { result: CheckResult }) {
       </section>
 
       <section className="mt-8 grid gap-6 lg:grid-cols-[1.25fr_1fr]">
-        <div className="rounded-lg border border-rule bg-paper px-5 py-4 text-sm sm:px-6">
-          <h3 className="font-semibold tracking-tight">What this check is, and isn&apos;t</h3>
-          <ul className="mt-2 space-y-1.5 text-muted">
-            <li>The model only splits your text into items. Which lines are kept or struck comes from the same fixed rules as the town pages.</li>
-            <li>A struck line isn&apos;t wrong; it could fit any town. A kept institution still needs the committee to confirm it.</li>
-            <li>Nothing you pasted is stored. Reloading the page clears it.</li>
-          </ul>
+        <div className="ui-card px-5 py-4 text-sm sm:px-6">
+          <details className="ui-more">
+            <summary>What this check is, and isn&apos;t</summary>
+            <ul className="mt-2 space-y-1.5">
+              <li>The model only splits your text into items. Which lines are kept or struck comes from the same fixed rules as the town pages.</li>
+              <li>A struck line isn&apos;t wrong; it could fit any town. A kept institution still needs the committee to confirm it.</li>
+            </ul>
+          </details>
+          <p className="mt-2 text-muted">Nothing you pasted is stored.</p>
           <Link href={`/town/${town.slug}?fund=${result.annualFund}`} className={`${secondaryCta} no-print mt-3`}>
             Memo, outreach drafts and ballot for {town.name}
             <Chevron className="h-3.5 w-3.5" />
           </Link>
         </div>
-        <div className="rounded-lg border border-rule bg-paper px-5 py-4 text-sm sm:px-6">
-          <h3 className="font-semibold tracking-tight">Guardrails</h3>
-          <ul className="mt-2 space-y-2.5">
-            {[
-              "Not persuasion: nothing here is scheduled around a vote, hearing or permit.",
-              "Residents rank the shortlist; the community committee decides.",
-              `No political, religious or identity targeting. ${profile.excluded} ${profile.excluded === 1 ? "result was" : "results were"} excluded by rule.`,
-              "Every message carries the sponsor's name. Signals are aggregate, never individual.",
-            ].map((g) => (
-              <li key={g} className="flex gap-2.5">
-                <Check className="mt-1 h-3.5 w-3.5 text-ok" />
-                <span className="text-muted">{g}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
+        <p className="ui-note self-start">
+          Guardrails: not tied to any vote or permit · residents rank · no political, religious or identity targeting ({profile.excluded} excluded by
+          rule) · the sponsor is named on every message. <Link href="/sources#data">Sources</Link>
+        </p>
       </section>
     </section>
   );
