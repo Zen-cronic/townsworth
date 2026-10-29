@@ -7,7 +7,6 @@ import { osmLookup } from "./nominatim";
 import { buildProfile, type TownProfile } from "./profile";
 import { searchPlaces } from "./qloo";
 import { buildProgram, type ProgramItem } from "./plan";
-import { applyReach, type LensOutcome } from "./reach";
 import { auditDraft } from "./run";
 import type { Town } from "./towns";
 import { groundModelItems, modelPlanSchema, SHORT_INPUT, splitPlanLines, userPlanMessage, userPlanPrompt, userPlanSchema } from "./userPlanParse";
@@ -113,11 +112,11 @@ export interface CheckResult {
   annualFund: number;
   parse: { method: PlanParse["method"]; model?: string; ms: number; notice?: string; truncated?: boolean; items: number };
   osm: { checked: number; failures: number; ms: number };
-  // Qloo name lookups for named partners (optional for older payloads).
-  qlooSearch?: { checked: number; verified: number; failures: number; ms: number };
+  // Qloo name lookups for named partners.
+  qlooSearch: { checked: number; verified: number; failures: number; ms: number };
   audit: AuditRow[];
   qlooAdds: ProgramItem[];
-  program: { items: ProgramItem[]; totalAllocated: number; unassigned: number; twoYearFund: number; costNote: string; reach?: LensOutcome[]; reachItems?: ProgramItem[]; reachEarmarked?: number };
+  program: { items: ProgramItem[]; totalAllocated: number; unassigned: number; twoYearFund: number; costNote: string };
   profile: { thin: boolean; localPlaces: number; excluded: number; failedCalls: number; calls: { label: string; status: number; ok: boolean; count: number }[] };
   ms: number;
 }
@@ -127,8 +126,9 @@ const normName = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim
 export async function runUserPlan(town: Town, fund: number | undefined, text: string): Promise<CheckResult> {
   const started = Date.now();
   const annualFund = fund && fund > 0 ? fund : town.defaultAnnualFund;
-  // The town profile uses only the town's coordinates and is data-cached per town.
-  const [profile, parse] = await Promise.all([buildProfile(town), parsePlan(text, town)]);
+  // The town profile uses only the town's coordinates and is data-cached per town. The age-group
+  // check isn't shown on /check, so its queries are skipped.
+  const [profile, parse] = await Promise.all([buildProfile(town, { lenses: false }), parsePlan(text, town)]);
   const program = buildProgram(profile, annualFund);
 
   // OpenStreetMap check for the first few named organisations, kept out of the data cache.
@@ -147,7 +147,6 @@ export async function runUserPlan(town: Town, fund: number | undefined, text: st
   const inputs = withOsm.map((i) => ({ ...i, qloo: i.named ? (search.matches.get(normName(i.named)) ?? null) : null }));
 
   const { audit, qlooAdds } = auditDraft(inputs, profile, program);
-  applyReach(profile, program);
   return {
     town,
     annualFund,
@@ -162,9 +161,6 @@ export async function runUserPlan(town: Town, fund: number | undefined, text: st
       unassigned: program.unassigned,
       twoYearFund: program.twoYearFund,
       costNote: program.costNote,
-      reach: program.reach,
-      reachItems: program.reachItems,
-      reachEarmarked: program.reachEarmarked,
     },
     profile: {
       thin: profile.thin,

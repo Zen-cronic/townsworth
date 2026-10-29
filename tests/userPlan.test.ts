@@ -204,6 +204,7 @@ function fixtureResult(): CheckResult {
     annualFund: 1_000_000,
     parse: { method: "lines", ms: 1, items: 2 },
     osm: { checked: 0, failures: 0, ms: 0 },
+    qlooSearch: { checked: 0, verified: 0, failures: 0, ms: 0 },
     audit,
     qlooAdds,
     program: { items: program.items, totalAllocated: program.totalAllocated, unassigned: program.unassigned, twoYearFund: program.twoYearFund, costNote: program.costNote },

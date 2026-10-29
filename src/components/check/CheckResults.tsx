@@ -199,7 +199,7 @@ function Note({ tone, children }: { tone: "amber" | "flag"; children: React.Reac
 }
 
 export function CheckResults({ result }: { result: CheckResult }) {
-  const { town, audit, qlooAdds, program, parse, osm, profile } = result;
+  const { town, audit, qlooAdds, program, parse, osm, qlooSearch, profile } = result;
   const flagged = audit.filter((a) => !isKept(a.verdict)).length;
   const keptPartners = audit.filter((a) => a.verdict === "grounded" && a.matched).length;
   const keptSignals = audit.filter((a) => a.verdict === "grounded" && !a.matched).length;
@@ -236,6 +236,7 @@ export function CheckResults({ result }: { result: CheckResult }) {
               <span className="font-mono text-xs tabular-nums">
                 {secs(result.ms)} total
                 {osm.checked > 0 && ` · ${plural(osm.checked, "name", "names")} looked up on OpenStreetMap`}
+                {qlooSearch.checked > 0 && ` · ${plural(qlooSearch.checked, "name", "names")} searched in Qloo, ${qlooSearch.verified} found within 25 km`}
               </span>
             </p>
             {parse.notice && <Note tone="amber">{parse.notice}</Note>}
@@ -244,6 +245,12 @@ export function CheckResults({ result }: { result: CheckResult }) {
               <Note tone="amber">
                 {plural(osm.failures, "OpenStreetMap lookup", "OpenStreetMap lookups")} didn&apos;t answer, so {osm.failures === 1 ? "that name counts" : "those names count"} as
                 unverified. Check again in a minute.
+              </Note>
+            )}
+            {qlooSearch.failures > 0 && (
+              <Note tone="amber">
+                {plural(qlooSearch.failures, "Qloo name search", "Qloo name searches")} didn&apos;t answer, so {qlooSearch.failures === 1 ? "that name stays" : "those names stay"} as
+                the other checks left {qlooSearch.failures === 1 ? "it" : "them"}. Check again in a minute.
               </Note>
             )}
             {profile.failedCalls > 0 && (
