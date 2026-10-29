@@ -8,6 +8,9 @@ import { companyFormHref, fundedByLine } from "@/lib/towns";
 
 export const metadata: Metadata = { title: "Ballot tally · Good Neighbor", description: "Checks a facility's draft community plan line by line against the places the host town actually goes (Qloo taste data), and returns a costed, resident-ranked program." };
 
+// Per request: never freeze a failed Qloo call into the page (see src/lib/qloo.ts).
+export const dynamic = "force-dynamic";
+
 export default async function BallotResultsPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const run = await runTown(slug);
