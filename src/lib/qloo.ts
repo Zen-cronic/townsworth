@@ -118,9 +118,11 @@ function parseEntity(raw: RawEntity, type: EntityType): QlooEntity {
   };
 }
 
-// At most 4 requests in flight per server instance (module state, not a global limit). 429s retry
+// At most 6 requests in flight per server instance (module state, not a global limit). The slot is
+// taken before Next's data cache is consulted, so cache hits queue here too; 6 keeps cold misses
+// polite to Qloo while warm renders of all six towns spend less time waiting for a slot. 429s retry
 // with backoff up to three times; a 502 or 503 retries once.
-const MAX_IN_FLIGHT = 4;
+const MAX_IN_FLIGHT = 6;
 let inFlight = 0;
 const waiters: (() => void)[] = [];
 
@@ -135,6 +137,15 @@ async function withSlot<T>(fn: () => Promise<T>): Promise<T> {
   }
 }
 
+// Caching policy. Each Qloo response is kept in Next's data cache for 24 hours, and only 2xx
+// responses are stored, so a failed call is retried on the next request rather than remembered.
+// That guarantee is lost if the page that made the call is itself cached: a statically prerendered
+// or ISR page stores its HTML, and a failure during that render (at build time or on the first
+// visit) would be served for the whole revalidate window even though the data cache holds nothing
+// for it. So every route that renders Qloo-derived figures (runTown, computeProof) is rendered per
+// request with `export const dynamic = "force-dynamic"`, or uses request data that makes it dynamic
+// anyway; warm renders still read the cached responses here and stay fast. When a call does fail,
+// the profile records it in `failedCalls` and the pages say so instead of showing partial figures.
 async function fetchWithRetry(url: string, key: string): Promise<Response> {
   for (let attempt = 0; ; attempt++) {
     const res = await withSlot(() =>
