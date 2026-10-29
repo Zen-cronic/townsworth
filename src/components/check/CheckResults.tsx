@@ -25,7 +25,7 @@ const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one :
 
 const CARD = {
   kept: "rounded-md border border-hairline bg-paper px-3.5 py-3",
-  proposed: "slide-in rounded-md border border-ok/30 border-l-[3px] border-l-ok bg-paper px-3.5 py-3 shadow-[0_1px_2px_rgb(34_33_31/0.05)]",
+  proposed: "slide-in rounded-md border border-ok/30 border-l-[3px] border-l-ok bg-paper px-3.5 py-3 shadow-[0_1px_2px_color-mix(in_srgb,var(--ink)_5%,transparent)]",
   none: "rounded-md border border-dashed border-rule px-3.5 py-3",
 };
 
@@ -75,7 +75,7 @@ function Kept({ row }: { row: AuditRow }) {
     return (
       <div className={CARD.kept}>
         <Eyebrow tone="ok">
-          <Check className="h-3 w-3" />
+          <Check className="kept-mark h-3 w-3" />
           Kept <span className="font-normal normal-case tracking-normal text-muted">· institution, couldn&apos;t verify here</span>
         </Eyebrow>
         <p className="mt-1 text-[15px] leading-snug">{row.named}</p>
@@ -88,7 +88,7 @@ function Kept({ row }: { row: AuditRow }) {
     return (
       <div className={CARD.kept}>
         <Eyebrow tone="ok">
-          <Check className="h-3 w-3" />
+          <Check className="kept-mark h-3 w-3" />
           Kept <span className="font-normal normal-case tracking-normal text-muted">· {row.keptLabel ?? "grant mechanism"}</span>
         </Eyebrow>
         <p className="mt-1 text-[15px] leading-snug">{row.keptNote ? row.keptNote.charAt(0).toUpperCase() + row.keptNote.slice(1) + "." : "How grants are decided stays as drafted."}</p>
@@ -113,7 +113,7 @@ function Kept({ row }: { row: AuditRow }) {
   return (
     <div className={CARD.kept}>
       <Eyebrow tone="ok">
-        <Check className="h-3 w-3" />
+        <Check className="kept-mark h-3 w-3" />
         Kept
       </Eyebrow>
       <p className="mt-1 text-[15px] leading-snug">{row.matched?.name ?? "Matches a local favourite"}</p>
@@ -134,7 +134,7 @@ function AuditLine({ row, index }: { row: AuditRow; index: number }) {
   const kept = isKept(row.verdict);
   const missing = row.verdict === "unverified" ? quotedName(row.reasons[0]) : undefined;
   return (
-    <li data-testid="check-row" data-verdict={row.verdict} className={`${ROW} break-inside-avoid`}>
+    <li data-testid="check-row" data-verdict={row.verdict} className={`${ROW} audit-row break-inside-avoid`}>
       <span className="pt-0.5 font-mono text-xs tabular-nums text-muted">{pad2(index + 1)}</span>
       <div className="min-w-0">
         <p className={`text-[15px] leading-relaxed ${kept ? "text-ink" : "text-muted"}`}>

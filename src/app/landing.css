@@ -1,23 +1,32 @@
 /* Landing, guided path and sources pages. Imported by those routes only.
-   Tokens read the app's Hi-vis field kit variables, with fallbacks so the pages hold if those are renamed.
-   Orange is the red pen and nothing else. Spacing runs on an 8px grid. */
+   Tokens alias the app palette in globals.css, so a palette change is one edit there.
+   Red is the pen and nothing else. Spacing runs on an 8px grid. */
 
 .gn-landing {
-  --l-concrete: var(--concrete, #efede8);
-  --l-paper: var(--paper, #fbfaf7);
-  --l-ink: var(--ink, #22211f);
-  --l-muted: var(--muted, #5e5b55);
-  --l-rule: var(--rule, #cfcbc2);
-  --l-hairline: var(--hairline, #e2dfd7);
-  --l-hivis: var(--hivis, #d9480f);
-  --l-hivis-text: var(--hivis-text, #a33409);
-  --l-ok: var(--ok, #2b5d8a);
-  --l-ok-text: var(--ok-text, #24507a);
-  --l-ok-wash: var(--ok-wash, #e2ebf3);
-  --l-amber-text: #7a5500;
-  --l-amber-wash: var(--amber-wash, #f5ecd3);
-  --l-side: #e8e5de;
-  --l-side-2: #d9d5cc;
+  --l-concrete: var(--concrete);
+  --l-paper: var(--paper);
+  --l-card: var(--card);
+  --l-ink: var(--ink);
+  --l-muted: var(--muted);
+  --l-rule: var(--rule);
+  --l-hairline: var(--hairline);
+  --l-hivis: var(--hivis);
+  --l-hivis-text: var(--hivis-text);
+  --l-ok: var(--ok);
+  --l-ok-text: var(--ok-text);
+  --l-ok-wash: var(--ok-wash);
+  --l-amber-text: var(--amber);
+  --l-amber-wash: var(--amber-wash);
+  --l-side: var(--side);
+  --l-side-2: var(--side-2);
+  --l-band: var(--band);
+  --l-band-text: var(--band-text);
+  --l-band-soft: var(--band-soft);
+  --l-band-muted: var(--band-muted);
+  --l-band-quiet: var(--band-quiet);
+  --l-band-ok: var(--band-ok);
+  --l-band-pen: var(--band-pen);
+  --l-band-amber: var(--band-amber);
   --l-mono: var(--font-plex-mono), ui-monospace, "SFMono-Regular", Menlo, monospace;
   --l-sans: var(--font-public-sans), system-ui, sans-serif;
   --l-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
@@ -158,10 +167,10 @@ a:focus-visible .lp-chev {
   padding: 0 6px 0 20px;
   background: var(--l-ink);
   color: var(--l-paper);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.08), 0 1px 2px rgb(34 33 31 / 0.2);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--l-card) 8%, transparent), 0 1px 2px color-mix(in srgb, var(--l-ink) 20%, transparent);
 }
 .lp-btn-primary:hover {
-  background: #000;
+  background: var(--ink-deep);
 }
 .lp-btn-sq {
   display: grid;
@@ -176,7 +185,7 @@ a:focus-visible .lp-chev {
   border: 1px solid var(--l-rule);
   background: var(--l-paper);
   color: var(--l-ink);
-  box-shadow: inset 0 1px 0 #fff;
+  box-shadow: inset 0 1px 0 var(--l-card);
 }
 .lp-btn-quiet:hover {
   border-color: var(--l-ink);
@@ -290,7 +299,7 @@ a:focus-visible .lp-chev {
   inset: 0;
   z-index: -1;
   overflow: hidden;
-  background: var(--l-ink) var(--poster) center bottom / contain no-repeat;
+  background: var(--l-band) var(--poster) center bottom / contain no-repeat;
 }
 @media (orientation: portrait) {
   .lp-film {
@@ -308,14 +317,14 @@ a:focus-visible .lp-chev {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(90deg, rgb(34 33 31 / 0.9) 0%, rgb(34 33 31 / 0.84) 38%, rgb(34 33 31 / 0.3) 56%, rgb(34 33 31 / 0) 72%),
-    linear-gradient(0deg, rgb(34 33 31 / 0.6) 0%, transparent 40%),
-    linear-gradient(270deg, rgb(34 33 31 / 0.55) 0%, transparent 14%),
-    linear-gradient(180deg, rgb(34 33 31 / 0.45) 0%, transparent 18%);
+    linear-gradient(90deg, color-mix(in srgb, var(--l-band) 90%, transparent) 0%, color-mix(in srgb, var(--l-band) 84%, transparent) 38%, color-mix(in srgb, var(--l-band) 30%, transparent) 56%, color-mix(in srgb, var(--l-band) 0%, transparent) 72%),
+    linear-gradient(0deg, color-mix(in srgb, var(--l-band) 60%, transparent) 0%, transparent 40%),
+    linear-gradient(270deg, color-mix(in srgb, var(--l-band) 55%, transparent) 0%, transparent 14%),
+    linear-gradient(180deg, color-mix(in srgb, var(--l-band) 45%, transparent) 0%, transparent 18%);
 }
 @media (max-width: 900px) {
   .lp-film-shade {
-    background: linear-gradient(0deg, rgb(34 33 31 / 0.88) 0%, rgb(34 33 31 / 0.78) 55%, rgb(34 33 31 / 0.45) 100%);
+    background: linear-gradient(0deg, color-mix(in srgb, var(--l-band) 88%, transparent) 0%, color-mix(in srgb, var(--l-band) 78%, transparent) 55%, color-mix(in srgb, var(--l-band) 45%, transparent) 100%);
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -349,11 +358,11 @@ a:focus-visible .lp-chev {
 }
 .has-film .lp-tone,
 .has-film .lp-lede {
-  color: #d6d2c9;
+  color: var(--l-band-soft);
 }
 .has-film .lp-hero-copy .lp-textlink {
   color: var(--l-paper);
-  text-decoration-color: rgb(251 250 247 / 0.45);
+  text-decoration-color: color-mix(in srgb, var(--l-band-text) 45%, transparent);
 }
 .has-film .lp-btn-primary {
   background: var(--l-paper);
@@ -365,15 +374,15 @@ a:focus-visible .lp-chev {
 }
 .has-film .lp-btn-quiet,
 .has-film .lp-motion {
-  background: rgb(34 33 31 / 0.35);
-  border-color: rgb(251 250 247 / 0.4);
+  background: color-mix(in srgb, var(--l-band) 35%, transparent);
+  border-color: color-mix(in srgb, var(--l-band-text) 40%, transparent);
   color: var(--l-paper);
 }
 .has-film .lp-btn-meta {
-  color: #d6d2c9;
+  color: var(--l-band-soft);
 }
 .has-film .lp-preview {
-  box-shadow: 0 1px 0 rgb(255 255 255 / 0.4) inset, 0 32px 64px -24px rgb(0 0 0 / 0.6);
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--l-card) 40%, transparent) inset, 0 32px 64px -24px color-mix(in srgb, var(--ink-deep) 60%, transparent);
 }
 
 
@@ -384,7 +393,7 @@ a:focus-visible .lp-chev {
   background: var(--l-paper);
   border: 1px solid var(--l-rule);
   border-radius: 8px;
-  box-shadow: 0 1px 0 var(--l-rule), 0 24px 48px -28px rgb(34 33 31 / 0.35);
+  box-shadow: 0 1px 0 var(--l-rule), 0 24px 48px -28px color-mix(in srgb, var(--l-ink) 35%, transparent);
   overflow: hidden;
 }
 .lp-preview-head {
@@ -488,7 +497,7 @@ a:focus-visible .lp-chev {
 .lp-gap {
   padding-top: 9px;
   padding-bottom: 9px;
-  background: repeating-linear-gradient(-45deg, transparent 0 6px, rgb(207 203 194 / 0.25) 6px 7px);
+  background: repeating-linear-gradient(-45deg, transparent 0 6px, color-mix(in srgb, var(--l-rule) 25%, transparent) 6px 7px);
   font-size: 0.8125rem;
   color: var(--l-muted);
 }
@@ -545,7 +554,7 @@ a:focus-visible .lp-chev {
   border: 1px solid var(--l-hairline);
   border-left: 2px solid var(--l-ok);
   border-radius: 4px;
-  background: #fff;
+  background: var(--l-card);
   padding: 12px 14px;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -677,10 +686,10 @@ a:focus-visible .lp-chev {
   border-radius: 2px;
 }
 .lp-legend .is-llm::before {
-  background: #8f8a80;
+  background: var(--l-band-quiet);
 }
 .lp-legend .is-gn::before {
-  background: #6f9fd0;
+  background: var(--l-band-ok);
 }
 .lp-h2h {
   list-style: none;
@@ -693,10 +702,10 @@ a:focus-visible .lp-chev {
   gap: 16px 56px;
   align-items: center;
   padding: 24px 0;
-  border-top: 1px solid rgb(251 250 247 / 0.16);
+  border-top: 1px solid color-mix(in srgb, var(--l-band-text) 16%, transparent);
 }
 .lp-h2h-row:last-child {
-  border-bottom: 1px solid rgb(251 250 247 / 0.16);
+  border-bottom: 1px solid color-mix(in srgb, var(--l-band-text) 16%, transparent);
 }
 .lp-h2h-measure {
   display: grid;
@@ -705,7 +714,7 @@ a:focus-visible .lp-chev {
 .lp-h2h-measure p {
   font-size: 0.875rem;
   line-height: 1.5;
-  color: #c9c4ba;
+  color: var(--l-band-muted);
   max-width: 30em;
 }
 .lp-h2h-lines {
@@ -722,25 +731,25 @@ a:focus-visible .lp-chev {
 .lp-h2h-who {
   font-family: var(--l-mono);
   font-size: 12px;
-  color: #dcd8cf;
+  color: var(--l-band-soft);
   white-space: nowrap;
 }
 .lp-h2h-track {
   height: 12px;
   border-radius: 2px;
-  background: rgb(251 250 247 / 0.1);
+  background: color-mix(in srgb, var(--l-band-text) 10%, transparent);
   overflow: hidden;
 }
 .lp-h2h-fill {
   display: block;
   height: 100%;
-  background: #8f8a80;
+  background: var(--l-band-quiet);
 }
 .lp-h2h-line.is-llm .lp-h2h-fill {
-  background: #8f8a80;
+  background: var(--l-band-quiet);
 }
 .lp-h2h-line.is-gn .lp-h2h-fill {
-  background: #6f9fd0;
+  background: var(--l-band-ok);
 }
 .lp-h2h-val {
   text-align: right;
@@ -749,11 +758,11 @@ a:focus-visible .lp-chev {
   line-height: 1;
   letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
-  color: #dcd8cf;
+  color: var(--l-band-soft);
 }
 .lp-h2h-line.is-gn .lp-h2h-val {
   font-weight: 700;
-  color: #8fb6dd;
+  color: var(--l-band-ok);
 }
 .lp-h2h-line.is-gn .lp-h2h-who {
   color: var(--l-paper);
@@ -766,18 +775,18 @@ a:focus-visible .lp-chev {
   gap: 10px;
   font-family: var(--l-mono);
   font-size: 11.5px;
-  color: #a9a49a;
+  color: var(--l-band-muted);
 }
 .lp-proof-foot {
   margin-top: 24px;
   max-width: 62em;
   line-height: 1.55;
   font-size: 0.875rem;
-  color: #c9c4ba;
+  color: var(--l-band-muted);
 }
 .is-ink .lp-textlink {
   color: var(--l-paper);
-  text-decoration-color: rgb(251 250 247 / 0.4);
+  text-decoration-color: color-mix(in srgb, var(--l-band-text) 40%, transparent);
 }
 .is-ink .lp-textlink:hover {
   text-decoration-color: var(--l-paper);
@@ -805,7 +814,7 @@ a:focus-visible .lp-chev {
 }
 .lp-town:hover {
   border-color: var(--l-ink);
-  box-shadow: 0 10px 24px -18px rgb(34 33 31 / 0.4);
+  box-shadow: 0 10px 24px -18px color-mix(in srgb, var(--l-ink) 40%, transparent);
 }
 .lp-town-top {
   display: flex;
@@ -832,7 +841,7 @@ a:focus-visible .lp-chev {
   color: var(--l-ink);
 }
 .lp-badge.is-thin {
-  border: 1px solid #e3cf98;
+  border: 1px solid var(--amber-rule);
   background: var(--l-amber-wash);
   color: var(--l-amber-text);
 }
@@ -862,7 +871,7 @@ a:focus-visible .lp-chev {
   border-left: 2px solid var(--l-ok);
 }
 .lp-town-pick.is-empty {
-  border-left-color: #c9a640;
+  border-left-color: var(--amber-mark);
 }
 .lp-town-pick-k {
   font-family: var(--l-mono);
@@ -1016,13 +1025,13 @@ a:focus-visible .lp-chev {
   position: relative;
   background: var(--ch-bg);
   padding: 104px 0 120px;
-  box-shadow: 0 -8px 16px -14px rgb(34 33 31 / 0.22);
+  box-shadow: 0 -8px 16px -14px color-mix(in srgb, var(--l-ink) 22%, transparent);
 }
 .lp-ch:nth-of-type(odd) {
   --ch-bg: var(--l-concrete);
 }
 .lp-ch.is-ink {
-  --ch-bg: var(--l-ink);
+  --ch-bg: var(--l-band);
   color: var(--l-paper);
 }
 .lp-ch-tab {
@@ -1057,14 +1066,14 @@ a:focus-visible .lp-chev {
 .is-ink .lp-kicker,
 .is-ink .lp-section-lede,
 .is-ink .lp-tone {
-  color: #b9b4aa;
+  color: var(--l-band-muted);
 }
 .is-ink .lp-ch-tab span {
   color: var(--l-paper);
 }
 .is-ink .lp-textlink {
   color: var(--l-paper);
-  text-decoration-color: rgb(251 250 247 / 0.4);
+  text-decoration-color: color-mix(in srgb, var(--l-band-text) 40%, transparent);
 }
 @media (min-width: 900px) and (prefers-reduced-motion: no-preference) {
   /* A chapter sticks by its bottom edge, so the next one slides over it like a filed sheet.
@@ -1217,7 +1226,7 @@ a:focus-visible .lp-chev {
   vector-effect: non-scaling-stroke;
 }
 .st-top {
-  fill: #fff;
+  fill: var(--l-card);
 }
 .st-l {
   fill: var(--l-side);
@@ -1226,13 +1235,13 @@ a:focus-visible .lp-chev {
   fill: var(--l-side-2);
 }
 .st-quiet polygon {
-  stroke: #8f8a80;
+  stroke: var(--line-quiet);
 }
 .st-quiet .st-top {
   fill: var(--l-paper);
 }
 .st-place .st-top {
-  fill: #fff;
+  fill: var(--l-card);
 }
 .st-awning .st-top,
 .st-awning .st-l,
@@ -1240,11 +1249,11 @@ a:focus-visible .lp-chev {
   fill: var(--l-ok);
 }
 .st-tree line {
-  stroke: #8f8a80;
+  stroke: var(--line-quiet);
 }
 .st-tree circle {
   fill: var(--l-paper);
-  stroke: #8f8a80;
+  stroke: var(--line-quiet);
 }
 .st-road {
   stroke: var(--l-rule) !important;
@@ -1252,19 +1261,19 @@ a:focus-visible .lp-chev {
 .st-parcel,
 .st-fence {
   fill: none;
-  stroke: #8f8a80 !important;
+  stroke: var(--line-quiet) !important;
   stroke-dasharray: 4 4;
 }
 .st-sheet {
-  fill: #fff;
+  fill: var(--l-card);
 }
 .st-text {
-  stroke: #a9a49a !important;
+  stroke: var(--line-faint) !important;
   stroke-width: 1.5 !important;
   stroke-linecap: round;
 }
 .st-text.is-struck {
-  stroke: #c9c4ba !important;
+  stroke: var(--line-fainter) !important;
 }
 .st-pen {
   stroke: var(--l-hivis) !important;
@@ -1272,14 +1281,14 @@ a:focus-visible .lp-chev {
   stroke-linecap: round;
 }
 .st-tile .st-top {
-  fill: #fff;
+  fill: var(--l-card);
 }
 .st-tile-edge {
   stroke: var(--l-ok) !important;
   stroke-width: 3 !important;
 }
 .st-memo .st-top {
-  fill: #fff;
+  fill: var(--l-card);
 }
 .st-slot {
   stroke-width: 3 !important;
@@ -1294,7 +1303,7 @@ a:focus-visible .lp-chev {
   stroke-dasharray: 3 4;
 }
 .st-post line {
-  stroke: #a9a49a !important;
+  stroke: var(--line-faint) !important;
 }
 .st-skip,
 .st-rise,
@@ -1433,7 +1442,7 @@ a:focus-visible .lp-chev {
     transform: translateY(-50%);
     font-size: 12px;
     line-height: 1.4;
-    color: rgb(34 33 31 / 0.62);
+    color: color-mix(in srgb, var(--l-ink) 62%, transparent);
   }
   .st-co-text b {
     display: block;
@@ -1450,7 +1459,7 @@ a:focus-visible .lp-chev {
     position: absolute;
     top: 0;
     display: block;
-    border-top: 1px solid rgb(34 33 31 / 0.45);
+    border-top: 1px solid color-mix(in srgb, var(--l-ink) 45%, transparent);
   }
   .st-co.is-l .st-co-lead {
     left: calc(var(--zone) + 8px);
@@ -1467,10 +1476,10 @@ a:focus-visible .lp-chev {
     width: 10px;
     height: 10px;
     transform: translate(-50%, -50%);
-    outline: 2px solid #fff;
+    outline: 2px solid var(--l-card);
   }
   .st-co.is-ok .st-co-lead {
-    border-top-color: rgb(43 93 138 / 0.6);
+    border-top-color: color-mix(in srgb, var(--l-ok) 60%, transparent);
   }
   /* The step being drawn is marked with an ink rule; every step stays fully legible. */
   .st-copy {
@@ -1624,7 +1633,7 @@ a:focus-visible .lp-chev {
   @supports (animation-timeline: view()) {
     .lp-fill {
       color: transparent;
-      background: linear-gradient(var(--l-paper), var(--l-paper)) 0 0 / 100% 100% no-repeat, #77726a;
+      background: linear-gradient(var(--l-paper), var(--l-paper)) 0 0 / 100% 100% no-repeat, var(--l-band-quiet);
       -webkit-background-clip: text;
       background-clip: text;
       animation: lp-fill linear forwards;
@@ -1657,8 +1666,8 @@ a:focus-visible .lp-chev {
   gap: 16px 64px;
   align-items: center;
   padding: 32px 0;
-  border-top: 1px solid rgb(251 250 247 / 0.16);
-  border-bottom: 1px solid rgb(251 250 247 / 0.16);
+  border-top: 1px solid color-mix(in srgb, var(--l-band-text) 16%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--l-band-text) 16%, transparent);
 }
 .lp-stats {
   list-style: none;
@@ -1691,13 +1700,13 @@ a:focus-visible .lp-chev {
 .lp-stat-note {
   font-size: 0.875rem;
   line-height: 1.55;
-  color: #b9b4aa;
+  color: var(--l-band-muted);
   max-width: 24em;
 }
 .is-ink .lp-proof-foot {
   margin-top: 56px;
   padding-top: 24px;
-  border-top: 1px solid rgb(251 250 247 / 0.16);
+  border-top: 1px solid color-mix(in srgb, var(--l-band-text) 16%, transparent);
 }
 
 /* Questions, each a deep link */
@@ -1719,7 +1728,7 @@ a:focus-visible .lp-chev {
   transition: background-color 150ms;
 }
 .lp-obj:hover {
-  background: rgb(251 250 247 / 0.7);
+  background: color-mix(in srgb, var(--l-paper) 70%, transparent);
 }
 .lp-obj-q {
   font-size: 1.125rem;
@@ -1751,7 +1760,7 @@ a:focus-visible .lp-chev {
   padding: 32px;
   border-radius: 8px;
   background: var(--l-paper);
-  box-shadow: 0 0 0 1px var(--l-hairline), 0 1px 2px rgb(34 33 31 / 0.05);
+  box-shadow: 0 0 0 1px var(--l-hairline), 0 1px 2px color-mix(in srgb, var(--l-ink) 5%, transparent);
 }
 .lp-anytown-copy {
   display: grid;
@@ -1774,7 +1783,7 @@ a:focus-visible .lp-chev {
 .lp-close.has-film {
   padding: 144px 0;
   color: var(--l-paper);
-  background: var(--l-ink) var(--poster) center 70% / cover no-repeat;
+  background: var(--l-band) var(--poster) center 70% / cover no-repeat;
 }
 @media (orientation: portrait) {
   .lp-close.has-film {
@@ -1786,10 +1795,10 @@ a:focus-visible .lp-chev {
   position: absolute;
   inset: 0;
   z-index: -1;
-  background: linear-gradient(90deg, rgb(34 33 31 / 0.9) 0%, rgb(34 33 31 / 0.72) 55%, rgb(34 33 31 / 0.62) 100%);
+  background: linear-gradient(90deg, color-mix(in srgb, var(--l-band) 90%, transparent) 0%, color-mix(in srgb, var(--l-band) 72%, transparent) 55%, color-mix(in srgb, var(--l-band) 62%, transparent) 100%);
 }
 .lp-close.has-film .lp-tone {
-  color: #b9b4aa;
+  color: var(--l-band-muted);
 }
 .lp-close.has-film .lp-btn-primary {
   background: var(--l-paper);
@@ -1800,8 +1809,8 @@ a:focus-visible .lp-chev {
   color: var(--l-paper);
 }
 .lp-close.has-film .lp-btn-quiet {
-  background: rgb(34 33 31 / 0.88);
-  border-color: rgb(251 250 247 / 0.4);
+  background: color-mix(in srgb, var(--l-band) 88%, transparent);
+  border-color: color-mix(in srgb, var(--l-band-text) 40%, transparent);
   color: var(--l-paper);
   box-shadow: none;
 }
@@ -1917,20 +1926,20 @@ a:focus-visible .lp-chev {
   padding: 24px;
   border-radius: 8px;
   background: var(--l-paper);
-  box-shadow: 0 0 0 1px var(--l-hairline), 0 1px 2px rgb(34 33 31 / 0.05), inset 0 1px 0 #fff;
+  box-shadow: 0 0 0 1px var(--l-hairline), 0 1px 2px color-mix(in srgb, var(--l-ink) 5%, transparent), inset 0 1px 0 var(--l-card);
   transition: box-shadow 150ms;
 }
 .gp-entry:hover {
-  box-shadow: 0 0 0 1px var(--l-ink), 0 8px 24px -16px rgb(34 33 31 / 0.4);
+  box-shadow: 0 0 0 1px var(--l-ink), 0 8px 24px -16px color-mix(in srgb, var(--l-ink) 40%, transparent);
 }
 .gp-entry.is-primary {
-  background: var(--l-ink);
+  background: var(--l-band);
   color: var(--l-paper);
-  box-shadow: 0 1px 2px rgb(34 33 31 / 0.2);
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--l-ink) 20%, transparent);
 }
 .gp-entry.is-primary .lp-kicker,
 .gp-entry.is-primary p {
-  color: #c9c4ba;
+  color: var(--l-band-muted);
 }
 .gp-entry-t {
   display: flex;
@@ -2013,8 +2022,8 @@ a:focus-visible .lp-chev {
   gap: 0;
   padding: 32px;
   border-radius: 8px;
-  background: #fff;
-  box-shadow: 0 0 0 1px var(--l-hairline), 0 1px 2px rgb(34 33 31 / 0.05);
+  background: var(--l-card);
+  box-shadow: 0 0 0 1px var(--l-hairline), 0 1px 2px color-mix(in srgb, var(--l-ink) 5%, transparent);
 }
 .gp-step-n {
   font-family: var(--l-mono);
@@ -2116,8 +2125,8 @@ a:focus-visible .lp-chev {
 .src-town {
   margin-top: 16px;
   border-radius: 8px;
-  background: #fff;
-  box-shadow: 0 0 0 1px var(--l-hairline), 0 1px 2px rgb(34 33 31 / 0.05);
+  background: var(--l-card);
+  box-shadow: 0 0 0 1px var(--l-hairline), 0 1px 2px color-mix(in srgb, var(--l-ink) 5%, transparent);
 }
 .src-town:first-of-type {
   margin-top: 32px;
@@ -2133,7 +2142,7 @@ a:focus-visible .lp-chev {
   transition: background-color 150ms;
 }
 .src-town summary:hover {
-  background: rgb(239 237 232 / 0.5);
+  background: color-mix(in srgb, var(--l-concrete) 50%, transparent);
 }
 .src-count {
   font-family: var(--l-mono);
@@ -2418,7 +2427,7 @@ a:focus-visible .lp-chev {
   transition: background-color 150ms;
 }
 .lp-preview-open:hover {
-  background: #000;
+  background: var(--ink-deep);
 }
 .lp-preview-lead {
   align-items: center;
@@ -2489,7 +2498,7 @@ a:focus-visible .lp-chev {
 .ui-card {
   background: var(--l-paper);
   border-radius: 8px;
-  box-shadow: 0 0 0 1px var(--l-hairline), 0 1px 2px rgb(34 33 31 / 0.05);
+  box-shadow: 0 0 0 1px var(--l-hairline), 0 1px 2px color-mix(in srgb, var(--l-ink) 5%, transparent);
 }
 .ui-chip {
   display: inline-flex;
@@ -2512,9 +2521,15 @@ a:focus-visible .lp-chev {
   border-radius: 50%;
   background: var(--l-ok);
 }
+/* Kept and added signals carry the kept wash, so the blue reads as strongly as the pen. */
+.ui-chip.is-ok {
+  color: var(--l-ok-text);
+  background: var(--l-ok-wash);
+  box-shadow: none;
+}
 .ui-chip.is-pen {
   color: var(--l-hivis-text);
-  background: var(--hivis-wash, #fbe3d6);
+  background: var(--hivis-wash);
   box-shadow: none;
 }
 .ui-chip.is-pen .ui-chip-dot {
@@ -2526,7 +2541,7 @@ a:focus-visible .lp-chev {
   box-shadow: none;
 }
 .ui-chip.is-warn .ui-chip-dot {
-  background: #c9a640;
+  background: var(--amber-mark);
 }
 .ui-stats {
   display: grid;
@@ -2540,7 +2555,7 @@ a:focus-visible .lp-chev {
   padding: 20px 24px;
   border-radius: 8px;
   background: var(--l-paper);
-  box-shadow: 0 0 0 1px var(--l-hairline), 0 1px 2px rgb(34 33 31 / 0.05);
+  box-shadow: 0 0 0 1px var(--l-hairline), 0 1px 2px color-mix(in srgb, var(--l-ink) 5%, transparent);
 }
 .ui-stat-v {
   font-size: clamp(2rem, 1.6rem + 1vw, 2.75rem);
@@ -2580,9 +2595,11 @@ a:focus-visible .lp-chev {
 
 /* Dark page-header band (town, check) */
 .ui-band {
-  background: var(--l-ink);
+  background: var(--l-band);
   color: var(--l-paper);
   padding: 48px 0 40px;
+  /* Contour-brown top rule: the one place the map accent shows on app pages. */
+  box-shadow: inset 0 4px 0 var(--band-contour);
 }
 .ui-band::after {
   opacity: 0.08;
@@ -2601,7 +2618,7 @@ a:focus-visible .lp-chev {
   max-width: 760px;
 }
 .ui-band .lp-kicker {
-  color: #b9b4aa;
+  color: var(--l-band-muted);
 }
 .ui-band-h {
   font-size: clamp(2rem, 1.4rem + 1.8vw, 3rem);
@@ -2612,34 +2629,34 @@ a:focus-visible .lp-chev {
 }
 .ui-band-note {
   font-size: 0.875rem;
-  color: #d6d2c9;
+  color: var(--l-band-soft);
 }
 .ui-band-note a {
   color: var(--l-paper);
   text-decoration: underline;
-  text-decoration-color: rgb(251 250 247 / 0.4);
+  text-decoration-color: color-mix(in srgb, var(--l-band-text) 40%, transparent);
   text-underline-offset: 3px;
 }
 .ui-band .ui-chip {
-  background: rgb(251 250 247 / 0.08);
-  box-shadow: inset 0 0 0 1px rgb(251 250 247 / 0.16);
-  color: #e6e2da;
+  background: color-mix(in srgb, var(--l-band-text) 8%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--l-band-text) 16%, transparent);
+  color: var(--l-band-text);
 }
 .ui-band .ui-chip-dot {
-  background: #6f9fd0;
+  background: var(--l-band-ok);
 }
 .ui-band .ui-chip.is-warn {
-  color: #f0d98c;
+  color: var(--l-band-amber);
 }
 /* Band text accents. Each has a print colour below, where the band prints on white. */
 .ui-band-muted {
-  color: #d6d2c9;
+  color: var(--l-band-soft);
 }
 .ui-band-alert {
-  color: #f2a37f;
+  color: var(--l-band-pen);
 }
 .ui-band-warn {
-  color: #f0d98c;
+  color: var(--l-band-amber);
 }
 .ui-band :where(a, button, input, summary):focus-visible {
   outline-color: var(--l-paper);
@@ -2653,7 +2670,7 @@ a:focus-visible .lp-chev {
   display: grid;
   gap: 6px;
   font-size: 0.75rem;
-  color: #b9b4aa;
+  color: var(--l-band-muted);
 }
 .ui-fund-input {
   display: flex;
@@ -2661,8 +2678,8 @@ a:focus-visible .lp-chev {
   height: 44px;
   padding-left: 12px;
   border-radius: 6px;
-  background: rgb(251 250 247 / 0.06);
-  box-shadow: inset 0 0 0 1px rgb(251 250 247 / 0.24);
+  background: color-mix(in srgb, var(--l-band-text) 6%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--l-band-text) 24%, transparent);
   font-family: var(--l-mono);
 }
 .ui-fund-input:focus-within {
@@ -2688,16 +2705,16 @@ a:focus-visible .lp-chev {
   transition: background-color 150ms;
 }
 .ui-fund button:hover {
-  background: #fff;
+  background: var(--l-card);
 }
 /* Re-plan is the quiet action next to the fund; the memo is the primary one. */
 .ui-fund button {
   background: transparent;
   color: var(--l-paper);
-  box-shadow: inset 0 0 0 1px rgb(251 250 247 / 0.4);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--l-band-text) 40%, transparent);
 }
 .ui-fund button:hover {
-  background: rgb(251 250 247 / 0.08);
+  background: color-mix(in srgb, var(--l-band-text) 8%, transparent);
 }
 .ui-fund .ui-band-cta {
   margin-left: 8px;
@@ -2705,7 +2722,7 @@ a:focus-visible .lp-chev {
   color: var(--l-ink);
 }
 .ui-fund .ui-band-cta:hover {
-  background: #fff;
+  background: var(--l-card);
 }
 .ui-fund .ui-band-cta .lp-btn-sq {
   background: var(--l-ink);
@@ -2774,7 +2791,7 @@ a:focus-visible .lp-chev {
 }
 @media print {
   .ui-band {
-    background: #fff;
+    background: var(--l-card);
     color: var(--l-ink);
     padding: 8px 0 16px;
     border-bottom: 1px solid var(--l-rule);
@@ -2840,18 +2857,18 @@ a:focus-visible .lp-chev {
   text-underline-offset: 3px;
 }
 .is-ink .live-notice {
-  color: #c9c4ba;
+  color: var(--l-band-muted);
 }
 .is-ink .live-notice b {
-  color: #f2a37f;
+  color: var(--l-band-pen);
 }
 .is-ink .live-notice a {
   color: var(--paper);
-  text-decoration-color: rgb(251 250 247 / 0.4);
+  text-decoration-color: color-mix(in srgb, var(--l-band-text) 40%, transparent);
 }
 /* In the hero card the notice takes the place of the lead figure. */
 .lp-preview-lead.is-degraded {
-  background: var(--hivis-wash, #fbe9e0);
+  background: var(--hivis-wash);
 }
 .lp-section-head > .live-notice {
   grid-column: 1 / -1;

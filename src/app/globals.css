@@ -1,31 +1,59 @@
 @import "tailwindcss";
 
-/* Hi-vis field kit: concrete, charcoal, safety orange and survey blue. Orange is the red pen
-   (struck) and nothing else; survey blue marks what is kept or added. Orange vs blue stays
-   distinguishable with the common colour-vision deficiencies. Text tones pass WCAG AA on concrete. */
+/* Topo palette: map-paper ground, woodland-green bands, contour-brown rules, water blue and the
+   survey red pen. Red is the pen (struck) and nothing else; water blue marks what is kept or added.
+   Red vs blue stays distinguishable with the common colour-vision deficiencies. Every text pair
+   below passes WCAG AA on the surfaces it is used on. Every colour in the app derives from these. */
 :root {
-  --concrete: #efede8;
-  --paper: #fbfaf7;
-  --ink: #22211f;
-  --muted: #5e5b55;
-  --rule: #cfcbc2;
-  --hairline: #e2dfd7;
-  --hivis: #d9480f;
-  --hivis-text: #a33409;
-  --hivis-wash: #fbe3d6;
-  --ok: #2b5d8a;
-  --ok-text: #24507a;
-  --ok-wash: #e2ebf3;
-  --amber: #9a6b00;
-  --amber-wash: #f5ecd3;
-  --focus: #22211f;
-  --sheet-shadow: 0 1px 2px rgb(34 33 31 / 0.06), 0 8px 24px -12px rgb(34 33 31 / 0.18);
+  --concrete: #e9ecdc;
+  --paper: #fafbf3;
+  --card: #fdfdf8;
+  --ink: #1d2118;
+  --ink-deep: #10140c;
+  --muted: #525849;
+  --rule: #c9c1a4;
+  --hairline: #dedac4;
+  --side: #e0e2cf;
+  --side-2: #cfd2b9;
+  --line-quiet: #8c8f76;
+  --line-faint: #b4b49c;
+  --line-fainter: #cfcdb6;
+  --hivis: #cc3a1e;
+  --hivis-text: #a3291a;
+  --hivis-wash: #f7dbd1;
+  --ok: #1f6592;
+  --ok-text: #1a5781;
+  --ok-wash: #d8e9f2;
+  --amber: #6b4a12;
+  --amber-mark: #a97f22;
+  --amber-rule: #dcc890;
+  --amber-wash: #efe5c8;
+  --contour: #a5672f;
+  --focus: #1d2118;
+  /* Dark band (hero, evidence, town header) and the tones that sit on it. */
+  --band: #22321e;
+  --band-text: #f3f4ea;
+  --band-soft: #dde1cf;
+  --band-muted: #c6ccb5;
+  --band-quiet: #8a957b;
+  --band-ok: #93c7e9;
+  --band-pen: #f6a58f;
+  --band-amber: #e6c88c;
+  --band-contour: #c08447;
+  --sheet-shadow: 0 1px 2px color-mix(in srgb, var(--ink) 6%, transparent), 0 8px 24px -12px color-mix(in srgb, var(--ink) 18%, transparent);
 }
 
 @theme inline {
   --color-concrete: var(--concrete);
   --color-paper: var(--paper);
+  --color-card: var(--card);
   --color-ink: var(--ink);
+  --color-band: var(--band);
+  --color-band-text: var(--band-text);
+  --color-contour: var(--contour);
+  --color-side: var(--side);
+  --color-line-quiet: var(--line-quiet);
+  --color-line-faint: var(--line-faint);
   --color-muted: var(--muted);
   --color-rule: var(--rule);
   --color-hairline: var(--hairline);
@@ -54,11 +82,11 @@ body {
   outline-offset: 2px;
 }
 
-/* A document sheet: paper on concrete with a hi-vis top rule, like a printed form. */
+/* A document sheet: paper on concrete with a contour-brown top rule, like a printed form. */
 .doc-sheet {
   background: var(--paper);
   border: 1px solid var(--rule);
-  border-top: 4px solid var(--hivis);
+  border-top: 4px solid var(--contour);
   box-shadow: var(--sheet-shadow);
 }
 
@@ -91,13 +119,37 @@ details[open] > summary .chev { transform: rotate(90deg); }
   background-image: linear-gradient(var(--hivis), var(--hivis));
   background-repeat: no-repeat;
   background-position: 0 60%;
-  background-size: 100% 1.5px;
+  background-size: 100% 2px;
   animation: strike-sweep 420ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 
 @keyframes strike-sweep {
-  from { background-size: 0% 1.5px; }
-  to { background-size: 100% 1.5px; }
+  from { background-size: 0% 2px; }
+  to { background-size: 100% 2px; }
+}
+
+@keyframes kept-draw {
+  from { clip-path: inset(0 100% 0 0); }
+  to { clip-path: inset(0 0 0 0); }
+}
+
+/* Audit rows on wide screens: the strike draws left to right as its row scrolls into view, and
+   the kept mark draws in. Paint-only (background-size, clip-path), so layout never moves. The
+   resting state is the drawn line, which is what older browsers, small screens and print show. */
+@supports (animation-timeline: view()) {
+  @media (min-width: 900px) and (prefers-reduced-motion: no-preference) {
+    .audit-row { view-timeline: --audit-row block; }
+    .audit-row .strike {
+      animation: strike-sweep linear both;
+      animation-timeline: --audit-row;
+      animation-range: entry 10% entry 90%;
+    }
+    .audit-row .kept-mark {
+      animation: kept-draw linear both;
+      animation-timeline: --audit-row;
+      animation-range: entry 25% entry 100%;
+    }
+  }
 }
 
 .slide-in {
@@ -110,12 +162,15 @@ details[open] > summary .chev { transform: rotate(90deg); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .strike, .slide-in, .skeleton { animation: none; }
+  .strike, .slide-in, .skeleton, .kept-mark { animation: none; }
   .chev { transition: none; }
 }
 
 @media print {
-  body { background: #fff; }
-  .doc-sheet { box-shadow: none; border: 0; border-top: 4px solid var(--hivis); }
+  body { background: var(--card); }
+  .strike, .kept-mark { animation: none !important; }
+  /* Backgrounds are often off in print, so the strike falls back to a text decoration there. */
+  .strike { background: none; text-decoration: line-through 2px var(--hivis); }
+  .doc-sheet { box-shadow: none; border: 0; border-top: 4px solid var(--contour); }
   .no-print { display: none !important; }
 }

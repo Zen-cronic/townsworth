@@ -88,7 +88,7 @@ function Why({ item, gloss }: { item: ProgramItem; gloss?: string }) {
 function Proposal({ item, label, gloss }: { item: ProgramItem; label: string; gloss?: string }) {
   const meta = [item.runWith && `with ${shortOrg(item.runWith)}`, km(item.partner?.distanceKm), money(item.amount)].filter(Boolean);
   return (
-    <div className="slide-in rounded-md border border-ok/25 border-l-[3px] border-l-ok bg-white px-3.5 py-3">
+    <div className="slide-in rounded-md border border-ok/25 border-l-[3px] border-l-ok bg-card px-3.5 py-3">
       <p className="text-[11px] font-medium uppercase tracking-wider text-ok-text">
         {label} <span className="font-normal normal-case tracking-normal text-muted">· {BUCKETS[item.bucket].label}</span>
       </p>
@@ -148,7 +148,7 @@ function Kept({ row, sameAs }: { row: AuditRow; sameAs?: string }) {
   return (
     <>
       <p className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 pt-0.5 text-sm leading-snug">
-        <Check className="h-3.5 w-3.5 shrink-0 translate-y-0.5 text-ok" />
+        <Check className="kept-mark h-3.5 w-3.5 shrink-0 translate-y-0.5 text-ok" />
         <span className="font-medium text-ok-text">Kept</span>
         {bySignal && (
           <span aria-hidden className="-mx-1 text-muted">
@@ -183,7 +183,7 @@ function AuditLine({ row, index, sameAs, gloss }: { row: AuditRow; index: number
   const kept = isKept(row.verdict);
   const missing = row.verdict === "unverified" ? quotedName(row.reasons[0]) : undefined;
   return (
-    <li id={`line-${num(index + 1)}`} className={`${ROW} scroll-mt-24`}>
+    <li id={`line-${num(index + 1)}`} className={`${ROW} audit-row scroll-mt-24`}>
       <span className="pt-0.5 font-mono text-xs tabular-nums text-muted">{num(index + 1)}</span>
       <div>
         <DraftText text={row.text} struck={!kept} />
@@ -211,7 +211,7 @@ function AuditLine({ row, index, sameAs, gloss }: { row: AuditRow; index: number
 function NoSwapGroup({ rows }: { rows: { row: AuditRow; index: number }[] }) {
   const range = `${num(rows[0].index + 1)}–${num(rows[rows.length - 1].index + 1)}`;
   return (
-    <li id={`line-${num(rows[0].index + 1)}`} className="scroll-mt-24 border-b border-hairline py-4 last:border-b-0">
+    <li id={`line-${num(rows[0].index + 1)}`} className="audit-row scroll-mt-24 border-b border-hairline py-4 last:border-b-0">
       <details className="group">
         <summary className="grid cursor-pointer grid-cols-[2rem_minmax(0,1fr)] gap-x-3 md:grid-cols-[2.25rem_minmax(0,1fr)_minmax(0,1fr)] md:gap-x-6">
           <span className="whitespace-nowrap pt-0.5 font-mono text-xs tabular-nums text-muted">{range}</span>
@@ -271,7 +271,7 @@ function QlooCalls({ calls }: { calls: TownRun["profile"]["calls"] }) {
       </summary>
       <table className="ui-band-muted mt-2 w-full max-w-md text-left font-mono text-[11px]">
         <thead>
-          <tr className="border-b border-white/15">
+          <tr className="border-b border-band-text/15">
             <th className="py-1 pr-3 font-medium">Call</th>
             <th className="py-1 pr-3 text-right font-medium">Status</th>
             <th className="py-1 text-right font-medium">Results</th>

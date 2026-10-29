@@ -4,8 +4,8 @@ export function TownLoading({ live }: { live?: boolean }) {
     <main aria-busy="true">
       <section className="ui-band">
         <div className="lp-wrap ui-band-main">
-          <div className="h-3 w-48 rounded bg-white/10" />
-          <div className="mt-2 h-10 w-80 max-w-full rounded bg-white/10" />
+          <div className="h-3 w-48 rounded bg-band-text/10" />
+          <div className="mt-2 h-10 w-80 max-w-full rounded bg-band-text/10" />
           <p role="status" className="ui-band-note mt-3">
             {live ? "AI is writing this town’s draft now (about 20 seconds), then it is checked line by line." : "Reading this town’s Qloo taste data and checking the draft…"}
           </p>

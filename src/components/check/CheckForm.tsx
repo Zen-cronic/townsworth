@@ -188,7 +188,7 @@ export function CheckForm({ town }: { town: Town }) {
         <div aria-live="polite" className="empty:hidden">
           {checking && (
             <div role="status" className="mt-4 flex items-start gap-3 rounded-md border border-rule bg-concrete/60 px-4 py-3 text-sm">
-              <span aria-hidden className="mt-1 h-2 w-2 shrink-0 animate-pulse rounded-full bg-hivis" />
+              <span aria-hidden className="mt-1 h-2 w-2 shrink-0 animate-pulse rounded-full bg-contour" />
               <span>
                 <span className="font-medium">{PROGRESS[step]}</span>
                 <span className="mt-0.5 block text-xs text-muted">
