@@ -1483,18 +1483,18 @@ a:focus-visible .lp-chev {
     --dy: 0%;
   }
   .st-layer.is-2 {
-    --dy: 7%;
+    --dy: 18%;
   }
   .st-layer.is-0 {
-    --dy: -7%;
+    --dy: -18%;
   }
   .st-rise {
     transform-box: fill-box;
     transform-origin: 50% 100%;
   }
 
-  /* Ranges start as the track enters from below, so a still of the page (or a visit that never
-     scrolls here) shows the finished, separated state; fill runs forwards only. */
+  /* The layers start collapsed as the track rises into view and separate while the stage is
+     pinned under the header; past the track, or on a jump below it, they stay separated. */
   @supports (animation-timeline: view()) {
     .st-scroll {
       view-timeline: --stack block;
@@ -1505,7 +1505,7 @@ a:focus-visible .lp-chev {
     }
     .st-hold {
       display: block;
-      height: 28vh;
+      height: 55vh;
     }
     .st-skip {
       position: absolute;
@@ -1526,14 +1526,14 @@ a:focus-visible .lp-chev {
     }
     .st-layer.is-2,
     .st-layer.is-0 {
-      animation: st-sep linear forwards;
+      animation: st-sep linear both;
       animation-timeline: --stack;
-      animation-range: cover 0% cover 44%;
+      animation-range: entry 75% contain 70%;
     }
     .st-rise {
-      animation: st-draw linear forwards;
+      animation: st-draw linear both;
       animation-timeline: --stack;
-      animation-range: cover 0% cover 54%;
+      animation-range: entry 75% contain 100%;
     }
     .st-step.is-0 .st-copy,
     .st-step.is-1 .st-copy {
@@ -1541,15 +1541,15 @@ a:focus-visible .lp-chev {
       animation-timeline: --stack;
     }
     .st-step.is-0 .st-copy {
-      animation-range: cover 22% cover 40%;
+      animation-range: contain 0% contain 40%;
     }
     .st-step.is-1 .st-copy {
-      animation-range: cover 38% cover 48%;
+      animation-range: contain 35% contain 70%;
     }
     .st-step.is-2 .st-copy {
       animation: st-active-last linear forwards;
       animation-timeline: --stack;
-      animation-range: cover 46% cover 52%;
+      animation-range: contain 65% contain 100%;
     }
   }
 
