@@ -1,17 +1,17 @@
 import "server-only";
 import { cache } from "react";
-import { auditPlan, GENERIC_AGENCY_PLAN, isKept, type AuditInput } from "./audit";
+import { auditPlan, GENERIC_AGENCY_PLAN, isKept, type AuditInput, type AuditRow } from "./audit";
 import { baselineFor, BASELINE, isInstitution } from "./baselineData";
 import { liveLlmDraft } from "./liveDraft";
-import { buildProfile } from "./profile";
-import { buildProgram, runWith, type Bucket, type ProgramItem } from "./plan";
+import { buildProfile, type TownProfile } from "./profile";
+import { buildProgram, runWith, type Bucket, type Program, type ProgramItem } from "./plan";
 import { townBySlug } from "./towns";
 
 export type PlanSource = "llm" | "agency";
 
 export const PLAN_LABEL: Record<PlanSource, string> = {
-  llm: `Plain-LLM plan (OpenAI ${BASELINE.model}, no Qloo)`,
-  agency: "Typical agency plan (sample)",
+  llm: `AI-written plan (OpenAI ${BASELINE.model}, no Qloo data)`,
+  agency: "Consultant template (sample)",
 };
 
 const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9 ]+/g, " ").replace(/\s+/g, " ").trim();
@@ -24,6 +24,29 @@ export interface DraftInfo {
   origin: DraftOrigin;
   notice?: string;
   live?: { model: string; createdAt: string; llmMs: number; osmMs: number; osmFailures: number };
+}
+
+// Audits one draft against a town: verdicts, then kept institutions run their bucket's items, then
+// the Qloo partners the draft never named. Mutates `program.items` (runWith), as runTown always did.
+export function auditDraft(inputs: AuditInput[], profile: TownProfile, program: Program): { audit: AuditRow[]; qlooAdds: ProgramItem[] } {
+  const audit = auditPlan(inputs, profile, program.items);
+
+  // Where the draft named an institution the audit kept (the technical college, the county EDC),
+  // that institution runs the bucket's items and the Qloo place hosts them. Grants go to applicants.
+  const RUN_WITH: Bucket[] = ["training", "procurement", "events", "channels"];
+  for (const bucket of RUN_WITH) {
+    const lead = audit.find((a) => a.bucket === bucket && isKept(a.verdict) && a.named && isInstitution(a.named));
+    if (lead?.named) program.items.filter((it) => it.bucket === bucket).forEach((it) => runWith(it, lead.named!));
+  }
+
+  // Partners Qloo surfaces that the audited draft never named.
+  const draftText = norm(inputs.map((i) => `${i.named ?? ""} ${i.text}`).join(" "));
+  const usedIds = new Set(audit.flatMap((a) => [a.replacement?.id, a.alongside?.id]).filter(Boolean));
+  const qlooAdds: ProgramItem[] = program.items.filter(
+    (it) => !usedIds.has(it.id) && it.partner && !draftText.includes(norm(it.partner.name)),
+  );
+
+  return { audit, qlooAdds };
 }
 
 // One deterministic run for a town: Qloo profile -> program -> audit of the chosen draft plan.
@@ -59,24 +82,9 @@ export const runTown = cache(async (slug: string, fund?: number, source: PlanSou
     draft.origin = "live";
     draft.live = { model: d.model, createdAt: d.createdAt, llmMs: d.llmMs, osmMs: d.osmMs, osmFailures: d.osmFailures };
   } else if (liveResult && !liveResult.ok) {
-    draft.notice = `The live plain-LLM draft didn't finish (${liveResult.reason.slice(0, 100)}), so this audits the typical agency template instead.`;
+    draft.notice = `The live AI-written draft didn't finish (${liveResult.reason.slice(0, 100)}), so this checks the consultant template instead.`;
   }
-  const audit = auditPlan(inputs, profile, program.items);
-
-  // Where the draft named an institution the audit kept (the technical college, the county EDC),
-  // that institution runs the bucket's items and the Qloo place hosts them. Grants go to applicants.
-  const RUN_WITH: Bucket[] = ["training", "procurement", "events", "channels"];
-  for (const bucket of RUN_WITH) {
-    const lead = audit.find((a) => a.bucket === bucket && isKept(a.verdict) && a.named && isInstitution(a.named));
-    if (lead?.named) program.items.filter((it) => it.bucket === bucket).forEach((it) => runWith(it, lead.named!));
-  }
-
-  // Partners Qloo surfaces that the audited draft never named.
-  const draftText = norm(inputs.map((i) => `${i.named ?? ""} ${i.text}`).join(" "));
-  const usedIds = new Set(audit.flatMap((a) => [a.replacement?.id, a.alongside?.id]).filter(Boolean));
-  const qlooAdds: ProgramItem[] = program.items.filter(
-    (it) => !usedIds.has(it.id) && it.partner && !draftText.includes(norm(it.partner.name)),
-  );
+  const { audit, qlooAdds } = auditDraft(inputs, profile, program);
 
   return { town, profile, program, audit, source: used, qlooAdds, draft };
 });
