@@ -21,6 +21,8 @@
   --l-mono: var(--font-plex-mono), ui-monospace, "SFMono-Regular", Menlo, monospace;
   --l-sans: var(--font-public-sans), system-ui, sans-serif;
   --l-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  /* Sticky header height, measured: 53px below 768px, 55px from 768px where the header search
+     shows; the host-community row adds 37px. Set per variant below. */
   --l-hdr: 53px;
   --l-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .13 0 0 0 0 .13 0 0 0 0 .12 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 
@@ -29,6 +31,19 @@
   font-family: var(--l-sans);
   font-variant-numeric: tabular-nums;
   overflow-x: clip;
+}
+@media (min-width: 768px) {
+  .gn-landing {
+    --l-hdr: 55px;
+  }
+}
+.gn-landing:has(header[data-app-header][data-towns]) {
+  --l-hdr: 90px;
+}
+@media (min-width: 768px) {
+  .gn-landing:has(header[data-app-header][data-towns]) {
+    --l-hdr: 92px;
+  }
 }
 .gn-landing ::selection {
   background: var(--l-ink);
@@ -2613,6 +2628,16 @@ a:focus-visible .lp-chev {
 .ui-band .ui-chip.is-warn {
   color: #f0d98c;
 }
+/* Band text accents. Each has a print colour below, where the band prints on white. */
+.ui-band-muted {
+  color: #d6d2c9;
+}
+.ui-band-alert {
+  color: #f2a37f;
+}
+.ui-band-warn {
+  color: #f0d98c;
+}
 .ui-band :where(a, button, input, summary):focus-visible {
   outline-color: var(--l-paper);
 }
@@ -2748,6 +2773,38 @@ a:focus-visible .lp-chev {
   .ui-band {
     background: #fff;
     color: var(--l-ink);
+    padding: 8px 0 16px;
+    border-bottom: 1px solid var(--l-rule);
+  }
+  .ui-band::after {
+    display: none;
+  }
+  .ui-band .lp-kicker,
+  .ui-band-note,
+  .ui-band-muted,
+  .ui-fund label {
+    color: var(--l-muted);
+  }
+  .ui-band-note a {
+    color: var(--l-ink);
+    text-decoration-color: var(--l-rule);
+  }
+  .ui-band-alert {
+    color: var(--l-hivis-text);
+  }
+  .ui-band-warn {
+    color: var(--l-amber-text);
+  }
+  .ui-band .ui-chip {
+    background: transparent;
+    box-shadow: inset 0 0 0 1px var(--l-rule);
+    color: var(--l-ink);
+  }
+  .ui-band .ui-chip-dot {
+    background: var(--l-ok);
+  }
+  .ui-band .ui-chip.is-warn {
+    color: var(--l-amber-text);
   }
 }
 

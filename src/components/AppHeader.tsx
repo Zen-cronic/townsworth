@@ -4,10 +4,13 @@ import { HeaderTownSearch } from "@/components/TownSearchForm";
 import { PRODUCT_NAME } from "@/components/landing/brand";
 
 const navLink =
-  "rounded-md px-2.5 py-1.5 text-sm transition-colors duration-150 hover:bg-concrete hover:text-ink active:bg-hairline";
+  "rounded-md px-2.5 py-1.5 text-sm max-[400px]:px-2 transition-colors duration-150 hover:bg-concrete hover:text-ink active:bg-hairline";
 
 // One header on every page: the wordmark and primary links on top, and on product pages a thin
 // second row that switches host community. Opaque paper, so nothing shows through when scrolled.
+// `data-towns` sets the header height (--l-hdr) that sticky rails and anchor offsets clear.
+// Below 400px the links tighten; below 380px the wordmark text collapses to the mark, so the
+// links fit on one row inside the page padding.
 export function AppHeader({ active, page, towns = true }: { active?: string; page?: "proof" | "judges" | "check"; towns?: boolean }) {
   const searchIcon = (
     <svg aria-hidden viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-4 w-4">
@@ -17,13 +20,13 @@ export function AppHeader({ active, page, towns = true }: { active?: string; pag
   );
   const current = (p: string) => (page === p ? "page" : undefined);
   return (
-    <header className="no-print sticky top-0 z-30 border-b border-hairline bg-paper">
-      <div className="mx-auto flex max-w-[1240px] items-center gap-x-4 px-4 py-2.5 sm:px-8">
+    <header data-app-header="" data-towns={towns ? "" : undefined} className="no-print sticky top-0 z-30 border-b border-hairline bg-paper">
+      <div className="mx-auto flex max-w-[1240px] items-center gap-x-4 px-4 py-2.5 max-[400px]:gap-x-2 sm:px-8">
         <Link href="/" className="flex shrink-0 items-center gap-2 whitespace-nowrap rounded-md py-1 pr-1 font-semibold tracking-tight">
           <span aria-hidden className="grid h-5 w-5 place-items-center rounded-[4px] bg-hivis">
             <span className="h-[3px] w-2.5 rounded-full bg-paper" />
           </span>
-          {PRODUCT_NAME}
+          <span className="max-[380px]:sr-only">{PRODUCT_NAME}</span>
         </Link>
         <nav aria-label="Primary" className="ml-auto flex items-center gap-0.5 text-muted">
           <HeaderTownSearch />
