@@ -180,8 +180,8 @@ export function CheckForm({ town }: { town: Town }) {
           </div>
 
           <p id="plan-disclosure" className="mt-4 border-t border-hairline pt-3 text-xs leading-relaxed text-muted">
-            Your text is sent to OpenAI to split it into items; organisation names are looked up on OpenStreetMap. Only the town&apos;s coordinates go
-            to Qloo. Nothing is stored.
+            Your text is sent to OpenAI to split it into items. Organisation names are looked up on OpenStreetMap, and the town&apos;s coordinates and
+            the venue names your plan mentions are looked up in Qloo. Your plan text is never stored or sent to Qloo.
           </p>
         </form>
 

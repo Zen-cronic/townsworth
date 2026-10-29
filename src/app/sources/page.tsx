@@ -318,6 +318,13 @@ export default async function SourcesPage() {
                     </span>
                   </li>
                   <li>
+                    <span className="src-k">Age groups</span>
+                    <span>
+                      The age-group check asks Qloo about three groups only: young adults (under 25), older residents and families with young
+                      children. Each uses aggregate place affinities; no resident is scored and no other demographic is requested.
+                    </span>
+                  </li>
+                  <li>
                     <span className="src-k">OpenStreetMap</span>
                     <span>
                       Partner checks and town geocoding (Nominatim). Map data © OpenStreetMap contributors, available under the Open Database

@@ -121,7 +121,7 @@ function Kept({ row }: { row: AuditRow }) {
       <p className="mt-1 text-[15px] leading-snug">{row.matched?.name ?? "Matches a local favourite"}</p>
       <p className="mt-0.5 text-xs text-muted">
         {row.matched
-          ? [row.matched.source === "osm" ? "Verified on OpenStreetMap" : "A local place in Qloo's data, within 15 km", km(row.matched.distanceKm) && `${km(row.matched.distanceKm)} away`]
+          ? [row.matched.source === "osm" ? "Verified on OpenStreetMap" : row.matched.source === "qloo-search" ? "Qloo knows this place, within 25 km" : "A local place in Qloo's data, within 15 km", km(row.matched.distanceKm) && `${km(row.matched.distanceKm)} away`]
               .filter(Boolean)
               .join(" · ")
           : row.termHits[0]}

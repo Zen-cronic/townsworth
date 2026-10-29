@@ -11,6 +11,7 @@ import { ClampMore } from "@/components/ui/ClampMore";
 import { keptBreakdown } from "@/components/ui/keptBreakdown";
 import { kindOf, LOCAL_AFFINITY, shortOrg, shortSignal, shortTermHit } from "@/components/ui/labels";
 import { LiveDataNotice } from "@/components/LiveDataNotice";
+import { AudienceReach } from "@/components/qloo/AudienceReach";
 import { FundBar, LineStrip, PartnerDistance, PartnerDotStrip, SessionTimeline, fundSplit, lineComposition, partnerPoints, sessionsByBucket } from "@/components/charts";
 
 const FACILITY_LABEL: Record<string, string> = {
@@ -572,6 +573,8 @@ export function TownView({ run }: { run: TownRun }) {
             <p className="ui-note">No further local partners. With limited local data, add places residents name.</p>
           )}
         </section>
+
+        <AudienceReach reach={program.reach} className="ui-section" />
 
         {/* What the town favours, and the guardrails in one line */}
         <section aria-labelledby="favours-title" className="ui-section">

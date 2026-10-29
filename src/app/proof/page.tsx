@@ -8,6 +8,7 @@ import { StatusPill } from "@/components/dashboard/StatusPill";
 import type { PickRef } from "@/lib/plan";
 import { computeProof } from "@/lib/proof";
 import { PRODUCT_NAME } from "@/components/landing/brand";
+import { ReachProof } from "@/components/qloo/ReachProof";
 
 export const metadata: Metadata = {
   title: `Evidence · ${PRODUCT_NAME}`,
@@ -271,6 +272,9 @@ export default async function ProofPage() {
           </div>
         </section>
 
+        {/* Age groups */}
+        <ReachProof towns={towns} />
+
         {/* Method and limits */}
         <section className="mt-6 grid gap-6 md:grid-cols-2">
           <div className="ui-card px-5 py-5 text-sm sm:px-6">
@@ -311,6 +315,10 @@ export default async function ProofPage() {
               <li>{towns.length === 6 ? "Six" : towns.length} towns and one model: a directional check, not a statistical study.</li>
               <li>Institutions are good partners too. The claim is that the LLM finds only them, not that they are wrong.</li>
               <li>A partner&apos;s availability or willingness is not confirmed by either arm.</li>
+              <li>
+                The age-group check uses Qloo&apos;s aggregate place affinities for each group; no resident is scored, and it doesn&apos;t show who
+                would attend.
+              </li>
               <li>
                 {PRODUCT_NAME}&apos;s side is recomputed from live Qloo calls on every visit. When a call fails, the page says which town it
                 hit; that town&apos;s figures are then computed from partial data, so reload before reading them.
