@@ -11,7 +11,6 @@ import { PrintButton } from "@/components/dashboard/PrintButton";
 import { parseFund, secondaryCta } from "@/components/dashboard/ui";
 import { StatusPill } from "@/components/dashboard/StatusPill";
 import { CrmExportLinks, SessionCalendarLinks } from "@/components/integrations";
-import { isKept } from "@/lib/audit";
 import { commitmentsFor } from "@/lib/commitments";
 import { BUCKETS, costLine, type Bucket } from "@/lib/plan";
 import { money, runTown } from "@/lib/run";
@@ -44,6 +43,24 @@ function SectionTitle({ n, children, note }: { n: string; children: React.ReactN
   );
 }
 
+// Struck draft lines by reason, omitting a reason with no lines: "3 of 12 draft lines name nothing
+// local; 1 names a partner that couldn't be confirmed".
+function StruckSummary({ generic, unverified, total }: { generic: number; unverified: number; total: number }) {
+  const verb = (n: number) => (n === 1 ? "names" : "name");
+  const unconfirmed = (n: number) => `${verb(n)} a partner that couldn't be confirmed`;
+  if (!generic && !unverified) return <>No draft line is struck</>;
+  const lead = generic || unverified;
+  return (
+    <>
+      <strong className="font-semibold">
+        {lead} of {total}
+      </strong>{" "}
+      draft {total === 1 ? "line" : "lines"} {generic ? `${verb(generic)} nothing local` : unconfirmed(unverified)}
+      {generic > 0 && unverified > 0 && `; ${unverified} ${unconfirmed(unverified)}`}
+    </>
+  );
+}
+
 export default async function MemoPage({
   params,
   searchParams,
@@ -55,7 +72,8 @@ export default async function MemoPage({
   const run = await runTown(slug, parseFund(fund));
   if (!run) notFound();
   const { town, program, profile, audit } = run;
-  const flagged = audit.filter((a) => !isKept(a.verdict)).length;
+  const generic = audit.filter((a) => a.verdict === "generic").length;
+  const unverified = audit.filter((a) => a.verdict === "unverified").length;
   const keptInstitutions = audit.filter((a) => a.verdict === "institution").length;
   const commitments = commitmentsFor(town.slug);
   const partnerPlaces = program.items.filter((i) => i.partner).length;
@@ -129,7 +147,7 @@ export default async function MemoPage({
               ))}
             </dl>
             <p className="mt-5 leading-relaxed">
-              <strong className="font-semibold">{flagged} of {audit.length}</strong> draft lines name nothing local
+              <StruckSummary generic={generic} unverified={unverified} total={audit.length} />
               {keptInstitutions > 0 && `; ${keptInstitutions} ${keptInstitutions === 1 ? "institution stays" : "institutions stay"} for the committee to confirm`}.{" "}
               <strong className="font-semibold">{program.items.length} program items</strong> ({partnerPlaces} with a local partner):{" "}
               <strong className="font-mono font-medium tabular-nums">{money(program.totalAllocated)}</strong> itemized and{" "}
@@ -259,10 +277,13 @@ export default async function MemoPage({
               <p>
                 <strong className="font-semibold text-ink">Annual fund {money(program.annualFund)}.</strong> {town.fundNote}
               </p>
-              <details className="ui-more mt-1">
+              <details className="ui-more mt-1 print:hidden">
                 <summary>How each item is costed</summary>
                 <div>{program.costNote}</div>
               </details>
+              <p className="mt-1 hidden print:block">
+                <strong className="font-semibold text-ink">How each item is costed.</strong> {program.costNote}
+              </p>
             </div>
           </section>
 
