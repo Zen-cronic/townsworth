@@ -21,16 +21,19 @@ type Mine = { state: "unknown" } | { state: "none" } | { state: "stale" } | { st
 
 const ordinal = (n: number) => `${n}${n % 10 === 1 && n % 100 !== 11 ? "st" : n % 10 === 2 && n % 100 !== 12 ? "nd" : n % 10 === 3 && n % 100 !== 13 ? "rd" : "th"}`;
 
-// Darkest = ranked first. Ink only: orange is reserved for the red pen.
-const shade = (r: number, n: number) => (n <= 1 ? 1 : 1 - (r / (n - 1)) * 0.82);
+// One blue ramp, darkest = ranked first: a mix of the survey blue into paper. Red stays the pen.
+const shade = (r: number, n: number) => Math.round(n <= 1 ? 100 : 100 - (r / (n - 1)) * 70);
+const fill = (r: number, n: number) => `color-mix(in srgb, var(--ok) ${shade(r, n)}%, var(--paper))`;
 
 function RankBar({ counts, total, label }: { counts: number[]; total: number; label: string }) {
   const n = counts.length;
   return (
-    <div role="img" aria-label={label} className="flex h-2.5 w-full overflow-hidden rounded-[3px] bg-hairline">
-      {counts.map((c, r) =>
-        c > 0 ? <span key={r} className="h-full bg-ink" style={{ width: `${(c / total) * 100}%`, opacity: shade(r, n) }} /> : null,
-      )}
+    <div className="ch-anim w-full">
+      <div role="img" aria-label={label} className="ch-reveal flex h-3.5 w-full gap-[2px] overflow-hidden rounded-[4px] bg-paper shadow-[inset_0_0_0_1px_var(--hairline)]">
+        {counts.map((c, r) =>
+          c > 0 ? <span key={r} className="ch-ramp h-full" style={{ width: `${(c / total) * 100}%`, background: fill(r, n) }} /> : null,
+        )}
+      </div>
     </div>
   );
 }
@@ -129,8 +132,8 @@ export function BallotResults({ slug, townName, items }: { slug: string; townNam
           const share = Math.round(row.firstShare * 100);
           const label = row.rankCounts.map((c, r) => `${ordinal(r + 1)}: ${c}`).join(", ");
           return (
-            <li key={row.item.id} className="grid grid-cols-[1.75rem_1fr] gap-x-3 py-4">
-              <span className="pt-0.5 text-right font-mono text-lg font-medium tabular-nums leading-6">{i + 1}</span>
+            <li key={row.item.id} className={`row-edge ${i === 0 ? "is-kept bg-ok-wash/50" : "is-quiet"} grid grid-cols-[1.75rem_1fr] gap-x-3 px-3 py-4`}>
+              <span className={`pt-0.5 text-right font-mono text-lg font-medium tabular-nums leading-6 ${i === 0 ? "text-ok-text" : ""}`}>{i + 1}</span>
               <div className="min-w-0">
                 <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
                   <h3 className="min-w-0 text-[15px] font-semibold leading-snug sm:text-base">{row.item.title}</h3>
@@ -159,7 +162,7 @@ export function BallotResults({ slug, townName, items }: { slug: string; townNam
         1st
         <span className="flex h-2 w-24 overflow-hidden rounded-[2px]">
           {Array.from({ length: n }, (_, r) => (
-            <span key={r} className="h-full flex-1 bg-ink" style={{ opacity: shade(r, n) }} />
+            <span key={r} className="ch-ramp h-full flex-1" style={{ background: fill(r, n) }} />
           ))}
         </span>
         {ordinal(n)}
