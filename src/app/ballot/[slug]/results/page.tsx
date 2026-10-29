@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { BallotResults } from "@/components/ballot/BallotResults";
+import { LiveDataNotice } from "@/components/LiveDataNotice";
 import { BallotShell, ThinShortlist } from "@/components/ballot/BallotShell";
 import { selectShortlist } from "@/lib/ballot";
 import { runTown } from "@/lib/run";
@@ -17,12 +18,15 @@ export default async function BallotResultsPage({ params }: { params: Promise<{ 
   if (!run) notFound();
   const { town, program } = run;
   const items = selectShortlist(program.items);
+  // A failed Qloo call shortens the list; say so instead of implying the town has few places.
+  const failed = run.profile.failedCalls.length ? [town.name] : [];
   const funder = { line: fundedByLine(town), placeholder: town.sponsorSource === "placeholder", fixHref: town.custom ? companyFormHref(town) : undefined };
 
   return (
     <BallotShell slug={town.slug} funder={funder} kicker={`Committee view · ${town.name}, ${town.region}`} title="How the shortlist ranks (sample tally)">
+      <LiveDataNotice towns={failed} subject="this tally" className="mt-3" />
       {items.length < 2 ? (
-        <ThinShortlist slug={town.slug} townName={town.name} count={items.length} />
+        failed.length ? null : <ThinShortlist slug={town.slug} townName={town.name} count={items.length} />
       ) : (
         <BallotResults slug={town.slug} townName={town.name} items={items} />
       )}
