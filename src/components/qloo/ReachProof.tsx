@@ -33,9 +33,10 @@ export function ReachProof({ towns }: { towns: { slug: string; name: string; rea
   const added = towns.reduce((s, t) => s + t.reach.added.length, 0);
   const townsAdded = towns.filter((t) => t.reach.added.length).length;
   const unchecked = towns.reduce((s, t) => s + t.reach.unchecked, 0);
-  const count = (status: LensStatus) => towns.reduce((s, t) => s + t.reach.lenses.filter((l) => l.status === status).length, 0);
-  const noHost = count("no-candidate");
-  const noFit = count("no-fit");
+  const count = (match: (l: ReachSummary["lenses"][number]) => boolean) => towns.reduce((s, t) => s + t.reach.lenses.filter(match).length, 0);
+  const noRanked = count((l) => l.status === "no-candidate" && l.ranked === 0);
+  const noHost = count((l) => l.status === "no-candidate" && l.ranked !== 0);
+  const noFit = count((l) => l.status === "no-fit");
   if (!checks) return null;
   return (
     <section id="age-groups" aria-labelledby="age-groups-title" className="mt-6 scroll-mt-24 ui-card">
@@ -51,6 +52,7 @@ export function ReachProof({ towns }: { towns: { slug: string; name: string; rea
           <p className="mt-1 text-sm leading-relaxed text-muted">
             {added === 0 ? "None in this run" : `${added} ${added === 1 ? "venue" : "venues"} in ${townsAdded} ${townsAdded === 1 ? "town" : "towns"}`}.{" "}
             {included} of {checks} age-group checks were already met by the program as drafted
+            {noRanked > 0 ? `; ${noRanked} had no places ranked near the site` : ""}
             {noHost > 0 ? `; ${noHost} had no eligible host` : ""}
             {noFit > 0 ? `; ${noFit} had a host the budget couldn't cover` : ""}
             {unchecked > 0 ? `; ${unchecked} couldn't be checked on this load` : ""}. Qloo ranks the places within 15 km for young adults (under

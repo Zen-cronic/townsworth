@@ -86,7 +86,7 @@ export const runTown = cache(async (slug: string, fund?: number, source: PlanSou
     draft.notice = `The live AI-written draft didn't finish (${liveResult.reason.slice(0, 100)}), so this checks the consultant template instead.`;
   }
   const { audit, qlooAdds } = auditDraft(inputs, profile, program);
-  // After the audit, so the age-group sessions never become a swap or a run-with target.
+  // The age-group check reads the costed program and adds its sessions to `reachItems` only.
   applyReach(profile, program);
 
   return { town, profile, program, audit, source: used, qlooAdds, draft };

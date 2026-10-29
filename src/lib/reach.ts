@@ -92,7 +92,7 @@ const LENS_HOST =
 // name with no host word). Whole words only, so "Farmington Community Library", "Brewster Ladies'
 // Library", "Sandbar Beach Park" and "Market Square Park" stay hosts. A museum with a gift shop stays.
 const NOT_A_LENS_HOST =
-  /\b(bars?|pubs?|brewery|breweries|brewing|brewpub|brewhouse|beer|winery|wineries|night ?club|lounge|gym|fitness|yoga|casino|hotel|motel|golf|country club|orchard|farms?|petting zoo)\b/i;
+  /\b(bars?|pubs?|(micro)?brew(ery|eries|ing|pub|pubs|house|houses|haus|ers?)|beers?|winery|wineries|night ?clubs?|lounges?|gym(s|nasium)?|fitness|yoga|casinos?|hotels?|motels?|golf|country clubs?|orchards?|farms?|petting zoos?)\b/i;
 const RETAIL = /\b(stores?|shops?|shoppes|market|marketplace|mall|outlet|boutique|supermarket|marina)\b/i;
 const HOST_WORD = /\b(park|library|museum|hall|center|centre|school|college|university|beach|zoo|preserve|auditorium)\b/i;
 
@@ -108,13 +108,21 @@ export function isLensHost(e: QlooEntity): boolean {
 
 // Bars, pubs, breweries and wineries: the program already runs them as adult (21+) evening venues.
 const ADULT_ONLY = /^(bar|pub|sports bar|brewery|brewpub|beer garden|beer hall|night club|winery|wine bar|cocktail bar|lounge|tavern)$/i;
-const ADULT_NAME = /\b(bars?|pubs?|brew(ery|eries|ing|pub|house|s)?|beer|tavern|saloon|taproom|winery)\b/i;
+const ADULT_NAME = /\b(bars?|pubs?|(micro)?brew(ery|eries|ing|pub|pubs|house|houses|haus|ers?|s)?|beers?|taverns?|saloons?|taprooms?|winery|wineries)\b/i;
 
 export function isAdultOnly(e: QlooEntity): boolean {
   return categories(e).some((c) => ADULT_ONLY.test(c)) || ADULT_NAME.test(cleanName(e.name));
 }
 
 const SESSION = UNIT.watch;
+
+const joinLabels = (groups: Lens[]) => {
+  const labels = groups.map((g) => g.label);
+  return labels.length < 3 ? labels.join(" and ") : `${labels.slice(0, -1).join(", ")} and ${labels.at(-1)}`;
+};
+
+const sessionDetail = (groups: Lens[]) =>
+  `Added so the program includes a place ${joinLabels(groups)} favour (Qloo, aggregate). One open session where they already go: the jobs, grants and supplier days explained, questions taken. Earmarked from the reserve for the committee to confirm.`;
 
 function lensPlace(id: string, rank: number, profile: TownProfile): LensPlace {
   const e = profile.places.find((p) => p.id === id);
@@ -127,7 +135,8 @@ function lensPlace(id: string, rank: number, profile: TownProfile): LensPlace {
 // `program.items`, `totalAllocated` and `unassigned` are left exactly as built, so every existing
 // count and the fund reconciliation (items + unassigned = 2x fund) are unchanged, and
 // `reachEarmarked` never exceeds `unassigned`. Without lens data the program is left untouched.
-// A later group whose top 15 holds a venue added for an earlier group shares that session.
+// When a group's best-ranked eligible host is a venue already added for an earlier group, the two
+// share that one session, which is retitled for both.
 export function applyReach(profile: TownProfile, program: Program): Program {
   if (!profile.lenses) return program;
   const outcomes: LensOutcome[] = [];
@@ -138,6 +147,7 @@ export function applyReach(profile: TownProfile, program: Program): Program {
   const partnerIds = new Set(program.picks.affinity);
   const addedBy = new Map<string, LensOutcome>();
   const reachItems: ProgramItem[] = [];
+  const groupsOf = new Map<string, Lens[]>();
   const earmarked = () => reachItems.reduce((s, it) => s + it.amount, 0);
   const localById = new Map(profile.localPlaces.map((e) => [e.id, e]));
 
@@ -164,10 +174,24 @@ export function applyReach(profile: TownProfile, program: Program): Program {
       outcomes.push({ ...base, status: "covered", partners: covered, note: `${covered[0].name} is #${covered[0].lensRank} for ${lens.label}.` });
       continue;
     }
-    const sharedAt = data.ids.findIndex((id) => addedBy.has(id));
-    if (sharedAt >= 0) {
-      const prior = addedBy.get(data.ids[sharedAt])!;
-      const place = { ...prior.place!, lensRank: sharedAt + 1 };
+    // The group's best eligible host, in Qloo's order for the group: a venue an earlier group's
+    // session already uses, or one in Qloo's local list with a local-affinity rank, a hall, library,
+    // park, museum, zoo, school or college, and not already in the program.
+    const best = data.ids
+      .map((id, i) => ({ id, rank: i + 1, e: localById.get(id), prior: addedBy.get(id) }))
+      .find((c) => c.prior || (c.e && profile.placeMeta.get(c.id)?.affinityRank != null && !partnerIds.has(c.id) && isLensHost(c.e)));
+    if (best?.prior) {
+      const prior = best.prior;
+      const place = { ...prior.place!, lensRank: best.rank };
+      const item = reachItems.find((it) => it.id === prior.itemId)!;
+      const groups = [...groupsOf.get(item.id)!, lens];
+      groupsOf.set(item.id, groups);
+      item.title = `Open session for ${joinLabels(groups)} at ${place.name}`;
+      item.detail = sessionDetail(groups);
+      item.provenance.splice(groups.length - 1, 0, {
+        signal: `Favoured by ${lens.label} · #${best.rank} of ${data.ids.length} (Qloo, aggregate)`,
+        detail: `None of the program's partners is in Qloo's top ${data.ids.length} places within 15 km for ${lens.label} either, and this venue is the best-ranked eligible host there, so the one session covers both groups.`,
+      });
       outcomes.push({
         ...base,
         status: "added",
@@ -178,11 +202,6 @@ export function applyReach(profile: TownProfile, program: Program): Program {
       });
       continue;
     }
-    // The group's best eligible host: in Qloo's local list with a local-affinity rank, a hall,
-    // library, park, museum, zoo, school or college, and not already in the program.
-    const best = data.ids
-      .map((id, i) => ({ id, rank: i + 1, e: localById.get(id) }))
-      .find((c) => c.e && profile.placeMeta.get(c.id)?.affinityRank != null && !partnerIds.has(c.id) && isLensHost(c.e));
     if (!best?.e) {
       outcomes.push({
         ...base,
@@ -215,7 +234,7 @@ export function applyReach(profile: TownProfile, program: Program): Program {
       id: `${REACH_PREFIX}${lens.key}`,
       bucket: "events",
       title: lens.title(place.name),
-      detail: `Added so the program includes a place ${lens.label} favour (Qloo, aggregate). One open session where they already go: the jobs, grants and supplier days explained, questions taken. Earmarked from the reserve for the committee to confirm.`,
+      detail: sessionDetail([lens]),
       partner: partnerOf(e, profile.placeMeta.get(e.id)),
       role: "host",
       sessions: 1,
@@ -232,6 +251,7 @@ export function applyReach(profile: TownProfile, program: Program): Program {
       ],
     });
     reachItems.push(item);
+    groupsOf.set(item.id, [lens]);
     const outcome: LensOutcome = { ...base, status: "added", place, itemId: item.id, amount: item.amount, note: `Added one session at ${place.name}, #${best.rank} for ${lens.label}.` };
     outcomes.push(outcome);
     addedBy.set(best.id, outcome);

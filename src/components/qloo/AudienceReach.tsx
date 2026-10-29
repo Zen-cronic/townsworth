@@ -1,5 +1,6 @@
 import { StatusPill } from "@/components/dashboard/StatusPill";
 import { Card } from "@/components/ui";
+import { NON_GRANT_CEILING } from "@/lib/plan";
 import { LENSES, type LensOutcome, type LensStatus } from "@/lib/reach";
 
 // Age-group check for one town: does the program include places each group already uses?
@@ -94,7 +95,9 @@ export function AudienceReach({ reach, className = "" }: { reach?: LensOutcome[]
         <div>
           Qloo ranks the places within 15 km of the site for each group from aggregate data; no resident is scored. A group is included when
           one of the program&apos;s venues or grant applicants is among its top 15. If none is, one session is added at the group&apos;s
-          best-ranked hall, library, park, museum, zoo, school or college, earmarked from the reserve, or skipped if the reserve can&apos;t cover it. The program totals above don&apos;t include it.
+          best-ranked hall, library, park, museum, zoo, school or college, earmarked from the reserve. When that venue already has a session added
+          for another group, the two groups share it. A session is skipped if the reserve can&apos;t cover it or it would take spending outside
+          grants past {Math.round(NON_GRANT_CEILING * 100)}% of the fund. The program totals above don&apos;t include it.
           A bar or brewery partner doesn&apos;t count for families or young adults.
         </div>
       </details>

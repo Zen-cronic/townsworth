@@ -1,7 +1,7 @@
 // Age-group check. Every place and lens list here is hand-written; none of it is Qloo API output.
 import assert from "node:assert/strict";
 import { afterEach, test } from "node:test";
-import { buildProgram, isReachItem, NON_GRANT_CEILING, type Program } from "../src/lib/plan";
+import { buildProgram, NON_GRANT_CEILING, REACH_PREFIX, type Program } from "../src/lib/plan";
 import { fetchLenses } from "../src/lib/profile";
 import { applyReach, isAdultOnly, isLensHost, reachSummary, type LensData } from "../src/lib/reach";
 import { entity, NORMAL_PLACES, profileOf } from "./fixtures";
@@ -39,7 +39,7 @@ function assertReconciles(p: Program) {
   const earmarked = (p.reachItems ?? []).reduce((s, it) => s + it.amount, 0);
   assert.equal(p.reachEarmarked ?? 0, earmarked);
   assert.ok(earmarked <= p.unassigned);
-  assert.ok(!p.items.some(isReachItem));
+  assert.ok(!p.items.some((it) => it.id.startsWith(REACH_PREFIX)));
   for (const it of [...p.items, ...(p.reachItems ?? [])]) assert.equal(it.amount, it.sessions * it.unitCost, it.id);
   const grants = p.items.filter((it) => it.bucket === "grants" && it.partner);
   for (const g of grants) assert.ok(g.unitCost <= 100_000, g.id);
@@ -101,6 +101,28 @@ test("two groups that favour the same venue share one session: nothing is earmar
   assert.equal(families.amount, undefined);
   assert.equal(program.reachEarmarked, program.reachItems![0].amount);
   assert.deepEqual(reachSummary(program.reach).added, ["Sandy Point Beach"]);
+  // The one session is retitled and described for both groups, with a ranking line for each.
+  const item = program.reachItems![0];
+  assert.equal(item.title, "Open session for young adults (under 25) and families with young children at Sandy Point Beach");
+  assert.match(item.detail, /young adults \(under 25\) and families with young children favour/);
+  assert.equal(item.provenance.filter((p) => p.signal.startsWith("Favoured by")).length, 2);
+  assertReconciles(program);
+});
+
+test("a shared venue is used only when it is the group's best eligible host", () => {
+  const { profile, program } = withLenses([
+    { key: "young-adults", ok: true, ids: ["p7"] },
+    { key: "older", ok: true, ids: ["p1"] },
+    { key: "families", ok: true, ids: ["p8", "p7"] },
+  ]);
+  applyReach(profile, program);
+  const families = program.reach!.find((o) => o.key === "families")!;
+  assert.equal(families.sharedWith, undefined);
+  assert.equal(families.place?.name, "Westview High School");
+  assert.deepEqual(program.reachItems!.map((it) => it.title), [
+    "Open evening for young adults (under 25) at Sandy Point Beach",
+    "Family open afternoon at Westview High School",
+  ]);
   assertReconciles(program);
 });
 
@@ -202,6 +224,12 @@ test("host rules match whole words: a name fragment never disqualifies a real ha
   assert.ok(!isLensHost(entity("g", "Harbor Market", { cats: ["Park"] })));
   assert.ok(!isLensHost(entity("h", "Union Brewing Hall", { cats: ["Banquet hall"] })));
   assert.ok(isAdultOnly(entity("i", "Union Brewing Hall", { cats: ["Banquet hall"] })));
+  // Plural and compound forms still disqualify.
+  assert.ok(!isLensHost(entity("j", "Hillside Orchards Banquet Hall", { cats: ["Banquet hall"] })));
+  assert.ok(!isLensHost(entity("k", "Lakefront Microbrewery Hall", { cats: ["Banquet hall"] })));
+  assert.ok(isAdultOnly(entity("l", "Lakefront Microbrewery Hall", { cats: ["Banquet hall"] })));
+  assert.ok(!isLensHost(entity("m", "Riverside Gymnasium Park", { cats: ["Park"] })));
+  assert.ok(!isLensHost(entity("n", "Twin Hotels Conference Center", { cats: ["Conference center"] })));
 });
 
 const realFetch = globalThis.fetch;
@@ -253,4 +281,25 @@ test("lens fetch: the life-stage id is read at runtime; an audience failure is a
   const fam = renamed.lenses.find((l) => l.key === "families")!;
   assert.deepEqual([fam.ok, fam.missing], [false, "audience"]);
   assert.equal(renamed.lensCalls.filter((c) => !c.ok).length, 0);
+
+  // A malformed audience list costs only families; the two age groups still answer.
+  globalThis.fetch = (async (url: string) =>
+    url.includes("/v2/audiences")
+      ? new Response(JSON.stringify({ results: { audiences: {} } }))
+      : new Response(JSON.stringify(places))) as typeof fetch;
+  const malformed = await fetchLenses({ lat: 42.7, lon: -87.9 });
+  assert.deepEqual(malformed.lenses.map((l) => [l.key, l.ok]), [
+    ["young-adults", true],
+    ["older", true],
+    ["families", false],
+  ]);
+
+  // A 200 whose body isn't JSON is a failed call (status 0), never "no places ranked".
+  globalThis.fetch = (async (url: string) =>
+    url.includes("/v2/audiences")
+      ? new Response(JSON.stringify({ results: { audiences: [] } }))
+      : new Response("<html>gateway</html>", { status: 200 })) as typeof fetch;
+  const garbled = await fetchLenses({ lat: 42.7, lon: -87.9 });
+  assert.equal(garbled.lenses.find((l) => l.key === "young-adults")!.ok, false);
+  assert.equal(garbled.lensCalls.find((c) => c.label.includes("young adults"))!.status, 0);
 });

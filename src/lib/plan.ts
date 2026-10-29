@@ -131,7 +131,7 @@ export const NON_GRANT_CEILING = 0.7;
 const HALL = /^(banquet hall|conference center|convention center|community center|auditorium|library|public library|college|community college|university|public university|performing arts theater|meeting planning service|cultural center|civic center|event venue)$/i;
 const ADULT_VENUE = /^(brewery|brewpub|beer garden|beer hall)$/i;
 const NOT_A_TRAINING_HOST = /orchard|farm|petting zoo|\bzoo\b|diner|fast food|amusement|gift shop|ice cream|golf|country club/i;
-export const DINING_NAME = /restaurant|cocktail|\bbrew(ery|eries|ing|pub|house|s)?\b|\bpub\b|grill|\bbar\b|caf[eé]|kitchen|diner|tavern|saloon|pizza|bbq|barbecue|steak|taco|eatery|bistro/i;
+export const DINING_NAME = /restaurant|cocktail|\b(micro)?brew(ery|eries|ing|pub|pubs|house|houses|haus|ers?|s)?\b|\bpub\b|grill|\bbar\b|caf[eé]|kitchen|diner|tavern|saloon|pizza|bbq|barbecue|steak|taco|eatery|bistro/i;
 export const DINING = /restaurant|diner|cafe|coffee|pizza|grill|eatery|steak house|takeout|buffet|pub\b|\bbar\b|mexican|american|italian/i;
 
 const INSTITUTION = /^(museum|art museum|history museum|park|city park|zoo|botanical garden|historical landmark|university|public university|college|non profit organization|library|hiking area|nature preserve|community center|festival|performing arts theater|aquarium|arboretum)$/i;
@@ -141,7 +141,6 @@ export const OPEN_GRANT_ID = "grants-open";
 // Items added by the age-group check carry this id prefix. They are paid from the reserve and kept
 // out of the audit's like-for-like swaps and the /proof partner figures.
 export const REACH_PREFIX = "reach-";
-export const isReachItem = (item: Pick<ProgramItem, "id">) => item.id.startsWith(REACH_PREFIX);
 
 export const km = (m?: number) => (m == null ? undefined : Math.round(m / 100) / 10);
 
