@@ -375,7 +375,7 @@ export default async function SourcesPage() {
                   </li>
                   <li>
                     <span className="src-k">Media</span>
-                    <span>Background loop: our own line drawing, rendered in Remotion; positions are schematic.</span>
+                    <span>Background loop: our own line drawing; positions are schematic.</span>
                   </li>
                 </ul>
               </section>
