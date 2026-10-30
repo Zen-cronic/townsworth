@@ -62,6 +62,7 @@ export function AudienceReach({ reach, className = "" }: { reach?: LensOutcome[]
   const included = reach.filter((o) => o.status === "covered").length;
   const unchecked = reach.filter((o) => o.status === "unchecked").length;
   const checked = reach.length - unchecked;
+  const sameNote = unchecked === reach.length && reach.length > 1 && reach.every((o) => o.note === reach[0].note);
   return (
     <Card as="section" aria-labelledby="reach-title" className={`overflow-hidden ${className}`}>
       <div className="border-b border-rule px-5 py-4 sm:px-6">
@@ -78,7 +79,16 @@ export function AudienceReach({ reach, className = "" }: { reach?: LensOutcome[]
         </p>
       </div>
       <ul className="divide-y divide-hairline">
-        {reach.map((o) => (
+        {sameNote ? (
+          // Qloo didn't answer for any group: one row says so once instead of three times.
+          <li className="grid gap-1.5 px-5 py-3.5 sm:grid-cols-[13rem_7.5rem_1fr] sm:items-baseline sm:gap-4 sm:px-6">
+            <span className="text-sm font-medium">{sentence(reach.map((o) => o.label).join(", "))}</span>
+            <span>
+              <StatusPill tone={PILL.unchecked.tone}>{PILL.unchecked.text}</StatusPill>
+            </span>
+            <span className="text-sm leading-snug text-muted">{reach[0].note}</span>
+          </li>
+        ) : reach.map((o) => (
           <li key={o.key} className="grid gap-1.5 px-5 py-3.5 sm:grid-cols-[13rem_7.5rem_1fr] sm:items-baseline sm:gap-4 sm:px-6">
             <span className="text-sm font-medium">{sentence(o.label)}</span>
             <span>

@@ -7,7 +7,8 @@ import { Check, Chevron, Notice } from "@/components/dashboard/Icons";
 import { secondaryCta } from "@/components/dashboard/ui";
 import { Card, Chip, PageBand, SectionHeader, SplitCta, StatTile } from "@/components/ui";
 import { cadenceLower, formatPhone, km, quotedName } from "@/components/dashboard/format";
-import { ClampMore } from "@/components/ui/ClampMore";
+import { AuditTools } from "@/components/town/AuditTools";
+import { DraftLine } from "@/components/town/DraftLine";
 import { keptBreakdown } from "@/components/ui/keptBreakdown";
 import { kindOf, LOCAL_AFFINITY, shortOrg, shortSignal, shortTermHit } from "@/components/ui/labels";
 import { LiveDataNotice } from "@/components/LiveDataNotice";
@@ -168,28 +169,14 @@ function Kept({ row, sameAs }: { row: AuditRow; sameAs?: string }) {
 
 const ROW = "grid grid-cols-[2rem_minmax(0,1fr)] gap-x-3 gap-y-2.5 border-b border-hairline py-4 last:border-b-0 md:grid-cols-[2.25rem_minmax(0,1fr)_minmax(0,1fr)] md:gap-x-6";
 
-// The draft text, clamped to two lines; "more" shows only when the clamp cuts text, and opens it in place.
-function DraftText({ text, struck }: { text: string; struck: boolean }) {
-  return (
-    <details className="group">
-      <summary className="cursor-pointer">
-        <span className={`line-clamp-2 text-[15px] leading-relaxed group-open:line-clamp-none ${struck ? "text-muted" : "text-ink"}`}>
-          <span className={struck ? "strike" : ""}>{text}</span>
-        </span>
-        <ClampMore className="text-xs text-muted underline decoration-rule underline-offset-2 group-open:hidden" />
-      </summary>
-    </details>
-  );
-}
-
 function AuditLine({ row, index, sameAs, gloss }: { row: AuditRow; index: number; sameAs?: string; gloss?: string }) {
   const kept = isKept(row.verdict);
   const missing = row.verdict === "unverified" ? quotedName(row.reasons[0]) : undefined;
   return (
-    <li id={`line-${num(index + 1)}`} className={`${ROW} audit-row row-edge ${kept ? "is-kept" : "is-struck"}${row.verdict === "unverified" ? " is-unsure" : ""} scroll-mt-24`}>
+    <li id={`line-${num(index + 1)}`} tabIndex={-1} className={`${ROW} audit-row row-edge ${kept ? "is-kept" : "is-struck"}${row.verdict === "unverified" ? " is-unsure" : ""} scroll-mt-24`}>
       <span className="pt-0.5 font-mono text-xs tabular-nums text-muted">{num(index + 1)}</span>
       <div>
-        <DraftText text={row.text} struck={!kept} />
+        <DraftLine text={row.text} struck={!kept} />
         {row.verdict === "unverified" && (
           <p className="mt-1.5 flex flex-wrap items-center gap-2">
             <Chip tone="unsure">Can&apos;t confirm</Chip>
@@ -214,7 +201,7 @@ function AuditLine({ row, index, sameAs, gloss }: { row: AuditRow; index: number
 function NoSwapGroup({ rows }: { rows: { row: AuditRow; index: number }[] }) {
   const range = `${num(rows[0].index + 1)}–${num(rows[rows.length - 1].index + 1)}`;
   return (
-    <li id={`line-${num(rows[0].index + 1)}`} className="audit-row row-edge is-struck scroll-mt-24 border-b border-hairline py-4 last:border-b-0">
+    <li id={`line-${num(rows[0].index + 1)}`} tabIndex={-1} className="audit-row row-edge is-struck scroll-mt-24 border-b border-hairline py-4 last:border-b-0">
       <details className="group">
         <summary className="grid cursor-pointer grid-cols-[2rem_minmax(0,1fr)] gap-x-3 md:grid-cols-[2.25rem_minmax(0,1fr)_minmax(0,1fr)] md:gap-x-6">
           <span className="whitespace-nowrap pt-0.5 font-mono text-xs tabular-nums text-muted">{range}</span>
@@ -307,6 +294,8 @@ export function TownView({ run }: { run: TownRun }) {
   // Each line's fragment id; lines folded into a "struck, no swap" group share the group's anchor.
   const anchors = audit.map((_, i) => `line-${num(i + 1)}`);
   for (const seg of segment(audit)) if (seg.kind === "group") for (const r of seg.rows) anchors[r.index] = `line-${num(seg.rows[0].index + 1)}`;
+  // The struck lines' anchors in page order, once each (a no-swap group is one stop).
+  const struckIds = [...new Set(audit.map((a, i) => (isKept(a.verdict) ? "" : anchors[i])).filter(Boolean))];
   const fund = fundSplit(program.items, program.unassigned);
   const partners = partnerPoints(program.items);
   const sessions = sessionsByBucket(program.items);
@@ -341,7 +330,7 @@ export function TownView({ run }: { run: TownRun }) {
     <form className="no-print ui-fund" action={`/town/${town.slug}`}>
       <input type="hidden" name="plan" value={source} />
       <label>
-        Fund a year (USD)
+        Annual community fund (USD)
         <span className="ui-fund-input">
           <span aria-hidden>$</span>
           <input
@@ -355,7 +344,7 @@ export function TownView({ run }: { run: TownRun }) {
           />
         </span>
       </label>
-      <button>Re-plan</button>
+      <button>Recost</button>
       <SplitCta href={memoHref} className="ui-band-cta">
         Open the memo
       </SplitCta>
@@ -366,7 +355,7 @@ export function TownView({ run }: { run: TownRun }) {
   );
 
   return (
-    <main>
+    <main id="main">
       <PageBand
         titleId="town-title"
         kicker={`${FACILITY_LABEL[town.facility]} host community`}
@@ -379,7 +368,7 @@ export function TownView({ run }: { run: TownRun }) {
           {!town.custom && <Chip tone="warn">{town.fundNote.startsWith("Illustrative") ? "Illustrative fund" : "Reported fund"}</Chip>}
         </div>
         {failed > 0 && (
-          <p role="alert" className="ui-band-note">
+          <p role="status" className="ui-band-note">
             <span className="ui-band-alert font-semibold">Qloo didn&apos;t answer ({failed} of {profile.calls.length} calls); this is not thin data.</span> Reload in a minute.
           </p>
         )}
@@ -394,16 +383,16 @@ export function TownView({ run }: { run: TownRun }) {
       <div className="ui-page">
         <section aria-label="Summary" className="ui-stats">
           <StatTile
-            value={`${kept.total} of ${audit.length}`}
-            label={flagged ? `lines kept, ${flagged} struck` : "lines kept, none struck"}
-            tone="ok"
+            value={`${flagged} of ${audit.length}`}
+            label={`draft lines struck · ${kept.total} kept`}
+            tone={flagged ? "pen" : "ok"}
             more={kept.parts.length > 0 && <>Kept: {kept.parts.join(", ")}.</>}
           >
             {audit.length > 0 && <LineStrip comp={comp} anchorOf={(i) => anchors[i]} legend={false} />}
           </StatTile>
           <StatTile value={partnerPlaces} label="local partners Qloo found" tone="ok" more={<>{qlooAdds.length} the draft never named. Each is traced to Qloo&apos;s taste data.</>}>
             {failed ? (
-              <LiveDataNotice towns={[town.name]} subject="the partner list" />
+              <LiveDataNotice towns={[town.name]} subject="the partner list" reloadHref={planHref(source)} />
             ) : partners.length ? (
               <PartnerNames points={partners} />
             ) : (
@@ -448,12 +437,11 @@ export function TownView({ run }: { run: TownRun }) {
                 </div>
               )}
             </div>
-            <div role="tablist" aria-label="Draft plan to audit" className="no-print flex rounded-md bg-concrete p-0.5 text-sm shadow-[inset_0_0_0_1px_var(--hairline)]">
+            <nav aria-label="Draft plan to audit" className="no-print flex rounded-md bg-concrete p-0.5 text-sm shadow-[inset_0_0_0_1px_var(--hairline)]">
               {(["llm", "agency"] as const).map((p) => (
                 <Link
                   key={p}
-                  role="tab"
-                  aria-selected={source === p}
+                  aria-current={source === p ? "page" : undefined}
                   href={planHref(p)}
                   prefetch={p === "llm" ? false : undefined}
                   className={`rounded px-3 py-1.5 transition-colors duration-150 ${
@@ -463,7 +451,7 @@ export function TownView({ run }: { run: TownRun }) {
                   {DRAFT[p].tab}
                 </Link>
               ))}
-            </div>
+            </nav>
           </div>
 
           {/* Verdict legend: pills only; the definitions are a click away */}
@@ -496,8 +484,13 @@ export function TownView({ run }: { run: TownRun }) {
             </dl>
           </details>
 
+          {audit.length > 0 && <AuditTools counts={{ all: audit.length, struck: flagged, kept: kept.total }} struckIds={struckIds} />}
+
           {audit.length ? (
-            <ol className="px-5 sm:px-6">
+            <ol
+              id="audit-lines"
+              className="group/audit px-5 data-[filter=kept]:[&>li.is-struck]:hidden data-[filter=struck]:[&>li.is-kept]:hidden sm:px-6"
+            >
               {segment(audit).map((seg) =>
                 seg.kind === "row" ? (
                   <AuditLine key={seg.index} row={seg.row} index={seg.index} sameAs={sameAs[seg.index]} gloss={seg.index === glossIndex ? gloss : undefined} />
@@ -517,7 +510,7 @@ export function TownView({ run }: { run: TownRun }) {
         </Card>
 
         {/* The fund and the partners, as charts */}
-        <section aria-label="Fund and partners" className={`ui-section grid gap-6 ${failed > 0 || partners.length > 0 ? "lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]" : ""}`}>
+        <section aria-label="Fund and partners" className={`ui-section grid items-start gap-6 ${failed > 0 || partners.length > 0 ? "lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]" : ""}`}>
           <Card className="px-5 py-5 sm:px-6">
             <h2 className="ui-h3">Where the fund goes</h2>
             <p className="mt-1 font-mono text-xs tabular-nums text-muted">{money(fund.total)} over 24 months</p>
@@ -539,7 +532,7 @@ export function TownView({ run }: { run: TownRun }) {
               <p className="mt-1 font-mono text-xs text-muted">Dot: distance from the site · #: Qloo local affinity rank · hollow: no rank</p>
               <div className="mt-4">
                 {failed ? (
-                  <LiveDataNotice towns={[town.name]} subject="the partner list" />
+                  <LiveDataNotice towns={[town.name]} subject="the partner list" reloadHref={planHref(source)} />
                 ) : (
                   <PartnerDistance points={partners} />
                 )}
