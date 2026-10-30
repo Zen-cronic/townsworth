@@ -68,13 +68,6 @@
 :root .lp-spec-v span {
   color: var(--ink);
 }
-:root .lp-spec:is([data-topic="power"], [data-topic="water"]) {
-  border-top-color: var(--qloo);
-  background: var(--band-soft);
-}
-:root .lp-spec:is([data-topic="power"], [data-topic="water"]) :is(.lp-spec-k, .lp-spec-v) {
-  color: var(--qloo);
-}
 :root .lp-spec-note {
   color: var(--muted);
 }
