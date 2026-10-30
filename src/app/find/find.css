@@ -1,0 +1,87 @@
+/* Type any town (/find) only. One flow down a single column: what you get, the search, then the
+   matches or the examples as one ruled list. No boxes around lists. */
+
+.fd .fd-meta {
+  margin-top: 16px;
+}
+.fd .fd-form {
+  margin-top: 32px;
+  padding-top: 28px;
+  border-top: 1px solid var(--ink);
+}
+.fd .fd-list {
+  margin-top: 40px;
+}
+.fd .fd-list-h {
+  font-size: 0.9375rem;
+  font-weight: 650;
+  color: var(--ink);
+}
+.fd .fd-rows,
+.fd .find-try {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  border-top: 1px solid var(--rule);
+}
+.fd .fd-rows > li,
+.fd .find-try > li {
+  border-bottom: 1px solid var(--hairline);
+}
+
+/* The examples: the same ruled rows as the matches, not three cards. */
+.fd .find-try {
+  display: block;
+}
+.fd .find-try a {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: baseline;
+  gap: 16px;
+  padding: 16px 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  transition: background-color 150ms;
+}
+.fd .find-try a:hover {
+  box-shadow: none;
+  background: color-mix(in srgb, var(--ink) 3%, transparent);
+}
+.fd .find-try-t {
+  font-size: 1rem;
+}
+.fd .find-try-m {
+  font-family: inherit;
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+.fd .find-try-c {
+  position: static;
+  margin: 0;
+  align-self: center;
+  color: var(--ink);
+}
+.fd .fd-empty {
+  padding-top: 16px;
+  border-top: 1px solid var(--rule);
+}
+.fd .fd-foot {
+  margin-top: 48px;
+  padding-top: 16px;
+  border-top: 1px solid var(--hairline);
+}
+
+@media (max-width: 640px) {
+  .fd .find-try a {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 2px 12px;
+  }
+  .fd .find-try-m {
+    grid-row: 2;
+  }
+  .fd .find-try-c {
+    grid-row: 1 / span 2;
+    grid-column: 2;
+  }
+}

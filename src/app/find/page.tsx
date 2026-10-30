@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import "./find.css";
 import Link from "next/link";
 import { AppHeader } from "@/components/AppHeader";
 import { Chevron, Notice } from "@/components/dashboard/Icons";
@@ -69,21 +70,29 @@ export default async function FindPage({ searchParams }: { searchParams: Promise
   return (
     <>
       <AppHeader />
-      <main id="main" className="mx-auto max-w-[760px] px-4 pb-24 pt-6 sm:px-6 sm:pt-10">
+      <main id="main" className="fd mx-auto max-w-[760px] px-4 pb-24 pt-6 sm:px-6 sm:pt-10">
         <p className="lp-kicker">Any host town</p>
         <h1 className="lp-h1 mt-3">Type any town</h1>
         <p className="lp-lede mt-3">Any US or Canadian town gets the same check, memo and exports.</p>
+        {/* What the search leads to, as the hero's caption line. */}
+        <ol className="find-line fd-meta" aria-label="What you get">
+          {STEPS.map((st) => (
+            <li key={st.title} title={st.note}>
+              {st.title}
+            </li>
+          ))}
+        </ol>
 
-        <div className="ui-card mt-8 p-4 sm:p-6">
+        <div className="fd-form">
           <TownSearchForm q={q} facility={facility} company={company} idPrefix="find" autoFocus={!q} />
         </div>
 
         {result === null && (
-          <section aria-labelledby="try-h" className="mt-6">
-            <h2 id="try-h" className="font-mono text-[11px] uppercase tracking-wider text-muted">
+          <section aria-labelledby="try-h" className="fd-list">
+            <h2 id="try-h" className="fd-list-h">
               Or try one
             </h2>
-            <ul className="find-try mt-2">
+            <ul className="find-try">
               {EXAMPLES.map(([name, f, co]) => (
                 <li key={name}>
                   <Link href={`/find?q=${encodeURIComponent(name)}&facility=${f}&company=${encodeURIComponent(co)}`}>
@@ -114,43 +123,43 @@ export default async function FindPage({ searchParams }: { searchParams: Promise
         )}
 
         {result?.ok && result.candidates.length === 0 && (
-          <div className="mt-6 rounded-md border border-dashed border-rule px-4 py-5 text-sm text-muted">
+          <div className="fd-list fd-empty text-sm text-muted">
             <p className="font-medium text-ink">No US or Canadian city, town or village matches &ldquo;{q}&rdquo;.</p>
             <p className="mt-1">Check the spelling, or add the state or province, as in &ldquo;Taylor, TX&rdquo; or &ldquo;St. Thomas, ON&rdquo;.</p>
           </div>
         )}
 
         {result?.ok && result.candidates.length > 0 && (
-          <section aria-labelledby="pick-h" className="mt-8">
-            <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-rule pb-2">
-              <h2 id="pick-h" className="font-semibold tracking-tight">
+          <section aria-labelledby="pick-h" className="fd-list">
+            <div className="flex flex-wrap items-baseline justify-between gap-2">
+              <h2 id="pick-h" className="fd-list-h">
                 Pick the town
               </h2>
-              <p className="text-xs text-muted">
+              <p className="text-sm text-muted">
                 {result.candidates.length} {result.candidates.length === 1 ? "match" : "matches"} for &ldquo;{q}&rdquo; · {facilityLabel}
                 {company ? ` · ${company}` : " · company not entered"}
               </p>
             </div>
-            <ol className="mt-3 space-y-2">
+            <ol className="fd-rows">
               {result.candidates.map((c) => {
                 const href = c.preset ? `/town/${c.preset.slug}` : `/town/${withCompany(c.slug, company)}`;
                 return (
                   <li key={c.slug}>
                     <Link
                       href={href}
-                      className="group grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 rounded-md border border-rule bg-paper px-4 py-3 transition-colors duration-150 hover:border-ink active:bg-concrete"
+                      className="group grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 py-4 transition-colors duration-150 hover:bg-ink/[0.03] active:bg-ink/[0.05]"
                     >
                       <span className="min-w-0">
                         <span className="flex flex-wrap items-center gap-2">
                           <span className="font-medium">{c.label}</span>
                           {c.preset && <StatusPill tone="ok">Preset · frozen LLM plan</StatusPill>}
                         </span>
-                        <span className="mt-0.5 block font-mono text-xs tabular-nums text-muted">
+                        <span className="mt-1 block text-sm tabular-nums text-muted">
                           {c.lat.toFixed(4)}, {c.lon.toFixed(4)} · {c.kind}
                           {c.preset && ` · opens ${c.preset.name}, ${c.preset.project.split(" (")[0].toLowerCase()}, funded by ${c.preset.sponsor} per public reporting`}
                         </span>
                       </span>
-                      <span className="flex items-center gap-1 text-sm text-muted group-hover:text-ink">
+                      <span className="flex items-center gap-1 text-sm font-medium text-ink">
                         <span className="hidden sm:inline">Open the audit</span>
                         <Chevron className="h-3.5 w-3.5" />
                       </span>
@@ -162,15 +171,7 @@ export default async function FindPage({ searchParams }: { searchParams: Promise
           </section>
         )}
 
-        <ol className="find-line mt-10" aria-label="What you get">
-          {STEPS.map((st) => (
-            <li key={st.title} title={st.note}>
-              {st.title}
-            </li>
-          ))}
-        </ol>
-
-        <p className="mt-10 text-xs leading-relaxed text-muted">
+        <p className="fd-foot text-sm leading-relaxed text-muted">
           Town search by OpenStreetMap Nominatim (© OpenStreetMap contributors). Only the town name you type is sent to it; only the
           town&apos;s coordinates are sent to Qloo.
         </p>
