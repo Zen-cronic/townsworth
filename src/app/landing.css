@@ -2502,11 +2502,24 @@ a:focus-visible .lp-chev {
   width: fit-content;
   cursor: pointer;
   font-size: 0.8125rem;
+  font-weight: 600;
   color: var(--l-muted);
-  text-decoration: underline;
-  text-decoration-color: var(--l-rule);
-  text-underline-offset: 3px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   transition: color 150ms;
+}
+.ui-more summary::after {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: translateY(-2px) rotate(45deg);
+  transition: transform 150ms;
+}
+.ui-more[open] summary::after {
+  transform: translateY(1px) rotate(225deg);
 }
 .ui-more summary:hover {
   color: var(--l-ink);

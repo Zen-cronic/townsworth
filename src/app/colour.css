@@ -259,10 +259,6 @@
 }
 :root .proof-band .ui-more summary {
   color: var(--band-text);
-  text-decoration-color: color-mix(in srgb, var(--band-text) 50%, transparent);
-}
-:root .proof-band .ui-more summary:hover {
-  text-decoration-color: var(--band-text);
 }
 :root .proof-band .ui-more > div {
   color: var(--band-soft);
