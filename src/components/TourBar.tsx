@@ -75,8 +75,14 @@ export function TourBar() {
             Back to the tour
           </Link>
           <Link href={next.href} className="tour-btn tour-next">
-            <span className="tour-next-k">{step >= TOTAL ? "Optional" : "Next"}</span>
-            <span className="tour-next-l">{next.label}</span>
+            {step >= TOTAL ? (
+              <span className="tour-next-k is-last">Try your own plan</span>
+            ) : (
+              <>
+                <span className="tour-next-k">Next</span>
+                <span className="tour-next-l">{next.label}</span>
+              </>
+            )}
             <Chevron />
           </Link>
           <button type="button" onClick={close} className="tour-close" aria-label="Close the tour bar">

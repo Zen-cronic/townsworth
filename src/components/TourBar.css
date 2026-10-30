@@ -76,6 +76,10 @@
   color: var(--muted);
   font-weight: 500;
 }
+.tour-next-k.is-last {
+  color: var(--ink);
+  font-weight: 600;
+}
 .tour-next-l {
   min-width: 0;
   overflow: hidden;

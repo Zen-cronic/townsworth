@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { AppHeader } from "@/components/AppHeader";
+import { ScrollToHash } from "@/components/ui/ScrollToHash";
 import { LiveDataNotice } from "@/components/LiveDataNotice";
 import { Figure } from "@/components/dashboard/Figure";
 import { Chevron } from "@/components/dashboard/Icons";
@@ -85,6 +86,7 @@ export default async function ProofPage() {
   return (
     <>
       <AppHeader towns={false} page="proof" />
+      <ScrollToHash />
       <main id="main" className="ui-page">
         <div className="proof-band lg:grid lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:items-start lg:gap-12">
           <header className="max-w-3xl">

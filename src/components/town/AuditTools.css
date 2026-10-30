@@ -1,8 +1,9 @@
-/* The line a #line-N link opened: an ink edge and a light wash, so it reads as "this one" at a
-   glance. Ink, not a data colour: it marks where you are, not what the line holds. */
+/* The line a #line-N link opened: a light wash inside a thin ring, so it reads as "this one" at a
+   glance without covering the verdict mark. Ink, not a data colour: it marks where you are, not
+   what the line holds. */
 :root .audit-row.is-landed {
   background: color-mix(in srgb, var(--ink) 6%, transparent);
-  box-shadow: inset 4px 0 0 var(--ink);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--ink) 45%, transparent);
 }
 @media (prefers-reduced-motion: no-preference) {
   :root .audit-row.is-landed {

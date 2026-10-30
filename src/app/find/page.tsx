@@ -164,8 +164,8 @@ export default async function FindPage({ searchParams }: { searchParams: Promise
                             : [c.kind.charAt(0).toUpperCase() + c.kind.slice(1), facilityName, company && `funded by ${company}`].filter(Boolean).join(" · ")}
                         </span>
                       </span>
-                      <span className="flex items-center gap-1 text-[15px] font-semibold text-ink underline decoration-rule underline-offset-4 group-hover:decoration-ink">
-                        <span className="hidden sm:inline">Open the audit</span>
+                      <span className="flex items-center gap-1 text-[15px] font-semibold text-ink">
+                        <span className="hidden sm:inline">Check this town</span>
                         <Chevron className="h-3.5 w-3.5" />
                       </span>
                     </Link>

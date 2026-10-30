@@ -3,6 +3,7 @@ import "./sources.css";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { AppHeader } from "@/components/AppHeader";
+import { ScrollToHash } from "@/components/ui/ScrollToHash";
 import { SpyLinks } from "@/components/ui/SpyLinks";
 import { LiveDataNotice } from "@/components/LiveDataNotice";
 import { PRODUCT_NAME } from "@/components/landing/brand";
@@ -128,6 +129,7 @@ export default async function SourcesPage() {
   return (
     <div className="gn-landing sp">
       <AppHeader towns={false} />
+      <ScrollToHash />
       <main id="main">
         <section className="src-hero sp-hero" aria-labelledby="src-h">
           <div className="lp-wrap sp-hero-grid">
