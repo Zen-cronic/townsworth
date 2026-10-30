@@ -362,7 +362,7 @@ export function TownView({ run }: { run: TownRun }) {
         aside={fundForm}
       >
         <p className="ui-band-note">{town.custom ? "Entered by you" : town.project}</p>
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="ui-band-meta">
           <QlooCalls calls={profile.calls} />
           {!town.custom && <Chip tone="warn">{town.fundNote.startsWith("Illustrative") ? "Illustrative fund" : "Reported fund"}</Chip>}
         </div>

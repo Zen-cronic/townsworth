@@ -1,0 +1,298 @@
+/* Composition: one containment level per view. Sections are separated by full-width hairline
+   rules and generous space; borders belong only to interactive controls and the one primary
+   object on a screen. Applied after every other sheet. */
+
+/* Palette roles for this layer: cobalt (the field), ink, paper, struck pink and kept green. A
+   fault or caveat is ink with a rose rule and icon; there is no violet. */
+:root {
+  --amber: #1b1c1e;
+  --amber-mark: #c2547f;
+  --amber-rule: #e6b7cb;
+  --amber-wash: #fbf9f9;
+  --band-amber: #ffffff;
+}
+:root svg.text-amber {
+  color: var(--amber-mark);
+}
+
+/* Sections */
+:root .ui-page {
+  padding-top: 0;
+}
+:root .ui-section {
+  margin-top: 80px;
+  padding-top: 40px;
+  border-top: 1px solid var(--rule);
+}
+@media (max-width: 760px) {
+  :root .ui-section {
+    margin-top: 56px;
+    padding-top: 28px;
+  }
+}
+
+/* No boxed panels: a card is a plain region on the page. */
+:root .ui-card {
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* Page hero: eyebrow, headline, lede, a caption line of metadata, then one control row that
+   always starts on the same column, whatever the length of the title. */
+:root .ui-band-inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 28px;
+  align-items: start;
+  justify-content: start;
+}
+:root .ui-band-main {
+  max-width: 860px;
+}
+:root .ui-band-aside {
+  justify-self: start;
+}
+:root .ui-band {
+  padding: 56px 0 48px;
+}
+/* Metadata on the hero is plain small text separated by middots, not boxed tags. */
+:root .ui-band-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 0;
+  font-size: 0.875rem;
+  color: var(--band-muted);
+}
+:root .ui-band-meta > * + *::before {
+  content: "\00b7";
+  margin: 0 10px;
+  color: var(--band-quiet);
+}
+:root .ui-band-meta .ui-chip,
+:root .ui-band .ui-band-meta .ui-chip {
+  padding: 0;
+  background: none;
+  box-shadow: none;
+  font-size: inherit;
+  color: var(--band-text);
+}
+:root .ui-band-meta .ui-chip-dot {
+  display: none;
+}
+:root .ui-band-meta summary {
+  display: inline;
+}
+:root .ui-band-meta summary .ui-chip {
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--band-text) 45%, transparent);
+  text-underline-offset: 3px;
+}
+
+/* Stats: one style everywhere, the extended face at one size, in ink. Only the struck and kept
+   verdict counts take a colour. */
+:root :is(.ui-stat-v, .memo-cell-v, .gp-vis-v, .lp-stat-v, .tally-v) {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-size: 2.25rem;
+  font-weight: 750;
+  font-stretch: 116%;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+:root :is(.ui-stat-v, .memo-cell-v, .gp-vis-v).is-ok,
+:root .lp-added-n {
+  color: var(--ink);
+}
+:root .tally-v.is-pen {
+  color: var(--hivis-text);
+}
+:root .tally-v.is-ok {
+  color: var(--ok-text);
+}
+@media (max-width: 760px) {
+  :root :is(.ui-stat-v, .memo-cell-v, .gp-vis-v, .lp-stat-v, .tally-v) {
+    font-size: 1.875rem;
+  }
+}
+
+/* The town summary: a rule-divided band, not three cards. */
+:root .ui-stats {
+  gap: 0;
+  margin-top: 0;
+  border-bottom: 1px solid var(--rule);
+}
+:root .ui-stat {
+  padding: 32px 32px 32px 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+:root .ui-stat + .ui-stat {
+  padding-left: 32px;
+  border-left: 1px solid var(--hairline);
+}
+@media (max-width: 900px) {
+  :root .ui-stats {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  :root .ui-stat {
+    padding: 24px 0;
+  }
+  :root .ui-stat + .ui-stat {
+    padding-left: 0;
+    border-left: 0;
+    border-top: 1px solid var(--hairline);
+  }
+}
+
+/* The audit as a ledger: each draft line, and its replacement as an indented column under one
+   neutral hairline. No boxed proposal. */
+:root .ui-card .gn-proposal,
+:root .gn-proposal {
+  padding: 2px 0 2px 16px;
+  border: 0;
+  border-left: 1px solid var(--hairline);
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+:root .audit-row:focus {
+  outline: none;
+}
+:root .audit-row:focus-visible {
+  outline: none;
+  background: color-mix(in srgb, var(--ink) 4%, transparent);
+}
+:root .audit-row:target {
+  background: color-mix(in srgb, var(--ink) 3%, transparent);
+}
+
+/* Landing: the hero card shows the struck line in full. */
+:root .lp-preview .lp-draft {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+}
+/* Landing: the site plan sits clear of the right edge, so its labels never crowd the frame. */
+@media (min-width: 641px) {
+  :root .lp-hero .lp-film::before,
+  :root .lp-hero .lp-film-media {
+    right: auto;
+    width: calc(100% - 72px);
+  }
+  :root .lp-hero .lp-film::before {
+    inset: 0 72px 0 0;
+  }
+}
+
+/* Landing: host towns as one ruled list, a row per town, instead of a card grid. */
+:root .lp-towns {
+  display: block;
+  border-top: 1px solid var(--rule);
+}
+:root .lp-towns > li {
+  border-bottom: 1px solid var(--hairline);
+}
+:root .lp-town {
+  height: auto;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 4fr) minmax(0, 3fr) minmax(0, 2fr);
+  grid-template-rows: auto auto;
+  gap: 4px 28px;
+  padding: 20px 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+:root .lp-town:hover {
+  box-shadow: none;
+  background: color-mix(in srgb, var(--ink) 3%, transparent);
+}
+:root .lp-town .lp-town-top {
+  grid-column: 1;
+  grid-row: 1;
+}
+:root .lp-town .lp-town-region {
+  grid-column: 1;
+  grid-row: 2;
+}
+:root .lp-town .lp-town-pick {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  margin-top: 0;
+}
+:root .lp-town .lp-town-signal {
+  grid-column: 3;
+  grid-row: 1 / span 2;
+  align-self: start;
+}
+:root .lp-town .lp-town-foot {
+  grid-column: 4;
+  grid-row: 1 / span 2;
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+  align-self: start;
+  justify-content: flex-end;
+  gap: 10px;
+}
+@media (max-width: 900px) {
+  :root .lp-town {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: none;
+    padding: 18px 0;
+  }
+  :root .lp-town > * {
+    grid-column: 1 !important;
+    grid-row: auto !important;
+  }
+  :root .lp-town .lp-town-foot {
+    justify-content: space-between;
+  }
+}
+
+/* The stats band hands straight on to the next section's rule. */
+:root .ui-stats {
+  border-bottom: 0;
+}
+/* Inside a section the content aligns to the page grid; there is no inset panel. */
+:root .ui-card > :is(div, ol, details, header, p, form, ul) {
+  padding-left: 0;
+  padding-right: 0;
+}
+:root .ui-card .row-edge.audit-row {
+  margin-inline: -12px;
+  padding-inline: 12px;
+}
+
+/* Landing closing band: the plain cobalt field (the drawing stays in the hero). */
+:root .lp-close.has-film {
+  background-image: none;
+}
+/* A town whose partners didn't load is a fault, in ink, never the strike colour. */
+:root .lp-town-foot .is-failed {
+  color: var(--ink);
+}
+/* "Or type any town" is a ruled row of the list, not a boxed panel. */
+:root .lp-anytown {
+  margin-top: 40px;
+  padding: 32px 0 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  border-top: 1px solid var(--rule);
+}
+/* The hero card holds one level: the replacement is an indented column under a hairline. */
+:root .lp-preview .lp-swap {
+  padding: 2px 0 2px 14px;
+  border: 0;
+  border-left: 1px solid var(--hairline);
+  border-radius: 0;
+  background: none;
+}
+/* On the cobalt field a stat is white, not ink. */
+:root :is(.is-ink, .ui-band) :is(.lp-stat-v, .ui-stat-v, .gp-vis-v) {
+  color: var(--band-text);
+}

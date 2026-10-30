@@ -116,7 +116,7 @@ export function AuditTools({
             Next struck line
           </button>
           <span aria-live="polite" className="ml-1 text-xs tabular-nums text-muted">
-            {at >= 0 ? `${at + 1} of ${struckIds.length}` : ""}
+            {at >= 0 ? `Stop ${at + 1} of ${struckIds.length}` : ""}
           </span>
         </div>
       )}

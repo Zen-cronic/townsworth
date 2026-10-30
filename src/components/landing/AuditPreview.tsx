@@ -4,7 +4,6 @@ import type { ProgramItem } from "@/lib/plan";
 import { LiveDataNotice } from "@/components/LiveDataNotice";
 import { kindOf, shortOrg, shortSignal } from "@/components/ui/labels";
 import { Chevron } from "./Chevron";
-import { clip } from "./clip";
 
 export interface PreviewRow extends AuditRow {
   n: number;
@@ -93,7 +92,7 @@ export function AuditPreview({
       {row && (
         <div className={`lp-row ${isKept(row.verdict) ? "is-kept" : "is-struck"}`}>
           <p className="lp-draft" title={row.text}>
-            {isKept(row.verdict) ? clip(row.text, 34) : <del className="lp-strike">{clip(row.text, 34)}</del>}
+            {isKept(row.verdict) ? row.text : <del className="lp-strike">{row.text}</del>}
           </p>
           <p className={isKept(row.verdict) ? "lp-keep" : "lp-reason"}>
             {isKept(row.verdict) && (
