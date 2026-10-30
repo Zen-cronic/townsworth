@@ -2839,3 +2839,72 @@ a:focus-visible .lp-chev {
 .src-section .live-notice {
   margin-top: 16px;
 }
+
+/* Guided path rail: a numbered dot per step, and the step being read in ink (aria-current is set
+   by SpyLinks). Sources contents: the section being read in ink. */
+.gp-rail ol {
+  counter-reset: gp-step;
+}
+.gp-rail li {
+  counter-increment: gp-step;
+}
+.gp-rail a span {
+  display: grid;
+  place-items: center;
+  margin: 0;
+  width: 22px;
+  height: 22px;
+  font-size: 11px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  color: var(--l-muted);
+  transition: background-color 150ms, color 150ms, box-shadow 150ms;
+}
+.gp-rail a span::before {
+  content: counter(gp-step);
+}
+.gp-rail a[aria-current] {
+  color: var(--l-ink);
+  font-weight: 600;
+}
+.gp-rail a[aria-current] span {
+  background: var(--l-ink);
+  color: var(--l-paper);
+  box-shadow: 0 0 0 1.5px var(--l-ink);
+}
+.src-toc p {
+  margin-bottom: 4px;
+}
+.src-toc a[aria-current] {
+  color: var(--l-ink);
+  font-weight: 600;
+}
+@media (prefers-reduced-motion: reduce) {
+  .gp-rail a span {
+    transition: none;
+  }
+}
+/* Single column: the cards carry "Step n of 5", so the rail goes; and the step's figure sits under
+   its title, before the explanation. Steps whose figure holds links keep source order, so focus
+   order still matches what is on screen. */
+@media (max-width: 900px) {
+  .gp-rail {
+    display: none;
+  }
+  .gp-step:has(.gp-vis):not(:has(.gp-vis a)) {
+    gap: 12px;
+  }
+  .gp-step:has(.gp-vis):not(:has(.gp-vis a)) .gp-step-body {
+    display: contents;
+  }
+  .gp-step:has(.gp-vis):not(:has(.gp-vis a)) .gp-step-body > * {
+    order: 3;
+  }
+  .gp-step:has(.gp-vis):not(:has(.gp-vis a)) .gp-step-body > :is(.lp-kicker, .lp-h2) {
+    order: 1;
+  }
+  .gp-step:has(.gp-vis):not(:has(.gp-vis a)) .gp-vis {
+    order: 2;
+  }
+}
