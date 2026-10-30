@@ -89,6 +89,29 @@ function VenueCard({ data, venueKey, legs, style, onClose }: { data: MapData; ve
   );
 }
 
+function Legend({ inline }: { inline?: boolean }) {
+  return (
+          <div className={`tm-legend${inline ? " is-inline" : ""}`} aria-hidden="true">
+            <span>
+              <i className="tm-dot is-ranked" />
+              Qloo-ranked place
+            </span>
+            <span>
+              <i className="tm-dot is-kept" />
+              Kept from the draft
+            </span>
+            <span>
+              <i className="tm-dot is-unranked" />
+              Not ranked
+            </span>
+            <span>
+              <i className="tm-dot is-site" />
+              Facility site
+            </span>
+          </div>
+  );
+}
+
 // The card sits beside the venue, kept inside the map.
 function cardPos(p: { x: number; y: number }, box: HTMLElement | null): React.CSSProperties {
   const w = box?.clientWidth ?? 800;
@@ -167,24 +190,7 @@ export function TownMap({ data, townName }: { data: MapData; townName: string })
               style={cardPos(point, mapEl.current)}
             />
           )}
-          <div className="tm-legend" aria-hidden="true">
-            <span>
-              <i className="tm-dot is-ranked" />
-              Qloo-ranked place
-            </span>
-            <span>
-              <i className="tm-dot is-kept" />
-              Kept from the draft
-            </span>
-            <span>
-              <i className="tm-dot is-unranked" />
-              Not ranked
-            </span>
-            <span>
-              <i className="tm-dot is-site" />
-              Facility site
-            </span>
-          </div>
+          <Legend />
           {!failed && (
             <button type="button" className="tm-btn tm-reset" onClick={() => (setFocus(undefined), setResetTick((t) => t + 1))}>
               Reset view
@@ -193,6 +199,7 @@ export function TownMap({ data, townName }: { data: MapData; townName: string })
         </div>
 
         <div className="tm-panel">
+          <Legend inline />
           <div className="tm-panel-head">
             <h2 id="map-title" className="tm-title">
               The plan on the map
