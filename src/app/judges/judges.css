@@ -5,8 +5,7 @@
 .jg .jg-hero {
   padding: 56px 0 48px;
 }
-/* Raised over the shared guided-path hero grid, which this page replaces with copy | overview. */
-:root .jg .jg-hero .jg-hero-grid {
+.jg .jg-hero-grid {
   display: grid;
   grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
   grid-template-rows: auto;
@@ -14,19 +13,13 @@
   row-gap: 40px;
   align-items: end;
 }
-:root .jg .jg-hero .jg-hero-grid > .jg-hero-copy {
+.jg .jg-hero-grid > .jg-hero-copy {
   grid-column: 1;
   grid-row: 1;
 }
-:root .jg .jg-hero .jg-hero-grid > .jg-overview {
+.jg .jg-hero-grid > .jg-overview {
   grid-column: 2;
   grid-row: 1;
-}
-.jg .jg-meta {
-  margin-top: 16px;
-  font-size: 0.9375rem;
-  line-height: 1.5;
-  color: var(--l-ink);
 }
 .jg .jg-ctas {
   margin-top: 28px;
@@ -67,7 +60,13 @@
   font-size: 1.375rem;
   font-weight: 750;
   line-height: 1.1;
+  letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
+}
+/* Figure sets its own face, weight and tracking; here the figure takes the overview's. */
+.jg .jg-overview-v > span {
+  font: inherit;
+  letter-spacing: inherit;
 }
 .jg .jg-overview-k {
   font-size: 0.9375rem;
@@ -189,10 +188,10 @@
 }
 
 @media (max-width: 900px) {
-  :root .jg .jg-hero .jg-hero-grid {
+  .jg .jg-hero-grid {
     grid-template-columns: minmax(0, 1fr);
   }
-  :root .jg .jg-hero .jg-hero-grid > .jg-overview {
+  .jg .jg-hero-grid > .jg-overview {
     grid-column: 1;
     grid-row: 2;
   }
@@ -212,18 +211,8 @@
     width: 100%;
     justify-content: space-between;
   }
-  .jg .jg-overview a {
-    grid-template-columns: 1.25rem minmax(0, 1fr);
-    gap: 2px 12px;
-  }
-  .jg .jg-overview-k {
-    grid-column: 2;
-  }
-}
-
-/* Phones: the overview would repeat the step figures that follow at once, so the hero ends at its
-   control row. */
-@media (max-width: 600px) {
+  /* The overview would repeat the step figures that follow at once, so the hero ends at its
+     control row. */
   .jg .jg-overview {
     display: none;
   }

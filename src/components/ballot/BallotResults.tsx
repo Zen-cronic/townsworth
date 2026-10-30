@@ -16,17 +16,9 @@ import {
 } from "@/lib/ballot";
 import { AreaLabel, DistanceLine } from "./ItemMeta";
 import { BallotSplit } from "./BallotSplit";
+import { isLast, ordinal, rankFill, rankInk } from "./rank";
 
 type Mine = { state: "unknown" } | { state: "none" } | { state: "stale" } | { state: "counted"; ballot: StoredBallot };
-
-const ordinal = (n: number) => `${n}${n % 10 === 1 && n % 100 !== 11 ? "st" : n % 10 === 2 && n % 100 !== 12 ? "nd" : n % 10 === 3 && n % 100 !== 13 ? "rd" : "th"}`;
-
-// Four clear steps, darkest = ranked first: ink, about 60% and 30% ink, then an outline for last.
-// Longer shortlists spread the tints between. Pink stays the strike.
-const shade = (r: number, n: number) => (r === 0 ? 100 : Math.round(60 - ((r - 1) / Math.max(n - 3, 1)) * 30));
-const isLast = (r: number, n: number) => n > 1 && r === n - 1;
-const fill = (r: number, n: number) => (isLast(r, n) ? "var(--paper)" : `color-mix(in srgb, var(--ink) ${shade(r, n)}%, var(--paper))`);
-const ink = (r: number, n: number) => (r === 0 || (!isLast(r, n) && shade(r, n) >= 55) ? "var(--paper)" : "var(--ink)");
 
 function RankBar({ counts, total, label, mine }: { counts: number[]; total: number; label: string; mine?: number }) {
   const n = counts.length;
@@ -39,7 +31,7 @@ function RankBar({ counts, total, label, mine }: { counts: number[]; total: numb
             <span
               key={r}
               className={`ch-ramp bl-seg ${isLast(r, n) ? "is-outline" : ""}`}
-              style={{ width: width(c), background: fill(r, n), color: ink(r, n) }}
+              style={{ width: width(c), background: rankFill(r, n), color: rankInk(r, n) }}
             >
               {/* The position names itself when its segment has room. */}
               {c / total >= 0.12 && <span aria-hidden>{ordinal(r + 1)}</span>}
@@ -178,7 +170,7 @@ export function BallotResults({ slug, townName, items }: { slug: string; townNam
       <p aria-hidden className="bl-key">
         {Array.from({ length: n }, (_, r) => (
           <span key={r}>
-            <span className={`bl-key-sw ${isLast(r, n) ? "is-outline" : ""}`} style={{ background: fill(r, n) }} />
+            <span className={`bl-key-sw ${isLast(r, n) ? "is-outline" : ""}`} style={{ background: rankFill(r, n) }} />
             {ordinal(r + 1)}
           </span>
         ))}

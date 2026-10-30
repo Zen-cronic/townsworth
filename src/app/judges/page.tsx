@@ -18,6 +18,7 @@ import { runTown } from "@/lib/run";
 import { HERO_SAMPLE_ID, sampleCheckHref, samplePlanById } from "@/lib/samplePlans";
 import { SpyLinks } from "@/components/ui/SpyLinks";
 import { VerdictMark } from "@/components/ui";
+import { isLast, ordinal, rankFill, rankInk } from "@/components/ballot/rank";
 import { HERO_TOWN, TOWNS, townBySlug } from "@/lib/towns";
 
 export const metadata: Metadata = {
@@ -35,6 +36,8 @@ interface Step {
   rail?: string;
   body: string;
   notice: string;
+  // The step's headline figure, which the hero's overview repeats and links to.
+  figure: { value: string; label: string };
   visual: React.ReactNode;
   primary: { href: string; label: string };
   secondary?: { href: string; label: string };
@@ -67,19 +70,11 @@ export default async function GuidedPath() {
   const sampleTownName = sampleHome ? `${sampleHome.name}, ${sampleHome.region}` : "any town";
   const FACILITY = { "data center": "Data center", fab: "Chip fab", nuclear: "Nuclear", plant: "Plant" } as const;
 
-  // The hero's overview: each step's figure in one line, linking to the step.
-  const overview: { value: string; label: string }[] = [
-    { value: `${comp.total - comp.kept} of ${comp.total}`, label: "draft lines struck" },
-    { value: usd(run.program.totalAllocated), label: "costed, item by item" },
-    { value: String(shortlist.length), label: "ideas on the ballot" },
-    { value: String(TOWNS.length), label: "host towns ready, or type your own" },
-    { value: `${t.llmInstitutionalPct}% vs ${t.gnInstitutionalPct}%`, label: "partners that are institutions, AI alone vs ours" },
-  ];
-
   const steps: Step[] = [
     {
       title: "The draft, checked line by line",
       rail: "The draft, checked",
+      figure: { value: `${comp.generic + comp.unverified} of ${comp.total}`, label: "draft lines struck" },
       body: useTemplate
         ? `${town}, a ${HERO_TOWN.sponsor} data center campus, checked against the generic plan a consultancy might send to any town.`
         : `${town}, a ${HERO_TOWN.sponsor} data center campus. Its draft plan was written by AI alone, the way a consultant would.`,
@@ -112,6 +107,7 @@ export default async function GuidedPath() {
     },
     {
       title: "The committee memo",
+      figure: { value: usd(run.program.totalAllocated), label: "costed, item by item" },
       body: "What a community-affairs lead takes to the committee, with a partner sheet (CSV) and a 24-month calendar (.ics).",
       visual: (
         <>
@@ -131,6 +127,7 @@ export default async function GuidedPath() {
     },
     {
       title: "Residents rank",
+      figure: { value: String(shortlist.length), label: "ideas on the ballot" },
       body: "Residents put the shortlisted grants and events in order on an anonymous ballot.",
       visual: (
         <>
@@ -140,8 +137,12 @@ export default async function GuidedPath() {
           <p className="gp-vis-k">ideas on the ballot</p>
           <ol className="gp-rank" aria-label="Ballot positions, first to last">
             {shortlist.map((it, i) => (
-              <li key={it.id} style={{ background: `color-mix(in srgb, var(--ink) ${i === 0 ? 100 : Math.round(55 - ((i - 1) / Math.max(shortlist.length - 2, 1)) * 35)}%, var(--paper))` }}>
-                <span className={i === 0 ? "is-dark" : ""}>{i === 0 ? "1st" : i === 1 ? "2nd" : i === 2 ? "3rd" : `${i + 1}th`}</span>
+              <li
+                key={it.id}
+                className={isLast(i, shortlist.length) ? "is-outline" : undefined}
+                style={{ background: rankFill(i, shortlist.length), color: rankInk(i, shortlist.length) }}
+              >
+                {ordinal(i + 1)}
               </li>
             ))}
           </ol>
@@ -159,6 +160,7 @@ export default async function GuidedPath() {
     },
     {
       title: "Any host town",
+      figure: { value: String(TOWNS.length), label: "host towns ready, or type your own" },
       body: "Any US or Canadian town, with the company that funds it. The picks change because the town changes.",
       visual: (
         <>
@@ -182,6 +184,7 @@ export default async function GuidedPath() {
     },
     {
       title: "The evidence and its limits",
+      figure: { value: `${t.llmInstitutionalPct}% vs ${t.gnInstitutionalPct}%`, label: "partners that are institutions, AI alone vs ours" },
       body: `AI alone against ${PRODUCT_NAME} in six host towns, with frozen plans and a list of what the test does not prove.`,
       visual: (
         <>
@@ -246,14 +249,14 @@ export default async function GuidedPath() {
             </div>
           </div>
           <ol className="jg-overview" aria-label="What the five steps show">
-            {overview.map((o, i) => (
-              <li key={o.label}>
+            {steps.map((s, i) => (
+              <li key={s.title}>
                 <a href={`#step-${i + 1}`}>
                   <span className="jg-overview-n">{i + 1}</span>
                   <span className="jg-overview-v">
-                    <Figure value={o.value} />
+                    <Figure value={s.figure.value} />
                   </span>
-                  <span className="jg-overview-k">{o.label}</span>
+                  <span className="jg-overview-k">{s.figure.label}</span>
                 </a>
               </li>
             ))}

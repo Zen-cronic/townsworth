@@ -627,7 +627,7 @@
   color: var(--ink);
   print-color-adjust: exact;
 }
-.gp-rank li .is-dark { color: var(--paper); }
+.gp-rank li.is-outline { box-shadow: inset 0 0 0 1px var(--line-quiet); }
 .gp-towns {
   display: grid;
   gap: 0;
@@ -654,13 +654,6 @@
   font-size: 11.5px;
   color: var(--ok-text);
 }
-.gp-vis.is-band {
-  position: relative;
-  background: var(--band);
-  box-shadow: inset 0 3px 0 var(--band-contour);
-}
-.gp-vis.is-band .gp-vis-k { color: var(--band-text); }
-.gp-step .gp-vis.is-band .gp-vis-note { color: var(--band-muted); }
 .gp-h2h {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) 2.75rem;
