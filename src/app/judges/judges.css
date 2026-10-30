@@ -73,9 +73,6 @@
   line-height: 1.1;
   font-variant-numeric: tabular-nums;
 }
-.jg .jg-overview-v.is-pen {
-  color: var(--hivis);
-}
 .jg .jg-overview-k {
   font-size: 0.9375rem;
   line-height: 1.4;
@@ -84,7 +81,7 @@
 
 /* The sequence */
 .jg .gp-path {
-  padding: 24px 0 96px;
+  padding: 0 0 96px;
 }
 .jg .gp-steps {
   gap: 0;
@@ -97,11 +94,23 @@
   box-shadow: none;
   border-top: 1px solid var(--l-rule);
 }
+/* The first step opens on the band's edge: no rule of its own, and the rail's label and the step's
+   label share its top line. */
 .jg .gp-steps > .gp-step:first-child {
-  border-top-color: var(--l-ink);
+  border-top: 0;
+}
+.jg .gp-rail {
+  padding-top: 56px;
+}
+.jg .gp-rail .lp-kicker {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 600;
+  color: var(--l-ink);
 }
 .jg .gp-step .lp-kicker {
   font-size: 0.875rem;
+  line-height: 1.25rem;
   font-weight: 600;
   color: var(--l-ink);
 }

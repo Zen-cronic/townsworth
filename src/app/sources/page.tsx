@@ -151,7 +151,11 @@ export default async function SourcesPage() {
                         </th>
                         {TOPICS.map((k) => (
                           <th key={k} scope="col">
-                            {k}
+                            {/* Phones show the short name; the full one stays for screen readers. */}
+                            <span className="sp-th-long">{k}</span>
+                            <span className="sp-th-short" aria-hidden>
+                              {k.split(" ")[0]}
+                            </span>
                           </th>
                         ))}
                         <th scope="col" className="src-matrix-total">

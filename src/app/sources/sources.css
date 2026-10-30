@@ -146,6 +146,32 @@
   }
   .sp .src-matrix thead th {
     font-size: 0.8125rem;
+  }
+  /* Equal topic columns, short names, so the Tax column is as wide as the rest. */
+  .sp .src-matrix table {
+    table-layout: fixed;
+  }
+  .sp .src-matrix thead th:first-child {
+    width: 32%;
+  }
+  .sp .src-matrix thead th.src-matrix-total {
+    width: 2.75rem;
+  }
+  .sp .sp-th-long {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .sp .src-matrix tbody th {
+    font-size: 0.875rem;
     white-space: normal;
+  }
+}
+@media (min-width: 601px) {
+  .sp .sp-th-short {
+    display: none;
   }
 }

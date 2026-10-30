@@ -1,8 +1,36 @@
 /* Type any town (/find) only. One flow down a single column: what you get, the search, then the
    matches or the examples as one ruled list. No boxes around lists. */
 
-.fd .fd-meta {
-  margin-top: 16px;
+/* What the search leads to: four quiet numbered steps on one line, stacked on a phone. */
+.fd .fd-steps {
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 28px;
+  font-size: 0.9375rem;
+  color: var(--ink);
+}
+.fd .fd-steps li {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.fd .fd-steps-n {
+  font-size: 0.875rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+}
+/* The search: one 2px focus line on fields (not a border plus an offset ring), and the button on
+   its own row across the field group. */
+.fd .fd-form :is(input, select):focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: -1px;
+}
+.fd .fd-form form > button {
+  grid-column: 1 / -1;
 }
 .fd .fd-form {
   margin-top: 32px;
@@ -73,6 +101,9 @@
 }
 
 @media (max-width: 640px) {
+  .fd .fd-steps {
+    flex-direction: column;
+  }
   .fd .find-try a {
     grid-template-columns: minmax(0, 1fr) auto;
     gap: 2px 12px;

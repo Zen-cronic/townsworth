@@ -30,6 +30,8 @@ export const maxDuration = 60;
 
 interface Step {
   title: string;
+  // A shorter label for the rail, when the title would wrap there.
+  rail?: string;
   body: string;
   notice: string;
   visual: React.ReactNode;
@@ -65,8 +67,8 @@ export default async function GuidedPath() {
   const FACILITY = { "data center": "Data center", fab: "Chip fab", nuclear: "Nuclear", plant: "Plant" } as const;
 
   // The hero's overview: each step's figure in one line, linking to the step.
-  const overview: { value: string; label: string; tone?: "pen" }[] = [
-    { value: `${comp.total - comp.kept} of ${comp.total}`, label: "draft lines struck", tone: comp.total - comp.kept ? "pen" : undefined },
+  const overview: { value: string; label: string }[] = [
+    { value: `${comp.total - comp.kept} of ${comp.total}`, label: "draft lines struck" },
     { value: usd(run.program.totalAllocated), label: "costed, item by item" },
     { value: String(shortlist.length), label: "ideas on the ballot" },
     { value: String(TOWNS.length), label: "host towns ready, or type your own" },
@@ -76,6 +78,7 @@ export default async function GuidedPath() {
   const steps: Step[] = [
     {
       title: "The draft, checked line by line",
+      rail: "The draft, checked",
       body: useTemplate
         ? `${town}, a ${HERO_TOWN.sponsor} data center campus, checked against the generic plan a consultancy might send to any town.`
         : `${town}, a ${HERO_TOWN.sponsor} data center campus. Its draft plan was written by AI alone, the way a consultant would.`,
@@ -210,10 +213,9 @@ export default async function GuidedPath() {
             </h1>
             <p className="lp-lede">
               Five steps through a finished example, then a town of your choice. Every step opens the live product at the exact line
-              that matters.
+              that matters. Begins with {town}, already checked line by line.
             </p>
             <LiveDataNotice towns={proof.failedTowns} />
-            <p className="jg-meta">Begins with {town}, already checked line by line.</p>
             <div className="jg-ctas">
               <Link href="#step-1" className="lp-btn lp-btn-primary">
                 Follow the five steps
@@ -231,7 +233,7 @@ export default async function GuidedPath() {
               <li key={o.label}>
                 <a href={`#step-${i + 1}`}>
                   <span className="jg-overview-n">{i + 1}</span>
-                  <span className={`jg-overview-v${o.tone ? ` is-${o.tone}` : ""}`}>
+                  <span className="jg-overview-v">
                     <Figure value={o.value} />
                   </span>
                   <span className="jg-overview-k">{o.label}</span>
@@ -251,7 +253,7 @@ export default async function GuidedPath() {
                   <li key={s.title}>
                     <a href={`#step-${i + 1}`} data-step={i + 1} aria-label={`Step ${i + 1}: ${s.title}`}>
                       <span aria-hidden="true" />
-                      {s.title}
+                      {s.rail ?? s.title}
                     </a>
                   </li>
                 ))}

@@ -75,9 +75,10 @@ export default async function FindPage({ searchParams }: { searchParams: Promise
         <h1 className="lp-h1 mt-3">Type any town</h1>
         <p className="lp-lede mt-3">Any US or Canadian town gets the same check, memo and exports.</p>
         {/* What the search leads to, as the hero's caption line. */}
-        <ol className="find-line fd-meta" aria-label="What you get">
-          {STEPS.map((st) => (
+        <ol className="fd-steps" aria-label="What you get">
+          {STEPS.map((st, i) => (
             <li key={st.title} title={st.note}>
+              <span className="fd-steps-n">{i + 1}</span>
               {st.title}
             </li>
           ))}
@@ -154,12 +155,14 @@ export default async function FindPage({ searchParams }: { searchParams: Promise
                           <span className="font-medium">{c.label}</span>
                           {c.preset && <StatusPill tone="ok">Preset · frozen LLM plan</StatusPill>}
                         </span>
-                        <span className="mt-1 block text-sm tabular-nums text-muted">
-                          {c.lat.toFixed(4)}, {c.lon.toFixed(4)} · {c.kind}
+                        <span className="mt-1 block text-sm text-muted" title={`${c.lat.toFixed(4)}, ${c.lon.toFixed(4)}`}>
+                          {[c.kind.charAt(0).toUpperCase() + c.kind.slice(1), FACILITY_CHOICES.find((f) => f.code === facility)?.label, company && `funded by ${company}`]
+                            .filter(Boolean)
+                            .join(" · ")}
                           {c.preset && ` · opens ${c.preset.name}, ${c.preset.project.split(" (")[0].toLowerCase()}, funded by ${c.preset.sponsor} per public reporting`}
                         </span>
                       </span>
-                      <span className="flex items-center gap-1 text-sm font-medium text-ink">
+                      <span className="flex items-center gap-1 text-[15px] font-semibold text-ink underline decoration-rule underline-offset-4 group-hover:decoration-ink">
                         <span className="hidden sm:inline">Open the audit</span>
                         <Chevron className="h-3.5 w-3.5" />
                       </span>
