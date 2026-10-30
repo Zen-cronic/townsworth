@@ -72,7 +72,6 @@ export function SiteFooter() {
           <span>
             © {new Date().getFullYear()} {PRODUCT_NAME} · MIT licence
           </span>
-          <span>Fund figures are illustrative unless a public figure exists. The resident tally is simulated.</span>
         </div>
       </div>
     </footer>
