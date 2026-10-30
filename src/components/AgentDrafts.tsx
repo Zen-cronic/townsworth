@@ -262,10 +262,10 @@ export function AgentDrafts({ slug, fund }: { slug: string; fund: number }) {
                         <Download />
                         Download .eml
                       </a>
-                      <ExternalLink href={gmailComposeUrl({ subject: d.subject, body: d.body })} label={`Open the draft to ${d.partner} in Gmail`}>
+                      <ExternalLink href={gmailComposeUrl({ subject: d.subject, body: d.body })} text="Open in Gmail" context={`the draft to ${d.partner}`}>
                         Open in Gmail
                       </ExternalLink>
-                      <ExternalLink href={outlookComposeUrl({ subject: d.subject, body: d.body })} label={`Open the draft to ${d.partner} in Outlook`}>
+                      <ExternalLink href={outlookComposeUrl({ subject: d.subject, body: d.body })} text="Open in Outlook" context={`the draft to ${d.partner}`}>
                         Open in Outlook
                       </ExternalLink>
                     </div>

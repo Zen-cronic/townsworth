@@ -12,9 +12,18 @@ const linkClass =
 
 const dateLabel = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
 
-export function ExternalLink({ href, label, children }: { href: string; label: string; children: React.ReactNode }) {
+// The accessible name starts with the visible text (so "click Add to Outlook" works by voice), then
+// says what the link is for and that it opens a new tab; the tooltip says so too.
+export function ExternalLink({ href, text, context, children }: { href: string; text: string; context: string; children: React.ReactNode }) {
   return (
-    <a href={href} target="_blank" rel="noopener noreferrer" aria-label={`${label} (opens in a new tab)`} className={linkClass}>
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label={`${text}: ${context} (opens in a new tab)`}
+      title="Opens in a new tab"
+      className={linkClass}
+    >
       {children}
     </a>
   );
@@ -42,10 +51,10 @@ export function SessionCalendarLinks({ item, town, firstOnly = false, now, class
         return (
           <li key={s.index} className="flex flex-wrap items-center gap-2">
             {shown.length > 1 || firstOnly ? <span className="font-mono tabular-nums text-muted">{when}</span> : null}
-            <ExternalLink href={googleCalendarUrl(event)} label={`Add the ${when} session to Google Calendar`}>
+            <ExternalLink href={googleCalendarUrl(event)} text="Add to Google Calendar" context={`the ${when} session`}>
               Add to Google Calendar
             </ExternalLink>
-            <ExternalLink href={outlookCalendarUrl(event)} label={`Add the ${when} session to Outlook`}>
+            <ExternalLink href={outlookCalendarUrl(event)} text="Add to Outlook" context={`the ${when} session`}>
               Add to Outlook
             </ExternalLink>
           </li>
