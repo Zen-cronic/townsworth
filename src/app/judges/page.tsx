@@ -36,14 +36,13 @@ interface Step {
   title: string;
   // A shorter label for the rail, when the title would wrap there.
   rail?: string;
-  body: string;
+  // One line: the thing to look for on the live page.
   notice: string;
   // The step's headline figure, which the hero's overview repeats and links to.
   // "pen" when the figure counts struck lines, so it takes the struck colour.
   figure: { value: string; label: string; tone?: "pen" };
   visual: React.ReactNode;
   primary: { href: string; label: string };
-  secondary?: { href: string; label: string };
 }
 
 export default async function GuidedPath() {
@@ -78,9 +77,6 @@ export default async function GuidedPath() {
       title: "The draft, checked line by line",
       rail: "The draft, checked",
       figure: { value: `${comp.generic + comp.unverified} of ${comp.total}`, label: "draft lines struck", tone: comp.generic + comp.unverified > 0 ? "pen" : undefined },
-      body: useTemplate
-        ? `${town}, a ${HERO_TOWN.sponsor} data center campus, checked against the generic plan a consultancy might send to any town.`
-        : `${town}, a ${HERO_TOWN.sponsor} data center campus. Its draft plan was written by AI alone, the way a consultant would.`,
       visual: (
         <>
           <StruckTally comp={comp} draft={useTemplate ? "Consultant template" : "AI-written draft"} />
@@ -106,14 +102,10 @@ export default async function GuidedPath() {
         ? `Line ${ft.swap.line} could fit any town, so it is struck; in its place, ${ft.swap.partner}${ft.swap.rank ? `, ranked #${ft.swap.rank} of ${first.profile.placeCount} places locals favour` : ""}.`
         : "Lines that could fit any town are struck; each replacement names a local place and why.",
       primary: { href: firstSwapHref ?? firstTownHref, label: ft.swap ? `Open line ${ft.swap.line}` : "Open the check" },
-      secondary: f.institution
-        ? { href: f.institution.href, label: useTemplate ? "See a kept line in the AI-written draft" : "See a kept institution" }
-        : undefined,
     },
     {
       title: "The committee memo",
       figure: { value: usd(run.program.totalAllocated), label: "costed, item by item" },
-      body: "What a community-affairs lead takes to the committee, with a partner sheet (CSV) and a 24-month calendar (.ics).",
       visual: (
         <>
           <p className="gp-vis-v">
@@ -126,14 +118,12 @@ export default async function GuidedPath() {
           </p>
         </>
       ),
-      notice: `Every item is costed from the fund; Draft outreach has an AI agent write the partner emails, naming ${HERO_TOWN.sponsor} as the funder.`,
+      notice: "Every item is costed from the fund, and an AI agent drafts each partner email.",
       primary: { href: f.memoHref, label: "Open the memo" },
-      secondary: { href: `${f.memoHref}#commitments`, label: "See section 1" },
     },
     {
       title: "Residents rank",
       figure: { value: String(shortlist.length), label: "ideas on the ballot" },
-      body: "Residents put the shortlisted grants and events in order on an anonymous ballot.",
       visual: (
         <>
           <p className="gp-vis-v is-ok">
@@ -159,14 +149,12 @@ export default async function GuidedPath() {
           </p>
         </>
       ),
-      notice: `The funder is named before anyone ranks; the tally adds ${SIMULATED_BALLOTS} simulated ballots to yours and says so.`,
+      notice: `The funder is named before anyone ranks; the ${SIMULATED_BALLOTS} simulated ballots are labelled.`,
       primary: { href: f.ballotHref, label: "Open the ballot" },
-      secondary: { href: `${f.resultsHref}#simulated`, label: "See the tally" },
     },
     {
       title: "Any host town",
       figure: { value: String(TOWNS.length), label: "host towns ready, or type your own" },
-      body: "Any US or Canadian town, with the company that funds it. The picks change because the town changes.",
       visual: (
         <>
           <p className="gp-vis-v">
@@ -183,14 +171,12 @@ export default async function GuidedPath() {
           </ul>
         </>
       ),
-      notice: "Open Taylor, Texas (a Samsung chip fab), then press “Have AI write a draft now” to watch one written and checked live, in about 20 seconds.",
+      notice: "Press “Have AI write a draft now” to watch a Taylor, Texas plan written and checked live.",
       primary: { href: "/find?q=Taylor%2C%20TX&facility=fab&company=Samsung", label: "Try Taylor, TX" },
-      secondary: { href: "/town/kemmerer-wy", label: "See a town with little data" },
     },
     {
       title: "The evidence and its limits",
       figure: { value: `${t.llmInstitutionalPct}% vs ${t.gnInstitutionalPct}%`, label: "partners that are institutions, AI alone vs ours" },
-      body: `AI alone against ${PRODUCT_NAME} in six host towns, with frozen plans and a list of what the test does not prove.`,
       visual: (
         <>
           <p className="gp-vis-k">Partners that are institutions</p>
@@ -209,9 +195,8 @@ export default async function GuidedPath() {
           <p className="gp-vis-note">{t.gnNovelPct}% of our local partners AI alone never names.</p>
         </>
       ),
-      notice: `AI alone mostly names institutions (${t.llmInstitutionalPct}%); ${t.gnNovelPct}% of our local partners are places it never names. The limits sit beside the figures.`,
+      notice: `${t.gnNovelPct}% of our local partners are places AI alone never names; the limits sit beside the figures.`,
       primary: { href: "/proof#findings", label: "Open the evidence" },
-      secondary: { href: "/proof#limits", label: "What it does not prove" },
     },
   ];
 
@@ -239,19 +224,15 @@ export default async function GuidedPath() {
               Watch a community‑benefits plan <span className="lp-tone">get checked against its host town.</span>
             </h1>
             <p className="lp-lede">
-              {town}, home to a {HERO_TOWN.sponsor} data center campus: its draft plan checked line by line, the costed committee memo, the
-              resident ballot, any town you type, then the evidence and its limits. Each step opens the live page.
+              {town}, home to a {HERO_TOWN.sponsor} data center campus. Each step opens the live page.
             </p>
             <LiveDataNotice towns={proof.failedTowns} retry />
             <div className="jg-ctas">
               <Link href="#step-1" className="lp-btn lp-btn-primary">
-                Follow the five steps
+                Start at step 1
                 <span className="lp-btn-sq" aria-hidden="true">
                   <Chevron />
                 </span>
-              </Link>
-              <Link href="/find" className="lp-btn lp-btn-quiet">
-                Find a town
               </Link>
             </div>
           </div>
@@ -293,25 +274,26 @@ export default async function GuidedPath() {
                 {steps.map((s, i) => (
                   <li key={s.title} id={`step-${i + 1}`} className="gp-step">
                     <div className="gp-step-body">
-                      <p className="lp-kicker">
-                        Step {i + 1} of {steps.length}
-                      </p>
-                      <h2 className="lp-h2">{s.title}</h2>
-                      <p>{s.body}</p>
+                      <div className="jg-step-head">
+                        <span className="jg-step-n" aria-hidden="true">
+                          {i + 1}
+                        </span>
+                        <h2 className="lp-h2">
+                          <span className="sr-only">
+                            Step {i + 1} of {steps.length}:{" "}
+                          </span>
+                          {s.title}
+                        </h2>
+                      </div>
                       <p className="gp-notice">
                         <b>What to notice</b>
                         {s.notice}
                       </p>
                       <div className="lp-ctas jg-step-ctas">
-                        <Link href={withTour(s.primary.href, i + 1)} className="lp-btn lp-btn-quiet">
+                        <Link href={withTour(s.primary.href, i + 1)} className="lp-btn jg-go">
                           {s.primary.label}
                           <Chevron />
                         </Link>
-                        {s.secondary && (
-                          <Link href={withTour(s.secondary.href, i + 1)} className="lp-btn lp-btn-quiet jg-link">
-                            {s.secondary.label}
-                          </Link>
-                        )}
                       </div>
                     </div>
                     <div className="gp-vis ch-anim">{s.visual}</div>
@@ -323,13 +305,18 @@ export default async function GuidedPath() {
                 <div className="gp-extra">
                   <section id="own-plan" className="gp-step" aria-labelledby="own-plan-h">
                     <div className="gp-step-body">
-                      <p className="lp-kicker">Optional</p>
-                      <h2 id="own-plan-h" className="lp-h2">
-                        Check a plan of your own
-                      </h2>
-                      <p>No plan to hand? Check our sample draft for {sampleTownName}: it fills the form, and you press Check this draft.</p>
+                      <div className="jg-step-head">
+                        <span className="jg-step-n is-optional" aria-hidden="true">
+                          +
+                        </span>
+                        <h2 id="own-plan-h" className="lp-h2">
+                          <span className="sr-only">Optional: </span>
+                          Check a plan of your own
+                        </h2>
+                      </div>
+                      <p>The sample draft for {sampleTownName} fills the form; you press Check this draft.</p>
                       <div className="lp-ctas jg-step-ctas">
-                        <Link href={sampleCheckHref(sample.id)} className="lp-btn lp-btn-quiet">
+                        <Link href={sampleCheckHref(sample.id)} className="lp-btn jg-go">
                           Check the sample plan
                           <Chevron />
                         </Link>

@@ -1,5 +1,6 @@
 /* The product-tour bar: one dark strip at the foot of the screen, only on pages opened from the
-   tour. Ink and paper, so it never competes with the page's one lime action. */
+   tour. Ink, with the next step in lime, the colour that marks the tour entry (ink on lime 14.5:1,
+   muted on lime 7.2:1), and a five-segment progress strip. */
 .tour-spacer {
   height: 88px;
 }
@@ -25,8 +26,22 @@
   margin: 0;
   min-width: 0;
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 10px;
+}
+.tour-prog {
+  flex: none;
+  display: inline-flex;
+  gap: 3px;
+}
+.tour-prog i {
+  width: 14px;
+  height: 6px;
+  border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--paper) 28%, transparent);
+}
+.tour-prog i.is-done {
+  background: var(--action);
 }
 .tour-n {
   flex: none;
@@ -64,12 +79,12 @@
   border-color: var(--paper);
 }
 .tour-next {
-  background: var(--paper);
+  background: var(--action);
   color: var(--ink);
   max-width: 300px;
 }
 .tour-next:hover {
-  background: var(--card);
+  background: var(--action-hover);
 }
 .tour-next-k {
   flex: none;
@@ -123,6 +138,9 @@
   }
   .tour-at {
     padding: 2px 6px 0;
+  }
+  .tour-prog i {
+    width: 10px;
   }
   .tour-actions .tour-btn {
     flex: 1 1 0;

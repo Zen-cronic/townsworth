@@ -65,6 +65,11 @@ export function TourBar() {
       <div className="tour-spacer no-print" aria-hidden="true" />
       <nav className="tour-bar no-print" aria-label="Product tour">
         <p className="tour-at">
+          <span className="tour-prog" aria-hidden="true">
+            {Array.from({ length: TOTAL }, (_, i) => (
+              <i key={i} className={i < step ? "is-done" : undefined} />
+            ))}
+          </span>
           <span className="tour-n">
             Step {step} of {TOTAL}
           </span>

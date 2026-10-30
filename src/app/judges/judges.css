@@ -233,3 +233,120 @@
   align-items: center;
   gap: 6px;
 }
+
+/* Each step: a numbered badge and its title on one row, then one line to notice and one button,
+   indented under the title. A rule joins the badges down the page, so the steps read as a sequence. */
+.jg .gp-steps {
+  position: relative;
+}
+.jg .gp-step-body {
+  position: relative;
+  padding-left: 68px;
+}
+.jg .jg-step-head {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-left: -68px;
+}
+.jg .jg-step-n {
+  position: relative;
+  z-index: 1;
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--r-pill);
+  background: var(--qloo);
+  color: var(--qloo-on);
+  font-size: 1.25rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  box-shadow: 0 0 0 6px var(--l-paper);
+}
+.jg .jg-step-n.is-optional {
+  background: var(--l-paper);
+  color: var(--qloo);
+  box-shadow: inset 0 0 0 2px var(--qloo), 0 0 0 6px var(--l-paper);
+}
+/* The joining rule runs from each badge's centre to the next step's badge (step padding 56px, plus
+   half the badge). */
+.jg .gp-steps > .gp-step {
+  position: relative;
+}
+.jg .gp-steps > .gp-step::before {
+  content: "";
+  position: absolute;
+  left: 23px;
+  top: 80px;
+  bottom: -80px;
+  border-left: 2px solid color-mix(in srgb, var(--qloo) 40%, var(--l-paper));
+}
+.jg .gp-steps > .gp-step:last-child::before {
+  border-left-style: dashed;
+}
+.jg .gp-step .gp-notice {
+  max-width: 34em;
+}
+.jg .jg-go {
+  justify-content: flex-start;
+  gap: 10px;
+  border: 1px solid var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+}
+.jg .jg-go:hover {
+  background: var(--ink-deep);
+}
+.jg .gp-step + .gp-step,
+.jg #own-plan {
+  border-top-color: var(--l-hairline);
+}
+
+/* The rail: steps already passed in pale blue, the step being read solid blue. */
+.jg .gp-rail li:has(~ li a[aria-current]) a span {
+  background: var(--qloo-wash);
+  color: var(--qloo);
+  box-shadow: 0 0 0 1.5px var(--qloo);
+}
+.jg .gp-rail li:has(~ li a[aria-current]) a {
+  color: var(--l-ink);
+}
+
+@media (max-width: 900px) {
+  .jg .gp-step-body {
+    padding-left: 0;
+  }
+  .jg .jg-step-head {
+    margin-left: 0;
+    gap: 14px;
+  }
+  .jg .jg-step-n {
+    width: 40px;
+    height: 40px;
+    font-size: 1.0625rem;
+    box-shadow: none;
+  }
+  .jg .jg-step-n.is-optional {
+    box-shadow: inset 0 0 0 2px var(--qloo);
+  }
+  .jg .gp-steps > .gp-step::before {
+    display: none;
+  }
+  .gp-step:has(.gp-vis):not(:has(.gp-vis a)) .gp-step-body > .jg-step-head {
+    order: 1;
+  }
+}
+
+@media print {
+  .jg .jg-step-n,
+  .jg .jg-step-n.is-optional {
+    background: none;
+    color: var(--ink);
+    box-shadow: inset 0 0 0 1.5px var(--ink);
+  }
+  .jg .gp-steps > .gp-step::before {
+    border-color: var(--ink);
+  }
+}
