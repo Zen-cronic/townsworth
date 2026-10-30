@@ -302,8 +302,143 @@
   color: var(--qloo);
 }
 
+/* Colour by layer: each plate, section and figure takes the colour of what it holds. The facility
+   and the draft stay paper and ink; Qloo's local signal is the blue wash with solid-blue places;
+   what the program keeps and costs is the green tint with solid-green items. Ratios: blue on the
+   wash 5.24, ink on the wash 13.68, muted on the wash 6.80, green text on the green wash 6.67,
+   muted on the green wash 6.98, paper on green 11.32, blue on concrete 5.13, green text on
+   concrete 6.36. */
+
+/* Landing stack, Signals plate: the town on the blue wash, houses in blue line, ranked places solid. */
+:root .st-layer.is-1 .st-plate > .st-top { fill: var(--qloo-wash); }
+:root .st-layer.is-1 .st-plate > .st-l { fill: var(--qloo-side); }
+:root .st-layer.is-1 .st-plate > .st-r { fill: var(--band-quiet); }
+:root .st-layer.is-1 .st-art :is(polygon, line, circle, path, ellipse) { stroke: var(--qloo); }
+:root .st-layer.is-1 .st-quiet polygon { stroke: var(--qloo); }
+:root .st-layer.is-1 .st-quiet .st-top { fill: var(--card); }
+:root .st-layer.is-1 .st-quiet :is(.st-l, .st-r) { fill: var(--qloo-wash); }
+:root .st-layer.is-1 .st-tree circle { fill: var(--card); }
+:root .st-layer.is-1 .st-road { stroke: var(--band-quiet) !important; }
+:root .st-layer.is-1 .st-place .st-top { fill: var(--qloo); }
+:root .st-layer.is-1 .st-place .st-l { fill: var(--qloo-deep); }
+:root .st-layer.is-1 .st-place .st-r { fill: var(--qloo-deeper); }
+:root .st-layer.is-1 .st-place polygon { stroke: var(--qloo-deeper); }
+:root .st-layer.is-1 .st-awning :is(.st-top, .st-l, .st-r) { fill: var(--action); stroke: var(--ink); }
+/* Out plate: the program on the green tint, each costed item a solid green card. */
+:root .st-layer.is-2 .st-plate > .st-top { fill: var(--ok-wash); }
+:root .st-layer.is-2 .st-plate > .st-l { fill: var(--ok-side); }
+:root .st-layer.is-2 .st-plate > .st-r { fill: var(--ok-side-2); }
+:root .st-layer.is-2 .st-art :is(polygon, line) { stroke: var(--ok); }
+:root .st-layer.is-2 .st-tile .st-top { fill: var(--ok); }
+:root .st-layer.is-2 .st-tile :is(.st-l, .st-r) { fill: var(--ok-mid); }
+:root .st-layer.is-2 g:has(> .st-tile) > .st-text { stroke: var(--ok-wash) !important; }
+:root .st-layer.is-2 .st-tile-edge { stroke: var(--action) !important; }
+:root .st-layer.is-2 .st-memo .st-top { fill: var(--card); }
+/* Callouts by layer: ink for the facility, blue for Qloo ranks, green for costs. */
+:root .st-layer.is-0 .st-co b { color: var(--ink); font-weight: 650; }
+:root .st-layer.is-1 .st-co b { color: var(--qloo); font-weight: 650; }
+:root .st-layer.is-1 .st-co .st-co-mark { background: var(--qloo); }
+:root .st-layer.is-1 .st-co .st-co-lead { border-top-color: var(--qloo); }
+:root .st-layer.is-2 .st-co b { color: var(--ok-text); font-weight: 650; }
+:root .st-layer.is-2 .st-co .st-co-lead { border-top-color: var(--ok); }
+/* Step copy: the rule and the step name take the layer colour. */
+:root .st-step .st-copy { border-left-width: 3px; }
+:root .st-step.is-0 .st-copy { border-left-color: var(--ink); }
+:root .st-step.is-1 .st-copy { border-left-color: var(--qloo); }
+:root .st-step.is-2 .st-copy { border-left-color: var(--ok); }
+:root .st-step .lp-step-n { color: var(--ink); font-weight: 650; }
+:root .st-step.is-1 .lp-step-n { color: var(--qloo); }
+:root .st-step.is-2 .lp-step-n { color: var(--ok-text); }
+@media (max-width: 899px) {
+  :root .st-step .st-copy { border-left-style: solid; padding-left: 14px; }
+}
+
+/* Landing town list: the section on paper; each Qloo pick on the blue wash; partners found in green. */
+:root #ch-04 { --ch-bg: var(--paper); }
+:root .lp-town .lp-town-pick { background: var(--qloo-wash); padding: 10px 14px; margin: -10px 0; }
+:root .lp-town .lp-town-pick-k { color: var(--qloo); font-weight: 600; }
+:root .lp-town .lp-town-pick.is-empty { background: var(--concrete); }
+:root .lp-town .lp-town-pick.is-empty .lp-town-pick-k { color: var(--muted); }
+:root .lp-town .lp-town-foot b { color: var(--ok-text); }
+/* Thin data is a limit of the data, not a strike: ink on paper with a dashed ink edge. */
+:root .lp-badge.is-thin { border: 1px dashed var(--ink); background: var(--paper); color: var(--ink); }
+
+/* Memo and town summary: each headline figure washed by its meaning (the tally green when nothing is
+   struck, pink when something is; Qloo partners blue; costed money green). */
+:root .memo-figs > .memo-cell:nth-child(1),
+:root .memo-figs > .memo-cell:nth-child(3) { background: var(--ok-wash); }
+:root .memo-figs > .memo-cell:nth-child(1):has(.is-pen) { background: var(--hivis-wash); }
+:root .memo-figs > .memo-cell:nth-child(2) { background: var(--qloo-wash); }
+:root .memo-figs > .memo-cell:nth-child(2) .memo-cell-v { color: var(--qloo); }
+:root .memo-figs > .memo-cell:nth-child(3) .memo-cell-v { color: var(--ok-text); }
+:root .memo-topics li { background: var(--paper); box-shadow: inset 0 0 0 1px var(--hairline); }
+:root .ui-stats > .ui-stat { padding: 28px 24px; }
+:root .ui-stats > .ui-stat:first-child { background: var(--ok-wash); }
+:root .ui-stats > .ui-stat:first-child:has(.is-pen) { background: var(--hivis-wash); }
+:root .ui-stats > .ui-stat:has(> .ui-stat-v.is-qloo) { background: var(--qloo-wash); }
+:root .ui-stats > .ui-stat:nth-child(3) { background: var(--ok-wash); }
+:root .ui-stats > .ui-stat:nth-child(3) > .ui-stat-v { color: var(--ok-text); }
+@media (max-width: 900px) {
+  :root .ui-stats > .ui-stat { padding: 20px 16px; }
+}
+
+/* Memo program: the section on the green tint; each program area a solid green bar; Qloo signals as
+   blue-wash chips; item costs in green. */
+:root #program { background: var(--ok-wash); margin-inline: -24px; padding: 20px 24px 24px; }
+:root #program .memo-section-head { border-bottom-color: var(--ok); }
+:root #program .memo-section-n { color: var(--ok-text); }
+:root .memo-area-head > * { background: var(--ok); color: var(--ok-on); padding: 8px 10px; }
+:root .memo-area-head .text-muted { color: var(--ok-wash); }
+:root .memo-signal { background: var(--qloo-wash); color: var(--qloo); box-shadow: inset 0 0 0 1px var(--qloo); padding: 0 6px; border-radius: 2px; }
+:root .memo-amount { color: var(--ok-text); font-weight: 650; }
+@media (max-width: 639px) {
+  :root #program { margin-inline: -12px; padding: 16px 12px 20px; }
+}
+
+/* Ballot and its tally: the hero stays neutral; ranks in blue, program areas in green. */
+:root .bl .bl-n { color: var(--qloo); }
+:root .bl .bl-area { color: var(--ok-text); font-weight: 600; }
+
+/* Check: the host town, whose Qloo data the draft is checked against, on the blue wash; the draft
+   itself stays paper. In the results, Qloo's added partners head on the wash, the fund on green. */
+:root .ui-card[aria-labelledby="step1-h"] { background: var(--qloo-wash); padding: 24px; margin-inline: -24px; }
+@media (max-width: 760px) {
+  :root .ui-card[aria-labelledby="step1-h"] { padding: 16px; margin-inline: 0; }
+}
+:root .check-results [aria-labelledby="adds-title"] > :first-child { background: var(--qloo-wash); }
+:root .check-results [aria-labelledby="fund-title"] { background: var(--ok-wash); }
+
+/* Sources: Townsworth's bars, which come from Qloo, in blue; the fund figures on the green tint; the
+   Qloo data rows on the blue wash. */
+:root .src-bar .ch-hbar:not(.is-quiet) { background: var(--qloo); }
+:root .src-bar b.is-ok { color: var(--qloo); }
+:root .src-section#funds { background: var(--ok-wash); margin-inline: -24px; padding-inline: 24px; padding-bottom: 40px; }
+:root .src-section#funds + .src-section { border-top: 0; }
+:root .src-list li.is-qloo { background: var(--qloo-wash); padding-inline: 12px; margin-inline: -12px; }
+:root .src-list li.is-qloo .src-k { color: var(--qloo); font-weight: 600; }
+@media (max-width: 760px) {
+  :root .src-section#funds { margin-inline: -16px; padding-inline: 16px; }
+  :root .src-list li.is-qloo { padding-inline: 8px; margin-inline: -8px; }
+}
+
+/* Find: the steps that use Qloo and the fund carry their colour. */
+:root .fd .fd-steps li:nth-child(2) .fd-steps-n { color: var(--qloo); }
+:root .fd .fd-steps li:nth-child(3) .fd-steps-n { color: var(--ok-text); }
+
 /* Print stays black on white: fills drop to outlines and blue type to ink. */
 @media print {
+  /* Colour by layer prints as plain paper and ink. */
+  :root :is(.memo-figs > .memo-cell, .memo-topics li, #program, .memo-area-head > *, .memo-signal, .ui-stats > .ui-stat, .src-section#funds, .src-list li.is-qloo, .lp-town .lp-town-pick, .ui-card[aria-labelledby="step1-h"], .check-results [aria-labelledby="adds-title"] > :first-child, .check-results [aria-labelledby="fund-title"]) {
+    background: none;
+    box-shadow: none;
+  }
+  :root :is(.memo-area-head > *, .memo-area-head .text-muted, .memo-signal, .memo-amount, .memo-section-n, .memo-figs .memo-cell-v, .ui-stat-v, .bl .bl-n, .bl .bl-area, .src-list li.is-qloo .src-k) {
+    color: var(--ink);
+  }
+  :root .memo-area-head > * { border-bottom: 1px solid var(--ink); padding-inline: 0; }
+  :root .memo-signal { box-shadow: inset 0 0 0 1px var(--ink); }
+  :root #program { margin-inline: 0; padding: 0; }
+  :root #program .memo-section-head { border-bottom-color: var(--ink); }
   :root .kept-label,
   :root .ui-chip.is-qloo,
   :root .status-pill.is-ok,

@@ -52,6 +52,14 @@
   --qloo: var(--band);
   --qloo-on: var(--band-text);
   --qloo-wash: #dfe6fb;
+  /* Plate sides and solid fills for the colour-by-layer drawings: Qloo blue and kept green, a
+     step lighter or darker than the base. Line art and text never sit on the side tints. */
+  --qloo-side: #c4d1f5;
+  --qloo-deep: #1b3ea8;
+  --qloo-deeper: #163391;
+  --ok-side: #c5dccd;
+  --ok-side-2: #a9c9b4;
+  --ok-mid: #2b6a4b;
   /* Kept as a fill: the kept green behind paper text (11.32:1). */
   --ok-on: var(--paper);
   /* Type roles: Archivo for text and headings; figures use its tabular numerals. */
