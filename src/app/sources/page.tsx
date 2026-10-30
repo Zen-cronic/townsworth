@@ -1,4 +1,5 @@
 import "../landing.css";
+import "./sources.css";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { AppHeader } from "@/components/AppHeader";
@@ -125,11 +126,12 @@ export default async function SourcesPage() {
   const maxCited = Math.max(1, ...cited.map(({ c }) => c?.items.length ?? 0));
 
   return (
-    <div className="gn-landing">
+    <div className="gn-landing sp">
       <AppHeader towns={false} />
       <main id="main">
-        <section className="src-hero lp-grain" aria-labelledby="src-h">
-          <div className="lp-wrap">
+        <section className="src-hero sp-hero" aria-labelledby="src-h">
+          <div className="lp-wrap sp-hero-grid">
+            <div className="sp-hero-copy">
             <p className="lp-kicker">Sources · every figure, with where it came from</p>
             <h1 id="src-h" className="lp-h1">
               Every number, <span className="lp-tone">sourced.</span>
@@ -138,29 +140,7 @@ export default async function SourcesPage() {
               The commitments are cited public reporting. The evidence is recomputed from frozen plans on every load. Fund figures
               are illustrative unless a public figure exists.
             </p>
-          </div>
-        </section>
-
-        <div className="src-body">
-          <div className="lp-wrap src-layout">
-            <nav className="src-toc" aria-labelledby="src-toc-h">
-              <p id="src-toc-h" className="text-xs font-semibold text-muted">
-                On this page
-              </p>
-              {SECTIONS.map(([id, label]) => (
-                <a key={id} href={`#${id}`}>
-                  {label}
-                </a>
-              ))}
-              <SpyLinks current="location" />
-            </nav>
-
-            <div>
-              <section id="commitments" className="src-section" aria-labelledby="commitments-h">
-                <h2 id="commitments-h" className="lp-h2">
-                  Material commitments
-                </h2>
-                <p>Cited public reporting per preset town. Check each figure against the developer&apos;s filings before it goes to a committee.</p>
+            </div>
                 <figure className="src-matrix">
                   <table>
                     <caption className="sr-only">Cited figures per town and topic</caption>
@@ -206,7 +186,31 @@ export default async function SourcesPage() {
                       })}
                     </tbody>
                   </table>
+                  <figcaption>Cited figures per town and topic. Open a town for each figure and its source.</figcaption>
                 </figure>
+          </div>
+        </section>
+
+        <div className="src-body">
+          <div className="lp-wrap src-layout">
+            <nav className="src-toc" aria-labelledby="src-toc-h">
+              <p id="src-toc-h" className="text-xs font-semibold text-muted">
+                On this page
+              </p>
+              {SECTIONS.map(([id, label]) => (
+                <a key={id} href={`#${id}`}>
+                  {label}
+                </a>
+              ))}
+              <SpyLinks current="location" />
+            </nav>
+
+            <div>
+              <section id="commitments" className="src-section" aria-labelledby="commitments-h">
+                <h2 id="commitments-h" className="lp-h2">
+                  Material commitments
+                </h2>
+                <p>Cited public reporting per preset town. Check each figure against the developer&apos;s filings before it goes to a committee.</p>
                 {TOWNS.map((town) => {
                   const c = commitmentsFor(town.slug);
                   if (!c) return null;

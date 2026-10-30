@@ -1,0 +1,151 @@
+/* Sources (/sources) only. The hero carries the cited-figures matrix as the page's primary object;
+   below it, sections are ruled lists with no boxes. */
+
+/* Raised over the shared sources hero grid (lede in the right half), which this page replaces with
+   copy | matrix. */
+:root .sp .sp-hero .sp-hero-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+  grid-template-rows: auto;
+  column-gap: 64px;
+  row-gap: 32px;
+  align-items: end;
+}
+:root .sp .sp-hero .sp-hero-grid > .sp-hero-copy {
+  grid-column: 1;
+  grid-row: 1;
+}
+:root .sp .sp-hero .sp-hero-grid > .src-matrix {
+  grid-column: 2;
+  grid-row: 1;
+  margin: 0;
+}
+:root .sp .sp-hero .sp-hero-copy > .lp-lede {
+  margin: 0;
+}
+.sp .sp-hero {
+  padding: 56px 0 48px;
+}
+
+/* The matrix: unboxed, ruled above and below, flat cells. */
+.sp .src-matrix {
+  padding: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  border-top: 1px solid var(--ink);
+}
+.sp .src-matrix table {
+  border-spacing: 0;
+}
+.sp .src-matrix thead th {
+  padding: 10px 4px;
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--muted);
+}
+.sp .src-matrix tbody tr {
+  border-top: 1px solid var(--hairline);
+}
+.sp .src-matrix tbody th,
+.sp .src-matrix tbody td {
+  padding-top: 4px;
+  padding-bottom: 4px;
+  border-top: 1px solid var(--hairline);
+}
+.sp .src-matrix tbody th {
+  font-size: 0.9375rem;
+}
+.sp .src-matrix td.is-cited > span,
+.sp .src-matrix td.is-empty > span {
+  box-shadow: none;
+  border-radius: 2px;
+}
+.sp .src-matrix td.is-cited > span {
+  background: color-mix(in srgb, var(--ink) 5%, var(--paper));
+}
+.sp .src-matrix td.is-empty > span {
+  background: none;
+}
+.sp .src-matrix td.src-matrix-total {
+  display: table-cell;
+  height: auto;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+.sp .src-matrix-bar {
+  display: inline-block;
+  vertical-align: middle;
+  width: calc(100% - 2.25rem);
+  margin-right: 8px;
+}
+.sp .src-matrix-total b {
+  font-family: inherit;
+  font-weight: 650;
+}
+.sp .src-matrix figcaption {
+  padding-top: 10px;
+  border-top: 1px solid var(--hairline);
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+
+/* Towns: ruled rows that open in place, not cards. */
+.sp .src-town {
+  margin-top: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  border-bottom: 1px solid var(--rule);
+}
+.sp .src-town:first-of-type {
+  margin-top: 24px;
+  border-top: 1px solid var(--ink);
+}
+.sp .src-town summary {
+  padding: 18px 0;
+  border-radius: 0;
+}
+.sp .src-town summary:hover {
+  background: none;
+}
+.sp .src-town summary:hover > :first-child {
+  text-decoration: underline;
+  text-decoration-color: var(--rule);
+  text-underline-offset: 4px;
+}
+.sp .src-town .src-list {
+  margin: 0 0 16px;
+}
+.sp .src-count {
+  font-family: inherit;
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+
+@media (max-width: 1023px) {
+  :root .sp .sp-hero .sp-hero-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  :root .sp .sp-hero .sp-hero-grid > .src-matrix {
+    grid-column: 1;
+    grid-row: 2;
+  }
+}
+@media (max-width: 600px) {
+  .sp .sp-hero {
+    padding: 40px 0 32px;
+  }
+  /* Phones: the count stays, its bar goes, so all five topics and the total fit. */
+  .sp .src-matrix-bar {
+    display: none;
+  }
+  .sp .src-matrix-total {
+    width: auto;
+  }
+  .sp .src-matrix thead th {
+    font-size: 0.8125rem;
+    white-space: normal;
+  }
+}
