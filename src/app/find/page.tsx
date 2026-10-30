@@ -64,7 +64,8 @@ export default async function FindPage({ searchParams }: { searchParams: Promise
   const q = cleanTownQuery(sp.q);
   const facility = isFacilityCode(sp.facility) ? sp.facility : "data-center";
   const company = cleanCompany(sp.company);
-  const facilityLabel = FACILITY_CHOICES.find((f) => f.code === facility)!.label.toLowerCase();
+  const facilityName = FACILITY_CHOICES.find((f) => f.code === facility)!.label;
+  const facilityLabel = facilityName.toLowerCase();
   const result: GeocodeResult | null = q.length >= 2 ? await geocodeTowns(q, facility) : null;
 
   return (
@@ -156,10 +157,10 @@ export default async function FindPage({ searchParams }: { searchParams: Promise
                           {c.preset && <Chip tone="plain">Preset · frozen LLM plan</Chip>}
                         </span>
                         <span className="mt-1 block text-sm text-muted" title={`${c.lat.toFixed(4)}, ${c.lon.toFixed(4)}`}>
-                          {[c.kind.charAt(0).toUpperCase() + c.kind.slice(1), FACILITY_CHOICES.find((f) => f.code === facility)?.label, company && `funded by ${company}`]
-                            .filter(Boolean)
-                            .join(" · ")}
-                          {c.preset && ` · opens ${c.preset.name}, ${c.preset.project.split(" (")[0].toLowerCase()}, funded by ${c.preset.sponsor} per public reporting`}
+                          {/* A preset opens with its own facility and funder, so the row names those, not the form's. */}
+                          {c.preset
+                            ? `${c.kind.charAt(0).toUpperCase() + c.kind.slice(1)} · opens ${c.preset.name}, ${c.preset.project.split(" (")[0].toLowerCase()}, funded by ${c.preset.sponsor} per public reporting`
+                            : [c.kind.charAt(0).toUpperCase() + c.kind.slice(1), facilityName, company && `funded by ${company}`].filter(Boolean).join(" · ")}
                         </span>
                       </span>
                       <span className="flex items-center gap-1 text-[15px] font-semibold text-ink underline decoration-rule underline-offset-4 group-hover:decoration-ink">
