@@ -906,3 +906,103 @@
   :root .memo-topics li .memo-topic-v { color: var(--ink); }
   :root :is(.memo-topics li, .bl .bl-row, .bl .bl-sim) { box-shadow: inset 0 0 0 1px var(--ink) !important; }
 }
+
+/* Alternating section grounds. Full-width sections alternate pale blue, white and pale green down
+   each page, under the deep blue hero or header band, and no two neighbours share a ground. The
+   pale grounds are a step lighter than the meaning washes (Qloo blue wash, kept green tint), so a
+   Qloo or kept section still reads as its colour. The memo body, the line-by-line list, the
+   sources lists and the map panel stay white. Ratios (WCAG 2.x) on the pale blue: ink 15.37,
+   muted 7.64, Qloo blue 5.89, green text 7.31, pink 5.93; on the pale green: 15.20, 7.56, 5.82,
+   7.22, 5.87; on white: 17.05, 8.48, 6.53, 8.11, 6.58. */
+:root {
+  --concrete: #ffffff;
+  --paper: #ffffff;
+  --ground-blue: #f0f3fc;
+  --ground-green: #eef3f0;
+}
+
+/* Landing: commitments green, how it works pale blue, the band, towns on the Qloo wash, questions
+   pale green, the closing band. */
+:root #ch-02 { --ch-bg: var(--ground-blue); }
+:root #ch-05 { --ch-bg: var(--ground-green); }
+
+/* Footer: on the blue band, with a white hairline on its top edge so it stays apart from a blue
+   closing band above it. White on blue 6.53, band-soft links 5.60. No underlines; the pilot link a
+   white outline. */
+:root .lp-footer {
+  --l-ink: var(--band-text);
+  --l-muted: var(--band-soft);
+  --l-hairline: color-mix(in srgb, var(--band-text) 28%, var(--band));
+  background: var(--band);
+  color: var(--band-soft);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--band-text) 40%, var(--band));
+}
+:root .lp-footer :is(.lp-brand, .lp-footer-h) { color: var(--band-text); }
+:root .lp-footer .lp-footer-col a { color: var(--band-soft); }
+:root .lp-footer .lp-footer-col a:hover { color: var(--band-text); text-decoration: none; }
+:root .lp-footer .lp-brand svg rect[fill^="var(--band"] { fill: var(--band-text); }
+:root .lp-footer .lp-footer-pilot { color: var(--band-text); background: transparent; border-color: var(--band-text); box-shadow: none; }
+:root .lp-footer .lp-footer-pilot:hover { background: color-mix(in srgb, var(--band-text) 12%, transparent); }
+:root .lp-footer :where(a, button):focus-visible { outline-color: var(--band-text); }
+
+/* Product tour: the path on white, the questions on pale green. */
+:root .jg .gp-extra:last-child {
+  border-image: linear-gradient(var(--ground-green), var(--ground-green)) fill 0 / 0 / 0 100vmax;
+}
+:root .jg .gp-steps > .gp-step:nth-child(4) .gp-vis { background: var(--ground-green); }
+
+/* Sources: the summary on pale blue above the white source lists. */
+:root .src-hero { background: var(--ground-blue); }
+
+/* Town: the map on pale blue (the panel stays white), the line list on white, the fund and
+   partners on pale green, then the Qloo band, the kept tint and the Qloo wash. */
+:root .ui-page > .tm.ui-section {
+  padding-bottom: 40px;
+  border-top: 0;
+  border-image: linear-gradient(var(--ground-blue), var(--ground-blue)) fill 0 / 0 / 0 100vmax;
+}
+:root .ui-page > section[aria-label="Fund and partners"] {
+  padding-bottom: 56px;
+  border-top: 0;
+  border-image: linear-gradient(var(--ground-green), var(--ground-green)) fill 0 / 0 / 0 100vmax;
+}
+:root .ui-page > section[aria-label="Fund and partners"] + .ui-section { margin-top: 0; }
+/* With no Qloo band between them, the fund sits on pale blue so it doesn't meet the kept tint. */
+:root .ui-page > section[aria-label="Fund and partners"]:has(+ .ui-section[aria-labelledby="reach-title"]) {
+  border-image: linear-gradient(var(--ground-blue), var(--ground-blue)) fill 0 / 0 / 0 100vmax;
+}
+
+/* Evidence: the per-town table as a white sheet on a pale blue band, the limits on pale green. */
+:root .ui-page > section[aria-labelledby="by-town"] {
+  margin-top: 48px;
+  background: var(--card);
+  box-shadow: inset 0 4px 0 var(--qloo), 0 0 0 100vmax var(--ground-blue);
+  clip-path: inset(-40px -100vmax);
+}
+:root .ui-page > section[aria-labelledby="by-town"] + section { margin-top: 48px; }
+:root .ui-page > section:has(> .proof-limits) {
+  margin-top: 48px;
+  padding-block: 40px 64px;
+  border-image: linear-gradient(var(--ground-green), var(--ground-green)) fill 0 / 0 / 0 100vmax;
+}
+:root .ui-page:has(> section > .proof-limits) { padding-bottom: 0; }
+
+/* Check: the form on white, the results on pale green under their white line-by-line sheet. */
+:root .check-results {
+  padding-block: 40px 48px;
+  border-image: linear-gradient(var(--ground-green), var(--ground-green)) fill 0 / 0 / 0 100vmax;
+}
+
+/* Ballot and tally: the ideas on a pale blue ground under the blue question band. */
+:root .bl .bl-body { background: var(--ground-blue); }
+
+/* Memo: the white sheet on a pale blue ground. */
+:root body:has(article.doc-sheet) { background: var(--ground-blue); }
+:root .doc-sheet { background: var(--card); }
+
+@media print {
+  :root body, :root body:has(article.doc-sheet), :root .src-hero, :root .bl .bl-body { background: var(--card); }
+  :root :is(#ch-02, #ch-05) { --ch-bg: var(--card); }
+  :root :is(.ui-page > .tm.ui-section, .ui-page > section[aria-label="Fund and partners"], .ui-page > section:has(> .proof-limits), .check-results) { border-image: none; }
+  :root .ui-page > section[aria-labelledby="by-town"] { box-shadow: none; clip-path: none; }
+}
