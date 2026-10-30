@@ -136,15 +136,15 @@
   justify-content: flex-start;
   gap: 10px;
 }
-.jg .jg-link {
+/* The step's second action: a quieter outlined button, the same height as the first. */
+.jg .jg-step-ctas .jg-link {
+  border-color: var(--l-hairline);
+  background: transparent;
+  box-shadow: none;
   font-weight: 600;
-  color: var(--l-ink);
-  text-decoration: underline;
-  text-decoration-color: var(--l-rule);
-  text-underline-offset: 4px;
 }
-.jg .jg-link:hover {
-  text-decoration-color: var(--l-ink);
+.jg .jg-step-ctas .jg-link:hover {
+  border-color: var(--l-ink);
 }
 
 /* Each step's figure: unboxed, under one hairline, aligned with the step title. */

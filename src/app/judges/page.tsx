@@ -104,7 +104,9 @@ export default async function GuidedPath() {
         ? `Line ${ft.swap.line} is struck: it could fit any town. In its place: ${ft.swap.title}${ft.swap.rank ? `, #${ft.swap.rank} by local affinity` : ""}. Click “Why” to see the Qloo signal.${!useTemplate && f.institution ? ` Line ${f.institution.line} keeps ${f.institution.name}: real institutions stay.` : ""}`
         : "Struck lines could fit any town; each replacement names a local place and the Qloo signal behind it.",
       primary: { href: firstSwapHref ?? firstTownHref, label: ft.swap ? `Open line ${ft.swap.line}` : "Open the check" },
-      secondary: f.institution ? { href: f.institution.href, label: "See a kept institution" } : undefined,
+      secondary: f.institution
+        ? { href: f.institution.href, label: useTemplate ? "See a kept line in the AI-written draft" : "See a kept institution" }
+        : undefined,
     },
     {
       title: "The committee memo",
@@ -302,7 +304,7 @@ export default async function GuidedPath() {
                           <Chevron />
                         </Link>
                         {s.secondary && (
-                          <Link href={s.secondary.href} className="jg-link">
+                          <Link href={s.secondary.href} className="lp-btn lp-btn-quiet jg-link">
                             {s.secondary.label}
                           </Link>
                         )}
