@@ -2872,3 +2872,21 @@ a:focus-visible .lp-chev {
     order: 2;
   }
 }
+
+/* A hero title holding "community‑benefits" with a non-breaking hyphen: the compound stays on one line,
+   so the title scales with the viewport before that word would overflow a phone. */
+@media (max-width: 1100px) {
+  .lp-h1.lp-h1-long {
+    font-size: min(3rem, 7.5vw);
+  }
+}
+@media (max-width: 600px) {
+  .lp-h1.lp-h1-long {
+    font-size: min(2.375rem, 7.5vw);
+  }
+}
+@media (max-width: 600px) {
+  .ui-band-h .ui-band-long {
+    font-size: min(2rem, 7.5vw);
+  }
+}

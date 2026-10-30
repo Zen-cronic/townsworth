@@ -23,7 +23,7 @@ import { HERO_TOWN, TOWNS, townBySlug } from "@/lib/towns";
 
 export const metadata: Metadata = {
   title: `Guided path · ${PRODUCT_NAME}`,
-  description: `See ${PRODUCT_NAME} work in two minutes: a finished example, the committee memo, the resident ballot, any host town, and the evidence with its limits.`,
+  description: `Watch a community-benefits plan get checked against its host town in five steps: the draft line by line, the costed committee memo, the resident ballot, any host town, and the evidence with its limits.`,
 };
 
 // Per request: never freeze a failed Qloo call into the page (see src/lib/qloo.ts).
@@ -230,13 +230,14 @@ export default async function GuidedPath() {
         <section className="gp-hero jg-hero" aria-labelledby="gp-h">
           <div className="lp-wrap jg-hero-grid">
           <div className="jg-hero-copy">
-            <p className="lp-kicker">Guided path · two minutes · nothing to sign up for</p>
-            <h1 id="gp-h" className="lp-h1">
-              See it work <span className="lp-tone">in two minutes.</span>
+            <p className="lp-kicker">Guided path · {steps.length} steps · about 2 minutes</p>
+            {/* A non-breaking hyphen keeps "community-benefits" on one line. */}
+            <h1 id="gp-h" className="lp-h1 lp-h1-long">
+              Watch a community‑benefits plan <span className="lp-tone">get checked against its host town.</span>
             </h1>
             <p className="lp-lede">
-              Five steps through a finished example, then a town of your choice. Every step opens the live product at the exact line
-              that matters. Begins with {town}, already checked line by line.
+              {town}, home to a {HERO_TOWN.sponsor} data center campus: its draft plan checked line by line, the costed committee memo, the
+              resident ballot, any town you type, then the evidence and its limits. Each step opens the live page.
             </p>
             <LiveDataNotice towns={proof.failedTowns} />
             <div className="jg-ctas">

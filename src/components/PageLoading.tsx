@@ -12,7 +12,7 @@ export function PageLoading({
   towns = true,
 }: {
   kicker: string;
-  title: string;
+  title: React.ReactNode;
   page?: "proof" | "judges" | "check";
   towns?: boolean;
 }) {
