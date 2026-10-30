@@ -67,7 +67,28 @@ export function ReachProof({ towns }: { towns: { slug: string; name: string; rea
           </p>
         </div>
       </div>
-      <div className="overflow-x-auto">
+      {/* Phones: one block per town, each age group as a label and its result. */}
+      <ul className="divide-y divide-hairline text-sm sm:hidden">
+        {towns.map((t) => (
+          <li key={t.slug} className="px-5 py-3">
+            <p className="font-medium">{t.name}</p>
+            <dl className="mt-2 grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-4 gap-y-2">
+              {LENSES.map((l) => {
+                const o = t.reach.lenses.find((x) => x.key === l.key);
+                return (
+                  <div key={l.key} className="contents">
+                    <dt className="text-xs text-muted">{sentence(l.label)}</dt>
+                    <dd>
+                      <Cell status={o?.status} place={o?.place} ranked={o?.ranked} fit={o?.fit} />
+                    </dd>
+                  </div>
+                );
+              })}
+            </dl>
+          </li>
+        ))}
+      </ul>
+      <div className="hidden overflow-x-auto sm:block">
         <table className="w-full min-w-[640px] text-sm">
           <thead>
             <tr className="border-b border-hairline text-[11px] uppercase tracking-wider text-muted">

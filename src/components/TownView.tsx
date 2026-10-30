@@ -176,7 +176,7 @@ function AuditLine({ row, index, sameAs, gloss }: { row: AuditRow; index: number
     <li id={`line-${num(index + 1)}`} tabIndex={-1} className={`${ROW} audit-row row-edge ${kept ? "is-kept" : "is-struck"}${row.verdict === "unverified" ? " is-unsure" : ""} scroll-mt-24`}>
       <span className="pt-0.5 font-mono text-xs tabular-nums text-muted">{num(index + 1)}</span>
       <div>
-        <DraftLine text={row.text} struck={!kept} />
+        <DraftLine text={row.text} struck={!kept} line={index + 1} />
         {row.verdict === "unverified" && (
           <p className="mt-1.5 flex flex-wrap items-center gap-2">
             <Chip tone="unsure">Can&apos;t confirm</Chip>
