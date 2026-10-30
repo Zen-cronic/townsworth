@@ -42,8 +42,9 @@ export function addPartnerTraits(profile: TownProfile, items: ProgramItem[]): vo
   }
 }
 
-// Asks Qloo for the partners' audience age profiles in one call (at most 15 places) and attaches each
-// row to its partner. A failure attaches nothing; it never throws.
+// Asks Qloo for the partners' audience age profiles (at most 15 places, in batches of 5; see
+// partnerDemographics) and attaches each row to its partner. A failed batch attaches nothing for its
+// own partners; the others still attach. It never throws.
 export async function addPartnerAges(profile: TownProfile, items: ProgramItem[]): Promise<void> {
   const matched = items.map((it) => ({ it, e: partnerEntity(it, profile.places) })).filter((m): m is { it: ProgramItem; e: QlooEntity } => !!m.e);
   const res = await partnerDemographics(matched.map((m) => m.e.id)).catch(() => null);

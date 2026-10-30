@@ -300,22 +300,25 @@ const AGE_CHUNK = 5;
 // favour the place. Only the age buckets are kept (see parseDemographics); gender is discarded. A
 // partner without a row has no profile, never a zero. A failed call returns no rows and its call
 // record, for the caller to keep apart from the town's own calls.
+// The first 15 ids in the caller's priority order are kept (audited swaps come first, so they win the
+// cap); the program is deterministic per town and draft, so the same draft picks the same 15. Only
+// then are they sorted, so those 15 always make the same batched requests.
 export async function partnerDemographics(ids: string[]): Promise<{ ages: Map<string, AgeProfile>; calls: QlooCall[] }> {
   const unique = [...new Set(ids.filter(Boolean))].slice(0, AGE_BATCH).sort();
   const ages = new Map<string, AgeProfile>();
-  const calls: QlooCall[] = [];
-  if (!unique.length) return { ages, calls };
+  if (!unique.length) return { ages, calls: [] };
   const batches: string[][] = [];
   for (let i = 0; i < unique.length; i += AGE_CHUNK) batches.push(unique.slice(i, i + AGE_CHUNK));
-  await Promise.all(
+  // Records come back in batch order (part 1, 2, 3), whichever answers first.
+  const calls: QlooCall[] = await Promise.all(
     batches.map(async (batch, i) => {
       const params = { "filter.type": "urn:demographics", "signal.interests.entities": batch.join(",") };
       const res = await qlooGet<unknown>("/v2/insights", params);
       const rows = res.ok ? parseDemographics(res.body) : new Map<string, AgeProfile>();
       const label = batches.length > 1 ? `audience age profile per partner (part ${i + 1} of ${batches.length})` : "audience age profile per partner";
-      calls.push({ label, params, status: res.status, ok: res.ok, count: rows.size, ms: res.ms });
       // Only ids that were asked about: an unexpected row is ignored.
       rows.forEach((v, k) => batch.includes(k) && ages.set(k, v));
+      return { label, params, status: res.status, ok: res.ok, count: rows.size, ms: res.ms };
     }),
   );
   return { ages, calls };

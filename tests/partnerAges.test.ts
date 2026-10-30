@@ -159,3 +159,16 @@ test("partnerEntity: matches a partner to its Qloo place by name, address and di
     assert.equal(e.name.split(" | ")[0], it.partner!.name);
   }
 });
+
+test("client: call records come back in batch order, whichever batch answers first", async () => {
+  process.env.QLOO_API_KEY ??= "test-key";
+  globalThis.fetch = (async (url: string) => {
+    const ids = new URL(url).searchParams.get("signal.interests.entities")!;
+    // The first batch answers last.
+    if (ids.startsWith("a")) await new Promise((r) => setTimeout(r, 30));
+    return new Response(JSON.stringify({ results: { demographics: [] } }));
+  }) as typeof fetch;
+  const ids = ["a", "b", "c", "d", "e", "f", "g"];
+  const res = await partnerDemographics(ids);
+  assert.deepEqual(res.calls.map((c) => c.label), ["audience age profile per partner (part 1 of 2)", "audience age profile per partner (part 2 of 2)"]);
+});
