@@ -8,6 +8,7 @@ import { StatusPill } from "@/components/dashboard/StatusPill";
 import type { PickRef } from "@/lib/plan";
 import { computeProof } from "@/lib/proof";
 import { PRODUCT_NAME } from "@/components/landing/brand";
+import { favourRank } from "@/components/ui/labels";
 import { ReachProof } from "@/components/qloo/ReachProof";
 
 export const metadata: Metadata = {
@@ -60,7 +61,7 @@ function Pick({ p, qloo = false }: { p?: PickRef; qloo?: boolean }) {
       <span className="font-medium text-ink">{p.name}</span>
       <span className="block font-mono text-[11px] tabular-nums text-muted">
         {p.distanceKm != null && `${p.distanceKm} km · `}
-        <span className={qloo && p.affinityRank != null ? "qloo-rank" : undefined}>{p.affinityRank != null ? `#${p.affinityRank} local affinity` : "no affinity score"}</span>
+        <span className={qloo && p.affinityRank != null ? "qloo-rank" : undefined}>{p.affinityRank != null ? favourRank(p.affinityRank) : "not ranked by Qloo"}</span>
         {p.city && ` · ${p.city}`}
       </span>
     </span>
@@ -77,8 +78,8 @@ export default async function ProofPage() {
       ? `${PRODUCT_NAME} put in no new partners in this run.`
       : `${totals.gnReplacementsLocalPct === 100 ? "Every one" : `${totals.gnReplacementsLocalPct}%`} of the ${totals.gnReplacements} partners ${PRODUCT_NAME} puts in exists locally in Qloo's places${
           totals.gnReplacementsAllRanked
-            ? " and is ranked by local affinity."
-            : `; ${totals.gnReplacementsRankedPct}% are ranked by local affinity, the rest listed by distance where Qloo has no affinity score.`
+            ? " and is ranked by Qloo for how much locals favour it."
+            : `; ${totals.gnReplacementsRankedPct}% are ranked by Qloo for how much locals favour them, the rest listed by distance where Qloo has no rank.`
         }`;
 
   return (
@@ -134,7 +135,7 @@ export default async function ProofPage() {
               n="4"
               big={`${totals.affinityChangedPct}%`}
               label="of picks change without Qloo's taste ranking (ordered by distance, like a nearby-places directory)"
-              note={`Same candidate places, same venue-fit and host-community rules; only the order differs: Qloo's local affinity vs distance from the site. The share of ${PRODUCT_NAME}'s picks a distance-only directory would not make.`}
+              note={`Same candidate places, same venue-fit and host-community rules; only the order differs: how much locals favour each place (Qloo) vs distance from the site. The share of ${PRODUCT_NAME}'s picks a distance-only directory would not make.`}
             />
           </section>
         </div>
@@ -144,7 +145,7 @@ export default async function ProofPage() {
           <div className="border-b border-rule px-5 py-4 sm:px-6">
             <h2 id="qloo-changes" className="font-semibold">What Qloo changes</h2>
             <p className="mt-1 text-sm leading-relaxed text-muted">
-              Each pick Qloo&apos;s local-affinity ranking makes that a distance-only ranking of the same candidates would not, next to the pick the
+              Each pick that ranking by what locals favour (Qloo) makes and ranking by distance alone would not, next to the pick the
               distance ranking makes instead. Same venue-fit and host-community rules.
             </p>
           </div>
@@ -263,7 +264,7 @@ export default async function ProofPage() {
                       ["Institutions", String(t.llmInstitutional)],
                       [`${PRODUCT_NAME} local partners`, String(t.gnPartners)],
                       ["Also named by AI alone", String(t.gnAlsoNamedByLlm)],
-                      ["Changed by affinity", `${t.gnPicksChangedByAffinity} / ${t.gnPicks}`],
+                      ["Changed by Qloo", `${t.gnPicksChangedByAffinity} / ${t.gnPicks}`],
                     ] as const
                   ).map(([k, v]) => (
                     <div key={k} className="contents">
@@ -285,7 +286,7 @@ export default async function ProofPage() {
                   <th scope="col" className="px-4 py-2.5 text-right font-medium">Institutions</th>
                   <th scope="col" className="qloo-col border-l border-hairline px-4 py-2.5 text-right font-medium">{PRODUCT_NAME} local partners</th>
                   <th scope="col" className="qloo-col px-4 py-2.5 text-right font-medium">Also named by AI alone</th>
-                  <th scope="col" className="qloo-col px-4 py-2.5 pr-6 text-right font-medium">Changed by affinity</th>
+                  <th scope="col" className="qloo-col px-4 py-2.5 pr-6 text-right font-medium">Changed by Qloo</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-hairline">

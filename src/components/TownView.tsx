@@ -10,7 +10,7 @@ import { AuditTools } from "@/components/town/AuditTools";
 import { DraftLine } from "@/components/town/DraftLine";
 import { TownSchematic } from "@/components/town/TownSchematic";
 import { keptBreakdown } from "@/components/ui/keptBreakdown";
-import { isQlooSignal, kindOf, LOCAL_AFFINITY, shortOrg, shortSignal, shortTermHit } from "@/components/ui/labels";
+import { favourRank, isQlooSignal, kindOf, LOCAL_AFFINITY, shortOrg, shortSignal, shortTermHit } from "@/components/ui/labels";
 import { LiveDataNotice } from "@/components/LiveDataNotice";
 import { AudienceReach } from "@/components/qloo/AudienceReach";
 import { AgeStrip } from "@/components/qloo/AgeStrip";
@@ -120,14 +120,15 @@ function Applicants({ items }: { items: ProgramItem[] }) {
       <span className="font-medium text-ink">Suggested applicants:</span>{" "}
       {named.map((a) => {
         const signal = a.provenance[0]?.signal ?? "";
-        const rank = signal.match(LOCAL_AFFINITY)?.[1] ?? a.partner!.affinityRank;
+        const m = signal.match(LOCAL_AFFINITY);
+        const rank = m?.[1] ?? a.partner!.affinityRank;
         return (
           <span key={a.id} className="block">
             <span className="text-ink">{shortOrg(a.partner!.name)}</span>
             {rank != null && (
               <>
                 {" "}
-                <Chip tone="qloo" className="align-middle">#{rank} local affinity</Chip>
+                <Chip tone="qloo" className="align-middle">{favourRank(rank, m?.[2])}</Chip>
               </>
             )}
           </span>
@@ -321,7 +322,7 @@ export function TownView({ run }: { run: TownRun }) {
     firstLine.set(key, i);
     return undefined;
   });
-  // The first "#N local affinity" chip on the page carries a one-time gloss inside its "Why".
+  // The first "#N of 50 places locals favour" chip on the page carries a one-time gloss inside its "Why".
   const glossIndex = audit.findIndex((r) => LOCAL_AFFINITY.test((r.replacement ?? r.alongside)?.provenance[0]?.signal ?? ""));
   const glossRank = glossIndex >= 0 ? (audit[glossIndex].replacement ?? audit[glossIndex].alongside)!.provenance[0].signal.match(/#(\d+)/)?.[1] : undefined;
   const gloss = glossRank ? `#${glossRank} of ${profile.placeCount} places within 15 km, ranked by Qloo for how strongly locals favour them.` : undefined;
@@ -543,7 +544,7 @@ export function TownView({ run }: { run: TownRun }) {
           {(failed > 0 || partners.length > 0) && (
             <Card className="px-5 py-5 sm:px-6">
               <h2 className="ui-h3">Local partners, by distance</h2>
-              <p className="mt-1 font-mono text-xs text-muted">Dot: distance from the site · #: Qloo local affinity rank · hollow: no rank</p>
+              <p className="mt-1 font-mono text-xs text-muted">Dot: distance from the site · #: rank among places locals favour (Qloo) · hollow: not ranked</p>
               <div className="mt-4">
                 {failed ? (
                   <LiveDataNotice towns={[town.name]} subject="the partner list" reloadHref={planHref(source)} />
@@ -587,7 +588,7 @@ export function TownView({ run }: { run: TownRun }) {
           <SectionHeader id="favours-title" size="sm" title={`What ${town.name} favours`} lede="Qloo taste data, aggregate for the town" />
           <div className="taste-panel lp-grain">
             {topPlaces.length > 0 && (
-              <ol className="taste-places" aria-label="Places locals favour most, by Qloo affinity rank">
+              <ol className="taste-places" aria-label="Places locals favour most, in Qloo's order">
                 {topPlaces.map(({ p, meta }) => (
                   <li key={p.id}>
                     {meta?.affinityRank ? <span className="taste-rank">#{meta.affinityRank}</span> : <span className="taste-rank is-none">by distance</span>}

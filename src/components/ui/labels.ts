@@ -1,18 +1,26 @@
 // Display labels shared by the landing, town and memo surfaces. Presentation only; no engine logic.
 
-// A place's affinity signal as the plan writes it: "Local favourite · #6 by local affinity".
-export const LOCAL_AFFINITY = /^(?:Qloo place|Local favourite) · #(\d+) by local affinity$/;
+// A place's local-favour signal as the plan writes it: "Local favourite · #6 of 50 places locals
+// favour". The older form "#6 by local affinity" (no count) still parses. [1] rank, [2] of how many.
+export const LOCAL_AFFINITY = /^(?:Qloo place|Local favourite) · #(\d+)(?: by local affinity| of (\d+) places locals favour)$/;
 
-// The signal in short form: "#6 local affinity"; other signals lose the "Qloo " prefix.
+// A rank in plain words for a cold reader: "#6 of 50 places locals favour", or "Locals' #6 place"
+// when the count is unknown.
+export const favourRank = (rank: number | string, of?: number | string) => (of ? `#${rank} of ${of} places locals favour` : `Locals' #${rank} place`);
+
+// The signal in short form: "#6 of 50 places locals favour", "Locals' #2 artist". Qloo's "brand"
+// type covers teams, universities and museums alike, so it never shows: a brand reads "Locals' #2
+// favourite". Other signals lose the "Qloo " prefix.
 export function shortSignal(signal?: string): string {
   if (!signal) return "Qloo signal";
-  // Qloo's "brand" type covers teams, universities and museums alike, so it reads as wrong data:
-  // "Qloo brand · #2 locally" shows as "#2 locally". Artist, TV show and podcast stay.
-  return signal
-    .replace(LOCAL_AFFINITY, "#$1 local affinity")
-    .replace(/^Qloo place\b/, "Local place")
-    .replace(/^Qloo brand · /, "")
-    .replace(/^Qloo /, "");
+  const place = signal.match(LOCAL_AFFINITY);
+  if (place) return favourRank(place[1], place[2]);
+  const taste = signal.match(/^Qloo (?:· locals' #(\d+) (.+)|(brand|artist|TV show|podcast) · #(\d+) locally)$/);
+  if (taste) {
+    const [rank, type] = taste[1] ? [taste[1], taste[2]] : [taste[4], taste[3]];
+    return `Locals' #${rank} ${type === "brand" ? "favourite" : type}`;
+  }
+  return signal.replace(/^Qloo place\b/, "Local place").replace(/^Qloo /, "");
 }
 
 // Whether a provenance signal came from Qloo (and so takes the Qloo chip). Every Qloo-sourced signal

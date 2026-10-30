@@ -272,7 +272,7 @@ export function placesNear(lat: number, lon: number, radiusM = 15000, take = 50,
   if (ranked) params["signal.location"] = point(lat, lon);
   params.take = String(take);
   const km = Math.round(radiusM / 1000);
-  return insights(ranked ? `places within ${km} km, ranked by local affinity` : `places within ${km} km, by distance (top-up)`, params, "place");
+  return insights(ranked ? `places within ${km} km, ranked by how much locals favour them` : `places within ${km} km, by distance (top-up)`, params, "place");
 }
 
 // Age-group and life-stage views of the same places query. Each lens re-ranks the places within the

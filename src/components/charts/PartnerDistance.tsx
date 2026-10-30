@@ -41,11 +41,11 @@ export function PartnerDistance({ points }: { points: PartnerPoint[] }) {
       </div>
       <div className="sr-only">
         <table>
-        <caption>Local partners by Qloo affinity rank, with distance from the site</caption>
+        <caption>Local partners by how much locals favour them (Qloo), with distance from the site</caption>
         <thead>
           <tr>
             <th scope="col">Partner</th>
-            <th scope="col">Affinity rank</th>
+            <th scope="col">Rank among places locals favour</th>
             <th scope="col">Distance</th>
           </tr>
         </thead>
@@ -53,7 +53,7 @@ export function PartnerDistance({ points }: { points: PartnerPoint[] }) {
           {points.map((p) => (
             <tr key={p.name}>
               <th scope="row">{p.name}</th>
-              <td>{p.affinityRank != null ? `#${p.affinityRank}` : "no affinity score"}</td>
+              <td>{p.affinityRank != null ? `#${p.affinityRank}` : "not ranked by Qloo"}</td>
               <td>{p.distanceKm != null ? kmLabel(p.distanceKm) : "unknown"}</td>
             </tr>
           ))}

@@ -188,19 +188,21 @@ export function placeProvenance(e: QlooEntity, why: string, profile: TownProfile
   const rank = meta?.affinityRank;
   return [
     {
-      signal: rank ? `Local favourite · #${rank} by local affinity` : `Local place (Qloo) · ${km(e.distanceM) ?? "?"} km away`,
+      signal: rank ? `Local favourite · #${rank} of ${profile.placeCount} places locals favour` : `Local place (Qloo) · ${km(e.distanceM) ?? "?"} km away`,
       detail: `${
         rank
-          ? `#${rank} by local affinity of ${profile.placeCount} Qloo places within 15 km. `
-          : "Qloo has no local-affinity score for this place, so it is listed by distance. "
+          ? `#${rank} of the ${profile.placeCount} places within 15 km, in Qloo's order of how strongly locals favour them. `
+          : "Qloo doesn't rank this place for how much locals favour it, so it is listed by distance. "
       }${km(e.distanceM) ?? "?"} km from the site, ${where}. ${why}${tags ? `. Tagged: ${tags}` : ""}${e.rating ? `. Rating ${e.rating.toFixed(1)}` : ""}`,
     },
   ];
 }
 
+// "Qloo · locals' #2 artist". Qloo's "brand" type covers teams, universities and museums alike, so
+// a brand reads as a plain favourite rather than naming the type.
 function signalProvenance(s: Signal, typeLabel: string): Provenance {
   return {
-    signal: `Qloo ${typeLabel} · #${s.rank} locally`,
+    signal: `Qloo · locals' #${s.rank} ${typeLabel === "brand" ? "favourite" : typeLabel}`,
     detail: s.distinct ? "Stands out here: not in the national top 50 or any big-metro list" : `Also popular nationally (#${s.nationalRank})`,
   };
 }

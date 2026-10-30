@@ -113,7 +113,7 @@ export default async function SourcesPage() {
     { k: "New", text: `${t.gnNovelPct}% of ${PRODUCT_NAME}'s local partners never appear in the AI-alone plans.`, bars: [{ label: PRODUCT_NAME, pct: t.gnNovelPct, tone: "gn" }] },
     {
       k: "Ranking",
-      text: `${t.affinityChangedPct}% of picks change when the same candidates are ordered by distance instead of Qloo's local affinity.`,
+      text: `${t.affinityChangedPct}% of picks change when the same candidates are ordered by distance instead of by how much locals favour them (Qloo).`,
       bars: [{ label: PRODUCT_NAME, pct: t.affinityChangedPct, tone: "gn" }],
     },
     {
@@ -325,7 +325,7 @@ export default async function SourcesPage() {
                   <li className="is-qloo">
                     <span className="src-k">Qloo</span>
                     <span>
-                      Insights API: places within 15 km ranked by local affinity, plus local taste for brands, artists, TV and podcasts. About 25
+                      Insights API: places within 15 km ranked by how much locals favour them, plus local taste for brands, artists, TV and podcasts. About 25
                       calls per town; aggregate for the town, never about a person.
                     </span>
                   </li>
