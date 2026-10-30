@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { primaryCta } from "@/components/dashboard/ui";
+import { primaryCta, tertiaryCta } from "@/components/dashboard/ui";
 import { ballotKey, isValidBallot, type BallotItem, type StoredBallot } from "@/lib/ballot";
 import { DistanceLine } from "./ItemMeta";
 
@@ -24,6 +24,8 @@ export function BallotForm({ slug, townName, items }: { slug: string; townName: 
   const [status, setStatus] = useState("");
   const [saveError, setSaveError] = useState(false);
   const [pending, setPending] = useState(false);
+  // The card moved last keeps a quiet tint until the next move, so it's easy to follow.
+  const [moved, setMoved] = useState<string | null>(null);
   const focusNext = useRef<string | null>(null);
   const buttons = useRef(new Map<string, HTMLButtonElement | null>());
   const byId = new Map(items.map((i) => [i.id, i]));
@@ -59,7 +61,16 @@ export function BallotForm({ slug, townName, items }: { slug: string; townName: 
     // Keep focus on the moved item; switch arrows when it reaches the top or bottom.
     const dir = to === 0 ? "down" : to === next.length - 1 ? "up" : delta < 0 ? "up" : "down";
     focusNext.current = `${id}:${dir}`;
+    setMoved(id);
     setStatus(`${byId.get(id)?.title ?? "Item"} moved to position ${to + 1} of ${next.length}.`);
+  }
+
+  const shortlistOrder = items.map((i) => i.id);
+  const reordered = order.some((id, i) => id !== shortlistOrder[i]);
+  function reset() {
+    setOrder(shortlistOrder);
+    setMoved(null);
+    setStatus("Back to the shortlist order.");
   }
 
   function submit(e: React.FormEvent) {
@@ -78,15 +89,24 @@ export function BallotForm({ slug, townName, items }: { slug: string; townName: 
 
   return (
     <form onSubmit={submit} className="mt-6">
-      <p id="rank-help" className="text-sm text-muted">
-        Use the arrows to move an idea up or down. Top means &ldquo;do this first.&rdquo;
-      </p>
+      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <p id="rank-help" className="text-sm text-muted">
+          Use the arrows to move an idea up or down. Top means &ldquo;do this first.&rdquo;
+        </p>
+        <button type="button" onClick={reset} disabled={!reordered} className={`${tertiaryCta} disabled:cursor-not-allowed disabled:text-muted`}>
+          Reset order
+        </button>
+      </div>
       <ol aria-describedby="rank-help" className="mt-3 space-y-2.5">
         {order.map((id, i) => {
           const it = byId.get(id);
           if (!it) return null;
           return (
-            <li key={id} className="flex items-stretch gap-3 rounded-md border border-rule bg-paper p-3 sm:p-4">
+            <li
+              key={id}
+              data-moved={moved === id || undefined}
+              className="flex items-stretch gap-3 rounded-md border border-rule bg-paper p-3 transition-colors duration-200 data-[moved]:border-ink data-[moved]:bg-concrete motion-reduce:transition-none sm:p-4"
+            >
               <span aria-hidden className="w-6 shrink-0 pt-0.5 text-right font-mono text-lg font-medium tabular-nums leading-6">
                 {i + 1}
               </span>
