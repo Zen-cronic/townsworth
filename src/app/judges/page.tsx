@@ -15,7 +15,7 @@ import { Figure } from "@/components/dashboard/Figure";
 import { computeProof } from "@/lib/proof";
 import { runTown } from "@/lib/run";
 import { HERO_SAMPLE_ID, sampleCheckHref, samplePlanById } from "@/lib/samplePlans";
-import { HERO_TOWN, TOWNS } from "@/lib/towns";
+import { HERO_TOWN, TOWNS, townBySlug } from "@/lib/towns";
 
 export const metadata: Metadata = {
   title: `Guided path · ${PRODUCT_NAME}`,
@@ -47,6 +47,8 @@ export default async function GuidedPath() {
   const shortlist = selectShortlist(run.program.items);
   const usd = (n: number) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n);
   const sample = samplePlanById(HERO_SAMPLE_ID);
+  const sampleHome = sample?.town ? townBySlug(sample.town) : undefined;
+  const sampleTownName = sampleHome ? `${sampleHome.name}, ${sampleHome.region}` : "any town";
   const FACILITY = { "data center": "Data center", fab: "Chip fab", nuclear: "Nuclear", plant: "Plant" } as const;
 
   const steps: Step[] = [
@@ -263,7 +265,7 @@ export default async function GuidedPath() {
                       <h2 id="own-plan-h" className="lp-h2">
                         Check a plan of your own
                       </h2>
-                      <p>No plan to hand? Check our sample draft for {town}: it fills the form, and you press Check this draft.</p>
+                      <p>No plan to hand? Check our sample draft for {sampleTownName}: it fills the form, and you press Check this draft.</p>
                       <div className="lp-ctas">
                         <Link href={sampleCheckHref(sample.id)} className="lp-btn lp-btn-primary">
                           Check the sample plan
