@@ -74,7 +74,7 @@
   font-variant-numeric: tabular-nums;
 }
 .jg .jg-overview-v.is-pen {
-  color: var(--hivis-text);
+  color: var(--hivis);
 }
 .jg .jg-overview-k {
   font-size: 0.9375rem;
