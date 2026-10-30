@@ -428,11 +428,19 @@
 /* Print stays black on white: fills drop to outlines and blue type to ink. */
 @media print {
   /* Colour by layer prints as plain paper and ink. */
-  :root :is(.memo-figs > .memo-cell, .memo-topics li, #program, .memo-area-head > *, .memo-signal, .ui-stats > .ui-stat, .src-section#funds, .src-list li.is-qloo, .lp-town .lp-town-pick, .ui-card[aria-labelledby="step1-h"], .check-results [aria-labelledby="adds-title"] > :first-child, .check-results [aria-labelledby="fund-title"]) {
+  :root :is(#program, .memo-area-head > *, .memo-signal, .ui-stats > .ui-stat, .src-section#funds, .src-list li.is-qloo, .lp-town .lp-town-pick, .ui-card[aria-labelledby="step1-h"], .check-results [aria-labelledby="adds-title"] > :first-child, .check-results [aria-labelledby="fund-title"]) {
     background: none;
     box-shadow: none;
   }
   :root :is(.memo-area-head > *, .memo-area-head .text-muted, .memo-signal, .memo-amount, .memo-section-n, .memo-figs .memo-cell-v, .ui-stat-v, .bl .bl-n, .bl .bl-area, .src-list li.is-qloo .src-k) {
+    color: var(--ink);
+  }
+  :root .memo-figs > .memo-cell:nth-child(n),
+  :root .memo-topics li {
+    background: var(--paper);
+  }
+  :root .memo-figs > .memo-cell:nth-child(n) .memo-cell-v,
+  :root .ui-stats > .ui-stat:nth-child(n) > .ui-stat-v {
     color: var(--ink);
   }
   :root .memo-area-head > * { border-bottom: 1px solid var(--ink); padding-inline: 0; }
