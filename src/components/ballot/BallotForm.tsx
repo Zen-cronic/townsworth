@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { primaryCta } from "@/components/dashboard/ui";
 import { ballotKey, isValidBallot, type BallotItem, type StoredBallot } from "@/lib/ballot";
-import { AreaLabel, DistanceLine, itemNote } from "./ItemMeta";
+import { AreaLabel, DistanceLine } from "./ItemMeta";
 
 function Arrow({ dir }: { dir: "up" | "down" }) {
   return (
@@ -89,13 +89,15 @@ export function BallotForm({ slug, townName, items }: { slug: string; townName: 
 
   return (
     <form onSubmit={submit}>
-      <p id="rank-help" className="text-sm text-muted">
-        Use the arrows to move an idea up or down. Top means &ldquo;do this first.&rdquo;{" "}
+      <div className="flex flex-wrap items-center justify-between gap-x-4">
+        <p id="rank-help" className="text-sm text-muted">
+          Use the arrows to move an idea up or down. Top means &ldquo;do this first.&rdquo;
+        </p>
         <button type="button" onClick={reset} disabled={!reordered} className="bl-reset">
           Reset order
         </button>
-      </p>
-      <ol aria-describedby="rank-help" className="bl-rows mt-3">
+      </div>
+      <ol aria-describedby="rank-help" className="bl-rows mt-1">
         {order.map((id, i) => {
           const it = byId.get(id);
           if (!it) return null;
@@ -114,7 +116,7 @@ export function BallotForm({ slug, townName, items }: { slug: string; townName: 
                   <span className="sr-only">Position {i + 1}: </span>
                   {it.title}
                 </h3>
-                {itemNote(it) && <p className="mt-1 text-sm leading-relaxed text-muted">{itemNote(it)}</p>}
+                {it.note && <p className="mt-1 text-sm leading-relaxed text-muted">{it.note}</p>}
                 <DistanceLine item={it} townName={townName} />
               </div>
               <div className="bl-moves flex shrink-0 flex-col">

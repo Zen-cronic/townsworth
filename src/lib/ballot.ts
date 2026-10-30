@@ -42,7 +42,7 @@ export const SHORTLIST_MIN = 3;
 export const SIMULATED_BALLOTS = 120;
 
 // Only buckets residents experience directly go on the ballot. A thin town gets a short ballot, not padding.
-const PRIMARY: Bucket[] = ["grants", "events"];
+export const PRIMARY: Bucket[] = ["grants", "events"];
 
 const MONEY = /\$|\b\d[\d,.]*\s?(k|m|usd|cad|dollars?)\b/gi;
 const stripMoney = (s: string) => s.replace(MONEY, "").replace(/\s{2,}/g, " ").trim();
@@ -57,13 +57,13 @@ function plainTitle(it: ProgramItem): string {
   return it.title;
 }
 
+// A note only where it says something the row doesn't. Grants and events would all share one
+// gloss, so their area label, partner and place carry them instead.
 function plainNote(it: ProgramItem): string | undefined {
   if (it.id === "events-music") {
     const theme = it.detail.match(/^Theme signal:\s*([^.]+)\./)?.[1];
     return theme ? `Music in the style the town listens to (${theme}). No artist is booked.` : "Music in the style the town listens to. No artist is booked.";
   }
-  if (it.bucket === "events") return "Free and open to everyone, at a local venue.";
-  if (it.bucket === "grants") return "Funding for the place to run something for residents.";
   if (it.bucket === "training") return "Hiring and apprenticeship information where people already gather.";
   if (it.bucket === "procurement") return "Local businesses get first chance to supply the program.";
   return undefined;

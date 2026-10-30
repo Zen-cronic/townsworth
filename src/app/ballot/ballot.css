@@ -21,10 +21,18 @@
   gap: 64px;
   align-items: start;
 }
+/* Held in view while the list scrolls; a side taller than the viewport scrolls on its own, so its
+   actions stay reachable. */
 .bl .bl-side {
   position: sticky;
   top: calc(var(--l-hdr, 56px) + 32px);
   max-width: 30rem;
+  max-height: calc(100dvh - var(--l-hdr, 56px) - 64px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  /* Room for focus rings inside the scroll box. */
+  padding: 4px;
+  margin: -4px;
 }
 
 /* Rows */
@@ -67,7 +75,11 @@
   color: var(--line-fainter);
 }
 .bl .bl-reset {
-  font: inherit;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  flex-shrink: 0;
+  font-size: 0.875rem;
   color: var(--ink);
   text-decoration: underline;
   text-decoration-color: var(--rule);
@@ -138,6 +150,8 @@
   .bl .bl-side {
     position: static;
     max-width: none;
+    max-height: none;
+    overflow: visible;
   }
 }
 @media (max-width: 600px) {
