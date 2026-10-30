@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Download, Notice } from "@/components/dashboard/Icons";
+import { Download, Notice } from "@/components/dashboard/Icons";
 import { StatusPill } from "@/components/dashboard/StatusPill";
 import { ExternalLink } from "@/components/integrations/SessionCalendarLinks";
 import { gmailComposeUrl, outlookComposeUrl } from "@/lib/integrations";
@@ -54,13 +54,28 @@ function describe(t: TraceStep): { text: string; ok: boolean } {
   }
 }
 
-function Rule({ ok, children }: { ok: boolean; children: React.ReactNode }) {
-  return (
-    <li className={`inline-flex items-center gap-1 ${ok ? "text-ok-text" : "text-amber"}`}>
-      {ok ? <Check className="h-3 w-3" /> : <Notice className="h-3 w-3" />}
-      {children}
-    </li>
-  );
+// Every check a draft went through, in plain words. Passed ones sit behind one status; a failed one
+// (such as a local signal that couldn't be verified) stays on the page in the warning tone.
+function draftChecks(d: AgentDraft, sponsor: string): { ok: boolean; text: string }[] {
+  const out: { ok: boolean; text: string }[] = [];
+  if (d.rules) {
+    out.push(
+      { ok: d.rules.sponsorInBody, text: `Names ${sponsor} in the email` },
+      { ok: d.rules.sponsorInSignature, text: `Signed for ${sponsor}` },
+      { ok: !d.rules.topic, text: d.rules.topic ? `Mentioned ${d.rules.topic}` : "No land-use, vote, political or religious topics" },
+      { ok: d.rules.inProgram, text: "Partner is in the program" },
+    );
+  }
+  if (d.independent?.found) {
+    out.push({
+      ok: true,
+      text: `Confirmed independently in OpenStreetMap${d.independent.osmName ? `: ${d.independent.osmName}` : ""}${d.independent.km != null ? `, ${d.independent.km} km from the site` : ""}${d.independent.by === "code" ? " (checked by code; the agent skipped it)" : ""}`,
+    });
+  }
+  if (d.rules && d.checked === "passed" && d.localSignal) {
+    out.push({ ok: !!d.signalVerified, text: d.signalVerified ? `Local signal: ${d.localSignal}` : `Local signal not verified: ${d.localSignal}` });
+  }
+  return out;
 }
 
 export function AgentDrafts({ slug, fund }: { slug: string; fund: number }) {
@@ -96,12 +111,11 @@ export function AgentDrafts({ slug, fund }: { slug: string; fund: number }) {
     <section data-testid="agent-drafts" aria-busy={state === "loading"} className="no-print mt-10 scroll-mt-24 rounded-lg border border-rule bg-paper">
       <div className="flex flex-wrap items-start justify-between gap-4 px-5 py-5 sm:px-6">
         <div className="max-w-xl">
-          <p className="font-mono text-[11px] uppercase tracking-wider text-muted">Next step</p>
+          <p className="text-[13px] font-semibold text-muted">Next step</p>
           <h2 className="mt-1 font-semibold tracking-tight">Partner outreach</h2>
           <p className="mt-1 text-sm text-muted">
-            An OpenAI agent reads the decided program, picks partners from at least two buckets, checks each one independently in OpenStreetMap,
-            and drafts a first email that uses one local signal. Rules check every draft before you see it, including that it names the sponsor.
-            Nothing is sent.
+            An OpenAI agent picks partners from the program, confirms each one in OpenStreetMap and drafts a first email. Rules check every draft,
+            including that it names the sponsor. Nothing is sent.
           </p>
         </div>
         <button
@@ -168,24 +182,24 @@ export function AgentDrafts({ slug, fund }: { slug: string; fund: number }) {
               <p className="text-sm leading-relaxed">{result.summary}</p>
               {activity.length > 0 && (
                 <div>
-                  <p className="text-[11px] font-medium uppercase tracking-wider text-muted">What the agent checked</p>
+                  <p className="text-[13px] font-semibold">What the agent checked</p>
                   <ol className="mt-2 space-y-1.5 text-xs text-muted" aria-label="What the agent checked">
-                    {activity.map((a) => (
-                      <li key={a.text} className={`flex gap-2 ${a.ok ? "" : "text-amber"}`}>
-                        {a.ok ? <Check className="mt-0.5 h-3 w-3 shrink-0 text-ok" /> : <Notice className="mt-0.5 h-3 w-3 shrink-0 text-amber" />}
-                        {a.text}
+                    {activity.map((a, i) => (
+                      <li key={a.text} className={`grid grid-cols-[1.25rem_1fr] ${a.ok ? "" : "text-amber"}`}>
+                        {a.ok ? <span className="font-mono tabular-nums">{i + 1}</span> : <Notice className="mt-0.5 h-3 w-3 shrink-0 text-amber" />}
+                        <span>{a.text}</span>
                       </li>
                     ))}
                   </ol>
                   {(result.rejected?.length ?? 0) > 0 && (
                     <>
-                      <p className="mt-4 text-[11px] font-medium uppercase tracking-wider text-muted">Dropped</p>
+                      <p className="mt-4 text-[13px] font-semibold">Dropped</p>
                       <ul className="mt-2 space-y-1.5 text-xs text-amber" aria-label="Partners the agent dropped">
                         {result.rejected!.map((r) => (
                           <li key={r.partner} className="flex gap-2">
                             <Notice className="mt-0.5 h-3 w-3 shrink-0" />
                             <span>
-                              Couldn&apos;t confirm <span className="font-medium">{r.partner}</span> independently. {r.reason}
+                              <span className="font-medium">{r.partner}</span>: {r.reason}
                             </span>
                           </li>
                         ))}
@@ -198,7 +212,11 @@ export function AgentDrafts({ slug, fund }: { slug: string; fund: number }) {
             </div>
             {result.drafts?.length ? (
               <ul className="divide-y divide-hairline border-t border-hairline">
-                {result.drafts.map((d, i) => (
+                {result.drafts.map((d, i) => {
+                  const checks = draftChecks(d, sponsor);
+                  const passed = checks.filter((c) => c.ok);
+                  const failed = checks.filter((c) => !c.ok);
+                  return (
                   <li key={i} className="px-5 py-5 sm:px-6">
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div className="min-w-0">
@@ -209,7 +227,18 @@ export function AgentDrafts({ slug, fund }: { slug: string; fund: number }) {
                         <p className="mt-0.5 font-medium">{d.subject}</p>
                       </div>
                       {d.checked === "passed" ? (
-                        <StatusPill tone="ok">Passed rule check</StatusPill>
+                        <details className="rp-more rule-menu">
+                          <summary aria-label={`Passed ${passed.length} ${passed.length === 1 ? "check" : "checks"}: show them`}>
+                            <StatusPill tone="ok">
+                              Passed {passed.length} {passed.length === 1 ? "check" : "checks"}
+                            </StatusPill>
+                          </summary>
+                          <ul aria-label="Rule check" className="cal-menu-panel space-y-1.5 text-xs text-muted">
+                            {passed.map((c) => (
+                              <li key={c.text}>{c.text}</li>
+                            ))}
+                          </ul>
+                        </details>
                       ) : (
                         <StatusPill tone="warn">Replaced by template</StatusPill>
                       )}
@@ -219,39 +248,22 @@ export function AgentDrafts({ slug, fund }: { slug: string; fund: number }) {
                         <span className="text-muted">Why the agent chose it:</span> {d.reason}
                       </p>
                     )}
-                    {d.independent &&
-                      (d.independent.found ? (
-                        <p className="mt-1 flex gap-1.5 text-xs text-ok-text">
-                          <Check className="mt-0.5 h-3 w-3 shrink-0" />
-                          Confirmed independently in OpenStreetMap{d.independent.osmName ? `: ${d.independent.osmName}` : ""}
-                          {d.independent.km != null ? `, ${d.independent.km} km from the site` : ""}
-                          {d.independent.by === "code" ? " (checked by code; the agent skipped it)" : ""}
-                        </p>
-                      ) : (
+                    {d.independent && !d.independent.found && (
                         <p className="mt-1 flex gap-1.5 text-xs text-amber">
                           <Notice className="mt-0.5 h-3 w-3 shrink-0" />
                           Couldn&apos;t confirm {d.partner} independently
                           {d.independent.unavailable ? " (OpenStreetMap didn't answer)" : " (not in OpenStreetMap within 25 km)"}. Check the contact before
                           sending.
                         </p>
-                      ))}
+                      )}
                     {d.note && <p className="mt-1 text-xs text-amber">{d.note}</p>}
                     <pre className="mt-3 whitespace-pre-wrap rounded-md bg-concrete/60 p-4 font-sans text-sm leading-relaxed text-ink/90">{d.body}</pre>
-                    {d.rules && (
-                      <ul aria-label="Rule check" className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs">
-                        <Rule ok={d.rules.sponsorInBody}>Names {sponsor} in the email</Rule>
-                        <Rule ok={d.rules.sponsorInSignature}>Signed for {sponsor}</Rule>
-                        <Rule ok={!d.rules.topic}>{d.rules.topic ? `Mentioned ${d.rules.topic}` : "No land-use, vote, political or religious topics"}</Rule>
-                        <Rule ok={d.rules.inProgram}>Partner is in the program</Rule>
-                        {d.checked === "passed" && (
-                          d.localSignal ? (
-                            <Rule ok={d.signalVerified}>{d.signalVerified ? `Local signal: ${d.localSignal}` : `Local signal not verified: ${d.localSignal}`}</Rule>
-                          ) : (
-                            <Rule ok>No local signal needed for this email</Rule>
-                          )
-                        )}
-                      </ul>
-                    )}
+                    {failed.map((c) => (
+                      <p key={c.text} className="mt-2 flex gap-1.5 text-xs text-amber">
+                        <Notice className="mt-0.5 h-3 w-3 shrink-0" />
+                        {c.text}
+                      </p>
+                    ))}
                     {/* Compose links leave "to" empty: no partner email address is known. */}
                     <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
                       <a
@@ -270,7 +282,8 @@ export function AgentDrafts({ slug, fund }: { slug: string; fund: number }) {
                       </ExternalLink>
                     </div>
                   </li>
-                ))}
+                  );
+                })}
               </ul>
             ) : (
               <p className="border-t border-hairline px-6 py-6 text-sm text-muted">
@@ -278,7 +291,7 @@ export function AgentDrafts({ slug, fund }: { slug: string; fund: number }) {
               </p>
             )}
             <p className="border-t border-hairline px-5 py-3 text-xs text-muted sm:px-6">
-              Drafts only, written by OpenAI {result.model} in {result.steps} steps. You review and send each one yourself.
+              Drafts only, written by an OpenAI model. You review and send each one yourself.
             </p>
           </div>
         )}
