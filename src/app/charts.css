@@ -591,6 +591,7 @@
   color: var(--ink);
 }
 .gp-vis-v.is-ok { color: var(--ok-text); }
+.gp-vis-v.is-pen { color: var(--hivis-text); }
 .gp-step .gp-vis-k {
   font-size: 0.875rem;
   font-weight: 600;
