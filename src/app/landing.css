@@ -1507,10 +1507,8 @@ a:focus-visible .lp-chev {
       min-height: 32px;
       align-items: center;
       font-size: 0.8125rem;
+      font-weight: 600;
       color: var(--l-muted);
-      text-decoration: underline;
-      text-decoration-color: var(--l-rule);
-      text-underline-offset: 3px;
     }
     .st-skip:hover {
       color: var(--l-ink);
@@ -2912,5 +2910,25 @@ a:focus-visible .lp-chev {
 @media (max-width: 600px) {
   .ui-band-h .ui-band-long {
     font-size: min(2rem, 7.5vw);
+  }
+}
+
+/* Stack step labels: In, Signals and Out sit in the deep green label box. */
+:root li.st-step:is(.is-0, .is-1, .is-2) .lp-step-n {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: 4px 10px;
+  border-radius: var(--r-btn);
+  background: var(--ok-text);
+  color: #ffffff;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+}
+@media print {
+  :root li.st-step:is(.is-0, .is-1, .is-2) .lp-step-n {
+    background: none;
+    color: var(--ink);
+    border: 1px solid var(--ink);
   }
 }
