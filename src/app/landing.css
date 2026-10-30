@@ -1599,13 +1599,16 @@ a:focus-visible .lp-chev {
   }
 }
 
-/* A key statement that fills from grey to paper as it scrolls in. Fully inked by default. */
+/* A key statement that inks word by word as it scrolls in. Fully inked by default. */
 @media (prefers-reduced-motion: no-preference) {
   @supports (animation-timeline: view()) {
     .lp-fill {
-      animation: lp-fill linear forwards;
-      animation-timeline: view();
-      animation-range: entry 0% cover 45%;
+      view-timeline: --fill block;
+    }
+    .lp-fill .lp-w {
+      animation: lp-fill linear both;
+      animation-timeline: --fill;
+      animation-range: cover calc(6% + var(--w) * 5%) cover calc(20% + var(--w) * 5%);
     }
   }
 }

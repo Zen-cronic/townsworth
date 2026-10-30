@@ -53,7 +53,7 @@ export function objectionsFor(f: HeroFacts, proof: { novelPct: number; changedPc
 
 export function Objections({ items, id }: { items: Objection[]; id?: string }) {
   return (
-    <ul className="lp-objections" id={id}>
+    <ul className="lp-objections" id={id} data-reveal="">
       {items.map((o) => (
         <li key={o.q}>
           <Link href={o.href} className="lp-obj">

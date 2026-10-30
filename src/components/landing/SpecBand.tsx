@@ -3,7 +3,7 @@ import type { Spec } from "./specs";
 // Cited material commitments for the example town: the floor every program sits on.
 export function SpecBand({ specs, town, asOf }: { specs: Spec[]; town: string; asOf: string }) {
   return (
-    <ul className="lp-specs" aria-label={`Material commitments for ${town}`}>
+    <ul className="lp-specs" data-reveal="" aria-label={`Material commitments for ${town}`}>
       {specs.map((s) => (
         <li key={s.topic} className="lp-spec">
           <p className="lp-spec-k">{s.topic}</p>

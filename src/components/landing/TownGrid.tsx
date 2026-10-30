@@ -70,7 +70,7 @@ export function TownGrid({
           </p>
         </div>
 
-        <ul className="lp-towns">
+        <ul className="lp-towns" data-reveal="">
           {towns.map((t) => (
             <li key={t.slug}>
               <Link href={`/town/${t.slug}`} className="lp-town">

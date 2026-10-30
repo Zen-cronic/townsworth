@@ -2,6 +2,7 @@ import Link from "next/link";
 import { LiveDataNotice } from "@/components/LiveDataNotice";
 import { PRODUCT_NAME } from "./brand";
 import { Chevron } from "./Chevron";
+import { Words } from "./Words";
 
 export interface ProofStat {
   pct: number;
@@ -34,7 +35,9 @@ export function ProofBand({
         <div className="lp-proof-title">
           <p className="lp-kicker">Would AI alone write the same plan? We tested it.</p>
           <h2 id="proof-h" className="lp-h2 lp-proof-h">
-            <span className="lp-fill">AI alone names the institutions.</span>{" "}
+            <span className="lp-fill">
+              <Words text="AI alone names the institutions." />
+            </span>{" "}
             <span className="lp-tone">Qloo adds the places the town actually goes.</span>
           </h2>
         </div>
@@ -62,7 +65,7 @@ export function ProofBand({
         </div>
       </div>
 
-      <ul className="lp-stats">
+      <ul className="lp-stats" data-reveal="">
         {stats.map((s) => (
           <li key={s.label} className={`is-${s.arm}`}>
             <p className="lp-stat-v">{s.pct}%</p>

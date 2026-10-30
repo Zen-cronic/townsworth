@@ -1,0 +1,99 @@
+/* Landing scroll motion. Every rule here is scroll-driven (no timers, no scroll capture), runs
+   only from 900px wide with motion allowed, and animates transform and opacity alone, so layout
+   never moves. Content is complete and readable without any of it: older browsers get a one-shot
+   reveal from LandingEffects, and phones and reduced motion get the finished state. */
+
+@media (min-width: 900px) and (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    /* Hero exit: as the hero scrolls away the copy lifts and quiets, the card trails it and the
+       site plan drifts the other way, so the drawing reads as ground under the page. */
+    .lp-hero.has-film {
+      view-timeline: --hero block;
+    }
+    .lp-hero .lp-hero-copy {
+      animation: hero-lift linear both;
+      animation-timeline: --hero;
+      animation-range: exit 0% exit 90%;
+      animation-timing-function: cubic-bezier(0.66, 0, 0.34, 1);
+    }
+    .lp-hero .lp-preview {
+      animation: hero-trail linear both;
+      animation-timeline: --hero;
+      animation-range: exit 0% exit 90%;
+    }
+    .lp-hero .lp-film::before,
+    .lp-hero .lp-film-media {
+      animation: hero-drift linear both;
+      animation-timeline: --hero;
+      animation-range: exit 0% exit 100%;
+    }
+
+    /* Settle: tiles rise a short way into place as they enter, each a beat after its neighbour. */
+    :is(.lp-specs > li, .lp-towns > li, .lp-objections > li, .lp-stats > li) {
+      animation: settle linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 75%;
+      animation-timing-function: cubic-bezier(0.32, 1, 0.6, 1);
+    }
+    :is(.lp-specs, .lp-towns, .lp-stats) > li:nth-child(3n + 2) {
+      animation-range: entry 8% entry 83%;
+    }
+    :is(.lp-specs, .lp-towns, .lp-stats) > li:nth-child(3n + 3) {
+      animation-range: entry 16% entry 91%;
+    }
+
+    /* The paired evidence bars draw out from zero as the comparison comes into view. */
+    .lp-h2h-fill {
+      transform-origin: left center;
+      animation: bar-draw linear both;
+      animation-timeline: view();
+      animation-range: entry 30% cover 45%;
+      animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+  }
+
+  /* One-shot fallback for browsers without scroll-driven animations (armed by LandingEffects). */
+  @supports not (animation-timeline: view()) {
+    [data-reveal] > li {
+      transition: transform 500ms cubic-bezier(0.32, 1, 0.6, 1), opacity 500ms cubic-bezier(0.32, 1, 0.6, 1);
+    }
+    [data-reveal] > li:nth-child(3n + 2) {
+      transition-delay: 80ms;
+    }
+    [data-reveal] > li:nth-child(3n + 3) {
+      transition-delay: 160ms;
+    }
+    [data-armed]:not([data-open]) > li {
+      transform: translateY(28px);
+      opacity: 0.35;
+    }
+  }
+}
+
+@keyframes hero-lift {
+  to {
+    transform: translateY(-9vh);
+    opacity: 0.35;
+  }
+}
+@keyframes hero-trail {
+  to {
+    transform: translateY(-4vh);
+  }
+}
+@keyframes hero-drift {
+  to {
+    transform: translateY(10vh);
+  }
+}
+@keyframes settle {
+  from {
+    transform: translateY(28px);
+    opacity: 0.35;
+  }
+}
+@keyframes bar-draw {
+  from {
+    transform: scaleX(0.02);
+  }
+}
