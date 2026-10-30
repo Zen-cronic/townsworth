@@ -331,8 +331,10 @@ export default async function ProofPage() {
 
         {/* Method and limits */}
         <section className="mt-6 grid gap-6 md:grid-cols-2">
-          <div className="ui-card px-5 py-5 text-sm sm:px-6">
-            <h2 className="font-semibold">How this was run</h2>
+          <details className="proof-method ui-card text-sm md:order-2">
+            <summary>
+              <h2 className="inline font-semibold">How this was run</h2>
+            </summary>
             <ul className="mt-3 space-y-2 text-muted">
               <li>Baseline: OpenAI {baseline.model}, frozen {baseline.createdAt.slice(0, 10)} before any measurement.</li>
               <li>Good Neighbor: live Qloo Insights calls (places within 15 km, plus local taste), with the same deterministic rules for every town.</li>
@@ -358,8 +360,8 @@ export default async function ProofPage() {
                 </div>
               </dl>
             </details>
-          </div>
-          <div id="limits" className="scroll-mt-24 rounded-lg border border-amber/35 bg-paper px-5 py-5 text-sm sm:px-6">
+          </details>
+          <div id="limits" className="proof-limits scroll-mt-24 text-sm md:order-1">
             <h2 className="flex items-center gap-2 font-semibold">
               <span aria-hidden className="h-2 w-2 rounded-full bg-amber" />
               What this does not prove

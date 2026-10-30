@@ -24,10 +24,11 @@ const money = (n: number) => new Intl.NumberFormat("en-US", { style: "currency",
 // Draft lines are numbered plainly.
 const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
 
+// Every answer is an indented column under one hairline (see .gn-proposal), never a box.
 const CARD = {
-  kept: "rounded-md border border-hairline bg-paper px-3.5 py-3",
-  proposed: "gn-proposal slide-in rounded-md border border-ok/40 bg-paper px-3.5 py-3 shadow-[0_1px_2px_color-mix(in_srgb,var(--ink)_5%,transparent)]",
-  none: "rounded-md border border-dashed border-rule px-3.5 py-3",
+  kept: "gn-proposal",
+  proposed: "gn-proposal slide-in",
+  none: "gn-proposal",
 };
 
 function Eyebrow({ tone, children }: { tone: "ok" | "muted"; children: React.ReactNode }) {
@@ -354,7 +355,7 @@ export function CheckResults({ result }: { result: CheckResult }) {
         </div>
       </div>
 
-      <section aria-labelledby="fund-title" className="ui-card mt-8 break-inside-avoid px-5 py-5 sm:px-6">
+      <section aria-labelledby="fund-title" className="ui-section break-inside-avoid">
         <h3 id="fund-title" className="font-semibold tracking-tight">
           Where the fund goes
         </h3>
@@ -364,7 +365,7 @@ export function CheckResults({ result }: { result: CheckResult }) {
         </div>
       </section>
 
-      <section aria-labelledby="adds-title" className="mt-8 break-inside-avoid rounded-lg border border-rule bg-paper">
+      <section aria-labelledby="adds-title" className="ui-section break-inside-avoid">
         <div className="flex flex-wrap items-end justify-between gap-3 border-b border-rule px-5 py-4 sm:px-6">
           <div className="max-w-2xl">
             <h3 id="adds-title" className="font-semibold tracking-tight">
@@ -401,8 +402,8 @@ export function CheckResults({ result }: { result: CheckResult }) {
         )}
       </section>
 
-      <section className="mt-8 grid gap-6 lg:grid-cols-[1.25fr_1fr]">
-        <div className="ui-card px-5 py-4 text-sm sm:px-6">
+      <section className="ui-section grid gap-6 lg:grid-cols-[1.25fr_1fr]">
+        <div className="min-w-0 text-sm">
           <details className="ui-more">
             <summary>What this check is, and isn&apos;t</summary>
             <ul className="mt-2 space-y-1.5">

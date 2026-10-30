@@ -4,6 +4,9 @@ import Form from "next/form";
 import Link from "next/link";
 import { AppHeader } from "@/components/AppHeader";
 import { PageBand } from "@/components/ui";
+import { TownSchematic } from "@/components/town/TownSchematic";
+
+const FACILITY_NAME = { "data center": "Data center", fab: "Chip fab", nuclear: "Nuclear plant", plant: "Plant" } as const;
 import { CheckForm } from "@/components/check/CheckForm";
 import { Chevron, Notice } from "@/components/dashboard/Icons";
 import { StatusPill } from "@/components/dashboard/StatusPill";
@@ -45,7 +48,12 @@ export default async function CheckPage({
       <AppHeader towns={false} page="check" />
       <main id="main">
         <div className="no-print">
-          <PageBand kicker="Your own draft" title="Check your own plan" titleId="check-h">
+          <PageBand
+            kicker="Your own draft"
+            title="Check your own plan"
+            titleId="check-h"
+            visual={<TownSchematic lat={town.lat} lon={town.lon} facility={FACILITY_NAME[town.facility]} points={[]} />}
+          >
             <p className="ui-band-note">Paste the plan you were sent. Each line is checked against the host town&apos;s Qloo taste data.</p>
           </PageBand>
         </div>

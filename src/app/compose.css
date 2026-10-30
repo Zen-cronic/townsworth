@@ -672,3 +672,121 @@
     max-width: calc(100% - 44px);
   }
 }
+
+/* Phase 2a: memo, proof, check ----------------------------------------------- */
+
+/* A rule-divided grid instead of a boxed one: the cells sit on the page, divided by hairlines. */
+:root .ui-page :is(#findings, [aria-label="Control checks"]) {
+  border-radius: 0;
+  box-shadow: none;
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+}
+:root .ui-page :is(#findings, [aria-label="Control checks"]) > * {
+  background: var(--concrete);
+}
+:root .ui-page :is(#findings, [aria-label="Control checks"]) [id^="finding-"] > p:not(:first-child),
+:root .ui-page [id^="finding-"] .ui-more summary {
+  font-size: 0.9375rem;
+}
+/* What the evidence does not prove is the prominent block; the method sits in a disclosure. */
+:root .proof-limits {
+  border-radius: 0;
+  border: 0;
+  box-shadow: inset 0 3px 0 var(--ink);
+  background: var(--card);
+  padding: 27px 28px 24px;
+  font-size: 0.9375rem;
+}
+:root .proof-limits :is(li, p) {
+  color: var(--ink);
+}
+:root .proof-method {
+  border-top: 1px solid var(--rule);
+  padding-top: 20px;
+}
+:root .proof-method > summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  list-style: none;
+}
+:root .proof-method > summary::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-right: 1.5px solid var(--ink);
+  border-bottom: 1.5px solid var(--ink);
+  transform: rotate(-45deg);
+  transition: transform 160ms ease-out;
+}
+:root .proof-method[open] > summary::before {
+  transform: rotate(45deg);
+}
+
+/* Memo: a committee document. Figures in a two-by-two rule grid, so each figure has room at the
+   one stat size; the material commitments as a ruled list. */
+:root .memo-figs {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border-radius: 0;
+  box-shadow: none;
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+}
+:root .memo-cell {
+  padding: 20px 20px 20px 0;
+}
+:root .memo-figs > * + * {
+  padding-left: 20px;
+}
+:root .memo-figs > :nth-child(odd) {
+  padding-left: 0;
+}
+:root .memo-cell-k,
+:root .doc-sheet dt {
+  font-size: 0.875rem;
+}
+:root .memo-topics {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+  border-top: 1px solid var(--rule);
+}
+:root .memo-topics li {
+  grid-template-columns: minmax(0, 9rem) 2.5rem minmax(0, 1fr);
+  align-items: baseline;
+  column-gap: 16px;
+  padding: 10px 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  border-bottom: 1px solid var(--hairline);
+}
+:root .memo-topics li.is-missing {
+  background: none;
+  box-shadow: none;
+}
+:root .memo-topic-v {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+:root .memo-topic-k {
+  font-weight: 600;
+}
+:root .memo-topic-n {
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+/* The document sheet itself is the page's one primary object. */
+:root .doc-sheet {
+  border-radius: 0;
+}
+
+/* Check: the result sheet is the primary object; answers inside it are unboxed columns. */
+:root .check-results .doc-sheet {
+  border-radius: 0;
+}
+:root .check-results .gn-proposal {
+  margin-top: 2px;
+}
