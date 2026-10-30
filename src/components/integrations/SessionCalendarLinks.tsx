@@ -6,7 +6,9 @@ import type { Town } from "@/lib/towns";
 
 type TownPlace = Pick<Town, "name" | "region">;
 
-const linkClass = "text-muted underline decoration-rule underline-offset-4 transition-colors duration-150 hover:text-ink hover:decoration-ink";
+// A small outlined button: each link adds an event or opens a compose window, so it reads as an action.
+const linkClass =
+  "inline-flex min-h-8 items-center rounded-md border border-rule bg-paper px-2.5 font-medium text-ink transition-colors duration-150 hover:border-ink active:bg-concrete";
 
 const dateLabel = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
 
@@ -14,7 +16,6 @@ export function ExternalLink({ href, label, children }: { href: string; label: s
   return (
     <a href={href} target="_blank" rel="noopener noreferrer" aria-label={`${label} (opens in a new tab)`} className={linkClass}>
       {children}
-      <span aria-hidden> ↗</span>
     </a>
   );
 }
@@ -39,13 +40,13 @@ export function SessionCalendarLinks({ item, town, firstOnly = false, now, class
         const event = sessionEvent(item, s, town);
         const when = dateLabel.format(s.start);
         return (
-          <li key={s.index} className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+          <li key={s.index} className="flex flex-wrap items-center gap-2">
             {shown.length > 1 || firstOnly ? <span className="font-mono tabular-nums text-muted">{when}</span> : null}
             <ExternalLink href={googleCalendarUrl(event)} label={`Add the ${when} session to Google Calendar`}>
               Add to Google Calendar
             </ExternalLink>
             <ExternalLink href={outlookCalendarUrl(event)} label={`Add the ${when} session to Outlook`}>
-              Outlook
+              Add to Outlook
             </ExternalLink>
           </li>
         );
@@ -68,7 +69,7 @@ export function ProgramCalendarLinks({ items, town, now, className = "" }: Progr
   return (
     <ul aria-label="Add sessions to a calendar" className={`no-print divide-y divide-hairline text-sm ${className}`}>
       {scheduled.map((it) => (
-        <li key={it.id} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 py-2">
+        <li key={it.id} className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 py-2">
           <span className="min-w-0">{it.title}</span>
           <SessionCalendarLinks item={it} town={town} now={now} firstOnly />
         </li>

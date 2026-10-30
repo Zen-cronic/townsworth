@@ -266,7 +266,7 @@ export function AgentDrafts({ slug, fund }: { slug: string; fund: number }) {
                         Open in Gmail
                       </ExternalLink>
                       <ExternalLink href={outlookComposeUrl({ subject: d.subject, body: d.body })} label={`Open the draft to ${d.partner} in Outlook`}>
-                        Outlook
+                        Open in Outlook
                       </ExternalLink>
                     </div>
                   </li>
