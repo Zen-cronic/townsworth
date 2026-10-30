@@ -283,6 +283,14 @@ export default function TownMapCanvas({ data, legs, venues, showPlaces, focus, h
       map.current = m;
       m.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), "top-right");
       m.addControl(new maplibregl.AttributionControl({ customAttribution: "© OpenStreetMap contributors" }), "bottom-right");
+      // Compact attribution opens expanded on narrow maps; start it collapsed so it doesn't cover the map.
+      const collapseAttribution = () => {
+        const a = m?.getContainer().querySelector(".maplibregl-ctrl-attrib.maplibregl-compact");
+        a?.classList.remove("maplibregl-compact-show");
+        a?.removeAttribute("open");
+      };
+      m.once("load", collapseAttribution);
+      m.once("idle", collapseAttribution);
       m.on("error", (e) => {
         // A missing tile or glyph is not fatal; a lost WebGL context is.
         if (/webgl/i.test(String(e.error?.message ?? ""))) cb.current.onFail();
