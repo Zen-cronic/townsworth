@@ -32,6 +32,29 @@ const FALLBACK = {
 };
 type Palette = typeof FALLBACK;
 
+// Base-map landscape tokens (the map block at the end of src/components/town/TownMap.css).
+const MAP_FALLBACK = {
+  land: "#f5f2ea",
+  water: "#b4d0d8",
+  shore: "#8fb2bd",
+  farmland: "#efe6c6",
+  grass: "#e0e8c8",
+  park: "#cfe2b2",
+  wood: "#bccfa6",
+  residential: "#eee6da",
+  commercial: "#f0e0d4",
+  industrial: "#dcd7e3",
+  building: "#e4dccb",
+  motorway: "#e8c27e",
+  motorwayCasing: "#d2a862",
+  major: "#f2dca6",
+  roadCasing: "#d9d3c4",
+  minor: "#ffffff",
+  rail: "#b3ad9f",
+  label: "#55534d",
+};
+type MapPalette = typeof MAP_FALLBACK;
+
 function readPalette(el: HTMLElement): Palette {
   const cs = getComputedStyle(el);
   const v = (name: string, fb: string) => cs.getPropertyValue(name).trim() || fb;
@@ -53,46 +76,99 @@ function readPalette(el: HTMLElement): Palette {
   };
 }
 
+function readMapPalette(el: HTMLElement): MapPalette {
+  const cs = getComputedStyle(el);
+  const out = { ...MAP_FALLBACK };
+  for (const k of Object.keys(out) as (keyof MapPalette)[]) {
+    const name = "--map-" + k.replace(/[A-Z]/g, (ch) => "-" + ch.toLowerCase());
+    out[k] = cs.getPropertyValue(name).trim() || MAP_FALLBACK[k];
+  }
+  return out;
+}
+
 type Layer = StyleSpecification["layers"][number];
+type Editable = Layer & { paint?: Record<string, unknown>; layout?: Record<string, unknown> };
 
 // The tile source carries its own attribution (OpenFreeMap, OpenMapTiles, OpenStreetMap
 // contributors), shown in full in the corner.
 
-// The base map in paper and ink: paper land, pale water and parks, ink roads by class, muted labels,
-// and the flat building layer dropped for the extruded one.
-function restyle(style: StyleSpecification, c: Palette): StyleSpecification {
-  const roadOpacity: [RegExp, number][] = [
-    [/motorway_(inner|subtle)|motorway_bridge_inner/, 0.34],
-    [/major_(inner|subtle)/, 0.22],
-    [/minor/, 0.11],
-    [/path|pier/, 0.08],
-  ];
+const polygons = ["match", ["geometry-type"], ["MultiPolygon", "Polygon"], true, false];
+const landFill = (id: string, sourceLayer: string, classes: string[], color: string, minzoom = 0): Layer =>
+  ({
+    id,
+    type: "fill",
+    source: "openmaptiles",
+    "source-layer": sourceLayer,
+    minzoom,
+    filter: ["all", polygons, ["match", ["get", "class"], classes, true, false]],
+    paint: { "fill-color": color, "fill-antialias": false },
+  }) as unknown as Layer;
+
+// The base map as a landscape: warm land, lake-blue water with a deeper shoreline, wheat farmland,
+// grass, park and sage wood, warm town tints with a grey-violet industrial district, amber
+// motorways over pale major roads and white cased minor roads, and muted labels. The flat building
+// layer is dropped for the extruded one. Every overlay colour sits on top of this unchanged.
+function restyle(style: StyleSpecification, c: Palette, p: MapPalette): StyleSpecification {
   const layers: Layer[] = [];
   for (const l of style.layers) {
     const id = l.id;
     if (id === "building" || id.startsWith("landcover_ice") || id.startsWith("landcover_glacier")) continue;
-    const L = structuredClone(l) as Layer & { paint?: Record<string, unknown>; layout?: Record<string, unknown> };
+    const L = structuredClone(l) as Editable;
     L.paint ??= {};
-    if (L.type === "background") L.paint["background-color"] = c.paper;
-    else if (id === "water") L.paint["fill-color"] = c.hairline;
-    else if (id === "waterway") L.paint["line-color"] = c.hairline;
-    else if (id === "park" || id === "landcover_wood") L.paint["fill-color"] = c.side;
-    else if (id === "landuse_residential") L.paint["fill-color"] = c.concrete;
-    else if (L.type === "line" && /casing/.test(id)) L.paint["line-color"] = c.paper;
-    else if (L.type === "line" && /highway|road_pier/.test(id)) {
-      L.paint["line-color"] = c.ink;
-      L.paint["line-opacity"] = roadOpacity.find(([re]) => re.test(id))?.[1] ?? 0.25;
+    if (id === "park") {
+      // Open land under the town: farmland, then grass, then the town's own uses.
+      layers.push(
+        landFill("tm-farmland", "landcover", ["farmland"], p.farmland),
+        landFill("tm-grass", "landcover", ["grass", "wetland"], p.grass),
+        landFill("tm-commercial", "landuse", ["commercial", "retail"], p.commercial, 10),
+        landFill("tm-industrial", "landuse", ["industrial", "railway", "garages", "quarry"], p.industrial, 9),
+      );
+    }
+    if (L.type === "background") L.paint["background-color"] = p.land;
+    else if (id === "water") {
+      L.paint["fill-color"] = p.water;
+      layers.push(L, {
+        id: "tm-shore",
+        type: "line",
+        source: "openmaptiles",
+        "source-layer": "water",
+        filter: L.filter,
+        paint: { "line-color": p.shore, "line-width": ["interpolate", ["linear"], ["zoom"], 8, 0.6, 14, 1.4] },
+      } as unknown as Layer);
+      continue;
+    } else if (id === "waterway") L.paint["line-color"] = p.shore;
+    else if (id === "park") L.paint["fill-color"] = p.park;
+    else if (id === "landcover_wood") L.paint["fill-color"] = p.wood;
+    else if (id === "landuse_residential") L.paint["fill-color"] = p.residential;
+    else if (L.type === "line" && /motorway/.test(id) && /casing/.test(id)) L.paint["line-color"] = p.motorwayCasing;
+    else if (L.type === "line" && /motorway/.test(id)) {
+      L.paint["line-color"] = p.motorway;
+      L.paint["line-opacity"] = 1;
+    } else if (L.type === "line" && /casing/.test(id)) L.paint["line-color"] = p.roadCasing;
+    else if (L.type === "line" && /highway_major/.test(id)) {
+      L.paint["line-color"] = p.major;
+      L.paint["line-opacity"] = 1;
+    } else if (L.type === "line" && /highway_minor/.test(id)) {
+      // A hairline casing under each minor road, as wide as the road itself.
+      const casing = structuredClone(L) as Editable;
+      casing.id = "tm-minor-casing";
+      casing.paint = { "line-color": p.roadCasing, "line-width": 0.8, "line-gap-width": L.paint["line-width"] };
+      layers.push(casing as Layer);
+      L.paint["line-color"] = p.minor;
+      L.paint["line-opacity"] = 1;
+    } else if (L.type === "line" && /highway_path|road_pier/.test(id)) {
+      L.paint["line-color"] = p.roadCasing;
     } else if (L.type === "line" && /railway/.test(id)) {
-      L.paint["line-color"] = /dashline/.test(id) ? c.paper : c.rule;
+      L.paint["line-color"] = /dashline/.test(id) ? p.land : p.rail;
     } else if (L.type === "line" && /boundary/.test(id)) L.paint["line-color"] = c.rule;
     else if (L.type === "symbol") {
       if (/shield/.test(id)) continue;
-      L.paint["text-color"] = /label_(town|city|village)/.test(id) ? c.ink : c.muted;
-      L.paint["text-halo-color"] = c.paper;
+      L.paint["text-color"] = /label_(town|city|village)/.test(id) ? c.ink : p.label;
+      L.paint["text-halo-color"] = p.land;
       L.paint["text-halo-width"] = 1.4;
     } else if (/aeroway/.test(id)) {
-      if (L.type === "fill") L.paint["fill-color"] = c.concrete;
-      else L.paint["line-color"] = c.concrete;
+      if (L.type === "fill") L.paint["fill-color"] = p.industrial;
+      else L.paint["line-color"] = p.roadCasing;
     }
     layers.push(L);
   }
@@ -171,6 +247,7 @@ export default function TownMapCanvas({ data, legs, venues, showPlaces, focus, h
     reduced.current = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     palette.current = readPalette(el.current);
     const c = palette.current;
+    const mp = readMapPalette(el.current);
     let m: MlMap | null = null;
     let cancelled = false;
     (async () => {
@@ -178,7 +255,7 @@ export default function TownMapCanvas({ data, legs, venues, showPlaces, focus, h
       try {
         const res = await fetch(STYLE_URL);
         if (!res.ok) throw new Error(String(res.status));
-        style = restyle((await res.json()) as StyleSpecification, c);
+        style = restyle((await res.json()) as StyleSpecification, c, mp);
       } catch {
         if (!cancelled) cb.current.onFail();
         return;
@@ -220,7 +297,7 @@ export default function TownMapCanvas({ data, legs, venues, showPlaces, focus, h
             "source-layer": "building",
             minzoom: 12.5,
             paint: {
-              "fill-extrusion-color": c.concrete,
+              "fill-extrusion-color": mp.building,
               "fill-extrusion-height": ["coalesce", ["get", "render_height"], 6],
               "fill-extrusion-base": ["coalesce", ["get", "render_min_height"], 0],
               "fill-extrusion-opacity": 0.92,
@@ -228,7 +305,7 @@ export default function TownMapCanvas({ data, legs, venues, showPlaces, focus, h
           },
           firstLabel,
         );
-        m.setLight({ anchor: "map", position: [1.4, 210, 40], intensity: 0.35, color: "#ffffff" });
+        m.setLight({ anchor: "map", position: [1.4, 210, 40], intensity: 0.45, color: "#ffffff" });
 
         m.addSource("tm-radius", { type: "geojson", data: { type: "Feature", properties: {}, geometry: { type: "LineString", coordinates: circleRing(data.site, data.radiusKm) } } });
         m.addLayer({ id: "tm-radius", type: "line", source: "tm-radius", paint: { "line-color": c.qloo, "line-width": 1.5, "line-dasharray": [3, 2], "line-opacity": 0.8 } });
