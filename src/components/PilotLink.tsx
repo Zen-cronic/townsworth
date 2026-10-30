@@ -1,6 +1,7 @@
 // "Run a pilot" mailto link. A plain email link: nothing is stored or sent by the app.
 
 import { PRODUCT_NAME } from "@/components/landing/brand";
+import { Chevron } from "@/components/dashboard/Icons";
 
 export const PILOT_EMAIL = "zin@kaungzinhein.com";
 
@@ -22,7 +23,7 @@ export function PilotLink({ townName, className = "", children }: { townName?: s
   return (
     <a href={pilotHref(townName)} className={className}>
       {children ?? "Run a pilot in your town"}
-      <span aria-hidden> →</span>
+      <Chevron className="ml-0.5 inline h-3 w-3 align-baseline" />
     </a>
   );
 }

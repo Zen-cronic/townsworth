@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { AgentDrafts } from "@/components/AgentDrafts";
 import { AppHeader } from "@/components/AppHeader";
 import { PilotLink } from "@/components/PilotLink";
+import { SpyLinks } from "@/components/ui/SpyLinks";
 import { FundBar, LineStrip, SessionTimeline, fundSplit, lineComposition, sessionsByBucket, splitFigures } from "@/components/charts";
 import { Figure } from "@/components/dashboard/Figure";
 import { Chevron, ChevronLeft, Download } from "@/components/dashboard/Icons";
@@ -130,7 +131,31 @@ export default async function MemoPage({
   return (
     <>
       <AppHeader active={slug} />
-      <main id="main" className="mx-auto max-w-[960px] px-4 pb-24 pt-8 sm:px-8 sm:pt-10">
+      <main id="main" className="relative mx-auto max-w-[960px] px-4 pb-24 pt-8 sm:px-8 sm:pt-10">
+        {/* Contents, in the left margin on wide screens only; never printed. Numbered like the memo. */}
+        <nav aria-label="Memo contents" className="no-print absolute right-full top-0 mr-6 hidden h-full w-40 min-[1360px]:block">
+          <div className="sticky top-[calc(var(--l-hdr,64px)+40px)] pt-[7.5rem]">
+            <p className="text-xs font-semibold text-muted">Contents</p>
+            <ol className="mt-2 grid gap-0.5 text-sm">
+              {[
+                ["commitments", "1", "Material commitments"],
+                ["program", "2", "The program"],
+                ["guardrails", "3", "Guardrails"],
+              ].map(([id, n, label]) => (
+                <li key={id}>
+                  <a
+                    href={`#${id}`}
+                    className="flex min-h-9 items-baseline gap-2 rounded-md py-1.5 text-muted transition-colors duration-150 hover:text-ink aria-[current]:font-medium aria-[current]:text-ink"
+                  >
+                    <span className="font-mono text-xs tabular-nums">{n}</span>
+                    {label}
+                  </a>
+                </li>
+              ))}
+            </ol>
+            <SpyLinks current="location" />
+          </div>
+        </nav>
         <div className="no-print mb-4 grid gap-3">
           <Link
             href={`/town/${town.slug}?fund=${program.annualFund}`}
@@ -191,7 +216,7 @@ export default async function MemoPage({
               ))}
             </dl>
             <div className="memo-figs mt-6">
-              <MemoFigure value={`${struck} of ${audit.length}`} label={struck === 1 ? "draft line struck" : "draft lines struck"} tone={struck ? "pen" : undefined}>
+              <MemoFigure value={`${struck} of ${audit.length}`} label={`${struck === 1 ? "draft line struck" : "draft lines struck"} · ${audit.length - struck} kept`} tone={struck ? "pen" : undefined}>
                 {audit.length > 0 && <LineStrip comp={comp} size="sm" />}
               </MemoFigure>
               <MemoFigure value={String(program.items.length)} label={`program items, ${partnerPlaces} with a local partner`} tone="ok" />
