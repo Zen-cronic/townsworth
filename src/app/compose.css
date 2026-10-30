@@ -342,10 +342,6 @@
   stroke-dasharray: 2 5;
   opacity: 0.75;
 }
-:root .town-plan-grid circle:first-child {
-  stroke-dasharray: 6 4 1 4;
-  opacity: 1;
-}
 :root .town-plan-parcel :is(polygon, rect) {
   fill: none;
   stroke: var(--band-text);
@@ -789,4 +785,218 @@
 }
 :root .check-results .gn-proposal {
   margin-top: 2px;
+}
+
+/* Round p2a2 ----------------------------------------------------------------- */
+
+/* One verdict vocabulary. Marks: a cross for Not local, a dotted ring for Can't confirm, a solid
+   ring for Kept. Chips share one shape, and their fills follow the tally cells: pink, hatched
+   pink, green. Affinity and rank chips are one neutral outline with no mark. */
+:root .vmark,
+:root .audit-mark {
+  display: inline-block;
+  flex: none;
+  width: 11px;
+  height: 11px;
+  vertical-align: -1px;
+}
+:root :is(.vmark, .audit-mark).is-generic {
+  border: 0;
+  border-radius: 0;
+  background:
+    linear-gradient(45deg, transparent 38%, var(--hivis) 38% 62%, transparent 62%),
+    linear-gradient(-45deg, transparent 38%, var(--hivis) 38% 62%, transparent 62%);
+}
+:root :is(.vmark, .audit-mark).is-unsure {
+  border: 2px dotted var(--hivis);
+  border-radius: 50%;
+  background: none;
+}
+:root :is(.vmark, .audit-mark).is-kept {
+  border: 2px solid var(--ok);
+  border-radius: 50%;
+  background: none;
+}
+:root .ui-chip {
+  gap: 7px;
+  padding: 3px 9px;
+  border-radius: 2px;
+  font-size: 13px;
+  color: var(--ink);
+  outline: 0;
+}
+:root .ui-chip.is-pen {
+  background: var(--hivis-wash);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--hivis) 45%, transparent);
+}
+:root .ui-chip.is-unsure {
+  outline: 0;
+  background: repeating-linear-gradient(135deg, var(--hivis-wash) 0 4px, var(--card) 4px 8px);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--hivis) 45%, transparent);
+  color: var(--ink);
+}
+:root .ui-chip.is-ok {
+  background: var(--ok-wash);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ok) 35%, transparent);
+  color: var(--ink);
+}
+:root .audit-row.is-struck .ui-chip.is-ok {
+  background: var(--ok-wash);
+}
+:root .ui-chip.is-plain,
+:root .lp-chip.is-plain,
+:root .gn-signal {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--rule);
+  border: 0;
+  border-radius: 2px;
+  color: var(--ink);
+}
+:root .ui-chip.is-plain .ui-chip-dot,
+:root .lp-chip.is-plain .lp-dot {
+  display: none;
+}
+/* The gutter uses the same marks. */
+:root .audit-row.is-struck.is-unsure > span:first-child::before {
+  border: 2px dotted var(--hivis);
+}
+:root .audit-row.is-kept > span:first-child::before,
+:root .audit-row.is-kept > details > summary > span:first-child::before {
+  border: 2px solid var(--ok);
+  background: none;
+}
+/* Struck text is dark grey ink; only the strike line is pink. */
+:root .audit-row.is-struck .line-clamp-2,
+:root .check-results .audit-row.is-struck p,
+:root .lp-strike {
+  color: #55575a;
+}
+:root .lp-strike {
+  background-size: 100% 1.5px;
+}
+:root .lp-tally .is-hivis {
+  color: var(--ink);
+}
+
+/* Objection answers at the 15px minimum, in ink. */
+:root .lp-obj-a {
+  font-size: 0.9375rem;
+  color: var(--ink);
+}
+
+/* The site plan fits inside its band: 28px clear top and bottom, scaled to the band's height,
+   with its label pinned to the top inset and knockouts behind the ring labels. */
+@media (min-width: 900px) {
+  :root .ui-band-visual {
+    top: 28px;
+    bottom: 28px;
+    right: 32px;
+    width: auto;
+    height: auto;
+    aspect-ratio: 1 / 1.08;
+    max-width: 34%;
+    transform: none;
+  }
+}
+:root .town-plan-wrap {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: 6px;
+}
+:root .town-plan-label {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 0;
+  font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--band-muted);
+}
+:root .town-plan-label b {
+  color: var(--band-text);
+  font-weight: 700;
+}
+:root .town-plan-wrap .town-plan {
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  height: 100%;
+}
+:root .town-plan-grid circle.is-outer {
+  stroke-dasharray: 6 4 1 4;
+  opacity: 1;
+}
+:root .town-plan-v {
+  paint-order: stroke;
+  stroke: var(--band);
+  stroke-width: 5px;
+  stroke-linejoin: round;
+}
+
+/* Page tops: a page without a hero starts one fixed inset below the header; in-page jumps land
+   the header height plus 24px down. */
+:root main.ui-page {
+  padding-top: 72px;
+}
+:root .no-print:has(> .ui-band) + .ui-page {
+  padding-top: 40px;
+}
+:root [id] {
+  scroll-margin-top: calc(var(--l-hdr) + 24px);
+}
+:root .check-results {
+  scroll-margin-top: calc(var(--l-hdr) + 24px);
+}
+/* /check: its sections align to the hero's column. */
+:root .ui-page > section.ui-card {
+  padding-left: 0;
+  padding-right: 0;
+}
+/* Memo: the contents rail starts on the page grid column, with the document to its right. */
+@media (min-width: 1360px) {
+  :root main#main:has(> nav[aria-label="Memo contents"]) {
+    margin-left: calc(max(32px, (100vw - 1240px) / 2 + 32px) + 184px);
+    margin-right: auto;
+  }
+}
+
+/* The summary band: its call-log footnote is the band's last row. */
+:root .ui-stats > .ui-provenance {
+  grid-column: 1 / -1;
+  padding: 12px 0;
+  border-top: 1px solid var(--hairline);
+}
+:root .ui-stats {
+  border-bottom: 1px solid var(--rule);
+}
+:root .ui-stats + .ui-section {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 0;
+}
+
+/* One primary button: flat lime, ink text, a plain ink chevron, no inset tile. */
+:root :is(.lp-btn-primary, .has-film .lp-btn-primary, .ui-fund .ui-band-cta, .lp-close.has-film .lp-btn-primary) .lp-btn-sq {
+  width: auto;
+  height: auto;
+  background: transparent;
+  color: var(--ink);
+}
+:root .lp-btn-primary {
+  padding: 0 18px 0 20px;
+  gap: 10px;
+}
+
+:root .ui-provenance .ui-chip.is-plain {
+  box-shadow: none;
+  padding: 0;
+}
+/* The drawing uses the band's full height, still 16px clear of each edge. */
+@media (min-width: 900px) {
+  :root .ui-band-visual {
+    top: -28px;
+    bottom: -24px;
+  }
 }

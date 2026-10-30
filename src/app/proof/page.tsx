@@ -209,7 +209,7 @@ export default async function ProofPage() {
         {/* Two control checks, in the same figure style as the findings */}
         <section aria-label="Control checks" className="mt-4 grid gap-px overflow-hidden rounded-lg bg-hairline shadow-[0_0_0_1px_var(--hairline)] sm:grid-cols-2">
           <div className="bg-paper px-5 py-5 sm:px-6">
-            <p className="text-[1.75rem] leading-none">
+            <p className="ui-stat-v">
               <Figure value={`${totals.controlOwnPct}% vs ${totals.controlCrossPct}%`} />
             </p>
             <p className="mt-2 font-medium leading-snug">Wiring check: partners found in their own town vs another</p>
@@ -222,7 +222,7 @@ export default async function ProofPage() {
             </details>
           </div>
           <div className="bg-paper px-5 py-5 sm:px-6">
-            <p className="text-[1.75rem] leading-none">
+            <p className="ui-stat-v">
               <Figure value={`${totals.llmPlanSimilarityPct}% vs ${totals.gnPartnerOverlapPct}%`} />
             </p>
             <p className="mt-2 font-medium leading-snug">Template check: plan overlap across towns, AI alone vs {PRODUCT_NAME}</p>

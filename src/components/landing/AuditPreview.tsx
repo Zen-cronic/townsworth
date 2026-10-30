@@ -31,8 +31,7 @@ function SwapCard({ item: r }: { item: ProgramItem }) {
       </p>
       <p className="lp-swap-meta">{meta.join(" · ")}</p>
       {r.provenance[0] && (
-        <span className="lp-chip">
-          <span aria-hidden="true" className="lp-dot" />
+        <span className="lp-chip is-plain">
           {shortSignal(r.provenance[0].signal)}
         </span>
       )}

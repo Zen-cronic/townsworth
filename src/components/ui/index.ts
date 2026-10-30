@@ -4,3 +4,4 @@ export { PageBand } from "./PageBand";
 export { SectionHeader } from "./SectionHeader";
 export { SplitCta } from "./SplitCta";
 export { StatTile } from "./StatTile";
+export { VerdictMark, type Verdict } from "./VerdictMark";

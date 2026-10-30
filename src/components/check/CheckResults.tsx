@@ -5,10 +5,10 @@ import type { AuditRow, Verdict } from "@/lib/audit";
 import { SEARCH_RADIUS_KM } from "@/lib/geo";
 import { BUCKETS, costLine, ROLE_LABEL, type ProgramItem } from "@/lib/plan";
 import type { CheckResult } from "@/lib/userPlan";
-import { Check, Chevron, Notice } from "@/components/dashboard/Icons";
+import { Chevron, Notice } from "@/components/dashboard/Icons";
 import { Figure } from "@/components/dashboard/Figure";
 import { ProvenanceChip } from "@/components/dashboard/ProvenanceChip";
-import { Chip } from "@/components/ui";
+import { Chip, VerdictMark } from "@/components/ui";
 import { cadenceLower, formatPhone, km, quotedName } from "@/components/dashboard/format";
 import { secondaryCta } from "@/components/dashboard/ui";
 import { CheckExports } from "./CheckExports";
@@ -77,7 +77,7 @@ function Kept({ row }: { row: AuditRow }) {
     return (
       <div className={CARD.kept}>
         <Eyebrow tone="ok">
-          <Check className="kept-mark h-3 w-3" />
+          <VerdictMark kind="kept" className="kept-mark" />
           Kept <span className="font-normal normal-case tracking-normal text-muted">· institution, couldn&apos;t verify here</span>
         </Eyebrow>
         <p className="mt-1 text-[15px] leading-snug">{row.named}</p>
@@ -90,7 +90,7 @@ function Kept({ row }: { row: AuditRow }) {
     return (
       <div className={CARD.kept}>
         <Eyebrow tone="ok">
-          <Check className="kept-mark h-3 w-3" />
+          <VerdictMark kind="kept" className="kept-mark" />
           Kept <span className="font-normal normal-case tracking-normal text-muted">· {row.keptLabel ?? "grant mechanism"}</span>
         </Eyebrow>
         <p className="mt-1 text-[15px] leading-snug">{row.keptNote ? row.keptNote.charAt(0).toUpperCase() + row.keptNote.slice(1) + "." : "How grants are decided stays as drafted."}</p>
@@ -115,7 +115,7 @@ function Kept({ row }: { row: AuditRow }) {
   return (
     <div className={CARD.kept}>
       <Eyebrow tone="ok">
-        <Check className="kept-mark h-3 w-3" />
+        <VerdictMark kind="kept" className="kept-mark" />
         Kept
       </Eyebrow>
       <p className="mt-1 text-[15px] leading-snug">{row.matched?.name ?? "Matches a local favourite"}</p>
@@ -174,7 +174,7 @@ function Stat({ title, figure, children }: { title?: string; figure?: string; ch
     <div className="flex flex-col bg-paper px-4 py-3.5 sm:px-6 sm:py-5">
       {title && <p className="font-mono text-[11px] uppercase tracking-wider text-muted">{title}</p>}
       {figure && (
-        <p className="mt-2 text-[1.625rem] leading-none text-ink sm:mt-3 sm:text-[2rem]">
+        <p className="ui-stat-v mt-2 sm:mt-3">
           <Figure value={figure} />
         </p>
       )}
@@ -323,7 +323,7 @@ export function CheckResults({ result }: { result: CheckResult }) {
           </div>
           <div className="flex items-start gap-2">
             <dt className="flex items-center gap-1 pt-0.5 font-medium text-ok-text">
-              <Check className="h-3.5 w-3.5" />
+              <VerdictMark kind="kept" />
               Kept
             </dt>
             <dd className="pt-0.5">

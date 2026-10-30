@@ -3,9 +3,9 @@ import { money, type PlanSource, type TownRun } from "@/lib/run";
 import { BASELINE } from "@/lib/baselineData";
 import { BUCKETS, costLine, type ProgramItem } from "@/lib/plan";
 import { isKept, type AuditRow } from "@/lib/audit";
-import { Check, Chevron, Notice } from "@/components/dashboard/Icons";
+import { Chevron, Notice } from "@/components/dashboard/Icons";
 import { secondaryCta } from "@/components/dashboard/ui";
-import { Card, Chip, PageBand, SectionHeader, SplitCta, StatTile } from "@/components/ui";
+import { Card, Chip, PageBand, SectionHeader, SplitCta, StatTile, VerdictMark } from "@/components/ui";
 import { cadenceLower, formatPhone, km, quotedName } from "@/components/dashboard/format";
 import { AuditTools } from "@/components/town/AuditTools";
 import { DraftLine } from "@/components/town/DraftLine";
@@ -67,7 +67,7 @@ function Why({ item, gloss }: { item: ProgramItem; gloss?: string }) {
   return (
     <details className="group text-xs">
       <summary className="flex cursor-pointer flex-wrap items-center gap-x-2.5 gap-y-1">
-        <Chip>{shortSignal(item.provenance[0]?.signal)}</Chip>
+        <Chip tone="plain">{shortSignal(item.provenance[0]?.signal)}</Chip>
         <span className="inline-flex items-center gap-0.5 font-medium text-ink underline decoration-rule underline-offset-2 transition-colors duration-150 group-hover:decoration-ink">
           Why
           <Chevron className="chev h-3 w-3" />
@@ -124,7 +124,7 @@ function Applicants({ items }: { items: ProgramItem[] }) {
             {rank != null && (
               <>
                 {" "}
-                <Chip className="align-middle">#{rank} local affinity</Chip>
+                <Chip tone="plain" className="align-middle">#{rank} local affinity</Chip>
               </>
             )}
           </span>
@@ -152,7 +152,7 @@ function Kept({ row, sameAs }: { row: AuditRow; sameAs?: string }) {
   return (
     <>
       <p className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 pt-0.5 text-sm leading-snug">
-        <Check className="kept-mark h-3.5 w-3.5 shrink-0 translate-y-0.5 text-ok" />
+        <VerdictMark kind="kept" className="kept-mark translate-y-0.5" />
         <span className="font-medium text-ok-text">Kept</span>
         {bySignal && (
           <span aria-hidden className="-mx-1 text-muted">
@@ -385,12 +385,13 @@ export function TownView({ run }: { run: TownRun }) {
         <section aria-label="Summary" className="ui-stats">
           <div className="ui-stat">
             <StruckTally comp={comp} draft={DRAFT[source].tab} anchorOf={(i) => anchors[i]} />
-            {kept.parts.length > 0 && (
-              <details className="ui-more">
-                <summary>Details</summary>
-                <div>Kept: {kept.parts.join(", ")}.</div>
-              </details>
-            )}
+            <details className="ui-more">
+              <summary>Details</summary>
+              <div>
+                {draftNote(run)}
+                {kept.parts.length > 0 && <> Kept: {kept.parts.join(", ")}.</>}
+              </div>
+            </details>
           </div>
           <StatTile value={partnerPlaces} label="local partners Qloo found" tone="ok" more={<>{qlooAdds.length} the draft never named. Each is traced to Qloo&apos;s taste data.</>}>
             {failed ? (
@@ -414,10 +415,10 @@ export function TownView({ run }: { run: TownRun }) {
               <span className="ui-stat-second-v">{money(program.unassigned)}</span> reserve
             </p>
           </StatTile>
+          <div className="ui-provenance">
+            <QlooCalls calls={profile.calls} />
+          </div>
         </section>
-        <div className="ui-provenance">
-          <QlooCalls calls={profile.calls} />
-        </div>
 
         {/* The line-by-line check */}
         <Card as="section" aria-labelledby="audit-title" className="ui-section scroll-mt-24">

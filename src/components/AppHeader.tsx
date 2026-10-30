@@ -2,6 +2,7 @@ import Link from "next/link";
 import { TOWNS } from "@/lib/towns";
 import { HeaderTownSearch } from "@/components/TownSearchForm";
 import { PRODUCT_NAME } from "@/components/landing/brand";
+import { CenterCurrent } from "@/components/ui/CenterCurrent";
 
 const navLink =
   "rounded-md px-2.5 py-1.5 text-sm max-[400px]:px-2 transition-colors duration-150 hover:bg-concrete hover:text-ink active:bg-hairline";
@@ -93,6 +94,7 @@ export function AppHeader({
               Any town
             </Link>
           </nav>
+          <CenterCurrent navLabel="Host communities" />
         </div>
       )}
     </header>
