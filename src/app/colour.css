@@ -607,3 +607,210 @@
 @media print {
   :root :is([data-age-strip], [data-trait-line]) { color: var(--ink); }
 }
+
+/* Colour bands, round 2. Every large section takes a ground from what it holds, so no two
+   neighbouring sections share one: paper or concrete for the draft and the facility, the green tint
+   for commitments, kept and costed items, the blue wash for Qloo's data, and one full blue band at
+   a natural break. Reading areas keep a
+   plain ground inside a tinted container. Ratios (WCAG 2.x): ink on the green tint 14.04, muted
+   6.98, green text 6.67, deep green 9.99, field blue 5.38; ink on the blue wash 13.68, muted 6.80,
+   blue 5.24; ink on concrete 13.39, muted on concrete 6.66; on the field white 6.53, band-soft
+   5.60, band-muted 4.84; ink on lime 14.50, ink on paper 15.91. */
+
+/* Landing: commitments on the green tint with each figure on a card; the host-town list on the blue
+   wash with each Qloo pick on a card. Order: blue hero, green, concrete, blue band, blue wash,
+   paper, blue close. */
+:root #ch-01 { --ch-bg: var(--ok-wash); }
+:root #ch-01 .lp-spec {
+  background: var(--card);
+  box-shadow: 0 0 0 1px var(--ok-side);
+}
+:root #ch-04 { --ch-bg: var(--qloo-wash); }
+:root #ch-04 .lp-section-lede { color: var(--muted); }
+:root #ch-04 .lp-town .lp-town-pick { background: var(--card); box-shadow: 0 0 0 1px var(--qloo-side); }
+:root #ch-04 .lp-town .lp-town-pick.is-empty { background: var(--paper); box-shadow: 0 0 0 1px var(--hairline); }
+:root #ch-04 .lp-towns { border-color: var(--qloo); }
+:root #ch-04 .lp-anytown { border-top-color: var(--qloo); }
+/* Questions stay on paper; the guardrails each open on a green rule, as standing commitments. */
+:root #ch-05 .lp-rail-list li { border-top: 3px solid var(--ok); }
+
+/* Product tour: each step's figure panel takes the colour of what it shows. Struck lines on a card
+   with a pink rule (the pink cells keep 3.3:1 against the card, not the pink wash); costed items
+   on the green tint; the simulated ballot on a card with an ink rule; the host towns on concrete; the
+   Qloo comparison on the blue wash. The questions after the steps sit on a full-width concrete
+   ground. */
+:root .jg .gp-steps > .gp-step:nth-child(1) .gp-vis { box-shadow: inset 0 0 0 1px var(--rule), inset 0 4px 0 var(--hivis); }
+:root .jg .gp-steps > .gp-step:nth-child(2) .gp-vis { background: var(--ok-wash); box-shadow: inset 0 4px 0 var(--ok); }
+:root .jg .gp-steps > .gp-step:nth-child(3) .gp-vis { background: var(--card); box-shadow: inset 0 0 0 1px var(--rule), inset 0 4px 0 var(--ink); }
+:root .jg .gp-steps > .gp-step .gp-vis { padding: 18px 18px 20px; }
+:root .jg .gp-steps > .gp-step:nth-child(4) .gp-vis { background: var(--concrete); box-shadow: inset 0 4px 0 var(--ink); }
+:root .jg .gp-steps > .gp-step:nth-child(5) .gp-vis { background: var(--qloo-wash); box-shadow: inset 0 4px 0 var(--qloo); }
+:root .jg .gp-steps > .gp-step:nth-child(4) .gp-towns :is(li, a) { border-color: var(--rule); }
+:root .jg .gp-steps > .gp-step:nth-child(5) .gp-h2h .ch-hbar.is-quiet { background: var(--line-quiet); }
+:root .jg .gp-extra:last-child {
+  padding: 64px 0 72px;
+  border-image: linear-gradient(var(--concrete), var(--concrete)) fill 0 / 0 / 0 100vmax;
+}
+:root .jg .gp-extra:last-child .lp-obj:hover { background: color-mix(in srgb, var(--paper) 60%, transparent); }
+:root .jg .gp-path { padding-bottom: 0; }
+:root .jg .gp-path + * { margin-top: 0; }
+
+/* Evidence: each card washed by what it reports. What Qloo changes on the blue wash; the per-town
+   table keeps its blue Qloo columns under a blue top rule; the age-group check on the green tint
+   (included is green); what the test does not prove keeps its card and ink rule. */
+:root .ui-page #what-qloo-changes {
+  background: var(--qloo-wash);
+  padding-inline: 24px;
+  box-shadow: inset 0 4px 0 var(--qloo);
+}
+:root .ui-page #what-qloo-changes > div:first-child { border-bottom-color: var(--qloo-side); }
+:root .ui-page #what-qloo-changes :is(tbody tr, li) { border-color: var(--qloo-side); }
+:root .ui-page section[aria-labelledby="by-town"] { box-shadow: inset 0 4px 0 var(--qloo); }
+:root .ui-page #age-groups {
+  background: var(--ok-wash);
+  padding-inline: 24px;
+  padding-bottom: 8px;
+  box-shadow: inset 0 4px 0 var(--ok);
+}
+:root .ui-page #age-groups > div:first-child { border-bottom-color: var(--ok-side-2); }
+:root .ui-page #age-groups :is(thead, tbody tr, li) { border-color: var(--ok-side); }
+
+/* Sources: the column alternates grounds section by section. Commitments green, the evidence on
+   the blue wash, the fund figures green, the business case on concrete, the data sources on paper
+   with Qloo's rows on the wash. */
+:root .src-section:is(#commitments, #evidence, #funds, #market) {
+  margin-inline: -32px;
+  padding: 48px 32px 56px;
+  border-top: 0;
+}
+:root .src-section + .src-section { border-top: 0; padding-top: 48px; }
+:root .src-section#commitments { background: var(--ok-wash); }
+:root .src-section#evidence { background: var(--qloo-wash); }
+:root .src-section#market { background: var(--concrete); }
+:root .src-section#commitments :is(.border-hairline, [class*="divide-"] > *) { border-color: var(--ok-side); }
+:root .src-section#evidence :is(.border-hairline, [class*="divide-"] > *) { border-color: var(--qloo-side); }
+:root .src-section#market :is(.border-hairline, [class*="divide-"] > *) { border-color: var(--side-2); }
+:root .src-section#evidence .ch-hbar.is-quiet { background: var(--line-quiet); }
+@media (max-width: 760px) {
+  :root .src-section:is(#commitments, #evidence, #funds, #market) {
+    margin-inline: -16px;
+    padding: 36px 16px 40px;
+  }
+  :root .src-section + .src-section { padding-top: 36px; }
+}
+
+/* Memo: the commitment counts as green cells, the outreach step on the blue band. The memo body
+   keeps its paper sheet; the program section already sits on the green tint. */
+:root .memo-topics li.is-cited { background: var(--ok-wash); box-shadow: inset 0 3px 0 var(--ok); }
+:root .memo-topics li.is-cited .memo-topic-v { color: var(--ok-text); }
+:root .memo-topics li.is-missing { background: var(--paper); box-shadow: none; outline: 1px dashed var(--rule); outline-offset: -1px; }
+:root #commitments > dl { background: var(--card); }
+:root [data-testid="agent-drafts"] { overflow: hidden; border-color: var(--band); }
+:root [data-testid="agent-drafts"] > div:first-child {
+  background: var(--band);
+  color: var(--band-text);
+}
+:root [data-testid="agent-drafts"] > div:first-child :is(p, .text-muted) { color: var(--band-soft); }
+:root [data-testid="agent-drafts"] > div:first-child h2 { color: var(--band-text); }
+:root [data-testid="agent-drafts"] > div:first-child button {
+  background: var(--paper);
+  color: var(--ink);
+}
+:root [data-testid="agent-drafts"] > div:first-child button:hover { background: var(--band-soft); }
+:root [data-testid="agent-drafts"] > div:first-child button:focus-visible { outline-color: var(--band-text); }
+
+/* Town (CSS only): the fund card green, the partners card blue; after the Qloo band, the age-group
+   check on a full-width green ground and what the town favours on a full-width blue wash. */
+:root section[aria-label="Fund and partners"] > .ui-card {
+  padding: 24px;
+}
+:root section[aria-label="Fund and partners"] > .ui-card:nth-child(1) { background: var(--ok-wash); box-shadow: inset 0 4px 0 var(--ok); }
+:root section[aria-label="Fund and partners"] > .ui-card:nth-child(2) { background: var(--qloo-wash); box-shadow: inset 0 4px 0 var(--qloo); }
+:root section[aria-label="Fund and partners"] > .ui-card:nth-child(1) .border-hairline { border-color: var(--ok-side); }
+:root .ui-section[aria-labelledby="reach-title"] {
+  margin-top: 0;
+  padding-top: 56px;
+  padding-bottom: 64px;
+  border-top: 0;
+  border-image: linear-gradient(var(--ok-wash), var(--ok-wash)) fill 0 / 0 / 0 100vmax;
+}
+:root .ui-section[aria-labelledby="reach-title"] :is(.border-rule, .border-hairline, [class*="divide-"] > *) { border-color: var(--ok-side-2); }
+:root .ui-section[aria-labelledby="favours-title"] {
+  padding-top: 56px;
+  padding-bottom: 72px;
+  border-top: 0;
+  border-image: linear-gradient(var(--qloo-wash), var(--qloo-wash)) fill 0 / 0 / 0 100vmax;
+}
+:root .ui-section[aria-labelledby="reach-title"] + .ui-section[aria-labelledby="favours-title"],
+:root .ui-section.qloo-band + .ui-section[aria-labelledby="favours-title"] { margin-top: 0; }
+:root .ui-page:has(> .ui-section[aria-labelledby="favours-title"]:last-child) { padding-bottom: 0; }
+@media (max-width: 760px) {
+  :root section[aria-label="Fund and partners"] > .ui-card { padding: 20px 16px; }
+  :root .ui-section[aria-labelledby="reach-title"] { padding-top: 40px; padding-bottom: 44px; }
+  :root .ui-section[aria-labelledby="favours-title"] { padding-top: 40px; padding-bottom: 52px; }
+}
+
+/* Find: the search is the page's blue band; the examples below stay on paper. */
+:root .fd .fd-hero {
+  padding: 40px 0 44px;
+  color: var(--band-text);
+  border-image: linear-gradient(var(--band), var(--band)) fill 0 / 0 / 0 100vmax;
+}
+:root .fd .fd-hero :is(.lp-kicker, .lp-lede) { color: var(--band-soft); }
+:root .fd .fd-hero .lp-h1 { color: var(--band-text); }
+:root .fd .fd-hero .fd-steps { color: var(--band-text); border-color: color-mix(in srgb, var(--band-text) 40%, transparent); }
+:root .fd .fd-hero .fd-steps li .fd-steps-n,
+:root .fd .fd-hero .fd-steps li:nth-child(n) .fd-steps-n { color: var(--band-muted); }
+:root .fd .fd-hero .fd-form { border-color: color-mix(in srgb, var(--band-text) 40%, transparent); }
+:root .fd .fd-hero .fd-form :is(.text-muted, .text-xs) { color: var(--band-soft); }
+:root .fd .fd-hero .fd-form :is(input, select) { border-color: var(--ink); }
+:root .fd .fd-hero .fd-form button:focus-visible { outline-color: var(--band-text); }
+:root main.fd { padding-top: 0; }
+
+/* Ballot and tally: the question on the blue band; each idea on the ballot, a program item, on the
+   green tint; the simulated notice on concrete under an ink rule. */
+:root .bl .bl-hero {
+  background: var(--band);
+  color: var(--band-text);
+}
+:root .bl .bl-hero :is(.lp-kicker, .text-muted, a) { color: var(--band-soft); }
+:root .bl .bl-hero a:hover { color: var(--band-text); }
+:root .bl .bl-hero .lp-h1 { color: var(--band-text); }
+:root .bl .bl-hero [data-testid="ballot-funder"] { color: var(--band-soft); }
+:root .bl .bl-hero [data-testid="ballot-funder"].text-amber { color: var(--band-text); }
+:root .bl .bl-hero [data-testid="ballot-funder"] :is(svg, a) { color: inherit; }
+:root .bl .bl-hero :where(a, button):focus-visible { outline-color: var(--band-text); }
+:root .bl .bl-rows { border-top: 0; display: grid; gap: 6px; }
+:root .bl .bl-row {
+  padding-inline: 16px;
+  border-bottom: 0;
+  background: var(--ok-wash);
+  box-shadow: inset 0 3px 0 var(--ok);
+}
+:root .bl .bl-row[data-moved] { background: var(--ok-side); box-shadow: inset 0 3px 0 var(--ok); }
+:root .bl .bl-row .bl-moves { border-left-color: var(--ok-side-2); }
+:root .bl .bl-row .bl-move:disabled { color: var(--ok-side-2); }
+:root .bl .bl-sim {
+  padding: 16px 20px;
+  border: 0;
+  background: var(--concrete);
+  box-shadow: inset 0 3px 0 var(--ink);
+}
+
+/* Print: every round-2 fill drops to paper and ink, and the full-width grounds go. */
+@media print {
+  :root :is(#ch-01, #ch-04) { --ch-bg: var(--paper); }
+  :root :is(#ch-01 .lp-spec, #ch-04 .lp-town-pick, .jg .gp-vis, .ui-page #what-qloo-changes, .ui-page #age-groups, .src-section, .memo-topics li, [data-testid="agent-drafts"] > div:first-child, section[aria-label="Fund and partners"] > .ui-card, .bl .bl-hero, .bl .bl-row, .bl .bl-sim) {
+    background: none !important;
+    box-shadow: none !important;
+  }
+  :root :is(.jg .gp-extra:last-child, .ui-section[aria-labelledby="reach-title"], .ui-section[aria-labelledby="favours-title"], .fd .fd-hero) {
+    border-image: none;
+  }
+  :root :is(.fd .fd-hero, .bl .bl-hero, [data-testid="agent-drafts"] > div:first-child),
+  :root :is(.fd .fd-hero, .bl .bl-hero, [data-testid="agent-drafts"] > div:first-child) * {
+    color: var(--ink) !important;
+  }
+  :root .memo-topics li .memo-topic-v { color: var(--ink); }
+  :root :is(.memo-topics li, .bl .bl-row, .bl .bl-sim) { box-shadow: inset 0 0 0 1px var(--ink) !important; }
+}

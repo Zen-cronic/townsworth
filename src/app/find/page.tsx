@@ -73,6 +73,7 @@ export default async function FindPage({ searchParams }: { searchParams: Promise
     <>
       <AppHeader />
       <main id="main" className="fd mx-auto max-w-[760px] px-4 pb-24 pt-6 sm:px-6 sm:pt-10">
+        <div className="fd-hero">
         <p className="lp-kicker">Find a town</p>
         <h1 className="lp-h1 mt-3">Type any town</h1>
         <p className="lp-lede mt-3">Any US or Canadian town gets the same check, memo and exports.</p>
@@ -88,6 +89,7 @@ export default async function FindPage({ searchParams }: { searchParams: Promise
 
         <div className="fd-form">
           <TownSearchForm q={q} facility={facility} company={company} idPrefix="find" autoFocus={!q} />
+        </div>
         </div>
 
         {result === null && (
