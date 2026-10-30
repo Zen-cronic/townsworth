@@ -234,6 +234,9 @@ export default async function GuidedPath() {
                   <Chevron />
                 </span>
               </Link>
+              <a href="#tour-video" className="lp-btn lp-btn-quiet">
+                Watch it in 70 seconds
+              </a>
             </div>
           </div>
           <ol className="jg-overview" aria-label="What the five steps show">
@@ -249,6 +252,18 @@ export default async function GuidedPath() {
               </li>
             ))}
           </ol>
+          </div>
+        </section>
+
+        {/* A silent screen recording of the five steps on the live site. */}
+        <section id="tour-video" className="jg-film" aria-labelledby="jg-film-h">
+          <div className="lp-wrap">
+            <h2 id="jg-film-h" className="jg-film-h">
+              The five steps, recorded on the live site <span>70 seconds, no sound</span>
+            </h2>
+            <video className="jg-film-media" controls muted playsInline preload="none" poster="/tour/product-tour-poster.webp" width={1280} height={720}>
+              <source src="/tour/product-tour.mp4" type="video/mp4" />
+            </video>
           </div>
         </section>
 
