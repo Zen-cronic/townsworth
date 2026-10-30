@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { shortSignal } from "@/components/ui/labels";
 import { PRODUCT_NAME } from "@/components/landing/brand";
 import { BrandMark } from "@/components/landing/BrandMark";
 import Link from "next/link";
@@ -324,7 +325,7 @@ export default async function MemoPage({
                           </div>
                           <div className="text-xs leading-relaxed text-muted">
                             {it.partner?.address ?? it.detail}
-                            <span className="ml-2 inline-block font-mono text-[11px] text-muted/90">{it.provenance[0]?.signal}</span>
+                            <span className="ml-2 inline-block font-mono text-[11px] text-muted/90">{shortSignal(it.provenance[0]?.signal)}</span>
                           </div>
                           <AgeStrip ages={it.partner?.ages} className="mt-0.5 text-xs leading-relaxed" />
                           <SessionCalendarLinks item={it} town={town} firstOnly className="mt-1" />
