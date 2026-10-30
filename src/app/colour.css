@@ -220,6 +220,9 @@
 :root .check-results .audit-row.is-struck :is([data-age-strip], [data-trait-line]) {
   color: var(--qloo);
 }
+:root .age-line b {
+  font-weight: 650;
+}
 :root .qloo-band :is([data-age-strip], [data-trait-line]) {
   color: var(--band-text);
 }

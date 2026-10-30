@@ -1,58 +1,28 @@
-import { AGE_BUCKETS, AGE_LABEL, ageLine, ageSkewLabel, type AgeProfile } from "@/lib/qlooInsights";
+import { AGE_BUCKETS, ageSkewLabel, type AgeProfile, type AgeBucket } from "@/lib/qlooInsights";
 
-// A partner's audience age profile from Qloo: six small bars, youngest to oldest, rising above the
-// line where the place's audience over-indexes on the group and dipping below where it under-indexes,
-// with the reading beside them. Aggregate affinity for the people who favour the place, never a
-// visitor count. Renders nothing when Qloo has no profile for the place.
+// A partner's audience age profile from Qloo, as one plain line: the age group the place's
+// audience over-indexes on most, or that no group stands out. Aggregate affinity for the people
+// who favour the place, never a visitor count. Renders nothing when Qloo has no profile.
 
-const W = 7;
-const GAP = 2;
-const MID = 10;
-const REACH = 9;
-// Bars reach full height at an affinity of 0.5 either way; anything beyond is drawn at full height.
-const FULL = 0.5;
-
-const signed = (v: number) => `${v >= 0 ? "+" : "−"}${Math.abs(v).toFixed(2)}`;
+const SHORT: Record<AgeBucket, string> = {
+  "24_and_younger": "under 25",
+  "25_to_29": "25–29",
+  "30_to_34": "30–34",
+  "35_to_44": "35–44",
+  "45_to_54": "45–54",
+  "55_and_older": "55+",
+};
 
 export function AgeStrip({ ages, className = "" }: { ages?: AgeProfile; className?: string }) {
-  const line = ageLine(ages);
-  if (!ages || !line) return null;
-  const top = ageSkewLabel(ages);
-  const width = AGE_BUCKETS.length * (W + GAP) - GAP;
-  const described = AGE_BUCKETS.map((b) => `${AGE_LABEL[b]} ${signed(ages[b])}`).join(", ");
+  const label = ageSkewLabel(ages);
+  if (!ages || !label) return null;
+  const broad = label === "broad age mix";
+  const top = AGE_BUCKETS.reduce((best, b) => (ages[b] > ages[best] ? b : best), AGE_BUCKETS[0]);
   return (
-    <p data-age-strip className={`flex items-center gap-2 ${className}`}>
-      <svg
-        role="img"
-        aria-label={`Qloo audience age affinity, youngest to oldest: ${described}`}
-        viewBox={`0 0 ${width} ${MID * 2}`}
-        width={width}
-        height={MID * 2}
-        className="shrink-0"
-      >
-        <line x1={0} x2={width} y1={MID} y2={MID} stroke="currentColor" strokeOpacity={0.35} strokeWidth={1} />
-        {AGE_BUCKETS.map((b, i) => {
-          const v = Math.max(-1, Math.min(1, ages[b]));
-          const h = Math.max(1.5, Math.min(1, Math.abs(v) / FULL) * REACH);
-          const isTop = AGE_LABEL[b] === top;
-          return (
-            <rect
-              key={b}
-              x={i * (W + GAP)}
-              y={v >= 0 ? MID - h : MID}
-              width={W}
-              height={h}
-              rx={1}
-              fill="currentColor"
-              fillOpacity={v < 0 ? 0.3 : isTop ? 1 : 0.65}
-            >
-              <title>{`${AGE_LABEL[b]}: ${signed(ages[b])}`}</title>
-            </rect>
-          );
-        })}
-      </svg>
+    <p data-age-strip className={`age-line ${className}`}>
+      <span className="age-line-k">Qloo audience age:</span>{" "}
       {/* A non-breaking hyphen, so a narrow card never splits "over-indexes" across two lines. */}
-      <span>{line.replace("over-indexes", "over\u2011indexes")}</span>
+      <b>{broad ? "broad mix, no group stands out" : `over‑indexes with ${SHORT[top]}`}</b>
     </p>
   );
 }
