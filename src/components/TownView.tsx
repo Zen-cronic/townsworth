@@ -252,7 +252,8 @@ function segment(audit: AuditRow[]): Segment[] {
   return out;
 }
 
-// The Qloo call log: quiet unless something failed. Never shows the API key or quota.
+// The Qloo call log: every lookup behind the page (town, age groups, place traits, partner ages),
+// quiet unless something failed. Never shows the API key or quota.
 function QlooCalls({ calls }: { calls: TownRun["profile"]["calls"] }) {
   const failed = calls.filter((c) => !c.ok).length;
   return (
@@ -422,7 +423,7 @@ export function TownView({ run }: { run: TownRun }) {
             </p>
           </StatTile>
           <div className="ui-provenance">
-            <QlooCalls calls={profile.calls} />
+            <QlooCalls calls={[...profile.calls, ...(profile.lensCalls ?? []), ...(profile.areaTagCalls ?? []), ...(profile.ageCalls ?? [])]} />
           </div>
         </section>
 

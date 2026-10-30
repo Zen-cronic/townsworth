@@ -339,7 +339,7 @@ export default async function SourcesPage() {
                   <li>
                     <span className="src-k">Partner ages</span>
                     <span>
-                      One more Insights call per town (urn:demographics, up to 15 partner ids) gives each partner&apos;s
+                      Up to three Insights calls per town (urn:demographics, five partner ids each, up to 15 partners) give each partner&apos;s
                       audience age profile: which age groups over-index among the people who favour the place, relative to the average. Only the
                       age buckets are read; gender is discarded. It is not a visitor count and says nothing about this town&apos;s residents.
                     </span>
@@ -348,7 +348,8 @@ export default async function SourcesPage() {
                     <span className="src-k">Place traits</span>
                     <span>
                       One more Insights call per town (urn:tag at the site, place tags only, take 50) gives the genres, ambience and dishes places
-                      around the site over-index on. Tags about who goes there (Locals, Families and the like) are dropped, as are generic ones. A
+                      around the site over-index on. Only tags that describe the place itself are kept: tags about who goes there, age ranges,
+                      neighbourhood descriptors and generic ones are dropped. A
                       partner&apos;s &ldquo;Why&rdquo; names the traits it carries, by rank among the rest.
                     </span>
                   </li>
