@@ -9,6 +9,12 @@ export function shortSignal(signal?: string): string {
   return signal.replace(LOCAL_AFFINITY, "#$1 local affinity").replace(/^Qloo place\b/, "Local place").replace(/^Qloo /, "");
 }
 
+// Whether a provenance signal came from Qloo (and so takes the Qloo chip). Every Qloo-sourced signal
+// the planner writes names Qloo or a local-affinity rank; an open call names no partner at all.
+const QLOO_SIGNAL = /^(?:Qloo |Local favourite · |Local place \(Qloo\))|\(Qloo, aggregate\)$/;
+// No signal at all is shown as the generic "Qloo signal" (shortSignal), so it is Qloo too.
+export const isQlooSignal = (signal?: string) => !signal || QLOO_SIGNAL.test(signal);
+
 // A matched theme from the audit ("Polka (Frankie Yankovic, Polka Band)") as "Polka · Frankie Yankovic".
 export function shortTermHit(hit?: string): string | undefined {
   return hit?.replace(/ \(([^,)]+)(?:, [^)]*)?\)$/, " · $1");

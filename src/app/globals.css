@@ -50,10 +50,10 @@
      (affinity ranks, suggested partners, rank dots). 6.10:1 on paper, 5.13:1 on concrete, and
      white on it 6.53:1. Its wash tints Qloo columns and cells (ink on it 13.68:1). */
   --qloo: var(--band);
-  --qloo-on: #ffffff;
+  --qloo-on: var(--band-text);
   --qloo-wash: #dfe6fb;
   /* Kept as a fill: the kept green behind paper text (11.32:1). */
-  --ok-on: #f8f7f3;
+  --ok-on: var(--paper);
   /* Type roles: Archivo for text and headings; figures use its tabular numerals. */
   --font-body: var(--font-archivo);
   --font-display: var(--font-archivo);

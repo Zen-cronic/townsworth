@@ -11,7 +11,7 @@ import { AuditTools } from "@/components/town/AuditTools";
 import { DraftLine } from "@/components/town/DraftLine";
 import { TownSchematic } from "@/components/town/TownSchematic";
 import { keptBreakdown } from "@/components/ui/keptBreakdown";
-import { kindOf, LOCAL_AFFINITY, shortOrg, shortSignal, shortTermHit } from "@/components/ui/labels";
+import { isQlooSignal, kindOf, LOCAL_AFFINITY, shortOrg, shortSignal, shortTermHit } from "@/components/ui/labels";
 import { LiveDataNotice } from "@/components/LiveDataNotice";
 import { AudienceReach } from "@/components/qloo/AudienceReach";
 import { FundBar, PartnerDistance, PartnerNames, StruckTally, SessionTimeline, fundSplit, lineComposition, partnerPoints, sessionsByBucket } from "@/components/charts";
@@ -54,9 +54,6 @@ const TASTE_LABEL = { brand: "Brands", artist: "Artists", tv_show: "TV", podcast
 
 // Draft lines are referred to plainly ("Line 4"), and anchored as #line-4.
 const num = (n: number) => String(n);
-
-// Every signal but the open grants call is read from Qloo.
-const isQlooSignal = (signal?: string) => !signal?.startsWith("Open call");
 
 // Everything behind "Why": the signals, the facts about the partner, and how the cost is built.
 function Why({ item, gloss }: { item: ProgramItem; gloss?: string }) {
