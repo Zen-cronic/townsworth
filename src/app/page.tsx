@@ -62,6 +62,7 @@ export default async function Home() {
 
   // Preview: the consultant template checked against the hero town, so the card shows a struck line
   // and its local replacement. The strongest swap: a host-community place, best affinity first.
+  // Both landing CTAs open this view, so the first click shows what the card claims.
   const previewHref = `${auditHref}?plan=agency`;
   const previewFailed = template.profile.failedCalls.length ? [town.name] : [];
   const rows: PreviewRow[] = template.audit.map((r, i) => ({ ...r, n: i + 1 }));
@@ -174,7 +175,7 @@ export default async function Home() {
                 line by line. It keeps the institutions, adds the places residents actually go, and costs each item.
               </p>
               <div className="lp-ctas">
-                <Link href={auditHref} className="lp-btn lp-btn-primary">
+                <Link href={previewHref} className="lp-btn lp-btn-primary">
                   Open the {town.name} audit
                   <span className="lp-btn-sq" aria-hidden="true">
                     <Chevron />
@@ -255,7 +256,7 @@ export default async function Home() {
               See a real plan, <span className="lp-tone">checked line by line.</span>
             </h2>
             <div className="lp-ctas">
-              <Link href={auditHref} className="lp-btn lp-btn-primary">
+              <Link href={previewHref} className="lp-btn lp-btn-primary">
                 Open the {town.name} audit
                 <span className="lp-btn-sq" aria-hidden="true">
                   <Chevron />
