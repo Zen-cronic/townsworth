@@ -9,6 +9,7 @@ import "./motion.css";
 import "./compose.css";
 import "./colour.css";
 import { SiteFooter } from "@/components/landing/SiteFooter";
+import { TourBar } from "@/components/TourBar";
 
 // Archivo with its width axis: the wide cut sets display sizes, the normal width sets text.
 const archivo = Archivo({ variable: "--font-archivo", subsets: ["latin"], axes: ["wdth"] });
@@ -34,6 +35,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         </svg>
         {children}
         <SiteFooter />
+        <TourBar />
       </body>
     </html>
   );

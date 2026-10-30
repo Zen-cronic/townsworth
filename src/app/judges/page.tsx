@@ -18,6 +18,8 @@ import { runTown } from "@/lib/run";
 import { HERO_SAMPLE_ID, sampleCheckHref, samplePlanById } from "@/lib/samplePlans";
 import { SpyLinks } from "@/components/ui/SpyLinks";
 import { VerdictMark } from "@/components/ui";
+import { TourStops } from "@/components/TourBar";
+import { withTour } from "@/lib/tour";
 import { isLast, ordinal, rankFill, rankInk } from "@/components/ballot/rank";
 import { HERO_TOWN, TOWNS, townBySlug } from "@/lib/towns";
 
@@ -101,8 +103,8 @@ export default async function GuidedPath() {
         </>
       ),
       notice: ft.swap
-        ? `Line ${ft.swap.line} is struck: it could fit any town. In its place: ${ft.swap.title}${ft.swap.rank ? `, #${ft.swap.rank} by local affinity` : ""}. Click “Why” to see the Qloo signal.${!useTemplate && f.institution ? ` Line ${f.institution.line} keeps ${f.institution.name}: real institutions stay.` : ""}`
-        : "Struck lines could fit any town; each replacement names a local place and the Qloo signal behind it.",
+        ? `Line ${ft.swap.line} could fit any town, so it is struck; in its place, ${ft.swap.partner}${ft.swap.rank ? `, ranked #${ft.swap.rank} of ${first.profile.placeCount} places locals favour` : ""}.`
+        : "Lines that could fit any town are struck; each replacement names a local place and why.",
       primary: { href: firstSwapHref ?? firstTownHref, label: ft.swap ? `Open line ${ft.swap.line}` : "Open the check" },
       secondary: f.institution
         ? { href: f.institution.href, label: useTemplate ? "See a kept line in the AI-written draft" : "See a kept institution" }
@@ -124,7 +126,7 @@ export default async function GuidedPath() {
           </p>
         </>
       ),
-      notice: `Commitments come first, in section 1. Every item is costed per session from the fund; the rest is held in reserve for the committee. Click Draft outreach: an OpenAI agent picks partners, confirms each on OpenStreetMap and drafts emails that name the funder (${HERO_TOWN.sponsor}).`,
+      notice: `Every item is costed from the fund; Draft outreach has an AI agent write the partner emails, naming ${HERO_TOWN.sponsor} as the funder.`,
       primary: { href: f.memoHref, label: "Open the memo" },
       secondary: { href: `${f.memoHref}#commitments`, label: "See section 1" },
     },
@@ -157,7 +159,7 @@ export default async function GuidedPath() {
           </p>
         </>
       ),
-      notice: `The funder is named before anything is ranked. The committee tally adds ${SIMULATED_BALLOTS} simulated ballots to yours, and every screen says so.`,
+      notice: `The funder is named before anyone ranks; the tally adds ${SIMULATED_BALLOTS} simulated ballots to yours and says so.`,
       primary: { href: f.ballotHref, label: "Open the ballot" },
       secondary: { href: `${f.resultsHref}#simulated`, label: "See the tally" },
     },
@@ -181,9 +183,9 @@ export default async function GuidedPath() {
           </ul>
         </>
       ),
-      notice: "Taylor, Texas (a Samsung chip fab) starts from the consultant template; click “Have AI write a draft now” to watch OpenAI write one live, in about 20 seconds. Kemmerer, Wyoming shows the plan with limited local data.",
+      notice: "Open Taylor, Texas (a Samsung chip fab), then press “Have AI write a draft now” to watch one written and checked live, in about 20 seconds.",
       primary: { href: "/find?q=Taylor%2C%20TX&facility=fab&company=Samsung", label: "Try Taylor, TX" },
-      secondary: { href: "/town/kemmerer-wy", label: "Open Kemmerer" },
+      secondary: { href: "/town/kemmerer-wy", label: "See a town with little data" },
     },
     {
       title: "The evidence and its limits",
@@ -207,7 +209,7 @@ export default async function GuidedPath() {
           <p className="gp-vis-note">{t.gnNovelPct}% of our local partners AI alone never names.</p>
         </>
       ),
-      notice: `${t.llmInstitutionalPct}% of the partners AI alone names are institutions, against ${t.gnInstitutionalPct}% of ours, and ${t.gnNovelPct}% of our local partners it never names. Ordering the same places by distance changes ${t.affinityChangedPct}% of picks${heroProof ? ` (${heroProof.gnPicksChangedByAffinity} of ${heroProof.gnPicks} in ${HERO_TOWN.name})` : ""}.`,
+      notice: `AI alone mostly names institutions (${t.llmInstitutionalPct}%); ${t.gnNovelPct}% of our local partners are places it never names. The limits sit beside the figures.`,
       primary: { href: "/proof#findings", label: "Open the evidence" },
       secondary: { href: "/proof#limits", label: "What it does not prove" },
     },
@@ -226,6 +228,7 @@ export default async function GuidedPath() {
   return (
     <div className="gn-landing jg">
       <AppHeader towns={false} page="judges" />
+      <TourStops stops={steps.map((s) => ({ title: s.rail ?? s.title, href: s.primary.href }))} />
       <main id="main">
         <section className="gp-hero jg-hero" aria-labelledby="gp-h">
           <div className="lp-wrap jg-hero-grid">
@@ -239,7 +242,7 @@ export default async function GuidedPath() {
               {town}, home to a {HERO_TOWN.sponsor} data center campus: its draft plan checked line by line, the costed committee memo, the
               resident ballot, any town you type, then the evidence and its limits. Each step opens the live page.
             </p>
-            <LiveDataNotice towns={proof.failedTowns} />
+            <LiveDataNotice towns={proof.failedTowns} retry />
             <div className="jg-ctas">
               <Link href="#step-1" className="lp-btn lp-btn-primary">
                 Follow the five steps
@@ -300,12 +303,12 @@ export default async function GuidedPath() {
                         {s.notice}
                       </p>
                       <div className="lp-ctas jg-step-ctas">
-                        <Link href={s.primary.href} className="lp-btn lp-btn-quiet">
+                        <Link href={withTour(s.primary.href, i + 1)} className="lp-btn lp-btn-quiet">
                           {s.primary.label}
                           <Chevron />
                         </Link>
                         {s.secondary && (
-                          <Link href={s.secondary.href} className="lp-btn lp-btn-quiet jg-link">
+                          <Link href={withTour(s.secondary.href, i + 1)} className="lp-btn lp-btn-quiet jg-link">
                             {s.secondary.label}
                           </Link>
                         )}
