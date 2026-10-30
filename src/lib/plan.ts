@@ -44,6 +44,9 @@ export interface Partner {
   ages?: AgeProfile;
   // The area place traits this place carries (Qloo), attached the same way. Display only.
   traits?: SharedTrait[];
+  // Qloo's coordinates for the place, for the town map. Display only: the planner, the audit and
+  // the reach check never read it.
+  location?: { lat: number; lon: number };
 }
 
 export interface ProgramItem {
@@ -178,6 +181,7 @@ export function partnerOf(e: QlooEntity, meta?: PlaceMeta): Partner {
     eventSpaces: e.eventSpaces,
     neighbouring: meta ? !meta.host : undefined,
     affinityRank: meta?.affinityRank,
+    location: e.location ? { lat: e.location.lat, lon: e.location.lon } : undefined,
   };
 }
 

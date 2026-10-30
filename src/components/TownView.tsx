@@ -9,6 +9,8 @@ import { cadenceLower, formatPhone, km, quotedName } from "@/components/dashboar
 import { AuditTools } from "@/components/town/AuditTools";
 import { DraftLine } from "@/components/town/DraftLine";
 import { TownSchematic } from "@/components/town/TownSchematic";
+import { TownMap } from "@/components/town/TownMap";
+import { buildMapData } from "@/lib/mapData";
 import { keptBreakdown } from "@/components/ui/keptBreakdown";
 import { favourRank, isQlooSignal, kindOf, LOCAL_AFFINITY, shortOrg, shortSignal, shortTermHit } from "@/components/ui/labels";
 import { LiveDataNotice } from "@/components/LiveDataNotice";
@@ -305,6 +307,20 @@ export function TownView({ run }: { run: TownRun }) {
   const partners = partnerPoints(program.items);
   const sessions = sessionsByBucket(program.items);
 
+  // The map's data, from this run only: the client recomputes flows and totals without calling Qloo.
+  const mapData = buildMapData({
+    site: { lat: town.lat, lon: town.lon, label: `${FACILITY_LABEL[town.facility]} site` },
+    // Qloo's places come from within 15 km of the site (src/lib/profile.ts).
+    radiusKm: 15,
+    placeCount: profile.placeCount,
+    twoYearFund: program.twoYearFund,
+    audit,
+    anchors,
+    qlooAdds,
+    localPlaces: profile.localPlaces.map((p) => ({ id: p.id, name: p.name, location: p.location })),
+    rankOf: (id) => profile.placeMeta.get(id)?.affinityRank,
+  });
+
   const memoHref = `/memo/${town.slug}?fund=${program.annualFund}`;
   const planHref = (p: PlanSource) => `/town/${town.slug}?plan=${p}&fund=${program.annualFund}`;
   // Places and brands lead; a taste type whose local list is mostly national pop is marked as such.
@@ -428,6 +444,9 @@ export function TownView({ run }: { run: TownRun }) {
             <QlooCalls calls={[...profile.calls, ...(profile.lensCalls ?? []), ...(profile.areaTagCalls ?? []), ...(profile.ageCalls ?? [])]} />
           </div>
         </section>
+
+        {/* The plan on the map: the main view; the line-by-line check below carries the same plan as text */}
+        {!failed && audit.length > 0 && <TownMap data={mapData} townName={town.name} />}
 
         {/* The line-by-line check */}
         <Card as="section" aria-labelledby="audit-title" className="ui-section scroll-mt-24">
