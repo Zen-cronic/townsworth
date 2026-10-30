@@ -15,10 +15,11 @@ import { PrintButton } from "@/components/dashboard/PrintButton";
 import { EXPORT_ITEM, ExportMenu } from "@/components/ui/ExportMenu";
 import { parseFund, primaryCta, secondaryCta } from "@/components/dashboard/ui";
 import { StatusPill } from "@/components/dashboard/StatusPill";
-import { CrmExportLinks, SessionCalendarLinks } from "@/components/integrations";
+import { CalendarMenu, CrmExportLinks } from "@/components/integrations";
+import { cadenceLower } from "@/components/dashboard/format";
 import { AgeStrip } from "@/components/qloo/AgeStrip";
 import { commitmentsFor } from "@/lib/commitments";
-import { BUCKETS, costLine, type Bucket } from "@/lib/plan";
+import { BUCKETS, type Bucket, type ProgramItem } from "@/lib/plan";
 import { money, runTown } from "@/lib/run";
 
 export const metadata: Metadata = {
@@ -34,6 +35,9 @@ const MATERIAL = [
   ["Tax", "Abatements, PILOT payments, school-district share"],
 ] as const;
 
+
+// "4 sessions × $6,000": the cost basis without the partner name, which the title already carries.
+const unitLine = (it: ProgramItem) => `${it.sessions} ${it.sessions === 1 ? it.unit : `${it.unit}s`} × ${money(it.unitCost)}`;
 
 function SectionTitle({ n, children, note }: { n: string; children: React.ReactNode; note?: React.ReactNode }) {
   return (
@@ -315,24 +319,26 @@ export default async function MemoPage({
                       </th>
                       <td className="pb-1.5 pt-5 text-right font-mono text-sm tabular-nums text-muted">{money(amount)}</td>
                     </tr>
-                    {items.map((it) => (
-                      <tr key={it.id} className="align-top">
-                        <td className="py-2 pr-4">
-                          <div className="leading-snug">{it.title}</div>
-                          <div className="mt-0.5 text-xs leading-relaxed text-muted">
-                            {costLine(it)} · {it.cadence}
-                            {it.partner?.neighbouring && ` · Neighbouring community${it.partner.city ? ` (${it.partner.city})` : ""}`}
-                          </div>
-                          <div className="text-xs leading-relaxed text-muted">
-                            {it.partner?.address ?? it.detail}
-                            <span className="memo-signal ml-2 inline-block font-mono text-[11px] text-muted/90">{shortSignal(it.provenance[0]?.signal)}</span>
-                          </div>
-                          <AgeStrip ages={it.partner?.ages} className="mt-0.5 text-xs leading-relaxed" />
-                          <SessionCalendarLinks item={it} town={town} firstOnly className="mt-1" />
-                        </td>
-                        <td className="memo-amount py-2 text-right font-mono tabular-nums">{money(it.amount)}</td>
-                      </tr>
-                    ))}
+                    {items.map((it) => {
+                      const where = it.partner?.address;
+                      const near = it.partner?.neighbouring ? (it.partner.city ?? "Neighbouring community") : undefined;
+                      const ownCadence = it.cadence !== program.cadence[b] ? cadenceLower(it.cadence) : undefined;
+                      return (
+                        <tr key={it.id} className="memo-item align-top">
+                          <td className="py-3 pr-4">
+                            <div className="font-medium leading-snug">{it.title}</div>
+                            <div className="memo-meta mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted">
+                              <span>{[unitLine(it), ownCadence, near, !it.partner && it.detail].filter(Boolean).join(" · ")}</span>
+                              {it.partner && <span className="memo-signal font-mono text-[11px]">{shortSignal(it.provenance[0]?.signal)}</span>}
+                              <CalendarMenu item={it} town={town} where={where} className="ml-auto" />
+                            </div>
+                            <AgeStrip ages={it.partner?.ages} className="mt-1 text-xs leading-relaxed" />
+                            {where && <div className="mt-0.5 hidden text-xs text-muted print:block">{where}</div>}
+                          </td>
+                          <td className="memo-amount py-3 text-right font-mono tabular-nums">{money(it.amount)}</td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 ))}
               <tbody className="border-b border-hairline">
@@ -363,9 +369,9 @@ export default async function MemoPage({
               <p>
                 <strong className="font-semibold text-ink">Annual fund {money(program.annualFund)}.</strong> {town.fundNote}
               </p>
-              <details className="ui-more mt-1 print:hidden">
+              <details className="rp-more mt-1 print:hidden">
                 <summary>How each item is costed</summary>
-                <div>{program.costNote}</div>
+                <div className="mt-1">{program.costNote}</div>
               </details>
               <p className="mt-1 hidden print:block">
                 <strong className="font-semibold text-ink">How each item is costed.</strong> {program.costNote}

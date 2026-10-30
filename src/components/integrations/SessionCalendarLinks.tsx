@@ -86,3 +86,40 @@ export function ProgramCalendarLinks({ items, town, now, className = "" }: Progr
     </ul>
   );
 }
+
+export interface CalendarMenuProps {
+  item: ProgramItem;
+  town: TownPlace;
+  now?: Date;
+  // Shown in the menu above the buttons, e.g. the venue's street address.
+  where?: string;
+  className?: string;
+}
+
+// One "Add to calendar" control per item: the first session's date and the two calendar buttons sit
+// in a small menu, so a program row carries one quiet control instead of a date and two buttons.
+export function CalendarMenu({ item, town, now, where, className = "" }: CalendarMenuProps) {
+  const first = itemSessions(item, now)[0];
+  if (!first) return null;
+  const event = sessionEvent(item, first, town);
+  const when = dateLabel.format(first.start);
+  return (
+    <details className={`cal-menu no-print ${className}`}>
+      <summary aria-label={`Add to calendar: ${item.title}`}>Add to calendar</summary>
+      <div className="cal-menu-panel">
+        <p className="cal-menu-when">
+          First session <span className="font-mono tabular-nums text-ink">{when}</span>
+          {where && <span className="block">{where}</span>}
+        </p>
+        <div className="flex flex-wrap gap-2">
+          <ExternalLink href={googleCalendarUrl(event)} text="Google Calendar" context={`the ${when} session`}>
+            Google Calendar
+          </ExternalLink>
+          <ExternalLink href={outlookCalendarUrl(event)} text="Outlook" context={`the ${when} session`}>
+            Outlook
+          </ExternalLink>
+        </div>
+      </div>
+    </details>
+  );
+}

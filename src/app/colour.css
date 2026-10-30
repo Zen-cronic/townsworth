@@ -490,3 +490,22 @@
     background: color-mix(in srgb, var(--ink) 35%, var(--paper));
   }
 }
+
+/* Check summary: each cell washed by what it counts. Struck is pink only when a line is struck;
+   Qloo's partners on the blue wash; kept and costed on the green tint. */
+:root .check-stat { background: var(--paper); }
+:root .check-stat.is-struck { background: var(--hivis-wash); }
+:root .check-stat.is-ok { background: var(--ok-wash); }
+:root .check-stat.is-qloo { background: var(--qloo-wash); }
+:root .check-stat.is-qloo :is(.check-stat-k, .ui-stat-v) { color: var(--qloo); }
+:root .check-stat.is-ok :is(.check-stat-k, .ui-stat-v) { color: var(--ok-text); }
+:root .check-results .rp-amount { color: var(--ok-text); font-weight: 650; }
+:root .check-results .audit-row.is-struck .gn-proposal .rp-amount { color: var(--ok-text); }
+@media print {
+  :root .check-stat:is(.is-struck, .is-ok, .is-qloo) { background: none; }
+  :root .check-stat :is(.check-stat-k, .ui-stat-v),
+  :root .check-results .rp-amount { color: var(--ink); }
+}
+@media print {
+  :root :is([data-age-strip], [data-trait-line]) { color: var(--ink); }
+}

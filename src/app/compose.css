@@ -1000,3 +1000,109 @@
     bottom: -24px;
   }
 }
+
+/* Report rows: a ruled rhythm under each area bar, one quiet meta line per item. */
+:root .memo-item + .memo-item > td {
+  border-top: 1px solid color-mix(in srgb, var(--ok) 18%, transparent);
+}
+:root .memo-meta > .memo-signal {
+  margin-left: 2px;
+}
+
+/* A disclosure that reads as a quiet control: a chevron, no underline. Used for "How this was
+   checked", the rule checks on a draft and the per-item calendar menu. */
+:root .rp-more > summary,
+:root .cal-menu > summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  cursor: pointer;
+  list-style: none;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--muted);
+  transition: color 150ms;
+}
+:root :is(.rp-more, .cal-menu) > summary::-webkit-details-marker {
+  display: none;
+}
+:root :is(.rp-more, .cal-menu) > summary::after {
+  content: "";
+  width: 6px;
+  height: 6px;
+  margin-top: -3px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(45deg);
+  transition: transform 150ms;
+}
+:root :is(.rp-more, .cal-menu)[open] > summary::after {
+  margin-top: 3px;
+  transform: rotate(-135deg);
+}
+:root :is(.rp-more, .cal-menu) > summary:hover {
+  color: var(--ink);
+}
+
+/* Calendar menu: one small outlined control per program item; the buttons open in a panel. On a
+   pointer screen it appears when the row is hovered or focused, so the list reads as titles and
+   amounts; on touch and narrow screens it always shows. */
+:root .cal-menu {
+  position: relative;
+  display: flex;
+  justify-content: flex-end;
+}
+:root .cal-menu > summary {
+  min-height: 24px;
+  padding: 0 8px 0 10px;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  background: var(--paper);
+  font-size: 0.75rem;
+  color: var(--ink);
+}
+:root .cal-menu > summary:hover {
+  border-color: var(--ink);
+}
+:root .cal-menu-panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 5;
+  width: max-content;
+  max-width: min(18rem, calc(100vw - 32px));
+  padding: 12px;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  background: var(--card);
+  box-shadow: var(--sheet-shadow);
+  text-align: left;
+}
+:root .cal-menu-when {
+  margin-bottom: 10px;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+@media (hover: hover) and (pointer: fine) and (min-width: 640px) {
+  :root .memo-item .cal-menu:not([open]) {
+    opacity: 0;
+    transition: opacity 150ms;
+  }
+  :root .memo-item:is(:hover, :focus-within) .cal-menu {
+    opacity: 1;
+  }
+}
+:root .rule-menu {
+  position: relative;
+}
+:root .rule-menu > .cal-menu-panel {
+  width: 20rem;
+}
+@media (max-width: 639px) {
+  :root .rule-menu > .cal-menu-panel {
+    left: 0;
+    right: auto;
+  }
+}
