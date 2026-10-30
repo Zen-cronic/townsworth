@@ -1,0 +1,32 @@
+/* Resident ballot and committee tally (/ballot/[slug], /ballot/[slug]/results) only. One calm
+   column; ideas are ruled rows, not cards. The simulated label keeps its panel. */
+
+.bl .bl-rows {
+  list-style: none;
+  margin-left: 0;
+  padding: 0;
+  border-top: 1px solid var(--ink);
+}
+.bl .bl-row {
+  border-bottom: 1px solid var(--hairline);
+}
+/* The idea moved last keeps a quiet tint until the next move. */
+.bl .bl-row[data-moved] {
+  background: color-mix(in srgb, var(--ink) 4%, transparent);
+  box-shadow: -12px 0 0 color-mix(in srgb, var(--ink) 4%, transparent), 12px 0 0 color-mix(in srgb, var(--ink) 4%, transparent);
+}
+.bl .bl-n {
+  font-family: var(--font-display);
+  font-stretch: 116%;
+  font-size: 1.375rem;
+  font-weight: 750;
+  line-height: 1.5rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+@media (max-width: 600px) {
+  .bl .bl-primary {
+    width: 100%;
+    justify-content: center;
+  }
+}

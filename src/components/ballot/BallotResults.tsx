@@ -127,30 +127,30 @@ export function BallotResults({ slug, townName, items }: { slug: string; townNam
       </p>
 
       {/* Tally */}
-      <ol className="mt-4 divide-y divide-hairline border-y border-rule" data-testid="tally">
+      <ol className="bl-rows mt-4" data-testid="tally">
         {tally.rows.map((row, i) => {
           const share = Math.round(row.firstShare * 100);
           const label = row.rankCounts.map((c, r) => `${ordinal(r + 1)}: ${c}`).join(", ");
           return (
-            <li key={row.item.id} className={`row-edge ${i === 0 ? "is-kept bg-side" : "is-quiet"} grid grid-cols-[1.75rem_1fr] gap-x-3 px-3 py-4`}>
-              <span className={`pt-0.5 text-right font-mono text-lg font-medium tabular-nums leading-6 ${i === 0 ? "text-ink" : ""}`}>{i + 1}</span>
+            <li key={row.item.id} className="bl-row grid grid-cols-[1.75rem_1fr] gap-x-4 py-4">
+              <span className="bl-n text-right">{i + 1}</span>
               <div className="min-w-0">
-                <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                <div className="grid grid-cols-[minmax(0,1fr)_auto] items-baseline gap-x-4">
                   <h3 className="min-w-0 text-[15px] font-semibold leading-snug sm:text-base">{row.item.title}</h3>
-                  <span className="font-mono text-sm tabular-nums">
+                  <span className="whitespace-nowrap text-sm font-semibold tabular-nums">
                     {row.points.toLocaleString("en-US")} <span className="text-xs text-muted">pts</span>
                   </span>
                 </div>
                 <DistanceLine item={row.item} townName={townName} />
                 <div className="mt-2.5 flex items-center gap-3">
                   <RankBar counts={row.rankCounts} total={tally.ballots || 1} label={`Ranking positions across ${tally.ballots} ballots. ${label}`} />
-                  <span className="w-[8.5rem] shrink-0 text-right text-xs text-muted">
-                    <span className="font-mono tabular-nums text-ink">{share}%</span> first choice
+                  <span className="w-[8.5rem] shrink-0 text-right text-sm text-muted">
+                    <span className="tabular-nums font-semibold text-ink">{share}%</span> first choice
                   </span>
                 </div>
                 {myRank && (
-                  <p className="mt-1.5 text-xs text-muted">
-                    You ranked it <span className="font-mono text-ink">{ordinal(myRank.get(row.item.id) ?? 0)}</span>
+                  <p className="mt-1.5 text-sm text-muted">
+                    You ranked it <span className="font-semibold text-ink">{ordinal(myRank.get(row.item.id) ?? 0)}</span>
                   </p>
                 )}
               </div>
@@ -169,17 +169,17 @@ export function BallotResults({ slug, townName, items }: { slug: string; townNam
       </div>
 
       {counted && mine.ballot.missing && (
-        <div className="mt-6 rounded-md border border-rule bg-paper px-4 py-3 text-sm">
-          <p className="text-xs font-medium text-muted">Your &ldquo;something missing&rdquo; note (kept in this browser only)</p>
+        <div className="mt-6 border-t border-rule pt-4 text-sm">
+          <p className="text-sm font-medium text-muted">Your &ldquo;something missing&rdquo; note (kept in this browser only)</p>
           <p className="mt-1 whitespace-pre-wrap break-words leading-relaxed">{mine.ballot.missing}</p>
         </div>
       )}
 
       {/* Decision */}
-      <p className="mt-8 border-l border-ink pl-3 text-base font-semibold leading-snug">The community committee decides; the ranking informs it.</p>
+      <p className="mt-8 border-t border-ink pt-4 text-base font-semibold leading-snug">The community committee decides; the ranking informs it.</p>
 
       <div className="mt-6 flex flex-wrap items-center gap-2">
-        <Link href={`/memo/${slug}`} className={`${primaryCta} min-h-11`}>
+        <Link href={`/memo/${slug}`} className={`${primaryCta} bl-primary min-h-11`}>
           Back to the memo
         </Link>
         <button type="button" onClick={downloadCsv} className={`${secondaryCta} min-h-11`}>

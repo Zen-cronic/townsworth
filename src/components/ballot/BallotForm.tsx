@@ -97,7 +97,7 @@ export function BallotForm({ slug, townName, items }: { slug: string; townName: 
           Reset order
         </button>
       </div>
-      <ol aria-describedby="rank-help" className="mt-3 space-y-2.5">
+      <ol aria-describedby="rank-help" className="bl-rows mt-3">
         {order.map((id, i) => {
           const it = byId.get(id);
           if (!it) return null;
@@ -105,9 +105,9 @@ export function BallotForm({ slug, townName, items }: { slug: string; townName: 
             <li
               key={id}
               data-moved={moved === id || undefined}
-              className="flex items-stretch gap-3 rounded-md border border-rule bg-paper p-3 transition-colors duration-200 data-[moved]:border-ink data-[moved]:bg-concrete motion-reduce:transition-none sm:p-4"
+              className="bl-row flex items-start gap-4 py-4 transition-colors duration-200 motion-reduce:transition-none"
             >
-              <span aria-hidden className="w-6 shrink-0 pt-0.5 text-right font-mono text-lg font-medium tabular-nums leading-6">
+              <span aria-hidden className="bl-n w-7 shrink-0 text-right">
                 {i + 1}
               </span>
               <div className="min-w-0 flex-1">
@@ -178,7 +178,7 @@ export function BallotForm({ slug, townName, items }: { slug: string; townName: 
       )}
 
       <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-3">
-        <button type="submit" disabled={pending} className={`${primaryCta} min-h-11 px-5 disabled:opacity-70`}>
+        <button type="submit" disabled={pending} className={`${primaryCta} bl-primary min-h-11 px-5 disabled:opacity-70`}>
           {pending ? "Saving…" : "Submit my ranking"}
         </button>
         <span className="text-sm text-muted">Anonymous: no name, email or address is asked for.</span>

@@ -1,3 +1,4 @@
+import "../ballot.css";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { BallotForm } from "@/components/ballot/BallotForm";
