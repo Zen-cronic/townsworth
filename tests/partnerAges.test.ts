@@ -68,41 +68,38 @@ afterEach(() => {
   globalThis.fetch = realFetch;
 });
 
-test("client: one call with the deduped ids, at most 15", async () => {
-  process.env.QLOO_API_KEY ??= "test-key";
-  const urls: string[] = [];
-  globalThis.fetch = (async (url: string) => {
-    urls.push(url);
-    return new Response(JSON.stringify({ results: { demographics: [row("a", { "55_and_older": 0.3 })] } }));
-  }) as typeof fetch;
-  const ids = ["a", "a", ...Array.from({ length: 20 }, (_, i) => `id${i}`)];
-  const res = await partnerDemographics(ids);
-  assert.equal(urls.length, 1);
-  const q = new URL(urls[0]).searchParams;
-  assert.equal(q.get("filter.type"), "urn:demographics");
-  const sent = q.get("signal.interests.entities")!.split(",");
-  assert.equal(sent.length, 15);
-  assert.equal(new Set(sent).size, 15);
-  assert.equal(sent[0], "a");
-  assert.deepEqual([...res.ages.keys()], ["a"]);
-  assert.equal(res.calls.length, 1);
-  assert.equal(res.calls[0].ok, true);
-  assert.equal((await partnerDemographics([])).calls.length, 0);
-});
-
-test("client: a 400 splits the ids into two calls", async () => {
+test("client: at most 15 deduped ids, sorted, in batches of 5", async () => {
   process.env.QLOO_API_KEY ??= "test-key";
   const sent: string[][] = [];
   globalThis.fetch = (async (url: string) => {
     const ids = new URL(url).searchParams.get("signal.interests.entities")!.split(",");
     sent.push(ids);
-    if (ids.length > 3) return new Response("{}", { status: 400 });
-    return new Response(JSON.stringify({ results: { demographics: ids.map((id) => row(id, { "24_and_younger": 0.2 })) } }));
+    assert.equal(new URL(url).searchParams.get("filter.type"), "urn:demographics");
+    return new Response(JSON.stringify({ results: { demographics: ids.includes("a") ? [row("a", { "55_and_older": 0.3 })] : [] } }));
   }) as typeof fetch;
-  const res = await partnerDemographics(["a", "b", "c", "d", "e", "f"]);
-  assert.deepEqual(sent.map((s) => s.length), [6, 3, 3]);
-  assert.deepEqual([...res.ages.keys()].sort(), ["a", "b", "c", "d", "e", "f"]);
-  assert.deepEqual(res.calls.map((c) => c.status), [400, 200, 200]);
+  const ids = ["a", "a", ...Array.from({ length: 20 }, (_, i) => `id${String(i).padStart(2, "0")}`)];
+  const res = await partnerDemographics(ids);
+  assert.deepEqual(sent.map((b) => b.length), [5, 5, 5]);
+  const all = sent.flat();
+  assert.equal(new Set(all).size, 15);
+  assert.ok(all.includes("a"), "the first-priority partner is inside the cap");
+  assert.deepEqual(all, [...all].sort());
+  assert.deepEqual([...res.ages.keys()], ["a"]);
+  assert.equal(res.calls.length, 3);
+  assert.ok(res.calls.every((c) => c.ok));
+  assert.equal((await partnerDemographics([])).calls.length, 0);
+});
+
+test("client: the same partners in any order make the same requests", async () => {
+  process.env.QLOO_API_KEY ??= "test-key";
+  const seen: string[] = [];
+  globalThis.fetch = (async (url: string) => {
+    seen.push(new URL(url).searchParams.get("signal.interests.entities")!);
+    return new Response(JSON.stringify({ results: { demographics: [] } }));
+  }) as typeof fetch;
+  await partnerDemographics(["c", "a", "b"]);
+  await partnerDemographics(["b", "c", "a"]);
+  assert.deepEqual(seen, ["a,b,c", "a,b,c"]);
 });
 
 test("isolation: a failed age call attaches nothing and leaves failedCalls, verdicts and amounts as they were", async () => {
@@ -119,9 +116,13 @@ test("isolation: a failed age call attaches nothing and leaves failedCalls, verd
 
   globalThis.fetch = (async () => new Response("{}", { status: 500 })) as typeof fetch;
   const failed = build();
+  // Seed the town's own call lists, so the check below can fail if the age call writes to them.
+  const own = { label: "places near point", params: {}, status: 200, ok: true, count: 5, ms: 1 };
+  failed.profile.calls = [own];
+  failed.profile.failedCalls = [];
   await addPartnerAges(failed.profile, failed.program.items);
-  assert.equal(failed.profile.failedCalls.length, 0);
-  assert.equal(failed.profile.calls.length, 0);
+  assert.deepEqual(failed.profile.failedCalls, []);
+  assert.deepEqual(failed.profile.calls, [own]);
   assert.equal(failed.profile.ageCalls!.length, 1);
   assert.equal(failed.profile.ageCalls![0].ok, false);
   assert.equal(failed.profile.partnerAges!.size, 0);
