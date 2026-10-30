@@ -653,6 +653,9 @@
 }
 :root .jg .gp-extra:last-child .lp-obj:hover { background: color-mix(in srgb, var(--paper) 60%, transparent); }
 :root .jg .gp-path { padding-bottom: 0; }
+@media (max-width: 760px) {
+  :root .jg .gp-extra:last-child { margin-top: 64px; padding: 36px 0 48px; }
+}
 :root .jg .gp-path + * { margin-top: 0; }
 
 /* Evidence: each card washed by what it reports. What Qloo changes on the blue wash; the per-town
@@ -797,10 +800,30 @@
   box-shadow: inset 0 3px 0 var(--ink);
 }
 
+/* Check results: the fund on the green tint and Qloo's added partners on the blue wash, each as a
+   whole panel under a rule in its colour; the line-by-line table above stays paper for reading. */
+:root .check-results [aria-labelledby="fund-title"] {
+  padding: 28px 24px 24px;
+  border-top: 0;
+  box-shadow: inset 0 4px 0 var(--ok);
+}
+:root .check-results [aria-labelledby="adds-title"] {
+  margin-top: 0;
+  padding: 4px 24px 16px;
+  border-top: 0;
+  background: var(--qloo-wash);
+  box-shadow: inset 0 4px 0 var(--qloo);
+}
+:root .check-results [aria-labelledby="adds-title"] > :first-child { background: none; }
+:root .check-results [aria-labelledby="adds-title"] :is(.border-rule, .border-hairline, [class*="divide-"] > *) { border-color: var(--qloo-side); }
+@media (max-width: 760px) {
+  :root .check-results :is([aria-labelledby="fund-title"], [aria-labelledby="adds-title"]) { padding-inline: 16px; }
+}
+
 /* Print: every round-2 fill drops to paper and ink, and the full-width grounds go. */
 @media print {
   :root :is(#ch-01, #ch-04) { --ch-bg: var(--paper); }
-  :root :is(#ch-01 .lp-spec, #ch-04 .lp-town-pick, .jg .gp-vis, .ui-page #what-qloo-changes, .ui-page #age-groups, .src-section, .memo-topics li, [data-testid="agent-drafts"] > div:first-child, section[aria-label="Fund and partners"] > .ui-card, .bl .bl-hero, .bl .bl-row, .bl .bl-sim) {
+  :root :is(#ch-01 .lp-spec, #ch-04 .lp-town-pick, .jg .gp-vis, .ui-page #what-qloo-changes, .ui-page #age-groups, .src-section, .memo-topics li, [data-testid="agent-drafts"] > div:first-child, section[aria-label="Fund and partners"] > .ui-card, .check-results [aria-labelledby="adds-title"], .check-results [aria-labelledby="fund-title"], .bl .bl-hero, .bl .bl-row, .bl .bl-sim) {
     background: none !important;
     box-shadow: none !important;
   }
