@@ -296,3 +296,379 @@
 :root :is(.is-ink, .ui-band) :is(.lp-stat-v, .ui-stat-v, .gp-vis-v) {
   color: var(--band-text);
 }
+
+/* Phase 1b ----------------------------------------------------------------- */
+
+/* One pink for every struck signal (marks, strike, cells and large numerals); small struck
+   labels are ink beside their pink mark. */
+:root {
+  --hivis-text: #1b1c1e;
+}
+:root .tally-v.is-pen {
+  color: var(--hivis);
+}
+
+/* Page hero with a drawing on the right: copy and controls on the left, the drawing spans both. */
+@media (min-width: 900px) {
+  :root .ui-band-inner:has(.ui-band-visual) {
+    position: relative;
+  }
+  :root .ui-band-inner:has(.ui-band-visual) > :is(.ui-band-main, .ui-band-aside) {
+    max-width: 58%;
+  }
+  :root .ui-band-visual {
+    position: absolute;
+    top: 50%;
+    right: 32px;
+    width: min(34%, 360px);
+    transform: translateY(-50%);
+  }
+}
+@media (max-width: 899px) {
+  :root .ui-band-visual {
+    display: none;
+  }
+}
+:root .town-plan {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+:root .town-plan-grid :is(circle, line) {
+  fill: none;
+  stroke: var(--band-quiet);
+  stroke-width: 1;
+  stroke-dasharray: 2 5;
+  opacity: 0.75;
+}
+:root .town-plan-grid circle:first-child {
+  stroke-dasharray: 6 4 1 4;
+  opacity: 1;
+}
+:root .town-plan-parcel :is(polygon, rect) {
+  fill: none;
+  stroke: var(--band-text);
+  stroke-width: 1.25;
+}
+:root .town-plan-parcel polygon {
+  stroke-dasharray: 8 3 1 3;
+}
+:root .town-plan-pt {
+  fill: var(--band);
+  stroke: var(--band-text);
+  stroke-width: 1.5;
+}
+:root .town-plan-k,
+:root .town-plan-v {
+  font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  fill: var(--band-muted);
+}
+:root .town-plan-k {
+  font-weight: 700;
+  fill: var(--band-text);
+}
+
+/* Fund controls: one height for the input and both buttons, top-aligned; on a phone Recost shares
+   the input row and the memo button takes the full width. */
+:root :is(.btn, .lp-btn) {
+  min-height: 44px;
+}
+:root .ui-fund {
+  align-items: flex-end;
+}
+:root .ui-fund-input,
+:root .ui-fund button,
+:root .ui-fund .ui-band-cta {
+  height: 44px;
+  min-height: 44px;
+}
+@media (max-width: 640px) {
+  :root .ui-fund {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+    width: 100%;
+  }
+  :root .ui-fund .ui-band-cta {
+    grid-column: 1 / -1;
+    width: 100%;
+    margin-left: 0;
+  }
+}
+
+/* The summary band: every column has the same parts in the same order, label first, and
+   "Details" sits on one shared bottom line. */
+:root .ui-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+:root .ui-stat > .ui-stat-k {
+  order: -1;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+:root .ui-stat .tally-draft {
+  font-size: 0.875rem;
+}
+:root .ui-stat > .ui-more,
+:root .ui-stat > .tally + .ui-more {
+  margin-top: auto;
+  padding-top: 12px;
+}
+:root .ch-names-n {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+}
+/* Provenance under the band: the Qloo call log, quiet and still on the page. */
+:root .ui-provenance {
+  padding: 14px 0 0;
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+:root .ui-provenance .ui-chip {
+  padding: 0;
+  background: none;
+  box-shadow: none;
+  font-size: 0.875rem;
+  color: var(--muted);
+  text-decoration: underline;
+  text-decoration-color: var(--rule);
+  text-underline-offset: 3px;
+}
+:root .ui-provenance .ui-chip-dot {
+  display: none;
+}
+:root .ui-provenance table {
+  color: var(--muted);
+}
+/* The audit follows the band closely: one rule, no dead gap. */
+:root .ui-provenance + .ui-section {
+  margin-top: 40px;
+}
+
+/* Audit ledger: the replacement carries the weight (about 40/60), and the struck original stays
+   readable in muted ink under a thinner pink strike. Rows sit inside the content gutter. */
+@media (min-width: 768px) {
+  :root .audit-row:is(li),
+  :root .audit-row > details > summary {
+    grid-template-columns: 2.25rem minmax(0, 2fr) minmax(0, 3fr);
+  }
+}
+:root .ui-card .row-edge.audit-row {
+  margin-inline: 0;
+  padding-inline: 0;
+}
+:root .audit-row .strike {
+  --strike-ink: var(--hivis);
+  background-size: 100% 1.5px;
+}
+@keyframes paint-strike-hair {
+  from { background-size: 0% 1.5px; }
+  to { background-size: 100% 1.5px; }
+}
+:root .audit-row .strike {
+  animation-name: paint-strike-hair;
+}
+:root .audit-row.is-struck .line-clamp-2 {
+  color: var(--muted);
+}
+:root .gn-proposal-t {
+  font-size: 1.0625rem;
+  font-weight: 650;
+  letter-spacing: -0.005em;
+}
+:root .gn-proposal-k {
+  font-size: 0.8125rem;
+  text-transform: none;
+  letter-spacing: 0;
+}
+:root .gn-proposal-m,
+:root .audit-row .text-xs {
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+/* "No local swap" sits on the same column and rule as a proposal. */
+:root .gn-noswap {
+  padding: 2px 0 2px 16px;
+  border-left: 1px solid var(--hairline);
+}
+
+/* Audit toolbar: verdict filter left; one stepper and "Show all" right; one link style. */
+:root .audit-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--hairline);
+  font-size: 0.875rem;
+}
+:root .audit-filter {
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 2px;
+  background: var(--concrete);
+  box-shadow: inset 0 0 0 1px var(--hairline);
+}
+:root .audit-opt {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 0 10px;
+  border-radius: 2px;
+  white-space: nowrap;
+  color: var(--muted);
+  cursor: pointer;
+}
+:root .audit-opt:hover {
+  color: var(--ink);
+}
+:root .audit-opt[aria-pressed="true"] {
+  background: var(--card);
+  color: var(--ink);
+  font-weight: 600;
+  box-shadow: 0 0 0 1px var(--hairline);
+}
+:root .audit-opt:disabled {
+  cursor: not-allowed;
+  color: var(--line-quiet);
+}
+:root .audit-legend > summary.audit-info {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  color: var(--ink);
+  cursor: pointer;
+  list-style: none;
+}
+:root .audit-info svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+}
+:root .audit-legend[open] {
+  flex-basis: 100%;
+  order: 9;
+}
+:root .audit-legend[open] > summary {
+  margin-bottom: 4px;
+}
+:root .audit-legend dl {
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+:root .audit-bar-end {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+:root .audit-stepper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+:root .audit-step {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 2px;
+  border: 1px solid var(--line-quiet);
+  background: var(--card);
+  color: var(--ink);
+  cursor: pointer;
+}
+:root .audit-step:hover {
+  border-color: var(--ink);
+}
+:root .audit-step:disabled {
+  cursor: not-allowed;
+  color: var(--line-quiet);
+  border-color: var(--hairline);
+}
+:root .audit-step svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+:root .audit-step-n {
+  min-width: 6.5em;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+@media (max-width: 640px) {
+  :root .audit-filter {
+    max-width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  :root .audit-bar-end {
+    margin-left: 0;
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+/* Metadata and deks one step up, and a shade darker. */
+:root .ui-band-note,
+:root .ui-card > div .text-xs,
+:root .audit-row .text-sm {
+  font-size: 0.9375rem;
+}
+:root .ui-card > div > div > p.text-xs {
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+
+/* The phone home headline keeps the wide display face, scaled down. */
+@media (max-width: 520px) {
+  :root .lp-hero .lp-h1 {
+    font-stretch: 112%;
+    font-size: 2.05rem;
+    letter-spacing: -0.025em;
+  }
+}
+
+/* Tighter vertical rhythm on the town page, so the audit begins near the first fold. */
+:root .ui-band {
+  padding: 44px 0 40px;
+}
+:root .ui-stat {
+  padding-top: 24px;
+  padding-bottom: 24px;
+}
+:root .ui-provenance + .ui-section {
+  margin-top: 24px;
+  padding-top: 24px;
+}
+:root .ui-stat > .ui-stat-k::first-letter {
+  text-transform: uppercase;
+}
+
+@media (max-width: 640px) {
+  :root .ui-band-aside {
+    width: 100%;
+  }
+  :root .audit-filter {
+    max-width: calc(100% - 44px);
+  }
+}

@@ -86,9 +86,7 @@ export function AuditTools({
       aria-pressed={filter === f}
       disabled={n === 0 && f !== "all"}
       onClick={() => setFilter(f)}
-      className={`inline-flex items-center gap-1.5 rounded px-2.5 py-1 transition-colors duration-150 disabled:cursor-not-allowed disabled:text-rule ${
-        filter === f ? "bg-paper font-medium text-ink shadow-sm" : "text-muted hover:text-ink active:bg-hairline"
-      }`}
+      className="audit-opt"
     >
       {mark && <span aria-hidden className={`audit-mark ${mark}`} />}
       {label} <span className="tabular-nums">{n}</span>
@@ -96,33 +94,36 @@ export function AuditTools({
   );
 
   return (
-    <div className="no-print flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-hairline px-5 py-2.5 text-sm sm:px-6">
-      <div role="group" aria-label="Show lines" className="flex flex-wrap rounded-md bg-concrete p-0.5 shadow-[inset_0_0_0_1px_var(--hairline)]">
+    <div className="audit-bar no-print">
+      <div role="group" aria-label="Show lines" className="audit-filter">
         {option("all", "All", counts.all)}
         {option("generic", "Not local", counts.generic, "is-generic")}
         {option("unsure", "Can't confirm", counts.unsure, "is-unsure")}
         {option("kept", "Kept", counts.kept, "is-kept")}
       </div>
       {children}
-      {struckIds.length > 0 && (
-        <div role="group" aria-label="Step through struck lines" className="ml-auto flex items-center gap-1">
-          <button type="button" onClick={() => go(-1)} disabled={at === 0} className={`${tertiaryCta} disabled:cursor-not-allowed disabled:text-muted`}>
-            Previous struck
-          </button>
-          <span aria-hidden className="text-muted">
-            ·
-          </span>
-          <button type="button" onClick={() => go(1)} disabled={at === struckIds.length - 1} className={`${tertiaryCta} disabled:cursor-not-allowed disabled:text-muted`}>
-            Next struck line
-          </button>
-          <span aria-live="polite" className="ml-1 text-xs tabular-nums text-muted">
-            {at >= 0 ? `Stop ${at + 1} of ${struckIds.length}` : ""}
-          </span>
-        </div>
-      )}
-      <button type="button" aria-pressed={full} onClick={() => setFull((v) => !v)} className={tertiaryCta}>
-        {full ? "Clamp long lines" : "Show all lines in full"}
-      </button>
+      <div className="audit-bar-end">
+        {struckIds.length > 0 && (
+          <div role="group" aria-label="Step through struck lines" className="audit-stepper">
+            <button type="button" onClick={() => go(-1)} disabled={at === 0} aria-label="Previous struck line" className="audit-step">
+              <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                <path d="M10 3.5 5.5 8l4.5 4.5" />
+              </svg>
+            </button>
+            <span aria-live="polite" className="audit-step-n">
+              {at >= 0 ? `Stop ${at + 1} of ${struckIds.length}` : `${struckIds.length} ${struckIds.length === 1 ? "stop" : "stops"}`}
+            </span>
+            <button type="button" onClick={() => go(1)} disabled={at === struckIds.length - 1} aria-label="Next struck line" className="audit-step">
+              <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                <path d="M6 3.5 10.5 8 6 12.5" />
+              </svg>
+            </button>
+          </div>
+        )}
+        <button type="button" aria-pressed={full} onClick={() => setFull((v) => !v)} className={tertiaryCta}>
+          {full ? "Clamp long lines" : "Show all"}
+        </button>
+      </div>
     </div>
   );
 }

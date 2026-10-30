@@ -4,12 +4,15 @@ export function PageBand({
   title,
   titleId,
   aside,
+  visual,
   children,
 }: {
   kicker?: React.ReactNode;
   title: React.ReactNode;
   titleId?: string;
   aside?: React.ReactNode;
+  // A drawing for the right of the band (hidden on phones).
+  visual?: React.ReactNode;
   children?: React.ReactNode;
 }) {
   return (
@@ -23,6 +26,7 @@ export function PageBand({
           {children}
         </div>
         {aside && <div className="ui-band-aside">{aside}</div>}
+        {visual && <div className="ui-band-visual">{visual}</div>}
       </div>
     </section>
   );

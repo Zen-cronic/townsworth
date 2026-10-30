@@ -9,6 +9,7 @@ import { Card, Chip, PageBand, SectionHeader, SplitCta, StatTile } from "@/compo
 import { cadenceLower, formatPhone, km, quotedName } from "@/components/dashboard/format";
 import { AuditTools } from "@/components/town/AuditTools";
 import { DraftLine } from "@/components/town/DraftLine";
+import { TownSchematic } from "@/components/town/TownSchematic";
 import { keptBreakdown } from "@/components/ui/keptBreakdown";
 import { kindOf, LOCAL_AFFINITY, shortOrg, shortSignal, shortTermHit } from "@/components/ui/labels";
 import { LiveDataNotice } from "@/components/LiveDataNotice";
@@ -88,19 +89,18 @@ function Why({ item, gloss }: { item: ProgramItem; gloss?: string }) {
   );
 }
 
-// A local partner card: title, one meta line (distance · cost), and the signal.
+// A local partner: the venue leads, the kind of item is its category line, then one meta line
+// (program area · run with · distance · cost) and the signal.
 function Proposal({ item, label, gloss }: { item: ProgramItem; label: string; gloss?: string }) {
-  const meta = [item.runWith && `with ${shortOrg(item.runWith)}`, km(item.partner?.distanceKm), money(item.amount)].filter(Boolean);
+  const meta = [BUCKETS[item.bucket].label, item.runWith && `with ${shortOrg(item.runWith)}`, km(item.partner?.distanceKm), money(item.amount)].filter(Boolean);
   return (
     <div className="gn-proposal slide-in rounded-md border border-ok/40 bg-card px-3.5 py-3">
-      <p className="text-[11px] font-medium uppercase tracking-wider text-ok-text">
-        {label} <span className="font-normal normal-case tracking-normal text-muted">· {BUCKETS[item.bucket].label}</span>
+      <p className="gn-proposal-k text-[11px] font-medium uppercase tracking-wider text-ok-text">
+        {label}
+        {item.partner && <span className="font-normal normal-case tracking-normal text-muted"> · {kindOf(item.title)}</span>}
       </p>
-      <p className="mt-1 text-[15px] font-medium leading-snug">
-        {kindOf(item.title)}
-        {item.partner && <span> · {shortOrg(item.partner.name)}</span>}
-      </p>
-      <p className="mt-0.5 font-mono text-xs tabular-nums text-muted">{meta.join(" · ")}</p>
+      <p className="gn-proposal-t mt-1 text-[15px] font-medium leading-snug">{item.partner ? shortOrg(item.partner.name) : kindOf(item.title)}</p>
+      <p className="gn-proposal-m mt-0.5 font-mono text-xs tabular-nums text-muted">{meta.join(" · ")}</p>
       <div className="mt-2">
         <Why item={item} gloss={gloss} />
       </div>
@@ -190,7 +190,7 @@ function AuditLine({ row, index, sameAs, gloss }: { row: AuditRow; index: number
         ) : row.replacement ? (
           <Proposal item={row.replacement} label="Proposed" gloss={gloss} />
         ) : (
-          <p className="pt-0.5 text-sm text-muted">No local swap · budget moves to the memo</p>
+          <p className="gn-noswap pt-0.5 text-sm text-muted">No local swap · budget moves to the memo</p>
         )}
         {row.alongside && <Proposal item={row.alongside} label="Added alongside" gloss={kept ? gloss : undefined} />}
       </div>
@@ -360,12 +360,14 @@ export function TownView({ run }: { run: TownRun }) {
         kicker={`${FACILITY_LABEL[town.facility]} host community`}
         title={`${town.name}, ${town.region}`}
         aside={fundForm}
+        visual={<TownSchematic lat={town.lat} lon={town.lon} facility={FACILITY_LABEL[town.facility]} points={partners} />}
       >
         <p className="ui-band-note">{town.custom ? "Entered by you" : town.project}</p>
-        <div className="ui-band-meta">
-          <QlooCalls calls={profile.calls} />
-          {!town.custom && <Chip tone="warn">{town.fundNote.startsWith("Illustrative") ? "Illustrative fund" : "Reported fund"}</Chip>}
-        </div>
+        {!town.custom && (
+          <div className="ui-band-meta">
+            <Chip tone="warn">{town.fundNote.startsWith("Illustrative") ? "Illustrative fund" : "Reported fund"}</Chip>
+          </div>
+        )}
         {failed > 0 && (
           <p role="status" className="ui-band-note">
             <span className="ui-band-alert font-semibold">Qloo didn&apos;t answer ({failed} of {profile.calls.length} calls); this is not thin data.</span> Reload in a minute.
@@ -413,6 +415,9 @@ export function TownView({ run }: { run: TownRun }) {
             </p>
           </StatTile>
         </section>
+        <div className="ui-provenance">
+          <QlooCalls calls={profile.calls} />
+        </div>
 
         {/* The line-by-line check */}
         <Card as="section" aria-labelledby="audit-title" className="ui-section scroll-mt-24">
@@ -457,10 +462,13 @@ export function TownView({ run }: { run: TownRun }) {
           {audit.length > 0 && (
             <AuditTools counts={{ all: audit.length, generic: comp.generic, unsure: comp.unverified, kept: kept.total }} struckIds={struckIds}>
               {/* The verdict definitions, a click away beside the options */}
-              <details className="group text-xs text-muted open:basis-full">
-                <summary className="inline-flex cursor-pointer items-center gap-0.5 font-medium text-ink underline decoration-rule underline-offset-2 group-hover:decoration-ink">
-                  What do these mean?
-                  <Chevron className="chev h-3 w-3" />
+              <details className="audit-legend group text-xs text-muted">
+                <summary className="audit-info" title="What do these mean?">
+                  <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                    <circle cx="8" cy="8" r="6.5" />
+                    <path d="M8 7v4.5M8 4.6v.1" />
+                  </svg>
+                  <span className="sr-only">What do these mean?</span>
                 </summary>
                 <dl className="mt-3 grid gap-x-6 gap-y-2 md:grid-cols-3">
                   <div>
