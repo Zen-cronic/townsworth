@@ -272,7 +272,8 @@
 :root .jg .jg-overview .text-muted {
   color: var(--band-muted);
 }
-:root .jg .jg-overview-v.is-pen > span > span:not(.text-muted) {
+/* Only the struck count is pink; the "of 12" total stays band white. */
+:root .jg .jg-overview-v.is-pen > span > span:first-child {
   color: var(--band-pen);
 }
 :root .jg .jg-hero :where(a, button, summary):focus-visible {
@@ -311,9 +312,28 @@
   :root .ch-dot {
     background: var(--ink);
   }
-  :root .ui-section.qloo-band,
-  :root .ui-page > .proof-band {
-    color: var(--ink);
+  /* Bands print as plain paper. Their descendants set band colours with higher specificity (down
+     to #findings), so the reset is !important, and only in print. */
+  :root :is(.ui-section.qloo-band, .ui-page > .proof-band, .jg .jg-hero),
+  :root .ui-page .proof-band #findings {
+    background: none;
     border-image: none;
+    box-shadow: none;
+  }
+  :root :is(.qloo-band, .proof-band, .jg-hero),
+  :root :is(.qloo-band, .proof-band, .jg-hero) * {
+    color: var(--ink) !important;
+    text-decoration-color: currentColor;
+    outline-color: var(--ink);
+  }
+  :root .proof-band .proof-bar-track {
+    background: none;
+    box-shadow: inset 0 0 0 1px var(--ink);
+  }
+  :root .proof-band .proof-bar.is-gn {
+    background: var(--ink);
+  }
+  :root .proof-band .proof-bar.is-llm {
+    background: color-mix(in srgb, var(--ink) 35%, var(--paper));
   }
 }
