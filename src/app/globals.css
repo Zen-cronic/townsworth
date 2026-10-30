@@ -66,6 +66,11 @@
   --font-body: var(--font-archivo);
   --font-display: var(--font-archivo);
   --font-data: var(--font-archivo);
+  /* Corner radius by role: buttons and inputs rounded, the square inside a split button a step
+     tighter, nav links, chips and toggles a full pill. Cards and sheets stay square. */
+  --r-btn: 10px;
+  --r-btn-inner: 6px;
+  --r-pill: 999px;
   --sheet-shadow: 0 1px 2px color-mix(in srgb, var(--ink) 6%, transparent), 0 8px 24px -12px color-mix(in srgb, var(--ink) 18%, transparent);
 }
 
@@ -96,6 +101,7 @@
   --color-amber: var(--amber);
   --color-amber-wash: var(--amber-wash);
   --color-focus: var(--focus);
+  --radius-btn: var(--r-btn);
   --font-sans: var(--font-body);
   --font-mono: var(--font-data);
 }
@@ -117,7 +123,7 @@ body {
     min-height: 40px;
     padding: 0 16px;
     border: 1px solid transparent;
-    border-radius: 2px;
+    border-radius: var(--r-btn);
     font-size: 0.875rem;
     font-weight: 600;
     line-height: 1.2;

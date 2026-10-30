@@ -11,7 +11,7 @@ export interface CrmExportLinksProps {
 }
 
 const defaultLink =
-  "inline-flex items-center gap-1.5 rounded-md border border-rule bg-paper px-3 py-1.5 text-sm transition-colors duration-150 hover:border-ink active:bg-concrete";
+  "inline-flex items-center gap-1.5 rounded-btn border border-rule bg-paper px-3 py-1.5 text-sm transition-colors duration-150 hover:border-ink active:bg-concrete";
 
 export function crmExportHref(slug: string, format: "hubspot" | "salesforce", fund?: number) {
   const q = new URLSearchParams({ format });

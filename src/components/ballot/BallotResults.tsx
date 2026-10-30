@@ -156,7 +156,7 @@ export function BallotResults({ slug, townName, items }: { slug: string; townNam
           {counted ? "Change my ballot" : "Rank the shortlist"}
         </Link>
         {counted && (
-          <button type="button" onClick={clearMine} className="min-h-11 rounded-md px-3 text-sm text-muted underline underline-offset-2 hover:text-ink">
+          <button type="button" onClick={clearMine} className="min-h-11 rounded-btn px-3 text-sm text-muted underline underline-offset-2 hover:text-ink">
             Remove my ballot from this browser
           </button>
         )}

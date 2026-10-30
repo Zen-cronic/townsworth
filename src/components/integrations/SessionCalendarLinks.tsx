@@ -8,7 +8,7 @@ type TownPlace = Pick<Town, "name" | "region">;
 
 // A small outlined button: each link adds an event or opens a compose window, so it reads as an action.
 const linkClass =
-  "inline-flex min-h-8 items-center rounded-md border border-rule bg-paper px-2.5 font-medium text-ink transition-colors duration-150 hover:border-ink active:bg-concrete";
+  "inline-flex min-h-8 items-center rounded-btn border border-rule bg-paper px-2.5 font-medium text-ink transition-colors duration-150 hover:border-ink active:bg-concrete";
 
 const dateLabel = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
 

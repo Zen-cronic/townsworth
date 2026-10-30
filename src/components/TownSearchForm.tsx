@@ -5,7 +5,7 @@ import { PendingSubmit } from "@/components/ui/PendingSubmit";
 // A plain GET form to /find, so it works without JavaScript. Geocoding happens on the server.
 
 const field =
-  "rounded-md border border-rule bg-paper text-ink transition-colors duration-150 placeholder:text-muted/80 hover:border-ink/50 focus:border-ink focus:outline-none";
+  "rounded-btn border border-rule bg-paper text-ink transition-colors duration-150 placeholder:text-muted/80 hover:border-ink/50 focus:border-ink focus:outline-none";
 
 export function HeaderTownSearch() {
   return (
@@ -24,7 +24,7 @@ export function HeaderTownSearch() {
         placeholder="Any town"
         className={`${field} w-36 rounded-r-none px-2.5 py-1.5 text-sm xl:w-24`}
       />
-      <button className="-ml-px rounded-md rounded-l-none border border-ink bg-ink px-2.5 py-1.5 text-sm font-medium text-paper transition-colors duration-150 hover:bg-ink/85 active:bg-ink/75">
+      <button className="-ml-px rounded-btn rounded-l-none border border-ink bg-ink px-2.5 py-1.5 text-sm font-medium text-paper transition-colors duration-150 hover:bg-ink/85 active:bg-ink/75">
         Search
       </button>
     </form>

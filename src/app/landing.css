@@ -154,7 +154,7 @@ a:focus-visible .lp-chev {
   gap: 16px;
   min-height: 48px;
   padding: 0 20px;
-  border-radius: 6px;
+  border-radius: var(--r-btn);
   font-size: 1rem;
   font-weight: 650;
   letter-spacing: -0.005em;
@@ -175,7 +175,7 @@ a:focus-visible .lp-chev {
   place-items: center;
   width: 36px;
   height: 36px;
-  border-radius: 4px;
+  border-radius: var(--r-btn-inner);
   background: var(--l-paper);
   color: var(--l-ink);
 }
@@ -2346,7 +2346,7 @@ a:focus-visible .lp-chev {
   place-items: center;
   width: 36px;
   height: 36px;
-  border-radius: 6px;
+  border-radius: var(--r-btn);
   background: var(--l-ink);
   color: var(--l-paper);
   transition: background-color 150ms;
@@ -2603,7 +2603,7 @@ a:focus-visible .lp-chev {
   align-items: center;
   height: 44px;
   padding-left: 12px;
-  border-radius: 6px;
+  border-radius: var(--r-btn);
   background: color-mix(in srgb, var(--l-band-text) 6%, transparent);
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--l-band-text) 24%, transparent);
   font-family: var(--l-mono);
@@ -2622,7 +2622,7 @@ a:focus-visible .lp-chev {
 .ui-fund button {
   height: 44px;
   padding: 0 16px;
-  border-radius: 6px;
+  border-radius: var(--r-btn);
   background: var(--l-paper);
   color: var(--l-ink);
   font-weight: 650;

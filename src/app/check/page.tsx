@@ -159,7 +159,7 @@ export default async function CheckPage({
                       href={`/check?town=${encodeURIComponent(slug)}`}
                       scroll={false}
                       aria-current={on ? "true" : undefined}
-                      className={`group flex items-center justify-between gap-3 rounded-md border px-3 py-2 text-sm transition-colors duration-150 hover:border-ink active:bg-concrete ${on ? "border-ink bg-concrete" : "border-rule bg-paper"}`}
+                      className={`group flex items-center justify-between gap-3 rounded-btn border px-3 py-2 text-sm transition-colors duration-150 hover:border-ink active:bg-concrete ${on ? "border-ink bg-concrete" : "border-rule bg-paper"}`}
                     >
                       <span className="min-w-0">
                         <span className="font-medium">{c.label}</span>

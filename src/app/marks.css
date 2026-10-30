@@ -84,7 +84,7 @@
   display: none;
 }
 :root .lp-motion {
-  border-radius: 2px;
+  border-radius: var(--r-pill);
 }
 
 /* Square-cornered sheets, cards, buttons and chips; sheets lift off the field with a rule and shadow. */
@@ -92,8 +92,18 @@
   border-radius: 2px;
   box-shadow: 0 0 0 1px var(--rule), 0 12px 28px -20px color-mix(in srgb, var(--ink) 32%, transparent);
 }
-:root :is(.lp-btn, .lp-btn-sq, .lp-preview, .lp-town, .ui-card, .ui-chip, .lp-chip, .lp-badge, .gn-proposal, .lp-swap) {
+:root :is(.lp-preview, .lp-town, .ui-card, .gn-proposal, .lp-swap) {
   border-radius: 2px;
+}
+/* Buttons rounded, chips and badges a full pill, from the shared radius tokens. */
+:root .lp-btn {
+  border-radius: var(--r-btn);
+}
+:root .lp-btn-sq {
+  border-radius: var(--r-btn-inner);
+}
+:root :is(.ui-chip, .lp-chip, .lp-badge) {
+  border-radius: var(--r-pill);
 }
 :root .lp-preview {
   border: 1.5px solid var(--ink);
@@ -289,7 +299,7 @@
 /* On the blue band: primary is lime, secondary an outline in white. */
 :root .ui-fund button,
 :root .ui-fund .ui-band-cta {
-  border-radius: 2px;
+  border-radius: var(--r-btn);
   font-size: 0.875rem;
   font-weight: 600;
 }
@@ -328,7 +338,7 @@
   padding: 4px;
   background: var(--card);
   border: 1px solid var(--rule);
-  border-radius: 2px;
+  border-radius: var(--r-btn);
   box-shadow: 0 12px 28px -14px color-mix(in srgb, var(--ink) 40%, transparent);
 }
 :root .gn-menu-item {
@@ -339,7 +349,7 @@
   padding: 0 12px;
   font-size: 0.875rem;
   color: var(--ink);
-  border-radius: 2px;
+  border-radius: var(--r-btn-inner);
 }
 :root .gn-menu-item:hover,
 :root .gn-menu-item:focus-visible {

@@ -6,7 +6,7 @@ import { BrandMark } from "@/components/landing/BrandMark";
 import { CenterCurrent } from "@/components/ui/CenterCurrent";
 
 const navLink =
-  "rounded-md px-2.5 py-1.5 text-sm max-[400px]:px-2 transition-colors duration-150 hover:bg-concrete hover:text-ink active:bg-hairline";
+  "rounded-full px-3 py-1.5 text-sm max-[400px]:px-2 transition-colors duration-150 hover:bg-concrete hover:text-ink active:bg-hairline";
 
 // One header on every page: the wordmark and primary links on top, and on product pages a thin
 // second row that switches town. Opaque paper, so nothing shows through when scrolled.
@@ -37,7 +37,7 @@ export function AppHeader({
     <header data-app-header="" data-towns={towns ? "" : undefined} className="no-print sticky top-0 z-30 border-b border-hairline bg-paper">
       <a
         href={skip.href}
-        className="sr-only rounded-md bg-ink px-3 py-2 text-sm font-medium text-paper focus:not-sr-only focus:absolute focus:left-4 focus:top-2 focus:z-40"
+        className="sr-only rounded-btn bg-ink px-3 py-2 text-sm font-medium text-paper focus:not-sr-only focus:absolute focus:left-4 focus:top-2 focus:z-40"
       >
         {skip.label}
       </a>
@@ -81,7 +81,7 @@ export function AppHeader({
                   href={`/town/${t.slug}`}
                   aria-current={on ? "page" : undefined}
                   title={`${t.name}, ${t.region}`}
-                  className={`shrink-0 rounded-md px-2.5 py-1 text-sm transition-colors duration-150 ${
+                  className={`shrink-0 rounded-full px-3 py-1 text-sm transition-colors duration-150 ${
                     on ? "bg-paper font-medium text-ink shadow-[0_0_0_1px_var(--hairline)]" : "text-muted hover:bg-paper hover:text-ink"
                   }`}
                 >
@@ -89,7 +89,7 @@ export function AppHeader({
                 </Link>
               );
             })}
-            <Link href="/find" className="shrink-0 rounded-md border border-rule px-2.5 py-0.5 text-sm text-ink transition-colors duration-150 hover:border-ink hover:bg-paper">
+            <Link href="/find" className="shrink-0 rounded-full border border-rule px-3 py-0.5 text-sm text-ink transition-colors duration-150 hover:border-ink hover:bg-paper">
               Find a town
             </Link>
           </nav>

@@ -452,14 +452,14 @@ export function TownView({ run }: { run: TownRun }) {
                 </div>
               )}
             </div>
-            <nav aria-label="Draft plan to audit" className="no-print flex rounded-md bg-concrete p-0.5 text-sm shadow-[inset_0_0_0_1px_var(--hairline)]">
+            <nav aria-label="Draft plan to audit" className="no-print flex rounded-full bg-concrete p-0.5 text-sm shadow-[inset_0_0_0_1px_var(--hairline)]">
               {(["llm", "agency"] as const).map((p) => (
                 <Link
                   key={p}
                   aria-current={source === p ? "page" : undefined}
                   href={planHref(p)}
                   prefetch={p === "llm" ? false : undefined}
-                  className={`rounded px-3 py-1.5 transition-colors duration-150 ${
+                  className={`rounded-full px-3.5 py-1.5 transition-colors duration-150 ${
                     source === p ? "bg-paper font-medium text-ink shadow-sm" : "text-muted hover:text-ink active:bg-hairline"
                   }`}
                 >

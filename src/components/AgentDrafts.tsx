@@ -121,7 +121,7 @@ export function AgentDrafts({ slug, fund }: { slug: string; fund: number }) {
         <button
           onClick={run}
           disabled={state === "loading"}
-          className="inline-flex items-center gap-2 rounded-md bg-ink px-4 py-2 text-sm font-semibold text-paper transition-colors duration-150 hover:bg-ink/85 active:bg-ink/75 disabled:cursor-progress disabled:opacity-70"
+          className="inline-flex items-center gap-2 rounded-btn bg-ink px-4 py-2 text-sm font-semibold text-paper transition-colors duration-150 hover:bg-ink/85 active:bg-ink/75 disabled:cursor-progress disabled:opacity-70"
         >
           {state === "loading" && <span aria-hidden className="h-3 w-3 animate-spin rounded-full border-2 border-paper/40 border-t-paper motion-reduce:animate-none" />}
           {state === "loading" ? "Drafting…" : state === "done" ? "Redraft" : "Draft outreach"}
@@ -269,7 +269,7 @@ export function AgentDrafts({ slug, fund }: { slug: string; fund: number }) {
                       <a
                         href={emlHref(d)}
                         download={`${d.partner.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}.eml`}
-                        className="inline-flex items-center gap-1.5 rounded-md border border-rule px-3 py-1.5 transition-colors duration-150 hover:border-ink active:bg-concrete"
+                        className="inline-flex items-center gap-1.5 rounded-btn border border-rule px-3 py-1.5 transition-colors duration-150 hover:border-ink active:bg-concrete"
                       >
                         <Download />
                         Download .eml
