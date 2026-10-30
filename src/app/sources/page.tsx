@@ -2,6 +2,7 @@ import "../landing.css";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { AppHeader } from "@/components/AppHeader";
+import { SpyLinks } from "@/components/ui/SpyLinks";
 import { LiveDataNotice } from "@/components/LiveDataNotice";
 import { PRODUCT_NAME } from "@/components/landing/brand";
 import { Chevron } from "@/components/landing/Chevron";
@@ -142,12 +143,16 @@ export default async function SourcesPage() {
 
         <div className="src-body">
           <div className="lp-wrap src-layout">
-            <nav className="src-toc" aria-label="On this page">
+            <nav className="src-toc" aria-labelledby="src-toc-h">
+              <p id="src-toc-h" className="text-xs font-semibold text-muted">
+                On this page
+              </p>
               {SECTIONS.map(([id, label]) => (
                 <a key={id} href={`#${id}`}>
                   {label}
                 </a>
               ))}
+              <SpyLinks current="location" />
             </nav>
 
             <div>
