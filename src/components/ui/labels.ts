@@ -6,7 +6,13 @@ export const LOCAL_AFFINITY = /^(?:Qloo place|Local favourite) · #(\d+) by loca
 // The signal in short form: "#6 local affinity"; other signals lose the "Qloo " prefix.
 export function shortSignal(signal?: string): string {
   if (!signal) return "Qloo signal";
-  return signal.replace(LOCAL_AFFINITY, "#$1 local affinity").replace(/^Qloo place\b/, "Local place").replace(/^Qloo /, "");
+  // Qloo's "brand" type covers teams, universities and museums alike, so it reads as wrong data:
+  // "Qloo brand · #2 locally" shows as "#2 locally". Artist, TV show and podcast stay.
+  return signal
+    .replace(LOCAL_AFFINITY, "#$1 local affinity")
+    .replace(/^Qloo place\b/, "Local place")
+    .replace(/^Qloo brand · /, "")
+    .replace(/^Qloo /, "");
 }
 
 // Whether a provenance signal came from Qloo (and so takes the Qloo chip). Every Qloo-sourced signal

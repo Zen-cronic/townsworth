@@ -103,7 +103,8 @@ export default async function Home() {
   const partnersByTown = Object.fromEntries(proof.towns.map((p) => [p.slug, p.gnPartners]));
 
   // Each town's own top pick and the taste that stands out most, so the cards differ the way the plans do.
-  const SIGNAL_TYPE = { brand: "brand", artist: "artist", tv_show: "TV show", podcast: "podcast" } as const;
+  // Qloo's "brand" type (teams, universities, museums) gets no label; the others are plain words.
+  const SIGNAL_TYPE = { brand: "", artist: "artist", tv_show: "TV show", podcast: "podcast" } as const;
   const picksByTown: Record<string, TownPick> = {};
   townRuns.forEach((r, i) => {
     if (!r) return;

@@ -101,7 +101,8 @@ export function TownGrid({
                 )}
                 {picks[t.slug]?.signal && (
                   <span className="lp-town-signal">
-                    Local favourite: <b>{picks[t.slug].signal!.name}</b> ({picks[t.slug].signal!.type})
+                    Local favourite: <b>{picks[t.slug].signal!.name}</b>
+                    {picks[t.slug].signal!.type ? ` (${picks[t.slug].signal!.type})` : null}
                   </span>
                 )}
                 <span className="lp-town-foot">
