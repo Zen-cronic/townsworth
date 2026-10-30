@@ -561,6 +561,22 @@
     background: var(--card);
   }
   .tm.is-full .tm-lines { overflow: visible; }
+  /* A compact sheet header so the plan lines start in the first screen. */
+  .tm.is-full .tm-panel > .tm-legend.is-inline,
+  .tm.is-full .tm-lede { display: none; }
+  .tm.is-full .tm-panel-head {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 8px;
+    padding: 12px 14px;
+  }
+  .tm.is-full .tm-title { grid-column: 1 / -1; margin: 0; font-size: 1rem; }
+  .tm.is-full .tm-totals { display: contents; }
+  .tm.is-full .tm-total { margin: 0; padding: 6px 10px; }
+  .tm.is-full .tm-total b { font-size: 1.0625rem; }
+  .tm.is-full .tm-total span { font-size: 0.75rem; }
+  .tm.is-full .tm-primary { grid-column: 1 / -1; margin: 0; min-height: 40px; }
+  .tm.is-full .tm-areas { grid-column: 1 / -1; margin: 0; flex-wrap: nowrap; overflow-x: auto; }
   .tm.is-full .tm-hint { top: 58px; bottom: auto; }
   .tm.is-full .tm-card { max-height: calc(100% - 16px); overflow-y: auto; }
 }
