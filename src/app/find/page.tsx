@@ -3,7 +3,7 @@ import "./find.css";
 import Link from "next/link";
 import { AppHeader } from "@/components/AppHeader";
 import { Chevron, Notice } from "@/components/dashboard/Icons";
-import { StatusPill } from "@/components/dashboard/StatusPill";
+import { Chip } from "@/components/ui";
 import { TownSearchForm } from "@/components/TownSearchForm";
 import { cleanTownQuery, geocodeTowns, type GeocodeResult } from "@/lib/nominatim";
 import { cleanCompany, FACILITY_CHOICES, isFacilityCode, withCompany } from "@/lib/towns";
@@ -153,7 +153,7 @@ export default async function FindPage({ searchParams }: { searchParams: Promise
                       <span className="min-w-0">
                         <span className="flex flex-wrap items-center gap-2">
                           <span className="font-medium">{c.label}</span>
-                          {c.preset && <StatusPill tone="ok">Preset · frozen LLM plan</StatusPill>}
+                          {c.preset && <Chip tone="plain">Preset · frozen LLM plan</Chip>}
                         </span>
                         <span className="mt-1 block text-sm text-muted" title={`${c.lat.toFixed(4)}, ${c.lon.toFixed(4)}`}>
                           {[c.kind.charAt(0).toUpperCase() + c.kind.slice(1), FACILITY_CHOICES.find((f) => f.code === facility)?.label, company && `funded by ${company}`]

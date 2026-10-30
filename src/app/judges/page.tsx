@@ -17,6 +17,7 @@ import { computeProof } from "@/lib/proof";
 import { runTown } from "@/lib/run";
 import { HERO_SAMPLE_ID, sampleCheckHref, samplePlanById } from "@/lib/samplePlans";
 import { SpyLinks } from "@/components/ui/SpyLinks";
+import { VerdictMark } from "@/components/ui";
 import { HERO_TOWN, TOWNS, townBySlug } from "@/lib/towns";
 
 export const metadata: Metadata = {
@@ -85,6 +86,22 @@ export default async function GuidedPath() {
       visual: (
         <>
           <StruckTally comp={comp} draft={useTemplate ? "Consultant template" : "AI-written draft"} />
+          {/* The verdicts behind the cells, in the shared marks. */}
+          <p className="gp-vis-note jg-verdicts">
+            {comp.generic > 0 && (
+              <span>
+                <VerdictMark kind="generic" /> {comp.generic} not local
+              </span>
+            )}
+            {comp.unverified > 0 && (
+              <span>
+                <VerdictMark kind="unsure" /> {comp.unverified} can&apos;t confirm
+              </span>
+            )}
+            <span>
+              <VerdictMark kind="kept" /> {comp.kept} kept
+            </span>
+          </p>
         </>
       ),
       notice: ft.swap
