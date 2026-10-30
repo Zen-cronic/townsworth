@@ -126,6 +126,7 @@ export function TownMap({ data, townName }: { data: MapData; townName: string })
   const [choices, setChoices] = useState<Record<number, Choice>>(() => defaultChoices(data));
   const [hidden, setHidden] = useState<Set<Bucket>>(() => new Set());
   const [showPlaces, setShowPlaces] = useState(false);
+  const [area, setArea] = useState<Bucket>();
   const [focus, setFocus] = useState<string>();
   const [hover, setHover] = useState<string>();
   const [point, setPoint] = useState<{ x: number; y: number }>();
@@ -347,6 +348,7 @@ export function TownMap({ data, townName }: { data: MapData; townName: string })
             <Canvas
               data={data}
               legs={state.visible}
+              area={area && !hidden.has(area) ? area : undefined}
               venues={state.venues}
               showPlaces={showPlaces}
               focus={focus}
@@ -437,7 +439,17 @@ export function TownMap({ data, townName }: { data: MapData; townName: string })
             {areas.length > 1 && (
               <div className="tm-areas" role="group" aria-label="Show flows by program area">
                 {areas.map((a) => (
-                  <button key={a.bucket} type="button" className="tm-area" aria-pressed={!hidden.has(a.bucket)} onClick={() => toggleArea(a.bucket)}>
+                  <button
+                    key={a.bucket}
+                    type="button"
+                    className={`tm-area is-${a.bucket}`}
+                    aria-pressed={!hidden.has(a.bucket)}
+                    onClick={() => toggleArea(a.bucket)}
+                    onMouseEnter={() => setArea(a.bucket)}
+                    onMouseLeave={() => setArea(undefined)}
+                    onFocus={() => setArea(a.bucket)}
+                    onBlur={() => setArea(undefined)}
+                  >
                     <span className={`tm-sw is-${a.bucket}`} aria-hidden="true" />
                     {a.label}
                   </button>

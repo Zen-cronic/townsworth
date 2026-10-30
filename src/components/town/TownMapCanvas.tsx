@@ -35,12 +35,12 @@ type Palette = typeof FALLBACK;
 // Base-map landscape tokens (the map block at the end of src/components/town/TownMap.css).
 const MAP_FALLBACK = {
   land: "#f5f2ea",
-  water: "#b4d0d8",
-  shore: "#8fb2bd",
+  water: "#a8cddc",
+  shore: "#7aa8bb",
   farmland: "#efe6c6",
-  grass: "#e0e8c8",
-  park: "#cfe2b2",
-  wood: "#bccfa6",
+  grass: "#d9e7bf",
+  park: "#c2dea1",
+  wood: "#aecb96",
   residential: "#eee6da",
   commercial: "#f0e0d4",
   industrial: "#dcd7e3",
@@ -197,6 +197,24 @@ function bendOf(i: number) {
   return (i % 2 ? -1 : 1) * (0.16 + (i % 3) * 0.05);
 }
 
+// One dash cycle in steps: stepping through these moves the dashes along a line, start to end.
+const DASHES: number[][] = [
+  [0, 4, 3],
+  [0.5, 4, 2.5],
+  [1, 4, 2],
+  [1.5, 4, 1.5],
+  [2, 4, 1],
+  [2.5, 4, 0.5],
+  [3, 4, 0],
+  [0, 0.5, 3, 3.5],
+  [0, 1, 3, 3],
+  [0, 1.5, 3, 2.5],
+  [0, 2, 3, 2],
+  [0, 2.5, 3, 1.5],
+  [0, 3, 3, 1],
+  [0, 3.5, 3, 0.5],
+];
+
 interface Anim {
   t: number;
   o: number;
@@ -205,6 +223,8 @@ interface Anim {
 export interface CanvasProps {
   data: MapData;
   legs: MapLeg[];
+  /** A program area the pointer or focus is on in the panel: its flows stay bright, the rest dim. */
+  area?: string;
   venues: Set<string>;
   showPlaces: boolean;
   focus?: string;
@@ -218,12 +238,14 @@ export interface CanvasProps {
   onFail: () => void;
 }
 
-export default function TownMapCanvas({ data, legs, venues, showPlaces, focus, hover, resetTick, full, onHover, onSelect, onPoint, onFail }: CanvasProps) {
+export default function TownMapCanvas({ data, legs, area, venues, showPlaces, focus, hover, resetTick, full, onHover, onSelect, onPoint, onFail }: CanvasProps) {
   const el = useRef<HTMLDivElement>(null);
   const map = useRef<MlMap | null>(null);
   const [ready, setReady] = useState(false);
   const anim = useRef(new Map<string, Anim>());
   const frame = useRef<number | null>(null);
+  const pulseFrame = useRef<number | null>(null);
+  const shownVenues = useRef(new Set<string>());
   const reduced = useRef(false);
   const palette = useRef<Palette>(FALLBACK);
   const cb = useRef({ onHover, onSelect, onPoint, onFail });
@@ -318,6 +340,8 @@ export default function TownMapCanvas({ data, legs, venues, showPlaces, focus, h
         m.setLight({ anchor: "map", position: [1.4, 210, 40], intensity: 0.45, color: "#ffffff" });
 
         m.addSource("tm-radius", { type: "geojson", data: { type: "Feature", properties: {}, geometry: { type: "LineString", coordinates: circleRing(data.site, data.radiusKm) } } });
+        m.addSource("tm-radius-area", { type: "geojson", data: { type: "Feature", properties: {}, geometry: { type: "Polygon", coordinates: [circleRing(data.site, data.radiusKm)] } } });
+        m.addLayer({ id: "tm-radius-area", type: "fill", source: "tm-radius-area", paint: { "fill-color": c.qloo, "fill-opacity": 0.06 } }, firstLabel);
         m.addLayer({ id: "tm-radius", type: "line", source: "tm-radius", paint: { "line-color": c.qloo, "line-width": 1.5, "line-dasharray": [3, 2], "line-opacity": 0.8 } });
         m.addLayer({
           id: "tm-radius-label",
@@ -331,22 +355,51 @@ export default function TownMapCanvas({ data, legs, venues, showPlaces, focus, h
         m.addLayer({ id: "tm-places", type: "circle", source: "tm-places", layout: { visibility: "none" }, paint: { "circle-radius": 2.6, "circle-color": c.qloo, "circle-opacity": 0.35 } });
 
         m.addSource("tm-arcs", { type: "geojson", data: fc([]) });
+        const arcColor = ["match", ["get", "bucket"], "training", c.training, "procurement", c.procurement, "grants", c.grants, "events", c.events, c.channels] as unknown as string;
         m.addLayer({
           id: "tm-arcs-casing",
           type: "line",
           source: "tm-arcs",
           layout: { "line-cap": "round", "line-join": "round" },
-          paint: { "line-color": c.paper, "line-width": ["+", ["get", "w"], 2.5], "line-opacity": ["*", ["get", "o"], 0.85] },
+          paint: { "line-color": c.paper, "line-width": ["+", ["get", "w"], 2.5], "line-opacity": ["*", ["get", "o"], ["case", ["get", "dim"], 0.2, 0.85]] },
         });
+        // A soft band of the program-area colour under each flow.
+        m.addLayer(
+          {
+            id: "tm-arcs-band",
+            type: "line",
+            source: "tm-arcs",
+            layout: { "line-cap": "round", "line-join": "round" },
+            paint: {
+              "line-color": arcColor,
+              "line-width": ["+", ["get", "w"], 7],
+              "line-opacity": ["*", ["get", "o"], ["case", ["get", "dim"], 0, 0.2]],
+            },
+          },
+          "tm-arcs-casing",
+        );
         m.addLayer({
           id: "tm-arcs",
           type: "line",
           source: "tm-arcs",
           layout: { "line-cap": "round", "line-join": "round" },
           paint: {
-            "line-color": ["match", ["get", "bucket"], "training", c.training, "procurement", c.procurement, "grants", c.grants, "events", c.events, c.channels],
+            "line-color": arcColor,
             "line-width": ["get", "w"],
-            "line-opacity": ["*", ["get", "o"], ["case", ["get", "dim"], 0.25, 0.95]],
+            "line-opacity": ["*", ["get", "o"], ["case", ["get", "dim"], 0.18, 0.95]],
+          },
+        });
+        // Travelling dashes over each flow, from the site out to the venue. Hidden under reduced motion.
+        m.addLayer({
+          id: "tm-arcs-flow",
+          type: "line",
+          source: "tm-arcs",
+          layout: { "line-cap": "butt", "line-join": "round", visibility: reduced.current ? "none" : "visible" },
+          paint: {
+            "line-color": c.paper,
+            "line-width": ["max", 1.2, ["*", ["get", "w"], 0.4]],
+            "line-opacity": ["*", ["get", "o"], ["case", ["get", "dim"], 0, 0.9]],
+            "line-dasharray": DASHES[0].map((x) => x * 2),
           },
         });
 
@@ -363,6 +416,36 @@ export default function TownMapCanvas({ data, legs, venues, showPlaces, focus, h
         });
 
         m.addSource("tm-venues", { type: "geojson", data: fc([]), promoteId: "key" });
+        m.addSource("tm-pulse", { type: "geojson", data: fc([]) });
+        // A soft ring in the venue's program-area colour, and a ring that spreads once when a venue joins the plan.
+        const areaColor = ["match", ["get", "bucket"], "training", c.training, "procurement", c.procurement, "grants", c.grants, "events", c.events, c.qloo] as unknown as string;
+        m.addLayer({
+          id: "tm-venue-ring",
+          type: "circle",
+          source: "tm-venues",
+          paint: {
+            "circle-radius": ["case", ["boolean", ["feature-state", "hot"], false], 21, 15],
+            "circle-color": areaColor,
+            "circle-opacity": ["case", ["get", "dim"], 0.06, 0.26],
+            "circle-stroke-color": areaColor,
+            "circle-stroke-width": 2,
+            "circle-stroke-opacity": ["case", ["get", "dim"], 0.1, 0.75],
+            "circle-pitch-alignment": "viewport",
+          },
+        });
+        m.addLayer({
+          id: "tm-pulse",
+          type: "circle",
+          source: "tm-pulse",
+          paint: {
+            "circle-radius": ["get", "r"],
+            "circle-opacity": 0,
+            "circle-stroke-color": areaColor,
+            "circle-stroke-width": 2.5,
+            "circle-stroke-opacity": ["get", "a"],
+            "circle-pitch-alignment": "viewport",
+          },
+        });
         m.addLayer({
           id: "tm-venues",
           type: "circle",
@@ -370,6 +453,8 @@ export default function TownMapCanvas({ data, legs, venues, showPlaces, focus, h
           paint: {
             "circle-radius": ["case", ["boolean", ["feature-state", "hot"], false], 13, ["==", ["get", "kind"], "ranked"], 10, 8],
             "circle-color": ["match", ["get", "kind"], "ranked", c.qloo, "kept", c.ok, c.paper],
+            "circle-opacity": ["case", ["get", "dim"], 0.45, 1],
+            "circle-stroke-opacity": ["case", ["get", "dim"], 0.45, 1],
             "circle-stroke-color": ["match", ["get", "kind"], "unranked", c.qloo, c.paper],
             "circle-stroke-width": ["case", ["boolean", ["feature-state", "hot"], false], 3, 2],
             "circle-pitch-alignment": "viewport",
@@ -388,8 +473,11 @@ export default function TownMapCanvas({ data, legs, venues, showPlaces, focus, h
           type: "symbol",
           source: "tm-venues",
           layout: { "text-field": ["get", "name"], "text-font": ["Noto Sans Bold"], "text-size": 11.5, "text-anchor": "left", "text-offset": [1.3, 0], "text-max-width": 12, "text-optional": true },
-          paint: { "text-color": c.ink, "text-halo-color": c.paper, "text-halo-width": 2 },
+          paint: { "text-color": c.ink, "text-halo-color": c.paper, "text-halo-width": 2, "text-opacity": ["case", ["get", "dim"], 0.4, 1] },
         });
+
+        // The site's name stays above the venue rings.
+        m.moveLayer("tm-site-label");
 
         let hot: string | undefined;
         const setHot = (key?: string) => {
@@ -426,6 +514,7 @@ export default function TownMapCanvas({ data, legs, venues, showPlaces, focus, h
     return () => {
       cancelled = true;
       if (frame.current) cancelAnimationFrame(frame.current);
+      if (pulseFrame.current) cancelAnimationFrame(pulseFrame.current);
       m?.remove();
       map.current = null;
     };
@@ -433,19 +522,56 @@ export default function TownMapCanvas({ data, legs, venues, showPlaces, focus, h
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Venues: only those with a visible flow (kept places always have one).
+  // Venues: only those with a visible flow (kept places always have one), ringed in the colour of
+  // their largest program item. With a venue or a program area picked, the others dim.
   useEffect(() => {
     const m = map.current;
     if (!ready || !m) return;
     const src = m.getSource("tm-venues") as GeoJSONSource | undefined;
+    const focusKey = focus ?? hover;
+    const top = new Map<string, MapLeg>();
+    for (const l of legs) if (!top.has(l.venue) || l.amount > top.get(l.venue)!.amount) top.set(l.venue, l);
+    const inArea = (key: string) => !area || legs.some((l) => l.venue === key && l.bucket === area);
+    const shown = data.venues.filter((v) => venues.has(v.key));
     src?.setData(
       fc(
-        data.venues
-          .filter((v) => venues.has(v.key))
-          .map((v) => ({ type: "Feature", properties: { key: v.key, name: v.name, kind: v.kind, ...(v.rank ? { rank: v.rank } : {}) }, geometry: { type: "Point", coordinates: [v.lon, v.lat] } })),
+        shown.map((v) => ({
+          type: "Feature",
+          properties: { key: v.key, name: v.name, kind: v.kind, bucket: top.get(v.key)?.bucket ?? "", dim: (!!focusKey && v.key !== focusKey) || !inArea(v.key), ...(v.rank ? { rank: v.rank } : {}) },
+          geometry: { type: "Point", coordinates: [v.lon, v.lat] },
+        })),
       ),
     );
-  }, [ready, venues, data.venues]);
+    // A ring spreads once from each venue that has just joined the plan.
+    const before = shownVenues.current;
+    const joined = before.size ? shown.filter((v) => !before.has(v.key)) : [];
+    shownVenues.current = new Set(shown.map((v) => v.key));
+    const pulse = m.getSource("tm-pulse") as GeoJSONSource | undefined;
+    if (!pulse || joined.length === 0 || reduced.current) return;
+    if (pulseFrame.current) cancelAnimationFrame(pulseFrame.current);
+    const start = performance.now();
+    const step = (now: number) => {
+      const p = Math.min(1, (now - start) / 1100);
+      const e = 1 - Math.pow(1 - p, 2);
+      const rings = joined.map((v) => ({ type: "Feature" as const, properties: { bucket: top.get(v.key)?.bucket ?? "", r: 10 + 30 * e, a: 0.9 * (1 - p) }, geometry: { type: "Point" as const, coordinates: [v.lon, v.lat] } }));
+      pulse.setData(fc(p < 1 ? rings : []));
+      pulseFrame.current = p < 1 ? requestAnimationFrame(step) : null;
+    };
+    pulseFrame.current = requestAnimationFrame(step);
+  }, [ready, venues, legs, area, focus, hover, data.venues]);
+
+  // The dashes travel along the flows, out from the site, while the page is visible.
+  useEffect(() => {
+    const m = map.current;
+    if (!ready || !m || reduced.current) return;
+    let i = 0;
+    const tick = window.setInterval(() => {
+      if (document.hidden || !m.getLayer("tm-arcs-flow")) return;
+      i = (i + 1) % DASHES.length;
+      m.setPaintProperty("tm-arcs-flow", "line-dasharray", DASHES[i].map((x) => x * 2));
+    }, 70);
+    return () => window.clearInterval(tick);
+  }, [ready]);
 
   useEffect(() => {
     const m = map.current;
@@ -489,7 +615,7 @@ export default function TownMapCanvas({ data, legs, venues, showPlaces, focus, h
         const n = Math.max(2, Math.round(coords.length * t));
         feats.push({
           type: "Feature",
-          properties: { id, bucket: leg.bucket, w: legWidth(leg.amount, max), o, dim: !!focusKey && leg.venue !== focusKey },
+          properties: { id, bucket: leg.bucket, w: legWidth(leg.amount, max), o, dim: (!!focusKey && leg.venue !== focusKey) || (!!area && leg.bucket !== area) },
           geometry: { type: "LineString", coordinates: coords.slice(0, n) },
         });
       }
@@ -509,7 +635,7 @@ export default function TownMapCanvas({ data, legs, venues, showPlaces, focus, h
       else frame.current = null;
     };
     frame.current = requestAnimationFrame(step);
-  }, [ready, legs, data, focus, hover]);
+  }, [ready, legs, data, focus, hover, area]);
 
   // Hover or focus highlights a venue; a focus from the panel moves the camera there.
   useEffect(() => {

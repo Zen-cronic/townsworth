@@ -356,6 +356,22 @@
   font-size: 12px;
   font-weight: 500;
   cursor: pointer;
+  --tm-area-c: var(--ink);
+  transition: background-color 150ms, border-color 150ms;
+}
+/* A shown area is tinted in its own colour; pointing at it picks out its flows on the map. */
+.tm-area.is-training { --tm-area-c: var(--ch-training); }
+.tm-area.is-procurement { --tm-area-c: var(--ch-procurement); }
+.tm-area.is-grants { --tm-area-c: var(--ch-grants); }
+.tm-area.is-events { --tm-area-c: var(--ch-events); }
+.tm-area[aria-pressed="true"] {
+  border-color: color-mix(in srgb, var(--tm-area-c) 45%, var(--card));
+  background: color-mix(in srgb, var(--tm-area-c) 10%, var(--card));
+}
+.tm-area[aria-pressed="true"]:hover,
+.tm-area[aria-pressed="true"]:focus-visible {
+  border-color: var(--tm-area-c);
+  background: color-mix(in srgb, var(--tm-area-c) 20%, var(--card));
 }
 .tm-area[aria-pressed="false"] {
   border-style: dashed;
@@ -607,12 +623,12 @@
    Kept softer than the overlay tokens so the ranked, kept, struck and program colours stay on top. */
 .tm {
   --map-land: #f5f2ea;
-  --map-water: #b4d0d8;
-  --map-shore: #8fb2bd;
+  --map-water: #a8cddc;
+  --map-shore: #7aa8bb;
   --map-farmland: #efe6c6;
-  --map-grass: #e0e8c8;
-  --map-park: #cfe2b2;
-  --map-wood: #bccfa6;
+  --map-grass: #d9e7bf;
+  --map-park: #c2dea1;
+  --map-wood: #aecb96;
   --map-residential: #eee6da;
   --map-commercial: #f0e0d4;
   --map-industrial: #dcd7e3;
