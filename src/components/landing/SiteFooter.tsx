@@ -4,7 +4,7 @@ import { PilotLink } from "@/components/PilotLink";
 import { PRODUCT_NAME } from "./brand";
 import { BrandMark } from "./BrandMark";
 
-const REPO = "https://github.com/Zen-cronic/good-neighbor";
+const REPO = "https://github.com/Zen-cronic/townsworth";
 
 const COLUMNS: { title: string; links: { href: string; label: string; external?: boolean }[] }[] = [
   {

@@ -20,7 +20,7 @@ A wiring check (partners found in their own town's Qloo places 100% vs another t
 
 **What it shows:** AI alone knows a town's institutions (the college, the district, the library, the chamber), and Townsworth keeps them. Qloo adds the places the town actually goes, and those are mostly places AI alone never names. The affinity row is honest and modest: once venue fit and host-community rules apply, Qloo's ranking changes about one pick in 30. These are the 2026-10-29 figures; `/proof` recomputes them from live Qloo data on every visit, so they can move a point or two as Qloo's data updates. **What it doesn't show:** that residents value the program more, or anything about acceptance or approval. It's six towns and one model, so read it as a directional check.
 
-**Live app:** https://good-neighbor-rho.vercel.app (no login).
+**Live app:** https://townsworth.vercel.app (no login).
 
 ## Start here (two minutes)
 The guided path is at `/judges`.
