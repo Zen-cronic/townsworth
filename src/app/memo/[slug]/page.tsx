@@ -15,6 +15,7 @@ import { EXPORT_ITEM, ExportMenu } from "@/components/ui/ExportMenu";
 import { parseFund, primaryCta, secondaryCta } from "@/components/dashboard/ui";
 import { StatusPill } from "@/components/dashboard/StatusPill";
 import { CrmExportLinks, SessionCalendarLinks } from "@/components/integrations";
+import { AgeStrip } from "@/components/qloo/AgeStrip";
 import { commitmentsFor } from "@/lib/commitments";
 import { BUCKETS, costLine, type Bucket } from "@/lib/plan";
 import { money, runTown } from "@/lib/run";
@@ -325,6 +326,7 @@ export default async function MemoPage({
                             {it.partner?.address ?? it.detail}
                             <span className="ml-2 inline-block font-mono text-[11px] text-muted/90">{it.provenance[0]?.signal}</span>
                           </div>
+                          <AgeStrip ages={it.partner?.ages} className="mt-0.5 text-xs leading-relaxed" />
                           <SessionCalendarLinks item={it} town={town} firstOnly className="mt-1" />
                         </td>
                         <td className="py-2 text-right font-mono tabular-nums">{money(it.amount)}</td>

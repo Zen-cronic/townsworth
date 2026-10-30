@@ -40,7 +40,7 @@ The guided path is at `/judges`.
 ## How Qloo drives it
 - `GET /v2/insights` with `filter.type=urn:entity:place` + `filter.location=POINT(lon lat)` + radius **+ `signal.location=POINT(...)`** gives the candidate local places, **ranked by Qloo's local affinity**, with categories, rating, event space and distance. Partners are chosen host community first, then by affinity rank ("#4 by local affinity of 50 Qloo places within 15 km"). Distance only breaks ties.
 - `signal.location=POINT(...)` for brands, artists, TV and podcasts gives the tastes that stand out locally. "Distinct" means it's absent from the national top 50 and from every big-metro reference list. Taste types that still lean national are shown as such and don't drive program items.
-- About 25 Insights calls per town, plus four for the age-group check. The town page shows the call log ("Qloo calls: 25 · all OK"), and a Qloo error is reported as an error, never as thin data.
+- About 25 Insights calls per town, plus four for the age-group check and one for the partners' audience age profiles. The town page shows the call log ("Qloo calls: 25 · all OK"), and a Qloo error is reported as an error, never as thin data.
 - Point queries, not town names: in our tests, town-name queries silently resolved to the wrong place for 6 of 22 hosts.
 
 ## How Townsworth uses Qloo
@@ -53,6 +53,7 @@ Every production call is server-side REST against the Insights API. Each one cha
 | `GET /v2/insights` (national baseline) | same types, `signal.location.query=United States\|Canada`, `take=50`, plus the same taste query at big-metro reference points | What is distinctly local: anything in the national top 50 or a big-metro list doesn't count as a local signal. |
 | `GET /v2/audiences` | `filter.parents.types=urn:audience:life_stage` | Looks up the "Parents With Young Children" life stage at runtime, for the families check. |
 | `GET /v2/insights` (age groups) | the places query with `take=15` and one of `signal.demographics.age=24_and_younger`, `signal.demographics.age=55_and_older`, `signal.demographics.audiences=<life-stage id>` | Whether the program includes a place young adults (under 25), older residents and families with young children favour. If none of its partners is in a group's top 15, one session at that group's best-ranked hall, library, park, museum, zoo, school or college is earmarked from the reserve. Only these three groups are ever queried. |
+| `GET /v2/insights` (partner age profile) | `filter.type=urn:demographics`, `signal.interests.entities=<up to 15 partner ids>` | The age strip on partner cards, `/check` swaps and the memo: which age groups Qloo's audience data over-indexes with at each partner. Only the age buckets are read; the gender buckets in the answer are discarded. A partner without a row shows nothing, and a failed call hides the strips without touching any verdict or figure. |
 | `GET /search` (`/check` only) | `query=<venue name>`, `types=urn:entity:place`, `filter.location=<lat>,<lon>`, `filter.radius=25`, `take=5`, never cached | A venue a pasted plan names becomes verified ("Qloo knows this place · N km") when Qloo has the same place within 25 km. Up to 8 names per check; the plan text itself is never sent. |
 
 To repeat a town's calls by hand, Qloo's CLI takes the same parameters (point it at the API host the app uses first):
@@ -76,7 +77,7 @@ npx -y @qloo/qloo-harness api search -q "Racine Zoo" -t place -n 5 --json --para
 
 ## Guardrails (Qloo SAFE_USE)
 - Aggregate signals only. No personal data is sent to Qloo, and residents' ballot data never leaves the app. On `/check`, Qloo receives the town's coordinates and the venue names the pasted plan mentions, never the plan text.
-- The age-group check uses only Qloo's aggregate place affinities for three groups (young adults under 25, older residents, families with young children). No resident is scored, and no other demographic is ever requested.
+- The age-group check uses only Qloo's aggregate place affinities for three groups (young adults under 25, older residents, families with young children). No resident is scored. Partner cards also show each partner's audience age profile (`urn:demographics`, age buckets only, gender discarded): an aggregate affinity for the people who favour the place, not a count of its visitors.
 - Political and religious results are excluded from plan items. Identity and inclusivity tags are never used as signals; businesses carrying them stay eligible.
 - Not persuasion: nothing is timed to a vote, hearing or permit. Material commitments (jobs, power, water, noise, tax) come first. For the preset towns they're pre-filled from cited public reporting (`data/commitments.json`); everywhere else they're entered from the developer's filings.
 - Disclosure: every outreach draft and the resident ballot name the funding company.

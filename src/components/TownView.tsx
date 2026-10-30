@@ -13,6 +13,7 @@ import { keptBreakdown } from "@/components/ui/keptBreakdown";
 import { isQlooSignal, kindOf, LOCAL_AFFINITY, shortOrg, shortSignal, shortTermHit } from "@/components/ui/labels";
 import { LiveDataNotice } from "@/components/LiveDataNotice";
 import { AudienceReach } from "@/components/qloo/AudienceReach";
+import { AgeStrip } from "@/components/qloo/AgeStrip";
 import { FundBar, PartnerDistance, PartnerNames, StruckTally, SessionTimeline, fundSplit, lineComposition, partnerPoints, sessionsByBucket } from "@/components/charts";
 
 const FACILITY_LABEL: Record<string, string> = {
@@ -80,6 +81,7 @@ function Why({ item, gloss }: { item: ProgramItem; gloss?: string }) {
           </p>
         ))}
         {facts.length > 0 && <p>{facts.join(" · ")}</p>}
+        <AgeStrip ages={p?.ages} />
         <p>
           {costLine(item)} · {cadenceLower(item.cadence)}
         </p>

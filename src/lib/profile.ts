@@ -2,6 +2,7 @@ import "server-only";
 import { lifeStageAudiences, placesForLens, placesNear, tasteNational, tasteNear, type EntityType, type LensSignal, type QlooCall, type QlooEntity } from "./qloo";
 import { brandKey, isChain, isLocalPartner, isMegabrand, signalTags, splitSafe, type ExclusionReason } from "./filters";
 import { LENSES, PARENTS_AUDIENCE, type LensData, type LensKey } from "./reach";
+import type { AgeProfile } from "./qlooInsights";
 import type { Town } from "./towns";
 
 type TasteType = Exclude<EntityType, "place">;
@@ -58,6 +59,11 @@ export interface TownProfile {
   // counts toward `failedCalls`.
   lenses?: LensData[];
   lensCalls?: QlooCall[];
+  // Qloo's audience age profile per program partner (entity id -> age buckets), attached after the
+  // program is built (src/lib/partnerInsights.ts). Optional, and like the lenses its calls are kept
+  // apart: a failed call leaves partners without a profile and never counts toward `failedCalls`.
+  partnerAges?: Map<string, AgeProfile>;
+  ageCalls?: QlooCall[];
 }
 
 const TASTE_TYPES: TasteType[] = ["brand", "artist", "tv_show", "podcast"];

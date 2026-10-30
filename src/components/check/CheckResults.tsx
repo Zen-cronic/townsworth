@@ -14,6 +14,7 @@ import { cadenceLower, formatPhone, km, quotedName } from "@/components/dashboar
 import { secondaryCta } from "@/components/dashboard/ui";
 import { CheckExports } from "./CheckExports";
 import { LiveDataNotice } from "@/components/LiveDataNotice";
+import { AgeStrip } from "@/components/qloo/AgeStrip";
 import { FundBar, StruckTally, PartnerNames, fundSplit, lineComposition, partnerPoints } from "@/components/charts";
 
 // The audit of a pasted draft, rendered from the JSON the check route returns. Same verdict
@@ -50,7 +51,12 @@ function PartnerFacts({ item }: { item: ProgramItem }) {
     p.eventSpaces && "Event space",
     formatPhone(p.phone),
   ].filter(Boolean) as string[];
-  return facts.length ? <p className="mt-0.5 text-xs text-muted">{facts.join(" · ")}</p> : null;
+  return (
+    <>
+      {facts.length > 0 && <p className="mt-0.5 text-xs text-muted">{facts.join(" · ")}</p>}
+      <AgeStrip ages={p.ages} className="mt-1 text-[12px] leading-4" />
+    </>
+  );
 }
 
 function Proposal({ item, label = "Proposed" }: { item: ProgramItem; label?: string }) {

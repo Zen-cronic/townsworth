@@ -3,6 +3,7 @@ import { categories, signalTags } from "./filters";
 import type { PlaceMeta, Signal, TownProfile } from "./profile";
 import type { LensOutcome } from "./reach";
 import { BUCKETS, type Bucket } from "./buckets";
+import type { AgeProfile } from "./qlooInsights";
 
 // Deterministic program builder. Qloo supplies the local candidates and ranks them by local
 // affinity; fixed policy decides venues, schedule and cost. Costs come from a per-event model
@@ -38,6 +39,9 @@ export interface Partner {
   // Outside the host community (different town and more than about 8 km away).
   neighbouring?: boolean;
   affinityRank?: number;
+  // Qloo's audience age profile for this place, attached after the program and the audit are built
+  // (src/lib/partnerInsights.ts). Display only: the planner, the audit and the reach check never read it.
+  ages?: AgeProfile;
 }
 
 export interface ProgramItem {

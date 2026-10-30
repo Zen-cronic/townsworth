@@ -1,6 +1,7 @@
 import "server-only";
 import { unstable_cache } from "next/cache";
 import { SEARCH_RADIUS_KM } from "./geo";
+import { parseDemographics, type AgeProfile } from "./qlooInsights";
 
 // Thin server-side client for the Qloo Insights API (hackathon environment).
 // Responses are cached privately by Next's data cache; never write them to the repo.
@@ -277,6 +278,38 @@ export function placesForLens(label: string, signal: LensSignal, lat: number, lo
     ...signal,
     take: String(take),
   }, "place");
+}
+
+// Most partner ids sent in one audience-profile call; a 400 splits the batch into two calls once.
+export const AGE_BATCH = 15;
+
+// The audience age profile of each partner: Qloo's aggregate age affinities for the people who
+// favour the place. Only the age buckets are kept (see parseDemographics); gender is discarded. A
+// partner without a row has no profile, never a zero. A failed call returns no rows and its call
+// record, for the caller to keep apart from the town's own calls.
+export async function partnerDemographics(ids: string[]): Promise<{ ages: Map<string, AgeProfile>; calls: QlooCall[] }> {
+  const unique = [...new Set(ids.filter(Boolean))].slice(0, AGE_BATCH);
+  const ages = new Map<string, AgeProfile>();
+  const calls: QlooCall[] = [];
+  const ask = async (batch: string[], label: string) => {
+    const params = { "filter.type": "urn:demographics", "signal.interests.entities": batch.join(",") };
+    const res = await qlooGet<unknown>("/v2/insights", params);
+    const rows = res.ok ? parseDemographics(res.body) : new Map<string, AgeProfile>();
+    calls.push({ label, params, status: res.status, ok: res.ok, count: rows.size, ms: res.ms });
+    return { status: res.status, rows };
+  };
+  if (!unique.length) return { ages, calls };
+  const first = await ask(unique, "audience age profile per partner");
+  if (first.status === 400 && unique.length > 1) {
+    const half = Math.ceil(unique.length / 2);
+    const parts = await Promise.all([unique.slice(0, half), unique.slice(half)].map((b, i) => ask(b, `audience age profile per partner (part ${i + 1} of 2)`)));
+    parts.forEach((p) => p.rows.forEach((v, k) => ages.set(k, v)));
+  } else {
+    first.rows.forEach((v, k) => ages.set(k, v));
+  }
+  // Only ids that were asked about: an unexpected row is ignored.
+  for (const k of [...ages.keys()]) if (!unique.includes(k)) ages.delete(k);
+  return { ages, calls };
 }
 
 export interface QlooAudience {

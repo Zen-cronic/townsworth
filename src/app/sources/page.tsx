@@ -333,7 +333,15 @@ export default async function SourcesPage() {
                     <span className="src-k">Age groups</span>
                     <span>
                       The age-group check asks Qloo about three groups only: young adults (under 25), older residents and families with young
-                      children. Each uses aggregate place affinities; no resident is scored and no other demographic is requested.
+                      children. Each uses aggregate place affinities; no resident is scored and the check asks about no other group.
+                    </span>
+                  </li>
+                  <li>
+                    <span className="src-k">Partner ages</span>
+                    <span>
+                      One more Insights call per town (urn:demographics, up to 15 partner ids) gives each partner&apos;s
+                      audience age profile: which age groups over-index among the people who favour the place, relative to the average. Only the
+                      age buckets are read; gender is discarded. It is not a visitor count and says nothing about this town&apos;s residents.
                     </span>
                   </li>
                   <li>

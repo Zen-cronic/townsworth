@@ -3,6 +3,7 @@ import { cache } from "react";
 import { auditPlan, GENERIC_AGENCY_PLAN, isKept, type AuditInput, type AuditRow } from "./audit";
 import { baselineFor, BASELINE, isInstitution } from "./baselineData";
 import { liveLlmDraft } from "./liveDraft";
+import { addPartnerAges, partnerItems } from "./partnerInsights";
 import { buildProfile, type TownProfile } from "./profile";
 import { buildProgram, runWith, type Bucket, type Program, type ProgramItem } from "./plan";
 import { applyReach } from "./reach";
@@ -50,6 +51,17 @@ export function auditDraft(inputs: AuditInput[], profile: TownProfile, program: 
   return { audit, qlooAdds };
 }
 
+// The items whose partners a page can show, the audited swaps first so they win the 15-place cap.
+export function auditPartnerItems(audit: AuditRow[], qlooAdds: ProgramItem[], program: Pick<Program, "items" | "reachItems">): ProgramItem[] {
+  return partnerItems([
+    audit.flatMap((a) => [a.replacement, a.alongside]),
+    qlooAdds,
+    audit.flatMap((a) => a.applicants ?? []),
+    program.items,
+    program.reachItems ?? [],
+  ]);
+}
+
 // One deterministic run for a town: Qloo profile -> program -> audit of the chosen draft plan.
 // `live` only matters for a typed-in town with source "llm": it drafts the plan with OpenAI now.
 export const runTown = cache(async (slug: string, fund?: number, source: PlanSource = "llm", live = false) => {
@@ -89,6 +101,10 @@ export const runTown = cache(async (slug: string, fund?: number, source: PlanSou
   // The age-group check reads the costed program and adds its sessions to `program.reachItems` only,
   // never `program.items`, so the audit above and the /proof figures can't see them (see REACH_PREFIX).
   applyReach(profile, program);
+  // Qloo's audience age profile per partner, for display only: it runs after everything above and
+  // attaches to the partners, so no verdict, amount or /proof figure can move. A failed call shows
+  // no age strip and stays out of `failedCalls`.
+  await addPartnerAges(profile, auditPartnerItems(audit, qlooAdds, program));
 
   return { town, profile, program, audit, source: used, qlooAdds, draft };
 });

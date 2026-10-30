@@ -112,6 +112,14 @@
   border-top: 1px solid color-mix(in srgb, var(--band-text) 55%, transparent);
   border-bottom: 1px solid color-mix(in srgb, var(--band-text) 28%, transparent);
 }
+/* A partner's Qloo audience age profile (AgeStrip): Qloo blue wherever it sits, white on the band. */
+:root [data-age-strip],
+:root .check-results .audit-row.is-struck [data-age-strip] {
+  color: var(--qloo);
+}
+:root .qloo-band [data-age-strip] {
+  color: var(--band-text);
+}
 :root .qloo-band .ui-chip.is-qloo {
   background: var(--band-text);
   color: var(--qloo);
