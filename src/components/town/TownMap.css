@@ -449,3 +449,26 @@
 @media (prefers-reduced-motion: reduce) {
   .tm * { transition: none !important; }
 }
+
+/* Map landscape: base-map colours under the overlays, read by TownMapCanvas at runtime.
+   Kept softer than the overlay tokens so the ranked, kept, struck and program colours stay on top. */
+.tm {
+  --map-land: #f5f2ea;
+  --map-water: #b4d0d8;
+  --map-shore: #8fb2bd;
+  --map-farmland: #efe6c6;
+  --map-grass: #e0e8c8;
+  --map-park: #cfe2b2;
+  --map-wood: #bccfa6;
+  --map-residential: #eee6da;
+  --map-commercial: #f0e0d4;
+  --map-industrial: #dcd7e3;
+  --map-building: #e4dccb;
+  --map-motorway: #e8c27e;
+  --map-motorway-casing: #d2a862;
+  --map-major: #f2dca6;
+  --map-road-casing: #d9d3c4;
+  --map-minor: #ffffff;
+  --map-rail: #b3ad9f;
+  --map-label: #55534d;
+}
