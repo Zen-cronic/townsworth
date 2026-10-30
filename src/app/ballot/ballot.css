@@ -1,6 +1,33 @@
-/* Resident ballot and committee tally (/ballot/[slug], /ballot/[slug]/results) only. One calm
-   column; ideas are ruled rows, not cards. The simulated label keeps its panel. */
+/* Resident ballot and committee tally (/ballot/[slug], /ballot/[slug]/results) only. A hero band
+   with the question, then a light body: context on the left, the ranked list on the right. Ideas
+   are ruled rows, not cards. */
 
+.bl .bl-hero {
+  padding: 32px 0 48px;
+}
+.bl .bl-h1 {
+  max-width: 20em;
+  margin-top: 0.36em;
+  margin-bottom: 0.5em;
+  font-size: clamp(2rem, 1.4rem + 2vw, 3rem);
+}
+.bl .bl-body {
+  padding: 56px 0 96px;
+  background: var(--l-paper);
+}
+.bl .bl-split {
+  display: grid;
+  grid-template-columns: minmax(0, 4fr) minmax(0, 7fr);
+  gap: 64px;
+  align-items: start;
+}
+.bl .bl-side {
+  position: sticky;
+  top: calc(var(--l-hdr, 56px) + 32px);
+  max-width: 30rem;
+}
+
+/* Rows */
 .bl .bl-rows {
   list-style: none;
   margin-left: 0;
@@ -10,7 +37,6 @@
 .bl .bl-row {
   border-bottom: 1px solid var(--hairline);
 }
-/* The idea moved last keeps a quiet tint until the next move. */
 .bl .bl-row[data-moved] {
   background: color-mix(in srgb, var(--ink) 4%, transparent);
   box-shadow: -12px 0 0 color-mix(in srgb, var(--ink) 4%, transparent), 12px 0 0 color-mix(in srgb, var(--ink) 4%, transparent);
@@ -24,7 +50,103 @@
   font-variant-numeric: tabular-nums;
   color: var(--ink);
 }
+.bl .bl-area {
+  margin-bottom: 2px;
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+
+/* Ranking controls: borderless icon buttons in one hairline column, 44px each. */
+.bl .bl-moves {
+  align-self: stretch;
+  justify-content: center;
+  padding-left: 8px;
+  border-left: 1px solid var(--hairline);
+}
+.bl .bl-move:disabled {
+  color: var(--line-fainter);
+}
+.bl .bl-reset {
+  font: inherit;
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: var(--rule);
+  text-underline-offset: 3px;
+}
+.bl .bl-reset:hover {
+  text-decoration-color: var(--ink);
+}
+.bl .bl-reset:disabled {
+  color: var(--muted);
+  text-decoration: none;
+  cursor: default;
+}
+
+/* Simulated: a ruled notice with its label as an eyebrow. */
+.bl .bl-sim {
+  padding: 16px 0;
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--ink);
+}
+.bl .bl-sim-k {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+/* Tally bars: four named steps and the reader's notch. */
+.bl .bl-seg {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.bl .bl-seg.is-outline {
+  box-shadow: inset 0 0 0 1px var(--line-quiet);
+}
+.bl .bl-key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+.bl .bl-key > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.bl .bl-key-sw {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 2px;
+}
+.bl .bl-key-sw.is-outline {
+  box-shadow: inset 0 0 0 1px var(--line-quiet);
+}
+
+@media (max-width: 900px) {
+  .bl .bl-split {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 40px;
+  }
+  .bl .bl-side {
+    position: static;
+    max-width: none;
+  }
+}
 @media (max-width: 600px) {
+  .bl .bl-hero {
+    padding: 24px 0 32px;
+  }
+  .bl .bl-body {
+    padding: 32px 0 72px;
+  }
   .bl .bl-primary {
     width: 100%;
     justify-content: center;

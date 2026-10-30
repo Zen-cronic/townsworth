@@ -3,7 +3,8 @@ import { AppHeader } from "@/components/AppHeader";
 import { ChevronLeft } from "@/components/dashboard/Icons";
 import { secondaryCta } from "@/components/dashboard/ui";
 
-// Shared frame for the resident ballot and the committee view: narrow, mobile-first, calm.
+// Shared frame for the resident ballot and the committee view: a hero band with the question, then
+// a light body. Pages lay the body out themselves (BallotSplit: context left, the list right).
 export function BallotShell({
   slug,
   kicker,
@@ -18,22 +19,30 @@ export function BallotShell({
   children: React.ReactNode;
 }) {
   return (
-    <>
+    <div className="gn-landing bl">
       <AppHeader towns={false} />
-      <main id="main" className="bl mx-auto max-w-[680px] px-4 pb-24 pt-5 sm:px-6 sm:pt-8">
-        <Link
-          href={`/memo/${slug}`}
-          className="inline-flex items-center gap-1 rounded-md py-1.5 pr-2 text-sm text-muted transition-colors duration-150 hover:text-ink"
-        >
-          <ChevronLeft />
-          Back to the memo
-        </Link>
-        <p className="lp-kicker mt-6">{kicker}</p>
-        <h1 className="ui-h3 mt-2 sm:text-[2rem]">{title}</h1>
-        {funder && <FundedBy {...funder} />}
-        {children}
+      <main id="main">
+        <section className="bl-hero" aria-labelledby="bl-h">
+          <div className="lp-wrap">
+            <Link
+              href={`/memo/${slug}`}
+              className="inline-flex items-center gap-1 rounded-md py-1.5 pr-2 text-sm text-muted transition-colors duration-150 hover:text-ink"
+            >
+              <ChevronLeft />
+              Back to the memo
+            </Link>
+            <p className="lp-kicker mt-6">{kicker}</p>
+            <h1 id="bl-h" className="lp-h1 bl-h1">
+              {title}
+            </h1>
+            {funder && <FundedBy {...funder} />}
+          </div>
+        </section>
+        <div className="bl-body">
+          <div className="lp-wrap">{children}</div>
+        </div>
       </main>
-    </>
+    </div>
   );
 }
 

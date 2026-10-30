@@ -2,9 +2,9 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { primaryCta, tertiaryCta } from "@/components/dashboard/ui";
+import { primaryCta } from "@/components/dashboard/ui";
 import { ballotKey, isValidBallot, type BallotItem, type StoredBallot } from "@/lib/ballot";
-import { DistanceLine } from "./ItemMeta";
+import { AreaLabel, DistanceLine, itemNote } from "./ItemMeta";
 
 function Arrow({ dir }: { dir: "up" | "down" }) {
   return (
@@ -15,7 +15,7 @@ function Arrow({ dir }: { dir: "up" | "down" }) {
 }
 
 const moveButton =
-  "grid h-11 w-11 place-items-center rounded-md border border-rule bg-paper text-ink transition-colors duration-150 hover:border-ink active:bg-concrete disabled:cursor-not-allowed disabled:border-hairline disabled:text-rule disabled:hover:border-hairline";
+  "bl-move grid h-11 w-11 place-items-center rounded-md text-ink transition-colors duration-150 hover:bg-ink/[0.06] active:bg-ink/10 disabled:cursor-default disabled:bg-transparent";
 
 export function BallotForm({ slug, townName, items }: { slug: string; townName: string; items: BallotItem[] }) {
   const router = useRouter();
@@ -88,15 +88,13 @@ export function BallotForm({ slug, townName, items }: { slug: string; townName: 
   }
 
   return (
-    <form onSubmit={submit} className="mt-6">
-      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-        <p id="rank-help" className="text-sm text-muted">
-          Use the arrows to move an idea up or down. Top means &ldquo;do this first.&rdquo;
-        </p>
-        <button type="button" onClick={reset} disabled={!reordered} className={`${tertiaryCta} disabled:cursor-not-allowed disabled:text-muted`}>
+    <form onSubmit={submit}>
+      <p id="rank-help" className="text-sm text-muted">
+        Use the arrows to move an idea up or down. Top means &ldquo;do this first.&rdquo;{" "}
+        <button type="button" onClick={reset} disabled={!reordered} className="bl-reset">
           Reset order
         </button>
-      </div>
+      </p>
       <ol aria-describedby="rank-help" className="bl-rows mt-3">
         {order.map((id, i) => {
           const it = byId.get(id);
@@ -111,14 +109,15 @@ export function BallotForm({ slug, townName, items }: { slug: string; townName: 
                 {i + 1}
               </span>
               <div className="min-w-0 flex-1">
+                <AreaLabel item={it} />
                 <h3 className="text-[15px] font-semibold leading-snug sm:text-base">
                   <span className="sr-only">Position {i + 1}: </span>
                   {it.title}
                 </h3>
-                {it.note && <p className="mt-1 text-sm leading-relaxed text-muted">{it.note}</p>}
+                {itemNote(it) && <p className="mt-1 text-sm leading-relaxed text-muted">{itemNote(it)}</p>}
                 <DistanceLine item={it} townName={townName} />
               </div>
-              <div className="flex shrink-0 flex-col gap-1.5">
+              <div className="bl-moves flex shrink-0 flex-col">
                 <button
                   type="button"
                   ref={(el) => {

@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { Download } from "@/components/dashboard/Icons";
-import { StatusPill } from "@/components/dashboard/StatusPill";
 import { primaryCta, secondaryCta } from "@/components/dashboard/ui";
 import {
   ballotKey,
@@ -15,25 +14,45 @@ import {
   type BallotItem,
   type StoredBallot,
 } from "@/lib/ballot";
-import { DistanceLine } from "./ItemMeta";
+import { AreaLabel, DistanceLine } from "./ItemMeta";
+import { BallotSplit } from "./BallotSplit";
 
 type Mine = { state: "unknown" } | { state: "none" } | { state: "stale" } | { state: "counted"; ballot: StoredBallot };
 
 const ordinal = (n: number) => `${n}${n % 10 === 1 && n % 100 !== 11 ? "st" : n % 10 === 2 && n % 100 !== 12 ? "nd" : n % 10 === 3 && n % 100 !== 13 ? "rd" : "th"}`;
 
-// One ink ramp, darkest = ranked first: a mix of ink into paper. Pink stays the strike.
-const shade = (r: number, n: number) => Math.round(n <= 1 ? 100 : 100 - (r / (n - 1)) * 70);
-const fill = (r: number, n: number) => `color-mix(in srgb, var(--ink) ${shade(r, n)}%, var(--paper))`;
+// Four clear steps, darkest = ranked first: ink, about 60% and 30% ink, then an outline for last.
+// Longer shortlists spread the tints between. Pink stays the strike.
+const shade = (r: number, n: number) => (r === 0 ? 100 : Math.round(60 - ((r - 1) / Math.max(n - 3, 1)) * 30));
+const isLast = (r: number, n: number) => n > 1 && r === n - 1;
+const fill = (r: number, n: number) => (isLast(r, n) ? "var(--paper)" : `color-mix(in srgb, var(--ink) ${shade(r, n)}%, var(--paper))`);
+const ink = (r: number, n: number) => (r === 0 || (!isLast(r, n) && shade(r, n) >= 55) ? "var(--paper)" : "var(--ink)");
 
-function RankBar({ counts, total, label }: { counts: number[]; total: number; label: string }) {
+function RankBar({ counts, total, label, mine }: { counts: number[]; total: number; label: string; mine?: number }) {
   const n = counts.length;
+  const width = (c: number) => `${(c / total) * 100}%`;
   return (
     <div className="ch-anim w-full">
-      <div role="img" aria-label={label} className="ch-reveal flex h-3.5 w-full gap-[2px] overflow-hidden rounded-[4px] bg-paper shadow-[inset_0_0_0_1px_var(--hairline)]">
+      <div role="img" aria-label={label} className="ch-reveal flex h-5 w-full gap-[2px] overflow-hidden rounded-[3px]">
         {counts.map((c, r) =>
-          c > 0 ? <span key={r} className="ch-ramp h-full" style={{ width: `${(c / total) * 100}%`, background: fill(r, n) }} /> : null,
+          c > 0 ? (
+            <span
+              key={r}
+              className={`ch-ramp bl-seg ${isLast(r, n) ? "is-outline" : ""}`}
+              style={{ width: width(c), background: fill(r, n), color: ink(r, n) }}
+            >
+              {/* The position names itself when its segment has room. */}
+              {c / total >= 0.12 && <span aria-hidden>{ordinal(r + 1)}</span>}
+            </span>
+          ) : null,
         )}
       </div>
+      {mine != null && (
+        // A notch under the segment for the position this browser's ballot gave the idea.
+        <div aria-hidden className="mt-[3px] flex h-[3px] w-full gap-[2px]">
+          {counts.map((c, r) => (c > 0 ? <span key={r} className={r === mine - 1 ? "bg-ink" : ""} style={{ width: width(c) }} /> : null))}
+        </div>
+      )}
     </div>
   );
 }
@@ -87,18 +106,15 @@ export function BallotResults({ slug, townName, items }: { slug: string; townNam
     setMine({ state: "none" });
   }
 
-  return (
+  const side = (
     <>
-      {/* Simulation label */}
-      <div id="simulated" className="mt-6 scroll-mt-24 rounded-md border border-amber/40 bg-amber-wash px-4 py-3.5 sm:px-5" data-testid="simulated-label">
-        <div className="flex flex-wrap items-center gap-2">
-          <StatusPill tone="warn">Simulated</StatusPill>
-          {counted && <StatusPill tone="ok">Includes your ballot</StatusPill>}
-        </div>
-        <p className="mt-2 text-[15px] font-medium leading-relaxed">
+      {/* Simulation label: a ruled notice, prominent, never a badge */}
+      <div id="simulated" className="bl-sim scroll-mt-24" data-testid="simulated-label">
+        <p className="bl-sim-k">Simulated</p>
+        <p className="mt-1.5 text-[15px] font-semibold leading-relaxed">
           Simulated: {SIMULATED_BALLOTS} random sample ballots, generated to show the tally. They are not real residents and predict nothing.
         </p>
-        <p className="mt-1 text-sm leading-relaxed text-muted" aria-live="polite">
+        <p className="mt-1 text-sm leading-relaxed text-ink" aria-live="polite">
           {mine.state === "counted" && <>Includes your ballot. {tally.ballots} ballots counted in total.</>}
           {mine.state === "none" && (
             <>
@@ -121,52 +137,10 @@ export function BallotResults({ slug, townName, items }: { slug: string; townNam
       </div>
 
       {/* Method */}
-      <p className="mt-5 text-sm leading-relaxed text-muted">
+      <p className="mt-6 text-sm leading-relaxed text-muted">
         <strong className="font-semibold text-ink">Method: points ranking (Borda count).</strong> On a ballot of {n} ideas, 1st place earns {n - 1} points and
         last earns 0. The bar shows how often each idea was ranked in each position, darkest = 1st.
       </p>
-
-      {/* Tally */}
-      <ol className="bl-rows mt-4" data-testid="tally">
-        {tally.rows.map((row, i) => {
-          const share = Math.round(row.firstShare * 100);
-          const label = row.rankCounts.map((c, r) => `${ordinal(r + 1)}: ${c}`).join(", ");
-          return (
-            <li key={row.item.id} className="bl-row grid grid-cols-[1.75rem_1fr] gap-x-4 py-4">
-              <span className="bl-n text-right">{i + 1}</span>
-              <div className="min-w-0">
-                <div className="grid grid-cols-[minmax(0,1fr)_auto] items-baseline gap-x-4">
-                  <h3 className="min-w-0 text-[15px] font-semibold leading-snug sm:text-base">{row.item.title}</h3>
-                  <span className="whitespace-nowrap text-sm font-semibold tabular-nums">
-                    {row.points.toLocaleString("en-US")} <span className="text-xs text-muted">pts</span>
-                  </span>
-                </div>
-                <DistanceLine item={row.item} townName={townName} />
-                <div className="mt-2.5 flex items-center gap-3">
-                  <RankBar counts={row.rankCounts} total={tally.ballots || 1} label={`Ranking positions across ${tally.ballots} ballots. ${label}`} />
-                  <span className="w-[8.5rem] shrink-0 text-right text-sm text-muted">
-                    <span className="tabular-nums font-semibold text-ink">{share}%</span> first choice
-                  </span>
-                </div>
-                {myRank && (
-                  <p className="mt-1.5 text-sm text-muted">
-                    You ranked it <span className="font-semibold text-ink">{ordinal(myRank.get(row.item.id) ?? 0)}</span>
-                  </p>
-                )}
-              </div>
-            </li>
-          );
-        })}
-      </ol>
-      <div aria-hidden className="mt-2 flex items-center justify-end gap-2 text-[11px] text-muted">
-        1st
-        <span className="flex h-2 w-24 overflow-hidden rounded-[2px]">
-          {Array.from({ length: n }, (_, r) => (
-            <span key={r} className="ch-ramp h-full flex-1" style={{ background: fill(r, n) }} />
-          ))}
-        </span>
-        {ordinal(n)}
-      </div>
 
       {counted && mine.ballot.missing && (
         <div className="mt-6 border-t border-rule pt-4 text-sm">
@@ -196,5 +170,60 @@ export function BallotResults({ slug, townName, items }: { slug: string; townNam
         )}
       </div>
     </>
+  );
+
+  return (
+    <BallotSplit side={side}>
+      {/* Position key: each step of the bar, named */}
+      <p aria-hidden className="bl-key">
+        {Array.from({ length: n }, (_, r) => (
+          <span key={r}>
+            <span className={`bl-key-sw ${isLast(r, n) ? "is-outline" : ""}`} style={{ background: fill(r, n) }} />
+            {ordinal(r + 1)}
+          </span>
+        ))}
+      </p>
+
+      {/* Tally */}
+      <ol className="bl-rows mt-3" data-testid="tally">
+        {tally.rows.map((row, i) => {
+          const share = Math.round(row.firstShare * 100);
+          const label = row.rankCounts.map((c, r) => `${ordinal(r + 1)}: ${c}`).join(", ");
+          const mineAt = myRank?.get(row.item.id);
+          return (
+            <li key={row.item.id} className="bl-row grid grid-cols-[1.75rem_minmax(0,1fr)_6.5rem] gap-x-4 py-4 max-[600px]:grid-cols-[1.5rem_minmax(0,1fr)_5rem] max-[600px]:gap-x-3">
+              <span className="bl-n text-right">{i + 1}</span>
+              <div className="min-w-0">
+                <AreaLabel item={row.item} />
+                <h3 className="min-w-0 text-[15px] font-semibold leading-snug sm:text-base">{row.item.title}</h3>
+                <DistanceLine item={row.item} townName={townName} />
+                <div className="mt-3">
+                  <RankBar
+                    counts={row.rankCounts}
+                    total={tally.ballots || 1}
+                    mine={mineAt}
+                    label={`Ranking positions across ${tally.ballots} ballots. ${label}`}
+                  />
+                </div>
+                {mineAt != null && (
+                  <p className="mt-2 text-sm font-semibold text-ink">
+                    You ranked it {ordinal(mineAt)}
+                  </p>
+                )}
+              </div>
+              {/* Points and first-choice share, one right-aligned column */}
+              <div className="text-right">
+                <p className="text-base font-semibold tabular-nums">
+                  {row.points.toLocaleString("en-US")} <span className="text-sm font-normal text-muted">pts</span>
+                </p>
+                <p className="mt-0.5 text-sm text-muted">
+                  <span className="font-semibold tabular-nums text-ink">{share}%</span> first choice
+                </p>
+              </div>
+            </li>
+          );
+        })}
+      </ol>
+    </BallotSplit>
   );
 }
