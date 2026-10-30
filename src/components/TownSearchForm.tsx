@@ -1,4 +1,5 @@
 import { FACILITY_CHOICES, SPONSOR_PLACEHOLDER, type FacilityCode } from "@/lib/towns";
+import { primaryCta } from "@/components/dashboard/ui";
 
 // A plain GET form to /find, so it works without JavaScript. Geocoding happens on the server.
 
@@ -84,7 +85,7 @@ export function TownSearchForm({
           className={`${field} h-10 w-full px-3`}
         />
       </label>
-      <button className="inline-flex h-10 items-center justify-center gap-1.5 rounded-md bg-ink px-4 text-sm font-semibold text-paper transition-colors duration-150 hover:bg-ink/85 active:bg-ink/75">
+      <button className={`${primaryCta} h-10`}>
         Find town
       </button>
       <p id={`${idPrefix}-company-help`} className={`text-xs leading-relaxed sm:col-span-2 ${company ? "text-muted" : "text-amber"}`}>

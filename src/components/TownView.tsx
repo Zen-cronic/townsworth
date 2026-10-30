@@ -12,7 +12,7 @@ import { keptBreakdown } from "@/components/ui/keptBreakdown";
 import { kindOf, LOCAL_AFFINITY, shortOrg, shortSignal, shortTermHit } from "@/components/ui/labels";
 import { LiveDataNotice } from "@/components/LiveDataNotice";
 import { AudienceReach } from "@/components/qloo/AudienceReach";
-import { FundBar, LineStrip, PartnerDistance, PartnerDotStrip, SessionTimeline, fundSplit, lineComposition, partnerPoints, sessionsByBucket } from "@/components/charts";
+import { FundBar, LineStrip, PartnerDistance, PartnerNames, SessionTimeline, fundSplit, lineComposition, partnerPoints, sessionsByBucket } from "@/components/charts";
 
 const FACILITY_LABEL: Record<string, string> = {
   "data center": "Data center",
@@ -190,9 +190,9 @@ function AuditLine({ row, index, sameAs, gloss }: { row: AuditRow; index: number
       <span className="pt-0.5 font-mono text-xs tabular-nums text-muted">{num(index + 1)}</span>
       <div>
         <DraftText text={row.text} struck={!kept} />
-        {!kept && (
+        {row.verdict === "unverified" && (
           <p className="mt-1.5 flex flex-wrap items-center gap-2">
-            {row.verdict === "unverified" ? <Chip tone="unsure">Can&apos;t confirm</Chip> : <Chip tone="pen">Not local</Chip>}
+            <Chip tone="unsure">Can&apos;t confirm</Chip>
             {missing && <span className="text-xs text-muted">&ldquo;{missing}&rdquo; not found</span>}
           </p>
         )}
@@ -405,7 +405,7 @@ export function TownView({ run }: { run: TownRun }) {
             {failed ? (
               <LiveDataNotice towns={[town.name]} subject="the partner list" />
             ) : partners.length ? (
-              <PartnerDotStrip points={partners} />
+              <PartnerNames points={partners} />
             ) : (
               <p className="ui-note">None in Qloo&apos;s places within 15 km. Add the partners residents name.</p>
             )}
@@ -419,9 +419,8 @@ export function TownView({ run }: { run: TownRun }) {
               </>
             }
           >
-            <FundBar parts={fund.parts} total={fund.total} size="sm" legend={false} caption={`The ${money(fund.total)} 24-month fund by program area`} />
-            <p className="font-mono text-[11px] tabular-nums text-muted">
-              {money(program.unassigned)} reserve <span className="ch-sw ch-k-reserve ml-1 align-[-1px]" aria-hidden />
+            <p className="ui-stat-second">
+              <span className="ui-stat-second-v">{money(program.unassigned)}</span> reserve
             </p>
           </StatTile>
         </section>

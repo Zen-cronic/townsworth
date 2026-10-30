@@ -241,3 +241,168 @@
     box-shadow: none;
   }
 }
+
+/* Struck draft text stays readable: a step lighter, with a thinner stroke in a muted pink. */
+:root .audit-row .strike {
+  --strike-ink: color-mix(in srgb, var(--hivis) 72%, var(--paper));
+  background-image: linear-gradient(var(--strike-ink), var(--strike-ink));
+  background-size: 100% 2px;
+}
+@keyframes paint-strike-thin {
+  from { background-size: 0% 2px; }
+  to { background-size: 100% 2px; }
+}
+:root .audit-row .strike {
+  animation-name: paint-strike-thin;
+}
+:root .audit-row.is-struck .line-clamp-2 {
+  color: color-mix(in srgb, var(--muted) 85%, var(--paper));
+}
+
+/* Opening the page at the first line keeps the section header and the legend above it in view. */
+:root .audit-row:first-child {
+  scroll-margin-top: calc(var(--l-hdr) + 188px);
+}
+@media (max-width: 640px) {
+  :root .audit-row:first-child {
+    scroll-margin-top: calc(var(--l-hdr) + 250px);
+  }
+}
+
+/* The two-tone headline belongs to the landing page; elsewhere a headline is one tone. */
+:root :is(.ui-page, .gp-hero) .lp-h1 .lp-tone {
+  color: inherit;
+  font-weight: inherit;
+}
+
+/* Guided path hero: the two ways in sit beside the headline instead of under it. */
+@media (min-width: 1024px) {
+  :root .gp-hero .lp-wrap {
+    display: grid;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    column-gap: 64px;
+    align-items: start;
+  }
+  :root .gp-hero .lp-wrap > * {
+    grid-column: 1;
+  }
+  :root .gp-hero .lp-wrap > .gp-entrances {
+    grid-column: 2;
+    grid-row: 1 / span 6;
+    margin-top: 0;
+    grid-template-columns: minmax(0, 1fr);
+    align-self: center;
+  }
+}
+
+/* Landing buttons follow the same set: solid primary, outlined secondary. */
+:root .lp-btn-quiet {
+  border-color: var(--line-quiet);
+  box-shadow: none;
+}
+:root .lp-btn-primary {
+  box-shadow: none;
+}
+/* On the asphalt band: primary is paper, secondary an outline in paint white. */
+:root .ui-fund button,
+:root .ui-fund .ui-band-cta {
+  border-radius: 2px;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+:root .ui-fund button {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--band-text) 60%, transparent);
+}
+
+/* Native selects match the text inputs: same height and border, the product's own chevron. */
+:root select:not([multiple]) {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-inline-end: 32px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 16 16' fill='none' stroke='%231b1c1e' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 11px center;
+  background-size: 12px;
+}
+
+/* The memo's export menu. */
+:root .gn-menu {
+  position: relative;
+}
+:root .gn-menu > summary {
+  list-style: none;
+}
+:root .gn-menu[open] > summary .chev {
+  transform: rotate(90deg);
+}
+:root .gn-menu-list {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 4px);
+  left: 0;
+  min-width: 220px;
+  display: grid;
+  padding: 4px;
+  background: var(--card);
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  box-shadow: 0 12px 28px -14px color-mix(in srgb, var(--ink) 40%, transparent);
+}
+:root .gn-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 12px;
+  font-size: 0.875rem;
+  color: var(--ink);
+  border-radius: 2px;
+}
+:root .gn-menu-item:hover,
+:root .gn-menu-item:focus-visible {
+  background: var(--concrete);
+}
+
+/* Stat cards: the named partners, and the reserve as a second figure. */
+:root .ch-names {
+  display: grid;
+  gap: 4px;
+  font-size: 0.8125rem;
+}
+:root .ch-names li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid var(--hairline);
+  padding-bottom: 4px;
+}
+:root .ch-names-n {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--ink);
+}
+:root .ch-names-d {
+  flex: none;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+:root .ui-stat-second {
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+:root .ui-stat-second-v {
+  font-size: 1.25rem;
+  font-weight: 700;
+  font-stretch: 108%;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Beside the findings, the proof headline sets a size down so it holds to four lines. */
+@media (min-width: 1024px) {
+  :root .ui-page > div > header .lp-h1 {
+    font-size: clamp(2.25rem, 1.2rem + 1.9vw, 3.125rem);
+  }
+}

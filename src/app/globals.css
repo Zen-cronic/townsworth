@@ -81,6 +81,60 @@ body {
   font-family: var(--font-body), system-ui, sans-serif;
 }
 
+/* Buttons: one solid primary per view, outlined secondaries, underlined tertiary text actions.
+   In the components layer so a utility (a height, a disabled state) can still refine one. */
+@layer components {
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 40px;
+    padding: 0 16px;
+    border: 1px solid transparent;
+    border-radius: 2px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1.2;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color 150ms, border-color 150ms, color 150ms;
+  }
+  .btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
+  }
+  .btn-primary {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--paper);
+  }
+  .btn-primary:hover {
+    background: var(--ink-deep);
+  }
+  .btn-secondary {
+    background: var(--card);
+    border-color: var(--line-quiet);
+    color: var(--ink);
+  }
+  .btn-secondary:hover {
+    border-color: var(--ink);
+  }
+  .btn-tertiary {
+    min-height: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--ink);
+    text-decoration: underline;
+    text-decoration-color: var(--rule);
+    text-underline-offset: 4px;
+  }
+  .btn-tertiary:hover {
+    text-decoration-color: currentColor;
+  }
+}
+
 /* Keyboard focus: one consistent ring on every interactive element. */
 :where(a, button, input, select, summary, [tabindex]):focus-visible {
   outline: 2px solid var(--focus);

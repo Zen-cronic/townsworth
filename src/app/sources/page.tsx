@@ -125,7 +125,7 @@ export default async function SourcesPage() {
 
   return (
     <div className="gn-landing">
-      <AppHeader />
+      <AppHeader towns={false} />
       <main>
         <section className="src-hero lp-grain" aria-labelledby="src-h">
           <div className="lp-wrap">

@@ -9,7 +9,7 @@ import { FundBar, LineStrip, SessionTimeline, fundSplit, lineComposition, sessio
 import { Figure } from "@/components/dashboard/Figure";
 import { Chevron, ChevronLeft, Download } from "@/components/dashboard/Icons";
 import { PrintButton } from "@/components/dashboard/PrintButton";
-import { parseFund, secondaryCta } from "@/components/dashboard/ui";
+import { parseFund, primaryCta, secondaryCta } from "@/components/dashboard/ui";
 import { StatusPill } from "@/components/dashboard/StatusPill";
 import { CrmExportLinks, SessionCalendarLinks } from "@/components/integrations";
 import { commitmentsFor } from "@/lib/commitments";
@@ -29,8 +29,8 @@ const MATERIAL = [
   ["Tax", "Abatements, PILOT payments, school-district share"],
 ] as const;
 
-const toolButton =
-  "inline-flex items-center gap-1.5 rounded-md border border-rule bg-paper px-3 py-1.5 text-sm transition-colors duration-150 hover:border-ink active:bg-concrete";
+// The export menu's items: one plain row each.
+const menuItem = "gn-menu-item";
 
 function SectionTitle({ n, children, note }: { n: string; children: React.ReactNode; note?: React.ReactNode }) {
   return (
@@ -140,17 +140,26 @@ export default async function MemoPage({
             Back to the audit
           </Link>
           {/* Exports line up with the memo's left edge */}
-          <span className="flex flex-wrap gap-2">
-            <a href={`${exportBase}&format=csv`} className={toolButton}>
-              <Download />
-              Partner sheet (CSV)
-            </a>
-            <a href={`${exportBase}&format=ics`} className={toolButton}>
-              <Download />
-              Calendar (.ics)
-            </a>
-            <CrmExportLinks slug={town.slug} fund={program.annualFund} linkClassName={toolButton} />
-            <PrintButton className={toolButton} />
+          <span className="flex flex-wrap items-start gap-2">
+            <PrintButton className={primaryCta} />
+            <details className="gn-menu">
+              <summary className={secondaryCta}>
+                <Download />
+                Export
+                <Chevron className="chev h-3 w-3" />
+              </summary>
+              <div className="gn-menu-list">
+                <a href={`${exportBase}&format=csv`} className={menuItem}>
+                  <Download />
+                  Partner sheet (CSV)
+                </a>
+                <a href={`${exportBase}&format=ics`} className={menuItem}>
+                  <Download />
+                  Calendar (.ics)
+                </a>
+                <CrmExportLinks slug={town.slug} fund={program.annualFund} linkClassName={menuItem} />
+              </div>
+            </details>
           </span>
         </div>
 

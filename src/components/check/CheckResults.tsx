@@ -14,7 +14,7 @@ import { cadenceLower, formatPhone, km, quotedName } from "@/components/dashboar
 import { secondaryCta } from "@/components/dashboard/ui";
 import { CheckExports } from "./CheckExports";
 import { LiveDataNotice } from "@/components/LiveDataNotice";
-import { FundBar, LineStrip, PartnerDotStrip, fundSplit, lineComposition, partnerPoints } from "@/components/charts";
+import { FundBar, LineStrip, PartnerNames, fundSplit, lineComposition, partnerPoints } from "@/components/charts";
 
 // The audit of a pasted draft, rendered from the JSON the check route returns. Same verdict
 // vocabulary as the town pages; audit.ts stays out of the client bundle (it carries the baseline).
@@ -286,7 +286,7 @@ export function CheckResults({ result }: { result: CheckResult }) {
             </p>
           </Stat>
           <Stat title="Local partners Qloo found" figure={String(partnerPlaces)}>
-            {profile.failedCalls > 0 ? <LiveDataNotice towns={[town.name]} subject="the partner list" /> : <PartnerDotStrip points={partners} />}
+            {profile.failedCalls > 0 ? <LiveDataNotice towns={[town.name]} subject="the partner list" /> : <PartnerNames points={partners} />}
             <p className="mt-2 text-xs">
               <span className="font-mono tabular-nums text-ink">{swapPlaces}</span> swap into struck lines
               {alongsidePlaces > 0 && (
@@ -299,7 +299,6 @@ export function CheckResults({ result }: { result: CheckResult }) {
             </p>
           </Stat>
           <Stat title="Costed for the committee" figure={money(program.totalAllocated)}>
-            <FundBar parts={fund.parts} total={fund.total} size="sm" legend={false} caption={`The ${money(fund.total)} 24-month fund by program area`} />
             <p className="mt-2 text-xs">
               {plural(program.items.length, "item", "items")} over 24 months ·{" "}
               <span className="font-mono tabular-nums text-ink">{money(program.unassigned)}</span> reserve

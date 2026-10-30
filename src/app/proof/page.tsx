@@ -83,7 +83,7 @@ export default async function ProofPage() {
 
   return (
     <>
-      <AppHeader page="proof" />
+      <AppHeader towns={false} page="proof" />
       <main className="ui-page">
         <div className="lg:grid lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:items-start lg:gap-12">
           <header className="max-w-3xl">
@@ -110,7 +110,6 @@ export default async function ProofPage() {
               n="1"
               big={`${totals.llmVerifiedPct}%`}
               label="of the partners AI alone named could be confirmed"
-              bars={[{ label: "Verified", pct: totals.llmVerifiedPct, tone: "llm" }]}
               note={`Verified against Qloo or OpenStreetMap within 25 km. In well-mapped towns the LLM mostly names real institutions${
                 kemmerer ? `; in thin-data Kemmerer only ${kemmerer.llmVerified} of ${kemmerer.llmNamed} could be verified` : ""
               }. Unverified is not proof of invented.`}
@@ -129,14 +128,12 @@ export default async function ProofPage() {
               n="3"
               big={`${totals.gnNovelPct}%`}
               label={`of ${PRODUCT_NAME}'s local partners AI alone never named`}
-              bars={[{ label: "Never named", pct: totals.gnNovelPct, tone: "gn" }]}
               note="Qloo isn't re-deriving what the model already knows. It adds a layer the model doesn't have."
             />
             <Finding
               n="4"
               big={`${totals.affinityChangedPct}%`}
               label="of picks change without Qloo's taste ranking (ordered by distance, like a nearby-places directory)"
-              bars={[{ label: "Changed", pct: totals.affinityChangedPct, tone: "gn" }]}
               note="Same candidate places, same venue-fit and host-community rules; only the order differs: Qloo's local affinity vs distance from the site. The share of Good Neighbor's picks a distance-only directory would not make."
             />
           </section>

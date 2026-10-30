@@ -1,4 +1,4 @@
-import { stackDots, type PartnerPoint } from "./chartData";
+import type { PartnerPoint } from "./chartData";
 
 const kmLabel = (n: number) => `${n < 10 ? n.toFixed(1) : Math.round(n)} km`;
 
@@ -64,39 +64,18 @@ export function PartnerDistance({ points }: { points: PartnerPoint[] }) {
   );
 }
 
-// Compact form: every place as a dot on one distance track. Dots that would overlap stack into
-// a second or third row, so each place keeps a visible mark; scored places draw above unscored.
-export function PartnerDotStrip({ points }: { points: PartnerPoint[] }) {
-  const known = points.filter((p) => p.distanceKm != null) as (PartnerPoint & { distanceKm: number })[];
+// The nearest named local partners: plain text a reader can scan, with the distance beside each.
+export function PartnerNames({ points, show = 3 }: { points: PartnerPoint[]; show?: number }) {
+  const known = (points.filter((p) => p.distanceKm != null) as (PartnerPoint & { distanceKm: number })[]).sort((a, b) => a.distanceKm - b.distanceKm);
   if (!known.length) return null;
-  const far = Math.max(15, ...known.map((p) => p.distanceKm));
-  const max = Math.ceil(far / 5) * 5;
-  const pos = (km: number) => `${(Math.min(km, max) / max) * 100}%`;
-  const near = Math.min(...known.map((p) => p.distanceKm));
-  const farthest = Math.max(...known.map((p) => p.distanceKm));
-  const placed = stackDots(known.map((p) => p.distanceKm / max), 0.06).map((lane, i) => ({ p: known[i], lane }));
-  const lanes = Math.max(...placed.map((d) => d.lane)) + 1;
-  const items = known.reduce((s, p) => s + p.items, 0);
   return (
-    <figure className="ch-anim" aria-label={`${known.length} places between ${kmLabel(near)} and ${kmLabel(farthest)} from the site`}>
-      <span className="ch-swarm block" style={{ height: 8 + lanes * 16 }} aria-hidden>
-        {placed
-          .sort((a, b) => Number(a.p.affinityRank != null) - Number(b.p.affinityRank != null))
-          .map(({ p, lane }) => (
-            <span
-              key={p.name}
-              className={`ch-dot ${p.affinityRank == null ? "is-unranked" : ""}`}
-              style={{ left: pos(p.distanceKm), top: `${lanes * 16 - lane * 16}px` }}
-              title={`${p.name}: ${kmLabel(p.distanceKm)}`}
-            />
-          ))}
-      </span>
-      <figcaption className="mt-1.5 flex flex-wrap justify-between gap-x-3 font-mono text-[11px] tabular-nums text-muted" aria-hidden>
-        <span>
-          {items > known.length ? `at ${known.length} places` : `${known.length} ${known.length === 1 ? "place" : "places"}`} · {kmLabel(near)}–{kmLabel(farthest)}
-        </span>
-        <span>0–{max} km from site</span>
-      </figcaption>
-    </figure>
+    <ul className="ch-names" aria-label="Nearest local partners">
+      {known.slice(0, show).map((p) => (
+        <li key={p.name}>
+          <span className="ch-names-n">{p.name}</span>
+          <span className="ch-names-d">{kmLabel(p.distanceKm)}</span>
+        </li>
+      ))}
+    </ul>
   );
 }

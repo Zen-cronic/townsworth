@@ -179,7 +179,7 @@ export default async function GuidedPath() {
 
   return (
     <div className="gn-landing">
-      <AppHeader page="judges" />
+      <AppHeader towns={false} page="judges" />
       <main>
         <section className="gp-hero lp-grain" aria-labelledby="gp-h">
           <div className="lp-wrap">

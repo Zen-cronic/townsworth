@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { primaryCta, secondaryCta } from "@/components/dashboard/ui";
 import Form from "next/form";
 import Link from "next/link";
 import { AppHeader } from "@/components/AppHeader";
@@ -71,7 +72,7 @@ export default async function CheckPage({
                   ))}
                 </select>
               </label>
-              <button className="h-10 rounded-md border border-rule bg-paper px-3 text-sm font-medium transition-colors duration-150 hover:border-ink active:bg-concrete">
+              <button className={`${secondaryCta} h-10`}>
                 Use
               </button>
             </Form>
@@ -113,7 +114,7 @@ export default async function CheckPage({
                   className={`${field} h-10 w-full px-3`}
                 />
               </label>
-              <button className="h-10 rounded-md bg-ink px-4 text-sm font-semibold text-paper transition-colors duration-150 hover:bg-ink/85 active:bg-ink/75">
+              <button className={`${primaryCta} h-10`}>
                 Find
               </button>
             </Form>
