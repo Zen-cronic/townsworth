@@ -257,8 +257,8 @@ export function CheckForm({ town, sample, townSample }: { town: Town; sample?: S
             <div role="alert" className="mt-4 flex flex-wrap items-center gap-3 rounded-md border border-amber/35 bg-amber-wash px-4 py-3 text-sm">
               <Notice className="h-4 w-4 text-amber" />
               <span className="min-w-0 flex-1">
-                {error}
-                {httpStatus > 0 && <span className="text-muted"> (server error {httpStatus})</span>} Your draft is still here.
+                {error} Your draft is still here.
+                {httpStatus > 0 && <span className="text-muted"> Server error {httpStatus}.</span>}
               </span>
               <button type="button" onClick={() => void check()} className={secondaryCta}>
                 Try again

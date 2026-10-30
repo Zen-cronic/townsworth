@@ -253,7 +253,7 @@ export default async function ProofPage() {
                     <Chevron className="h-3 w-3 text-muted" />
                   </Link>
                   {t.thin && <StatusPill tone="warn">Thin data</StatusPill>}
-                  {t.failed && <StatusPill tone="flag">Qloo didn&apos;t answer</StatusPill>}
+                  {t.failed && <StatusPill tone="warn">Qloo didn&apos;t answer</StatusPill>}
                 </p>
                 <dl className="mt-2 grid grid-cols-[minmax(0,1fr)_auto] gap-x-4 gap-y-1 text-xs">
                   {(
