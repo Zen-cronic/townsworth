@@ -1,5 +1,6 @@
 import { FACILITY_CHOICES, SPONSOR_PLACEHOLDER, type FacilityCode } from "@/lib/towns";
 import { primaryCta } from "@/components/dashboard/ui";
+import { PendingSubmit } from "@/components/ui/PendingSubmit";
 
 // A plain GET form to /find, so it works without JavaScript. Geocoding happens on the server.
 
@@ -85,10 +86,11 @@ export function TownSearchForm({
           className={`${field} h-10 w-full px-3`}
         />
       </label>
-      <button className={`${primaryCta} h-10`}>
+      <PendingSubmit pendingLabel="Finding…" className={`${primaryCta} h-10`}>
         Find town
-      </button>
-      <p id={`${idPrefix}-company-help`} className={`text-xs leading-relaxed sm:col-span-2 ${company ? "text-muted" : "text-amber"}`}>
+      </PendingSubmit>
+      {/* A plain hint until a search has run without a company; only then is it a warning. */}
+      <p id={`${idPrefix}-company-help`} className={`text-xs leading-relaxed sm:col-span-2 ${!company && q ? "text-amber" : "text-muted"}`}>
         {company
           ? `Every outreach draft and the resident ballot will name ${company} as the funder.`
           : `Fill in the company: every outreach draft and the resident ballot name the funder. Left blank, they say “${SPONSOR_PLACEHOLDER}”.`}
