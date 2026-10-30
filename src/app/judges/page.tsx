@@ -6,6 +6,7 @@ import { AppHeader } from "@/components/AppHeader";
 import { LiveDataNotice } from "@/components/LiveDataNotice";
 import { PRODUCT_NAME } from "@/components/landing/brand";
 import { Chevron } from "@/components/landing/Chevron";
+import { CopyablePlan } from "@/components/landing/CopyablePlan";
 import { heroFacts } from "@/components/landing/heroFacts";
 import { Objections, objectionsFor } from "@/components/landing/Objections";
 import { selectShortlist, SIMULATED_BALLOTS } from "@/lib/ballot";
@@ -13,6 +14,7 @@ import { FundBar, LineStrip, fundSplit, lineComposition } from "@/components/cha
 import { Figure } from "@/components/dashboard/Figure";
 import { computeProof } from "@/lib/proof";
 import { runTown } from "@/lib/run";
+import { HERO_SAMPLE_ID, sampleCheckHref, samplePlanById } from "@/lib/samplePlans";
 import { HERO_TOWN, TOWNS } from "@/lib/towns";
 
 export const metadata: Metadata = {
@@ -44,6 +46,7 @@ export default async function GuidedPath() {
   const fund = fundSplit(run.program.items, run.program.unassigned);
   const shortlist = selectShortlist(run.program.items);
   const usd = (n: number) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n);
+  const sample = samplePlanById(HERO_SAMPLE_ID);
   const FACILITY = { "data center": "Data center", fab: "Chip fab", nuclear: "Nuclear", plant: "Plant" } as const;
 
   const steps: Step[] = [
@@ -251,6 +254,34 @@ export default async function GuidedPath() {
                   </li>
                 ))}
               </ol>
+
+              {sample && (
+                <div className="gp-extra">
+                  <section id="own-plan" className="gp-step" aria-labelledby="own-plan-h">
+                    <div className="gp-step-body">
+                      <p className="lp-kicker">Optional</p>
+                      <h2 id="own-plan-h" className="lp-h2">
+                        Check a plan of your own
+                      </h2>
+                      <p>No plan to hand? Check our sample draft for {town}: it fills the form, and you press Check this draft.</p>
+                      <div className="lp-ctas">
+                        <Link href={sampleCheckHref(sample.id)} className="lp-btn lp-btn-primary">
+                          Check the sample plan
+                          <span className="lp-btn-sq" aria-hidden="true">
+                            <Chevron />
+                          </span>
+                        </Link>
+                      </div>
+                      <details className="ui-more">
+                        <summary>Show the sample plan</summary>
+                        <div>
+                          <CopyablePlan text={sample.text} label={sample.label} />
+                        </div>
+                      </details>
+                    </div>
+                  </section>
+                </div>
+              )}
 
               <div className="gp-extra">
                 <div className="lp-section-head">

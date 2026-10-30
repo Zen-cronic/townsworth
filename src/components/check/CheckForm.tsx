@@ -21,8 +21,10 @@ const PROGRESS = [
   "Costing local replacements against your fund…",
 ];
 
-export function CheckForm({ town }: { town: Town }) {
-  const [text, setText] = useState("");
+// `sample` pre-fills the textarea once, from /check?sample=<id>; nothing is checked until the
+// visitor presses the button.
+export function CheckForm({ town, sample }: { town: Town; sample?: string }) {
+  const [text, setText] = useState(sample ?? "");
   const [fundEdit, setFundEdit] = useState<string | null>(null);
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState("");
@@ -144,7 +146,7 @@ export function CheckForm({ town }: { town: Town }) {
             </p>
             <button
               type="button"
-              onClick={() => setText(SAMPLE_PLAN)}
+              onClick={() => setText(sample ?? SAMPLE_PLAN)}
               disabled={checking}
               className="rounded text-ink underline decoration-rule underline-offset-4 hover:decoration-ink disabled:text-muted"
             >

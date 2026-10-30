@@ -7,6 +7,7 @@ import { CheckForm } from "@/components/check/CheckForm";
 import { Chevron, Notice } from "@/components/dashboard/Icons";
 import { StatusPill } from "@/components/dashboard/StatusPill";
 import { cleanTownQuery, geocodeTowns, type GeocodeResult } from "@/lib/nominatim";
+import { samplePlanById } from "@/lib/samplePlans";
 import { cleanCompany, FACILITY_CHOICES, HERO_TOWN, isFacilityCode, SPONSOR_PLACEHOLDER, TOWNS, townBySlug, withCompany } from "@/lib/towns";
 
 export const metadata: Metadata = {
@@ -22,14 +23,16 @@ function StepLabel({ children }: { children: React.ReactNode }) {
 }
 
 // Step 1 picks the town with client-side GET navigations (next/form, Link), so the pasted text in
-// step 2 survives a town switch. The plan text itself never goes into a URL.
+// step 2 survives a town switch. The plan text itself never goes into a URL: ?sample=<id> names a
+// sample plan from src/lib/samplePlans.ts, which fills the form without submitting it.
 export default async function CheckPage({
   searchParams,
 }: {
-  searchParams: Promise<{ town?: string; q?: string; facility?: string; company?: string }>;
+  searchParams: Promise<{ town?: string; q?: string; facility?: string; company?: string; sample?: string }>;
 }) {
   const sp = await searchParams;
-  const town = (sp.town && townBySlug(sp.town)) || HERO_TOWN;
+  const sample = samplePlanById(sp.sample);
+  const town = (sp.town && townBySlug(sp.town)) || (sample && townBySlug(sample.town)) || HERO_TOWN;
   const q = cleanTownQuery(sp.q);
   const facility = isFacilityCode(sp.facility) ? sp.facility : "data-center";
   const company = cleanCompany(sp.company);
@@ -161,7 +164,7 @@ export default async function CheckPage({
           )}
         </section>
 
-        <CheckForm town={town} />
+        <CheckForm town={town} sample={sample?.text} />
 
         <p className="no-print ui-note mt-10">
           Town search © OpenStreetMap contributors · taste data from Qloo ·{" "}
