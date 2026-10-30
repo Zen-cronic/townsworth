@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { PRODUCT_NAME } from "@/components/landing/brand";
+import { BrandMark } from "@/components/landing/BrandMark";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AgentDrafts } from "@/components/AgentDrafts";
@@ -184,9 +185,7 @@ export default async function MemoPage({
           <header>
             <div className="flex flex-wrap items-center justify-between gap-3">
               <p className="flex items-center gap-2 text-sm font-semibold tracking-tight">
-                <span aria-hidden className="grid h-4 w-4 place-items-center rounded-[3px] bg-hivis">
-                  <span className="h-[2px] w-2 rounded-full bg-paper" />
-                </span>
+                <BrandMark size={18} />
                 {PRODUCT_NAME}
               </p>
               <div className="flex items-center gap-2">

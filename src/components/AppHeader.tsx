@@ -2,6 +2,7 @@ import Link from "next/link";
 import { TOWNS } from "@/lib/towns";
 import { HeaderTownSearch } from "@/components/TownSearchForm";
 import { PRODUCT_NAME } from "@/components/landing/brand";
+import { BrandMark } from "@/components/landing/BrandMark";
 import { CenterCurrent } from "@/components/ui/CenterCurrent";
 
 const navLink =
@@ -42,9 +43,7 @@ export function AppHeader({
       </a>
       <div className="mx-auto flex max-w-[1240px] items-center gap-x-4 px-4 py-2.5 max-[400px]:gap-x-2 sm:px-8">
         <Link href="/" className="flex shrink-0 items-center gap-2 whitespace-nowrap rounded-md py-1 pr-1 font-semibold tracking-tight">
-          <span aria-hidden className="grid h-5 w-5 place-items-center rounded-[4px] bg-hivis">
-            <span className="h-[3px] w-2.5 rounded-full bg-paper" />
-          </span>
+          <BrandMark size={22} />
           <span className="max-[380px]:sr-only">{PRODUCT_NAME}</span>
         </Link>
         <nav aria-label="Primary" className="ml-auto flex items-center gap-0.5 text-muted">

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { HERO_TOWN } from "@/lib/towns";
 import { PilotLink } from "@/components/PilotLink";
 import { PRODUCT_NAME } from "./brand";
+import { BrandMark } from "./BrandMark";
 
 const REPO = "https://github.com/Zen-cronic/good-neighbor";
 
@@ -38,7 +39,7 @@ export function SiteFooter() {
       <div className="lp-wrap lp-footer-grid">
         <div className="lp-footer-brand">
           <span className="lp-brand">
-            <span aria-hidden="true" className="lp-brand-mark" /> {PRODUCT_NAME}
+            <BrandMark size={18} /> {PRODUCT_NAME}
           </span>
           <p>Community programs a host town recognizes as its own, checked line by line and costed from the fund.</p>
           <PilotLink className="lp-textlink lp-footer-pilot" />
