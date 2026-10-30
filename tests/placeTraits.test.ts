@@ -198,3 +198,22 @@ test("traits: only the top half of the area's list is cited", () => {
   assert.deepEqual(sharedTraits(place, area), [{ name: "Trait 3", rank: 3, of: 10 }]);
   assert.deepEqual(sharedTraits(entity("p21", "W", { tags: [{ name: "Trait 9", id: "t9" }] }), area), []);
 });
+
+test("traits: only place-trait kinds survive; age ranges, hidden and neighbourhood tags never do", () => {
+  const tag = (id: string, name: string, subtype: string, affinity: number) => ({ tag_id: id, name, subtype, query: { affinity } });
+  const area = parseAreaTags({
+    results: {
+      tags: [
+        tag("urn:tag:age_range:qloo:18_24", "18 24", "urn:tag:age_range:qloo", 0.99),
+        tag("urn:tag:not_for_display:place:mask_required", "Mask required", "urn:tag:not_for_display:place", 0.98),
+        tag("urn:tag:neighborhood_characteristic:qloo:family_friendly", "Family friendly", "urn:tag:neighborhood_characteristic:qloo", 0.97),
+        tag("urn:tag:genre:place:latino_owned", "Latino-owned", "urn:tag:genre:place", 0.96),
+        tag("urn:tag:category:place:bakery", "Bakery", "urn:tag:category:place", 0.9),
+        tag("urn:tag:offerings:place:bakery", "Bakery", "urn:tag:offerings:place", 0.8),
+        tag("urn:tag:ambience:qloo:lively", "Lively", "urn:tag:ambience:qloo", 0.7),
+      ],
+    },
+  });
+  assert.deepEqual(area.map((t) => [t.name, t.rank]), [["Bakery", 1], ["Lively", 2]]);
+});
+

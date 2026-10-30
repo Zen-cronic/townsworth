@@ -74,11 +74,34 @@ export interface SharedTrait {
 // id, so a tag can't slip through on any one of them.
 const IDENTITY = /customer_identity|identity|inclusivity|demographic|audience/i;
 // Names that point at a group or a belief, whatever subtype they arrive under. Cuisines stay.
-const SENSITIVE_NAME = /\b(lgbtq\+?|gay|lesbian|queer|trans(gender)?|black[- ]owned|women[- ]owned|minority[- ]owned|veteran[- ]owned|christian|catholic|muslim|jewish|halal|kosher|church|religio\w*|politic\w*|conservative|liberal|immigrants?)\b/i;
+const SENSITIVE_NAME = /\b(lgbtq\+?|gay|lesbian|queer|trans(gender)?|\w+[- ]owned|christian|catholic|muslim|jewish|halal|kosher|church|religio\w*|politic\w*|conservative|liberal|immigrants?)\b/i;
 
 export function isIdentityTag(t: { id?: string; subtype?: string; types?: unknown; type?: string }): boolean {
   const fields = [t.id, t.subtype, t.type, ...(Array.isArray(t.types) ? t.types : [])].filter((x): x is string => typeof x === "string");
   return fields.some((f) => IDENTITY.test(f) || NON_SIGNAL_TAG_TYPES.has(f) || [...NON_SIGNAL_TAG_TYPES].some((n) => f.startsWith(`${n}:`)));
+}
+
+// Only these kinds of tag describe the place itself (what it is, its feel, what it serves or offers),
+// so only these can be an area trait. Anything else (age ranges, "not for display", neighbourhood
+// or audience descriptors, payments, parking) is never ranked or shown, whatever it is called.
+const TRAIT_TYPES = [
+  "urn:tag:genre:place",
+  "urn:tag:category:place",
+  "urn:tag:ambience:qloo",
+  "urn:tag:style:qloo",
+  "urn:tag:theme:qloo",
+  "urn:tag:setting:qloo",
+  "urn:tag:decor:qloo",
+  "urn:tag:activity_type:qloo",
+  "urn:tag:activities:place",
+  "urn:tag:offerings:place",
+  "urn:tag:specialty_dish:place",
+  "urn:tag:cuisine:qloo",
+];
+const isTraitField = (f: string) => TRAIT_TYPES.some((t) => f === t || f.startsWith(`${t}:`));
+
+export function isTraitType(t: { id?: string; subtype?: string }): boolean {
+  return [t.subtype, t.id].some((f) => typeof f === "string" && isTraitField(f));
 }
 
 // Traits too generic to explain a pick: every town has restaurants, parks and "casual" places.
@@ -89,8 +112,8 @@ export function isGenericTrait(name: string): boolean {
   return GENERIC_TRAIT.test(name.trim());
 }
 
-// results.tags[] -> the area's place traits in Qloo's order (highest affinity first), with identity,
-// sensitive and generic tags removed before ranking, so "#k of N" counts only what is shown.
+// results.tags[] -> the area's place traits in Qloo's order (highest affinity first). Only place-trait
+// kinds are kept; identity, sensitive and generic tags are removed before ranking, so "#k of N" counts only what is shown.
 export function parseAreaTags(body: unknown): AreaTag[] {
   const raw = (body as { results?: { tags?: unknown } } | null)?.results?.tags;
   if (!Array.isArray(raw)) return [];
@@ -103,11 +126,13 @@ export function parseAreaTags(body: unknown): AreaTag[] {
       types: t?.types,
       affinity: typeof t?.query?.affinity === "number" ? t.query.affinity : 0,
     }))
-    .filter((t) => t.id && t.name && !isIdentityTag(t) && !SENSITIVE_NAME.test(t.name) && !isGenericTrait(t.name));
+    .filter((t) => t.id && t.name && isTraitType(t) && !isIdentityTag(t) && !SENSITIVE_NAME.test(t.name) && !isGenericTrait(t.name));
+  // One trait per name: "Bakery" can arrive as a category and as an offering.
   const seen = new Set<string>();
+  const key = (t: { name: string }) => t.name.toLowerCase();
   return kept
     .sort((a, b) => b.affinity - a.affinity || a.i - b.i)
-    .filter((t) => !seen.has(t.id) && !!seen.add(t.id))
+    .filter((t) => !seen.has(key(t)) && !!seen.add(key(t)))
     .map((t, k) => ({ id: t.id, name: t.name, subtype: t.subtype, affinity: t.affinity, rank: k + 1 }));
 }
 
