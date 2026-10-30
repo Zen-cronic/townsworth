@@ -1,6 +1,6 @@
 # Townsworth
 
-**When a data center, chip fab or nuclear plant comes to town, its community fund usually buys a generic plan. Townsworth checks that plan line by line against the places the host town actually goes, ranked by Qloo's local affinity (how strongly locals favour them). It keeps the institutions the plan already names, adds the local places residents actually go that AI alone never names (84% of its local partners, measured 2026-10-29; the live `/proof` page recomputes it on every visit), and returns a costed, resident-ranked 24-month program of local partners and host venues. Every item is traceable to its Qloo signal.**
+**When a data center, chip fab or nuclear plant comes to town, its community fund usually buys a generic plan. Townsworth checks that plan line by line against the places the host town actually goes, ranked by how strongly locals favour them (Qloo). It keeps the institutions the plan already names, adds the local places residents actually go that AI alone never names (84% of its local partners, measured 2026-10-29; the live `/proof` page recomputes it on every visit), and returns a costed, resident-ranked 24-month program of local partners and host venues. Every item is traceable to its Qloo signal.**
 
 For community-affairs teams at hyperscalers, developers, fabs and utilities.
 
@@ -38,9 +38,9 @@ The guided path is at `/judges`.
 - **Pricing hypothesis (not validated):** a per-project annual licence, set against civic-engagement software that publishes £13,200–£35,200 a year (EngagementHQ, [G-Cloud 15](https://assets.applytosupply.digitalmarketplace.service.gov.uk/g-cloud-15/documents/92418/394920096965516-pricing-document-2026-01-29-1924.pdf)). That's a rounding error next to a nine-figure fund. We have not yet talked to a paying buyer.
 
 ## How Qloo drives it
-- `GET /v2/insights` with `filter.type=urn:entity:place` + `filter.location=POINT(lon lat)` + radius **+ `signal.location=POINT(...)`** gives the candidate local places, **ranked by Qloo's local affinity**, with categories, rating, event space and distance. Partners are chosen host community first, then by affinity rank ("#4 of 50 places locals favour"). Distance only breaks ties.
+- `GET /v2/insights` with `filter.type=urn:entity:place` + `filter.location=POINT(lon lat)` + radius **+ `signal.location=POINT(...)`** gives the candidate local places, **ranked by how strongly locals favour them**, with categories, rating, event space and distance. Partners are chosen host community first, then by that rank ("#4 of 50 places locals favour"). Distance only breaks ties.
 - `signal.location=POINT(...)` for brands, artists, TV and podcasts gives the tastes that stand out locally. "Distinct" means it's absent from the national top 50 and from every big-metro reference list. Taste types that still lean national are shown as such and don't drive program items.
-- About 25 Insights calls per town, plus four for the age-group check, one for the partners' audience age profiles and one for the area's place traits. The town page shows the call log ("Live Qloo data: N lookups"), and a Qloo error is reported as an error, never as thin data.
+- About 25 Insights calls per town, plus four for the age-group check, up to three for the partners' audience age profiles (batches of 5) and one for the area's place traits. The town page shows the call log ("Live Qloo data: N lookups"), and a Qloo error is reported as an error, never as thin data.
 - Point queries, not town names: in our tests, town-name queries silently resolved to the wrong place for 6 of 22 hosts.
 
 ## How Townsworth uses Qloo
@@ -48,12 +48,12 @@ Every production call is server-side REST against the Insights API. Each one cha
 
 | Call | Key parameters | What it changes |
 |---|---|---|
-| `GET /v2/insights` (places) | `filter.type=urn:entity:place`, `filter.location=POINT(lon lat)`, `filter.location.radius=15000`, `signal.location=POINT(lon lat)`, `take=50` | The candidate venues and grant applicants, ranked by local affinity. Thin towns get one by-distance top-up without `signal.location`. |
+| `GET /v2/insights` (places) | `filter.type=urn:entity:place`, `filter.location=POINT(lon lat)`, `filter.location.radius=15000`, `signal.location=POINT(lon lat)`, `take=50` | The candidate venues and grant applicants, ranked by how strongly locals favour them. Thin towns get one by-distance top-up without `signal.location`. |
 | `GET /v2/insights` (taste) | `filter.type=urn:entity:brand\|artist\|tv_show\|podcast`, `signal.location=POINT(lon lat)`, `take=20` | What the town favours: event themes, a local team's watch party, where to announce the program. |
 | `GET /v2/insights` (national baseline) | same types, `signal.location.query=United States\|Canada`, `take=50`, plus the same taste query at big-metro reference points | What is distinctly local: anything in the national top 50 or a big-metro list doesn't count as a local signal. |
 | `GET /v2/audiences` | `filter.parents.types=urn:audience:life_stage` | Looks up the "Parents With Young Children" life stage at runtime, for the families check. |
 | `GET /v2/insights` (age groups) | the places query with `take=15` and one of `signal.demographics.age=24_and_younger`, `signal.demographics.age=55_and_older`, `signal.demographics.audiences=<life-stage id>` | Whether the program includes a place young adults (under 25), older residents and families with young children favour. If none of its partners is in a group's top 15, one session at that group's best-ranked hall, library, park, museum, zoo, school or college is earmarked from the reserve. Only these three groups are ever queried. |
-| `GET /v2/insights` (partner age profile) | `filter.type=urn:demographics`, `signal.interests.entities=<partner ids, sorted, in batches of 5, up to 15>` | The age strip on partner cards, `/check` swaps and the memo: which age groups favour each partner more than most, from Qloo's audience data. Only the age buckets are read; the gender buckets in the answer are discarded. A partner without a row shows nothing, and a failed call hides the strips without touching any verdict or figure. |
+| `GET /v2/insights` (partner age profile) | `filter.type=urn:demographics`, `signal.interests.entities=<partner ids, sorted, in batches of 5, up to 15>` | The age strip on partner cards, `/check` swaps and the memo: which age groups favour each partner more than most, from Qloo's audience data. Only the age buckets are read; the gender buckets in the answer are discarded. A partner without a row shows nothing; a failed batch hides the strips for its own partners only, and never touches a verdict or figure. |
 | `GET /v2/insights` (area place traits) | `filter.type=urn:tag`, `signal.location=POINT(lon lat)`, `filter.parents.types=urn:entity:place`, `take=50` | The "Place traits" row in "What {town} favours", and a "Why" line on partners and swaps: "Carries Lively and Banquet hall, #4 and #6 of 21 place traits this area over-indexes on (Qloo)", matched on tag id against the partner's own Qloo tags. Only tag kinds that describe the place itself are kept (genre, category, ambience, style, theme, setting, decor, activities, offerings, dishes, cuisine); identity, age-range and neighbourhood tags never are, and generic ones ("Restaurant", "Casual") are dropped. Only traits in the top half of the area's list are cited. No overlap, no line. |
 | `GET /search` (`/check` only) | `query=<venue name>`, `types=urn:entity:place`, `filter.location=<lat>,<lon>`, `filter.radius=25`, `take=5`, never cached | A venue a pasted plan names becomes verified ("Qloo knows this place · N km") when Qloo has the same place within 25 km. Up to 8 names per check; the plan text itself is never sent. |
 
@@ -72,10 +72,10 @@ npx -y @qloo/qloo-harness api search -q "Racine Zoo" -t place -n 5 --json --para
 | Qloo Insights API (`/v2/insights`) | Places ranked by how strongly locals favour them, distinct local taste, age-group checks, partner audience ages (`urn:demographics`) and area place traits (`urn:tag`) |
 | Qloo Audiences API (`/v2/audiences`) | Looks up the life-stage audience for the families check |
 | Qloo Search API (`/search`) | Finds each venue a pasted plan names, within 25 km; never cached |
-| OpenAI (`gpt-5.4-mini`, Vercel AI SDK) | The outreach agent: drafts partner emails with tool calls, checked by fixed rules. Also wrote the frozen AI-alone baseline plans and splits a pasted plan into lines. Never decides a verdict or an amount |
+| OpenAI (`gpt-5.4-mini`, Vercel AI SDK) | The outreach agent: drafts partner emails with tool calls, checked by fixed rules. Also writes a live draft for a typed-in town ("Have AI write a draft now"), wrote the frozen AI-alone baseline plans, and splits a pasted plan into lines. Never decides a verdict or an amount |
 | OpenStreetMap Nominatim | Finds any US or Canadian town, and confirms that a partner a plan names exists nearby |
 | Next.js 15, React 19, TypeScript, Tailwind CSS, Zod | The app: server-rendered pages, fixed rules for every verdict and cost, CSV, calendar and CRM exports |
-| Vercel | Hosting, with the data cache that keeps each successful Qloo answer for 24 hours |
+| Vercel | Hosting, with the data cache that keeps each successful Qloo Insights answer for 24 hours (`/search` is never cached) |
 
 ## The trust split
 - **The model proposes; code decides.** Partner choice, bucket, allocation and every audit verdict are deterministic rules over Qloo fields.
