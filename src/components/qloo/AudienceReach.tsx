@@ -9,9 +9,10 @@ import { LENSES, type LensOutcome, type LensStatus } from "@/lib/reach";
 const usd = (n: number) => `$${n.toLocaleString("en-US")}`;
 const sentence = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
-const PILL: Record<LensStatus, { tone: "ok" | "flag" | "neutral"; text: string }> = {
+// "Added" (Qloo's signal changed the program) takes the Qloo tone, so it stands apart from "Included".
+const PILL: Record<LensStatus, { tone: "ok" | "qloo" | "flag" | "neutral"; text: string }> = {
   covered: { tone: "ok", text: "Included" },
-  added: { tone: "ok", text: "Added" },
+  added: { tone: "qloo", text: "Added" },
   "no-fit": { tone: "flag", text: "Not reached" },
   "no-candidate": { tone: "flag", text: "Not reached" },
   unchecked: { tone: "neutral", text: "Couldn't check" },

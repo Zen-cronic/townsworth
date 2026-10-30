@@ -297,13 +297,14 @@
 @media print {
   :root .kept-label,
   :root .ui-chip.is-qloo,
-  :root .status-pill.is-ok {
+  :root .status-pill.is-ok,
+  :root .status-pill.is-qloo {
     background: none;
     color: var(--ink);
     box-shadow: inset 0 0 0 1px var(--ink);
     border-color: var(--ink);
   }
-  :root .status-pill.is-ok > span {
+  :root :is(.status-pill.is-ok, .status-pill.is-qloo) > span {
     background: var(--ink);
   }
   :root :is(.qloo-rank, .ui-stat-v.is-qloo, .ch-dots-rank, .text-qloo) {

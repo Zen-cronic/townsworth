@@ -1,4 +1,5 @@
-type Tone = "flag" | "unsure" | "ok" | "warn" | "neutral";
+// "qloo": a status that Qloo's local signal caused (an age group the check added), in Qloo blue.
+type Tone = "flag" | "unsure" | "ok" | "warn" | "neutral" | "qloo";
 
 const TONE: Record<Tone, string> = {
   flag: "border-hivis/30 bg-hivis-wash text-hivis-text",
@@ -6,6 +7,7 @@ const TONE: Record<Tone, string> = {
   ok: "border-ok bg-ok text-ok-on",
   warn: "border-amber/30 bg-amber-wash text-amber",
   neutral: "border-hairline bg-concrete text-muted",
+  qloo: "border-qloo bg-qloo text-qloo-on",
 };
 
 const DOT: Record<Tone, string> = {
@@ -14,6 +16,7 @@ const DOT: Record<Tone, string> = {
   ok: "bg-ok-on",
   warn: "bg-amber",
   neutral: "bg-muted",
+  qloo: "bg-qloo-on",
 };
 
 export function StatusPill({ tone, children, dot = true }: { tone: Tone; children: React.ReactNode; dot?: boolean }) {

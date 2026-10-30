@@ -14,7 +14,7 @@ function Cell({ status, place, ranked, fit }: { status?: LensStatus; place?: str
   if (status === "added")
     return (
       <span className="flex flex-col items-start gap-1">
-        <StatusPill tone="ok">Added</StatusPill>
+        <StatusPill tone="qloo">Added</StatusPill>
         <span className="text-xs text-muted">{place}</span>
       </span>
     );
