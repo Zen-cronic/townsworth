@@ -1,9 +1,7 @@
 /* Sources (/sources) only. The hero carries the cited-figures matrix as the page's primary object;
    below it, sections are ruled lists with no boxes. */
 
-/* Raised over the shared sources hero grid (lede in the right half), which this page replaces with
-   copy | matrix. */
-:root .sp .sp-hero .sp-hero-grid {
+.sp .sp-hero-grid {
   display: grid;
   grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
   grid-template-rows: auto;
@@ -11,11 +9,11 @@
   row-gap: 32px;
   align-items: end;
 }
-:root .sp .sp-hero .sp-hero-grid > .sp-hero-copy {
+.sp .sp-hero-grid > .sp-hero-copy {
   grid-column: 1;
   grid-row: 1;
 }
-:root .sp .sp-hero .sp-hero-grid > .src-matrix {
+.sp .sp-hero-grid > .src-matrix {
   grid-column: 2;
   grid-row: 1;
   margin: 0;
@@ -125,10 +123,10 @@
 }
 
 @media (max-width: 1023px) {
-  :root .sp .sp-hero .sp-hero-grid {
+  .sp .sp-hero-grid {
     grid-template-columns: minmax(0, 1fr);
   }
-  :root .sp .sp-hero .sp-hero-grid > .src-matrix {
+  .sp .sp-hero-grid > .src-matrix {
     grid-column: 1;
     grid-row: 2;
   }

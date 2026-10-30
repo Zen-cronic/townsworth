@@ -25,7 +25,7 @@
 }
 
 /* Type: Archivo throughout; display sizes open up to the wide cut. */
-:root :is(.lp-h1, .lp-h2, .lp-h3, .ui-h3, .ui-band-h, .lp-stat-v, .ui-stat-v, .lp-proof-title, .gp-entry-t),
+:root :is(.lp-h1, .lp-h2, .lp-h3, .ui-h3, .ui-band-h, .lp-stat-v, .ui-stat-v, .lp-proof-title),
 :root main :is(h1, h2, h3) {
   font-family: var(--font-display), system-ui, sans-serif;
 }
@@ -35,7 +35,7 @@
   font-weight: 800;
   letter-spacing: -0.02em;
 }
-:root :is(.lp-h3, .ui-h3, .gp-entry-t),
+:root :is(.lp-h3, .ui-h3),
 :root main h3 {
   font-stretch: 108%;
   font-weight: 700;
@@ -276,28 +276,6 @@
 :root :is(.ui-page, .gp-hero) .lp-h1 .lp-tone {
   color: inherit;
   font-weight: inherit;
-}
-
-/* Guided path hero: the two ways in sit beside the headline instead of under it. */
-@media (min-width: 1024px) {
-  :root .gp-hero .lp-wrap {
-    display: grid;
-    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
-    /* The ways in span every row; the spare height goes to the last row, not between the lines. */
-    grid-template-rows: auto auto auto auto 1fr;
-    column-gap: 64px;
-    align-items: start;
-  }
-  :root .gp-hero .lp-wrap > * {
-    grid-column: 1;
-  }
-  :root .gp-hero .lp-wrap > .gp-entrances {
-    grid-column: 2;
-    grid-row: 1 / span 5;
-    margin-top: 0;
-    grid-template-columns: minmax(0, 1fr);
-    align-self: center;
-  }
 }
 
 /* Landing buttons follow the same set: solid primary, outlined secondary. */
@@ -544,24 +522,6 @@
 :root .src-hero .lp-h1 .lp-tone {
   color: inherit;
   font-weight: inherit;
-}
-/* Sources hero: the lede takes the right half instead of leaving it empty. */
-@media (min-width: 1024px) {
-  :root .src-hero .lp-wrap {
-    display: grid;
-    grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
-    column-gap: 64px;
-    align-items: end;
-  }
-  :root .src-hero .lp-wrap > * {
-    grid-column: 1;
-  }
-  :root .src-hero .lp-wrap > .lp-lede {
-    grid-column: 2;
-    grid-row: 1 / span 2;
-    align-self: end;
-    margin-bottom: 0.9rem;
-  }
 }
 
 /* Plain grounds: no paper-grain texture on any band. */

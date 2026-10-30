@@ -1878,49 +1878,6 @@ a:focus-visible .lp-chev {
 .gp-hero .lp-lede {
   margin-top: 16px;
 }
-.gp-entrances {
-  margin-top: 40px;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
-  max-width: 880px;
-}
-.gp-entry {
-  display: grid;
-  gap: 8px;
-  align-content: start;
-  padding: 24px;
-  border-radius: 8px;
-  background: var(--l-paper);
-  box-shadow: 0 0 0 1px var(--l-hairline), 0 1px 2px color-mix(in srgb, var(--l-ink) 5%, transparent), inset 0 1px 0 var(--l-card);
-  transition: box-shadow 150ms;
-}
-.gp-entry:hover {
-  box-shadow: 0 0 0 1px var(--l-ink), 0 8px 24px -16px color-mix(in srgb, var(--l-ink) 40%, transparent);
-}
-.gp-entry.is-primary {
-  background: var(--l-band);
-  color: var(--l-paper);
-  box-shadow: 0 1px 2px color-mix(in srgb, var(--l-ink) 20%, transparent);
-}
-.gp-entry.is-primary .lp-kicker,
-.gp-entry.is-primary p {
-  color: var(--l-band-muted);
-}
-.gp-entry-t {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  font-size: 1.25rem;
-  font-weight: 650;
-  letter-spacing: -0.015em;
-}
-.gp-entry p {
-  color: var(--l-muted);
-  font-size: 0.9375rem;
-  line-height: 1.55;
-}
 .gp-path {
   padding: 72px 0 96px;
   background: var(--l-paper);
@@ -2268,9 +2225,6 @@ a:focus-visible .lp-chev {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .lp-obj {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .gp-entrances {
     grid-template-columns: minmax(0, 1fr);
   }
 }
