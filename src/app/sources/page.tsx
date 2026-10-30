@@ -137,8 +137,7 @@ export default async function SourcesPage() {
               Every number, <span className="lp-tone">sourced.</span>
             </h1>
             <p className="lp-lede">
-              The commitments are cited public reporting. The evidence is recomputed from frozen plans on every load. Fund figures
-              are illustrative unless a public figure exists.
+              The commitments are cited public reporting. Fund figures are illustrative unless a public figure exists.
             </p>
             </div>
                 <figure className="src-matrix">

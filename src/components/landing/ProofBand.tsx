@@ -76,7 +76,7 @@ export function ProofBand({
       </ul>
 
       <p className="lp-proof-foot">
-        A directional check, not a study; unverified is not proof of invented.{" "}
+        A directional check, not a study. Unconfirmed doesn’t mean invented.{" "}
         <Link href="/proof#limits" className="lp-textlink">
           Method and limits <Chevron />
         </Link>

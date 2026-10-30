@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { money, type PlanSource, type TownRun } from "@/lib/run";
-import { BASELINE } from "@/lib/baselineData";
 import { BUCKETS, costLine, type ProgramItem } from "@/lib/plan";
 import { isKept, type AuditRow } from "@/lib/audit";
 import { Chevron, Notice } from "@/components/dashboard/Icons";
@@ -26,7 +25,7 @@ const FACILITY_LABEL: Record<string, string> = {
 const DRAFT: Record<PlanSource, { tab: string; note: string }> = {
   llm: {
     tab: "AI-written draft",
-    note: `OpenAI ${BASELINE.model}, no Qloo data, frozen before it was measured.`,
+    note: "Written by AI without Qloo data, and fixed before it was checked.",
   },
   agency: {
     tab: "Consultant template",
@@ -254,10 +253,11 @@ function QlooCalls({ calls }: { calls: TownRun["profile"]["calls"] }) {
   const failed = calls.filter((c) => !c.ok).length;
   return (
     <details id="qloo-calls" className="group no-print scroll-mt-24 text-xs">
-      <summary className="cursor-pointer">
+      <summary className="inline-flex cursor-pointer items-center gap-1">
         <Chip tone={failed ? "warn" : "plain"}>
-          Qloo calls: {calls.length} · {failed ? `${failed} failed` : "all OK"}
+          Live Qloo data: {calls.length} lookups{failed ? ` · ${failed} failed` : ""}
         </Chip>
+        <Chevron className="chev h-3 w-3" />
       </summary>
       <table className="ui-band-muted mt-2 w-full max-w-md text-left font-mono text-[11px]">
         <thead>

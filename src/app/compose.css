@@ -433,9 +433,9 @@
   box-shadow: none;
   font-size: 0.875rem;
   color: var(--muted);
-  text-decoration: underline;
-  text-decoration-color: var(--rule);
-  text-underline-offset: 3px;
+}
+:root .ui-provenance summary:hover .ui-chip {
+  color: var(--ink);
 }
 :root .ui-provenance .ui-chip-dot {
   display: none;

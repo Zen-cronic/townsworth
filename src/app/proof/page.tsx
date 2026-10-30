@@ -87,7 +87,7 @@ export default async function ProofPage() {
       <main id="main" className="ui-page">
         <div className="proof-band lg:grid lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:items-start lg:gap-12">
           <header className="max-w-3xl">
-            <p className="lp-kicker">Evidence · {towns.length} host towns · recomputed on every load</p>
+            <p className="lp-kicker">Evidence · {towns.length} host towns</p>
             <h1 className="lp-h1 mt-3">
               Qloo grounds the AI plan <span className="lp-tone">in where the town actually goes.</span>
             </h1>
