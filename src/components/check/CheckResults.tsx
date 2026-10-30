@@ -4,7 +4,7 @@ import Link from "next/link";
 import { PRODUCT_NAME } from "@/components/landing/brand";
 import type { AuditRow, Verdict } from "@/lib/audit";
 import { SEARCH_RADIUS_KM } from "@/lib/geo";
-import { BUCKETS, costLine, ROLE_LABEL, type ProgramItem } from "@/lib/plan";
+import { BUCKETS, type ProgramItem } from "@/lib/plan";
 import type { CheckResult } from "@/lib/userPlan";
 import { Chevron, Notice } from "@/components/dashboard/Icons";
 import { Figure } from "@/components/dashboard/Figure";
@@ -24,6 +24,8 @@ import { FundBar, StruckTally, PartnerNames, fundSplit, lineComposition, partner
 const isKept = (v: Verdict) => v === "grounded" || v === "institution" || v === "mechanism";
 
 const money = (n: number) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n);
+// "2 sessions × $9,000": the cost basis without the partner name, which the title already carries.
+const unitLine = (it: ProgramItem) => `${it.sessions} ${it.sessions === 1 ? it.unit : `${it.unit}s`} × ${money(it.unitCost)}`;
 // Draft lines are numbered plainly.
 const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
 
@@ -42,41 +44,52 @@ function Eyebrow({ tone, children }: { tone: "ok" | "muted"; children: React.Rea
   );
 }
 
+// The venue facts a reader needs only when reaching out: behind the item's own disclosure.
+function VenueFacts({ item }: { item: ProgramItem }) {
+  const p = item.partner;
+  if (!p) return null;
+  const facts = [p.address, p.rating != null && `Rated ${p.rating.toFixed(1)}`, p.eventSpaces && "Event space", formatPhone(p.phone)].filter(Boolean) as string[];
+  if (!facts.length) return null;
+  return (
+    <details className="rp-more mt-2">
+      <summary>Venue details</summary>
+      <p className="mt-1 text-xs leading-relaxed text-muted">{facts.join(" · ")}</p>
+    </details>
+  );
+}
+
 function PartnerFacts({ item }: { item: ProgramItem }) {
   const p = item.partner;
   if (!p) return null;
-  const facts = [
-    km(p.distanceKm) && `${km(p.distanceKm)} from site`,
-    p.neighbouring && `Neighbouring community${p.city ? ` (${p.city})` : ""}`,
-    p.rating != null && `Rated ${p.rating.toFixed(1)}`,
-    p.eventSpaces && "Event space",
-    formatPhone(p.phone),
-  ].filter(Boolean) as string[];
   return (
     <>
-      {facts.length > 0 && <p className="mt-0.5 text-xs text-muted">{facts.join(" · ")}</p>}
       <TraitLine traits={p.traits} className="mt-1 text-[12px] leading-4" />
       <AgeStrip ages={p.ages} className="mt-1 text-[12px] leading-4" />
     </>
   );
 }
 
+function proposalMeta(item: ProgramItem) {
+  const p = item.partner;
+  return [unitLine(item), cadenceLower(item.cadence), p && km(p.distanceKm) && `${km(p.distanceKm)} from site`, p?.neighbouring && (p.city ?? "Neighbouring community")]
+    .filter(Boolean)
+    .join(" · ");
+}
+
 function Proposal({ item, label = "Proposed" }: { item: ProgramItem; label?: string }) {
   return (
     <div className={CARD.proposed}>
-      <Eyebrow tone="ok">
-        {label} <span className="font-normal normal-case tracking-normal text-muted">· {BUCKETS[item.bucket].label}</span>
-      </Eyebrow>
-      <p className="mt-1 text-[15px] font-medium leading-snug">{item.title}</p>
+      <Eyebrow tone="ok">{label}</Eyebrow>
+      <div className="mt-1 flex items-baseline justify-between gap-3">
+        <p className="text-[15px] font-medium leading-snug">{item.title}</p>
+        <span className="rp-amount shrink-0 font-mono text-sm tabular-nums">{money(item.amount)}</span>
+      </div>
+      <p className="mt-1 text-xs text-muted">{proposalMeta(item)}</p>
       <PartnerFacts item={item} />
-      <p className="mt-2 text-xs text-muted">{costLine(item)}</p>
-      <p className="mt-0.5 flex flex-wrap items-baseline gap-x-1.5 text-xs text-muted">
-        <span className="font-mono text-sm tabular-nums text-ink">{money(item.amount)}</span>
-        <span>item budget from your fund · {cadenceLower(item.cadence)}</span>
-      </p>
       <div className="mt-2.5">
         <ProvenanceChip item={item} />
       </div>
+      <VenueFacts item={item} />
     </div>
   );
 }
@@ -109,7 +122,7 @@ function Kept({ row }: { row: AuditRow }) {
             <ul className="space-y-1.5">
               {applicants.map((a) => (
                 <li key={a.id} className="text-xs text-muted">
-                  <span className="text-ink">{a.partner?.name ?? a.title}</span> · {costLine(a)}
+                  <span className="text-ink">{a.partner?.name ?? a.title}</span> · <span className="font-mono tabular-nums">{unitLine(a)}</span>
                   <div className="mt-1">
                     <ProvenanceChip item={a} />
                   </div>
@@ -141,6 +154,10 @@ function Kept({ row }: { row: AuditRow }) {
 
 const ROW = "grid grid-cols-[2rem_minmax(0,1fr)] gap-x-3 gap-y-3 border-b border-hairline py-4 last:border-b-0 md:grid-cols-[2.25rem_minmax(0,1fr)_minmax(0,1fr)] md:gap-x-6";
 
+// The reason under a draft line, only where the answer column doesn't already say it: a matched
+// partner and an institution explain themselves there, and "Not local" is the reason for a generic line.
+const showReason = (row: AuditRow) => !(row.verdict === "generic" || row.verdict === "institution" || (row.verdict === "grounded" && row.matched));
+
 function AuditLine({ row, index }: { row: AuditRow; index: number }) {
   const kept = isKept(row.verdict);
   const missing = row.verdict === "unverified" ? quotedName(row.reasons[0]) : undefined;
@@ -154,11 +171,14 @@ function AuditLine({ row, index }: { row: AuditRow; index: number }) {
           </span>
         </p>
         <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1">
-          {kept ? <Chip>Kept</Chip> : row.verdict === "unverified" ? <Chip tone="unsure">Can&apos;t confirm</Chip> : null}
+          {kept ? <Chip>Kept</Chip> : row.verdict === "unverified" ? <Chip tone="unsure">Can&apos;t confirm</Chip> : <Chip tone="pen">Not local</Chip>}
           <span className="text-xs text-muted">{BUCKETS[row.bucket].label}</span>
-          {missing && <span className="text-xs text-muted">· &ldquo;{missing}&rdquo; not found locally</span>}
         </div>
-        <p className="mt-1.5 text-xs leading-relaxed text-muted">{row.reasons[0]}</p>
+        {missing ? (
+          <p className="mt-1.5 text-xs leading-relaxed text-muted">&ldquo;{missing}&rdquo; isn&apos;t in Qloo or OpenStreetMap nearby. It may exist; it can&apos;t be checked here.</p>
+        ) : (
+          showReason(row) && <p className="mt-1.5 text-xs leading-relaxed text-muted">{row.reasons[0]}</p>
+        )}
       </div>
       <div className="col-start-2 space-y-2 md:col-start-3">
         {kept ? (
@@ -178,10 +198,10 @@ function AuditLine({ row, index }: { row: AuditRow; index: number }) {
 }
 
 // One summary cell. Without a figure it holds the struck tally, which carries its own.
-function Stat({ title, figure, children }: { title?: string; figure?: string; children: React.ReactNode }) {
+function Stat({ title, figure, tone, children }: { title?: string; figure?: string; tone: "struck" | "ok" | "qloo"; children: React.ReactNode }) {
   return (
-    <div className="flex flex-col bg-paper px-4 py-3.5 sm:px-6 sm:py-5">
-      {title && <p className="font-mono text-[11px] uppercase tracking-wider text-muted">{title}</p>}
+    <div className={`check-stat is-${tone} flex flex-col px-4 py-3.5 sm:px-6 sm:py-5`}>
+      {title && <p className="check-stat-k text-[13px] font-semibold">{title}</p>}
       {figure && (
         <p className="ui-stat-v mt-2 sm:mt-3">
           <Figure value={figure} />
@@ -236,14 +256,19 @@ export function CheckResults({ result }: { result: CheckResult }) {
             <h2 id="check-title" className="mt-1 text-lg font-semibold tracking-tight sm:text-xl">
               Your draft, checked against {town.name}, {town.region}
             </h2>
-            <p className="mt-1 text-sm text-muted">
-              {parseLine}{" "}
-              <span className="font-mono text-xs tabular-nums">
-                {secs(result.ms)} total
-                {osm.checked > 0 && ` · ${plural(osm.checked, "name", "names")} looked up on OpenStreetMap`}
-                {qlooSearch.checked > 0 && ` · ${plural(qlooSearch.checked, "name", "names")} searched in Qloo, ${qlooSearch.verified} found within ${SEARCH_RADIUS_KM} km`}
-              </span>
-            </p>
+            <details className="rp-more mt-2">
+              <summary>How this was checked</summary>
+              <ul className="mt-2 space-y-1 border-l border-rule pl-3 text-xs leading-relaxed text-muted">
+                <li>{parseLine}</li>
+                {osm.checked > 0 && <li>{plural(osm.checked, "name", "names")} looked up on OpenStreetMap.</li>}
+                {qlooSearch.checked > 0 && (
+                  <li>
+                    {plural(qlooSearch.checked, "name", "names")} searched in Qloo, {qlooSearch.verified} found within {SEARCH_RADIUS_KM} km.
+                  </li>
+                )}
+                <li>Took {secs(result.ms)}.</li>
+              </ul>
+            </details>
             {parse.notice && <Note tone="amber">{parse.notice}</Note>}
             {parse.truncated && <Note tone="amber">Only the first 40 items were checked. Split a longer plan into parts.</Note>}
             {osm.failures > 0 && (
@@ -275,34 +300,34 @@ export function CheckResults({ result }: { result: CheckResult }) {
         </div>
 
         <div className="grid gap-px border-b border-rule bg-hairline sm:grid-cols-3">
-          <Stat>
+          <Stat tone={comp.generic + comp.unverified > 0 ? "struck" : "ok"}>
             <StruckTally comp={comp} draft="Your draft" />
             <p className="mt-2 text-xs">
               Kept:{" "}
               {[
-                plural(keptPartners, "verified local partner", "verified local partners"),
+                plural(keptPartners, "local partner", "local partners"),
                 keptInstitutions > 0 && plural(keptInstitutions, "institution to confirm", "institutions to confirm"),
-                keptMechanisms > 0 && plural(keptMechanisms, "commitment kept as drafted", "commitments kept as drafted"),
-                keptSignals > 0 && plural(keptSignals, "match to a local favourite", "matches to local favourites"),
+                keptMechanisms > 0 && `${keptMechanisms} as drafted`,
+                keptSignals > 0 && plural(keptSignals, "local favourite", "local favourites"),
               ]
                 .filter(Boolean)
-                .join(", ")}
+                .join(" · ")}
             </p>
           </Stat>
-          <Stat title="Local partners Qloo found" figure={String(partnerPlaces)}>
+          <Stat tone="qloo" title="Local partners Qloo found" figure={String(partnerPlaces)}>
             {profile.failedCalls > 0 ? <LiveDataNotice towns={[town.name]} subject="the partner list" /> : <PartnerNames points={partners} />}
             <p className="mt-2 text-xs">
-              <span className="font-mono tabular-nums text-ink">{swapPlaces}</span> swap into struck lines
+              <span className="font-mono tabular-nums text-ink">{swapPlaces}</span> swapped in
               {alongsidePlaces > 0 && (
                 <>
                   {" "}
                   · <span className="font-mono tabular-nums text-ink">{alongsidePlaces}</span> added alongside
                 </>
               )}{" "}
-              · <span className="font-mono tabular-nums text-ink">{qlooAdds.length}</span> your draft never named
+              · <span className="font-mono tabular-nums text-ink">{qlooAdds.length}</span> new to your draft
             </p>
           </Stat>
-          <Stat title="Costed for the committee" figure={money(program.totalAllocated)}>
+          <Stat tone="ok" title="Costed for the committee" figure={money(program.totalAllocated)}>
             <p className="mt-2 text-xs">
               {plural(program.items.length, "item", "items")} over 24 months ·{" "}
               <span className="font-mono tabular-nums text-ink">{money(program.unassigned)}</span> reserve
@@ -315,7 +340,7 @@ export function CheckResults({ result }: { result: CheckResult }) {
             <Chip tone="pen">Not local</Chip>
             <Chip tone="unsure">Can&apos;t confirm</Chip>
             <Chip>Kept</Chip>
-            <span className="font-medium text-ink underline decoration-rule underline-offset-2 group-hover:decoration-ink">What do these mean?</span>
+            <span className="rp-legend-q font-medium text-ink">What do these mean?</span>
           </summary>
         <dl className="mt-3 grid gap-x-6 gap-y-2 md:grid-cols-3">
           <div className="flex items-start gap-2">
@@ -380,7 +405,7 @@ export function CheckResults({ result }: { result: CheckResult }) {
             <h3 id="adds-title" className="font-semibold tracking-tight">
               Qloo also suggests
             </h3>
-            <p className="mt-0.5 text-sm text-muted">More places residents go that your draft never mentions. Open a row for the Qloo signal.</p>
+            <p className="mt-0.5 text-sm text-muted">More places residents go that your draft never mentions.</p>
           </div>
           <p className="font-mono text-xs tabular-nums text-muted">{plural(qlooAdds.length, "more local partner", "more local partners")}</p>
         </div>
@@ -390,19 +415,12 @@ export function CheckResults({ result }: { result: CheckResult }) {
               <li key={it.id} className="row-edge is-kept grid gap-x-4 gap-y-1 px-5 py-3 sm:px-6 md:grid-cols-[minmax(0,1fr)_auto]">
                 <div className="min-w-0">
                   <p className="font-medium leading-snug">{it.title}</p>
-                  <p className="text-xs text-muted">
-                    {[BUCKETS[it.bucket].label, it.partner && it.role && `${ROLE_LABEL[it.role]}: ${it.partner.name}`, km(it.partner?.distanceKm)]
-                      .filter(Boolean)
-                      .join(" · ")}
-                  </p>
-                  <p className="mt-0.5 text-xs text-muted">
-                    {costLine(it)} · {cadenceLower(it.cadence)}
-                  </p>
+                  <p className="mt-0.5 text-xs text-muted">{[BUCKETS[it.bucket].label, proposalMeta(it)].join(" · ")}</p>
                   <div className="mt-1.5">
                     <ProvenanceChip item={it} />
                   </div>
                 </div>
-                <p className="font-mono text-sm tabular-nums md:text-right">{money(it.amount)}</p>
+                <p className="rp-amount font-mono text-sm tabular-nums md:text-right">{money(it.amount)}</p>
               </li>
             ))}
           </ul>
@@ -413,7 +431,7 @@ export function CheckResults({ result }: { result: CheckResult }) {
 
       <section className="ui-section grid gap-6 lg:grid-cols-[1.25fr_1fr]">
         <div className="min-w-0 text-sm">
-          <details className="ui-more">
+          <details className="rp-more">
             <summary>What this check is, and isn&apos;t</summary>
             <ul className="mt-2 space-y-1.5">
               <li>The model only splits your text into items. Which lines are kept or struck comes from the same fixed rules as the town pages.</li>
