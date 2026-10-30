@@ -16,7 +16,7 @@ We asked OpenAI `gpt-5.4-mini`, with no Qloo access, to write the community plan
 | Townsworth local partners AI alone never named | 84% |
 | Picks that change without Qloo's taste ranking (same places ordered by distance) | 3% (1 of 30 across six towns) |
 
-A wiring check (partners found in their own town's Qloo places 100% vs another town's 0%) holds by construction. It confirms the wiring and is not a finding.
+An own-town check (partners found in their own town's Qloo places 100% vs a different town's 0%) holds by construction. It confirms that no town reads another town's data and is not a finding.
 
 **What it shows:** AI alone knows a town's institutions (the college, the district, the library, the chamber), and Townsworth keeps them. Qloo adds the places the town actually goes, and those are mostly places AI alone never names. The affinity row is honest and modest: once venue fit and host-community rules apply, Qloo's ranking changes about one pick in 30. These are the 2026-10-29 figures; `/proof` recomputes them from live Qloo data on every visit, so they can move a point or two as Qloo's data updates. **What it doesn't show:** that residents value the program more, or anything about acceptance or approval. It's six towns and one model, so read it as a directional check.
 

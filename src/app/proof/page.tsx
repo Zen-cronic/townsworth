@@ -212,12 +212,12 @@ export default async function ProofPage() {
             <p className="ui-stat-v">
               <Figure value={`${totals.controlOwnPct}% vs ${totals.controlCrossPct}%`} />
             </p>
-            <p className="mt-2 font-medium leading-snug">Wiring check: partners found in their own town vs another</p>
+            <p className="mt-2 font-medium leading-snug">Own-town check: partners found in their own town vs a different town</p>
             <details className="ui-more mt-2">
               <summary>What this measures</summary>
               <div>
-                Partners are picked from the town&apos;s own list and the towns are far apart, so this has to hold. It checks the wiring (no town reads
-                another town&apos;s data); it is not evidence that Qloo improves the plan.
+                Partners are picked from the town&apos;s own list and the towns are far apart, so this has to hold. It checks that no town reads
+                another town&apos;s data; it is not evidence that Qloo improves the plan.
               </div>
             </details>
           </div>
@@ -225,7 +225,7 @@ export default async function ProofPage() {
             <p className="ui-stat-v">
               <Figure value={`${totals.llmPlanSimilarityPct}% vs ${totals.gnPartnerOverlapPct}%`} />
             </p>
-            <p className="mt-2 font-medium leading-snug">Template check: plan overlap across towns, AI alone vs {PRODUCT_NAME}</p>
+            <p className="mt-2 font-medium leading-snug">Repeat check: plan wording shared across towns, AI alone vs {PRODUCT_NAME}</p>
             <details className="ui-more mt-2">
               <summary>What this measures</summary>
               <div>
