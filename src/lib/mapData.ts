@@ -182,8 +182,9 @@ export function buildMapData(input: MapInput): MapData {
   };
 }
 
-// Every struck line that has a swap starts on the swap, as the line-by-line check proposes.
-export function defaultChoices(data: Pick<MapData, "lines">, choice: Choice = "swap"): Record<number, Choice> {
+// Every struck line that has a swap starts as drafted; the reader flips lines (or applies them all)
+// and watches the local flows draw in.
+export function defaultChoices(data: Pick<MapData, "lines">, choice: Choice = "drafted"): Record<number, Choice> {
   return Object.fromEntries(data.lines.filter((l) => l.swap).map((l) => [l.n, choice]));
 }
 

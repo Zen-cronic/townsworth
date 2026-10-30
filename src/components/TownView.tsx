@@ -8,7 +8,6 @@ import { Card, Chip, PageBand, SectionHeader, SplitCta, StatTile, VerdictMark } 
 import { cadenceLower, formatPhone, km, quotedName } from "@/components/dashboard/format";
 import { AuditTools } from "@/components/town/AuditTools";
 import { DraftLine } from "@/components/town/DraftLine";
-import { TownSchematic } from "@/components/town/TownSchematic";
 import { TownMap } from "@/components/town/TownMap";
 import { buildMapData } from "@/lib/mapData";
 import { keptBreakdown } from "@/components/ui/keptBreakdown";
@@ -384,7 +383,6 @@ export function TownView({ run }: { run: TownRun }) {
         kicker={`${FACILITY_LABEL[town.facility]} host community`}
         title={`${town.name}, ${town.region}`}
         aside={fundForm}
-        visual={<TownSchematic lat={town.lat} lon={town.lon} facility={FACILITY_LABEL[town.facility]} points={partners} />}
       >
         <p className="ui-band-note">{town.custom ? "Entered by you" : town.project}</p>
         {!town.custom && (

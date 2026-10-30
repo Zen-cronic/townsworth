@@ -89,20 +89,22 @@ test("a partner without coordinates is listed as having no map position", () => 
 
 test("flipping a struck line to its swap draws its flow and updates the totals", () => {
   const d = buildMapData(input(audit));
-  const swapped = planState(d, defaultChoices(d));
+  // The panel opens as drafted.
+  assert.ok(Object.values(defaultChoices(d)).every((c) => c === "drafted"));
+  const swapped = planState(d, defaultChoices(d, "swap"));
   assert.equal(swapped.localLines, 4);
   assert.equal(swapped.totalLines, 5);
   assert.equal(swapped.total, 60_000);
   assert.deepEqual(swapped.active.map((l) => l.id).sort(), ["kept-1", "procurement-0", "training-0"]);
 
-  const drafted = planState(d, defaultChoices(d, "drafted"));
+  const drafted = planState(d, defaultChoices(d));
   assert.equal(drafted.localLines, 2);
   assert.equal(drafted.total, 0);
   assert.deepEqual(drafted.active.map((l) => l.id), ["kept-1"]);
   assert.deepEqual([...drafted.venues], ["riverside park"]);
 
   // One line flipped back: its flow leaves, the other stays.
-  const one = planState(d, { ...defaultChoices(d), 2: "drafted" });
+  const one = planState(d, { ...defaultChoices(d, "swap"), 2: "drafted" });
   assert.equal(one.localLines, 3);
   assert.equal(one.total, 24_000);
   assert.ok(!one.venues.has("civic hall"));
@@ -110,8 +112,8 @@ test("flipping a struck line to its swap draws its flow and updates the totals",
 
 test("the area filter hides flows but never changes the totals", () => {
   const d = buildMapData(input(audit, [item("grants-0", "grants", 50_000, { name: "Museum", location: { lat: 42.6, lon: -87.8 }, affinityRank: 9 })]));
-  const all = planState(d, defaultChoices(d));
-  const noTraining = planState(d, defaultChoices(d), new Set(["training"]));
+  const all = planState(d, defaultChoices(d, "swap"));
+  const noTraining = planState(d, defaultChoices(d, "swap"), new Set(["training"]));
   assert.equal(all.total, 110_000);
   assert.equal(noTraining.total, all.total);
   assert.equal(noTraining.localLines, all.localLines);
