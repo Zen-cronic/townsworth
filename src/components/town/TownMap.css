@@ -66,13 +66,11 @@
 }
 
 .tm-legend {
-  position: absolute;
-  top: 10px;
-  left: 246px;
   display: flex;
+  flex: 0 1 auto;
   flex-wrap: wrap;
   gap: 6px 14px;
-  max-width: calc(100% - 246px - 60px);
+  min-width: 0;
   padding: 8px 12px;
   border-radius: var(--r-btn);
   background: color-mix(in srgb, var(--card) 94%, transparent);
@@ -126,14 +124,21 @@
   transition: border-color 150ms;
 }
 .tm-btn:hover { border-color: var(--ink); }
+/* The buttons and the legend share one row along the top; it wraps on narrow maps and stops short
+   of the zoom controls on the right. */
 .tm-tools {
   position: absolute;
   z-index: 2;
   top: 10px;
   left: 10px;
+  right: 56px;
   display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
   gap: 6px;
+  pointer-events: none;
 }
+.tm-tools > * { pointer-events: auto; }
 .tm-full {
   gap: 7px;
   padding: 0 12px 0 10px;
@@ -505,16 +510,15 @@
 }
 /* Full screen: the section fills the screen (Fullscreen API) or the viewport (the overlay
    fallback). The map takes the space; the panel stays docked and scrolls on its own. */
+/* Outranks the page's section band rule (:root .ui-page > .tm.ui-section), whatever the stylesheet order. */
+:root .ui-page > .tm.is-full.ui-section,
 :root .tm.is-full.ui-section {
   --tm-h: 100%;
   margin: 0;
   padding: 0;
   border: 0;
+  border-image: none;
   background: var(--paper);
-}
-.tm.is-full .tm-legend:not(.is-inline) {
-  left: 268px;
-  max-width: calc(100% - 268px - 60px);
 }
 .tm.is-overlay {
   position: fixed;
@@ -562,8 +566,14 @@
   }
   .tm.is-full .tm-lines { overflow: visible; }
   /* A compact sheet header so the plan lines start in the first screen. */
-  .tm.is-full .tm-panel > .tm-legend.is-inline,
   .tm.is-full .tm-lede { display: none; }
+  .tm.is-full .tm-panel > .tm-legend.is-inline {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding: 7px 14px;
+    white-space: nowrap;
+    font-size: 11px;
+  }
   .tm.is-full .tm-panel-head {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -571,7 +581,13 @@
     padding: 12px 14px;
   }
   .tm.is-full .tm-title { grid-column: 1 / -1; margin: 0; font-size: 1rem; }
-  .tm.is-full .tm-totals { display: contents; }
+  .tm.is-full .tm-totals {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 8px;
+    margin: 0;
+  }
   .tm.is-full .tm-total { margin: 0; padding: 6px 10px; }
   .tm.is-full .tm-total b { font-size: 1.0625rem; }
   .tm.is-full .tm-total span { font-size: 0.75rem; }

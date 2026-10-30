@@ -167,20 +167,26 @@ export function TownMap({ data, townName }: { data: MapData; townName: string })
   const [full, setFull] = useState<FullMode | null>(null);
   const fullRef = useRef(full);
   fullRef.current = full;
+  const pending = useRef(false);
   const hovered = useRef(false);
   const [hint, setHint] = useState(false);
+  const [keys, setKeys] = useState(true);
   const [goLine, setGoLine] = useState<number>();
 
   const enterFull = useCallback(async () => {
     const el = section.current as (HTMLElement & { webkitRequestFullscreen?: () => void }) | null;
-    if (!el || fullRef.current) return;
+    if (!el || fullRef.current || pending.current) return;
     const doc = document as Document & { webkitFullscreenEnabled?: boolean };
     if (typeof el.requestFullscreen === "function" && document.fullscreenEnabled) {
+      pending.current = true;
       try {
         await el.requestFullscreen({ navigationUI: "hide" });
         return;
       } catch {
-        // Refused (a policy or an embedding frame): use the overlay.
+        // Refused (a policy or an embedding frame): use the overlay, unless full screen is on anyway.
+        if (document.fullscreenElement === el) return;
+      } finally {
+        pending.current = false;
       }
     } else if (typeof el.webkitRequestFullscreen === "function" && doc.webkitFullscreenEnabled) {
       el.webkitRequestFullscreen();
@@ -241,6 +247,7 @@ export function TownMap({ data, townName }: { data: MapData; townName: string })
   useEffect(() => {
     if (full) {
       wasFull.current = true;
+      setKeys(window.matchMedia("(hover: hover) and (pointer: fine)").matches);
       setHint(true);
       const t = window.setTimeout(() => setHint(false), 3500);
       return () => window.clearTimeout(t);
@@ -320,6 +327,8 @@ export function TownMap({ data, townName }: { data: MapData; townName: string })
       className={`tm ui-section no-print${full ? " is-full" : ""}${full === "overlay" ? " is-overlay" : ""}`}
       onKeyDown={(e) => {
         if (e.key === "Escape") {
+          // An open venue card closes first; the next Esc leaves the overlay.
+          if (focus && full === "overlay") e.stopPropagation();
           setFocus(undefined);
           setHover(undefined);
         }
@@ -360,15 +369,16 @@ export function TownMap({ data, townName }: { data: MapData; townName: string })
               style={cardPos(point, mapEl.current)}
             />
           )}
-          <Legend />
           {data.venues.length === 0 && !failed && (
             <p className="tm-empty">No venue in this plan has a Qloo map position here. The lines are listed beside the map.</p>
           )}
-          {!failed && (
-            <div className="tm-tools">
+          <div className="tm-tools">
+            {!failed && (
               <button type="button" className="tm-btn tm-reset" onClick={() => (setFocus(undefined), setResetTick((t) => t + 1))}>
                 Reset view
               </button>
+            )}
+            {(!failed || full) && (
               <button
                 ref={fullBtn}
                 type="button"
@@ -384,11 +394,18 @@ export function TownMap({ data, townName }: { data: MapData; townName: string })
                 </svg>
                 <span>{full ? "Exit full screen" : "Full screen"}</span>
               </button>
-            </div>
-          )}
+            )}
+            {!failed && <Legend />}
+          </div>
           {full && (
             <p className={`tm-hint${hint ? "" : " is-gone"}`} role="status">
-              Press <kbd>Esc</kbd> or <kbd>F</kbd> to exit
+              {keys ? (
+                <>
+                  Press <kbd>Esc</kbd> or <kbd>F</kbd> to exit
+                </>
+              ) : (
+                <>Tap &ldquo;Exit full screen&rdquo; to leave</>
+              )}
             </p>
           )}
         </div>
