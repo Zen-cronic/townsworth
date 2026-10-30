@@ -74,7 +74,6 @@ npx -y @qloo/qloo-harness api search -q "Racine Zoo" -t place -n 5 --json --para
 | Qloo Search API (`/search`) | Finds each venue a pasted plan names, within 25 km; never cached |
 | OpenAI (`gpt-5.4-mini`, Vercel AI SDK) | The outreach agent: drafts partner emails with tool calls, checked by fixed rules. Also writes a live draft for a typed-in town ("Have AI write a draft now"), wrote the frozen AI-alone baseline plans, and splits a pasted plan into lines. Never decides a verdict or an amount |
 | OpenStreetMap Nominatim | Finds any US or Canadian town, and confirms that a partner a plan names exists nearby |
-| Next.js 15, React 19, TypeScript, Tailwind CSS, Zod | The app: server-rendered pages, fixed rules for every verdict and cost, CSV, calendar and CRM exports |
 | Vercel | Hosting, with the data cache that keeps each successful Qloo Insights answer for 24 hours (`/search` is never cached) |
 
 ## The trust split
