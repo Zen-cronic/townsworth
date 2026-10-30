@@ -256,7 +256,7 @@ export default async function SourcesPage() {
                   plans were frozen on {baseline.createdAt.slice(0, 10)} before any measurement. The method, the per-town table and what the
                   test does not prove are on <Link href="/proof" className="lp-textlink">the evidence page</Link>.
                 </p>
-                <LiveDataNotice towns={failedTowns} />
+                <LiveDataNotice towns={failedTowns} retry />
                 <ul className="src-list">
                   {figures.map((f) => (
                     <li key={f.k}>

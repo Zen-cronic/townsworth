@@ -377,7 +377,8 @@ export function TownView({ run }: { run: TownRun }) {
         )}
         {failed > 0 && (
           <p role="status" className="ui-band-note">
-            <span className="ui-band-alert font-semibold">Qloo didn&apos;t answer ({failed} of {profile.calls.length} calls); this is not thin data.</span> Reload in a minute.
+            <span className="ui-band-alert font-semibold">Qloo didn&apos;t answer ({failed} of {profile.calls.length} calls); this is not thin data.</span>{" "}
+            <a href={planHref(source)}>Try again</a>: what loaded is kept, so a retry only asks for the rest.
           </p>
         )}
         {profile.thin && (

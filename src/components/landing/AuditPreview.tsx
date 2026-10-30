@@ -75,7 +75,7 @@ export function AuditPreview({
       </div>
       {failed.length ? (
         <div className="lp-preview-lead is-degraded">
-          <LiveDataNotice towns={failed} subject="this excerpt" />
+          <LiveDataNotice towns={failed} subject="this excerpt" retry />
         </div>
       ) : (
         <div className="lp-preview-lead">

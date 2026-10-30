@@ -94,7 +94,7 @@ export default async function ProofPage() {
             <p className="lp-lede mt-4">
               {totals.llmVerifiedPct}% of the partners AI alone named could be confirmed ({totals.llmVerified} of {totals.llmNamed}). {replacementsLine}
             </p>
-            <LiveDataNotice towns={failedTowns} className="mt-3" />
+            <LiveDataNotice towns={failedTowns} className="mt-3" retry />
             <details className="ui-more mt-3">
               <summary>How the test was set up</summary>
               <div>

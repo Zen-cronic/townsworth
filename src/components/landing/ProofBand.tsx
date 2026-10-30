@@ -44,7 +44,7 @@ export function ProofBand({
         <p className="lp-section-lede">
           AI alone against {PRODUCT_NAME} in {townCount} host towns, with plans frozen before we measured.
         </p>
-        <LiveDataNotice towns={failedTowns} />
+        <LiveDataNotice towns={failedTowns} retry />
       </div>
 
       <div className="lp-pair">

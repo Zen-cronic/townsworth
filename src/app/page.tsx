@@ -221,7 +221,7 @@ export default async function Home() {
               Generic plan in. <span className="lp-tone">A costed, local program out.</span>
             </h2>
             <p className="lp-section-lede">Three layers, drawn from the {town.name} run.</p>
-            <LiveDataNotice towns={heroFailed} subject="these layers" />
+            <LiveDataNotice towns={heroFailed} subject="these layers" retry />
           </div>
           <HostStack data={stack} nextId="ch-03" />
         </Chapter>
@@ -240,7 +240,7 @@ export default async function Home() {
               Fair questions.
             </h2>
             <p className="lp-section-lede">Each answer opens the live screen.</p>
-            <LiveDataNotice towns={proof.failedTowns} subject="these answers" />
+            <LiveDataNotice towns={proof.failedTowns} subject="these answers" retry />
           </div>
           <Objections items={objections} />
           <Guardrails />
