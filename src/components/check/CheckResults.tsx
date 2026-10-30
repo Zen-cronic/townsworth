@@ -266,7 +266,7 @@ export function CheckResults({ result }: { result: CheckResult }) {
         </div>
 
         <div className="grid gap-px border-b border-rule bg-hairline sm:grid-cols-3">
-          <Stat title="Lines that could fit any town" figure={`${flagged} of ${audit.length}`} tone="flag">
+          <Stat title={`Draft lines struck · ${audit.length - flagged} kept`} figure={`${flagged} of ${audit.length}`} tone={flagged ? "flag" : undefined}>
             {audit.length > 0 && <LineStrip comp={comp} />}
             <p className="mt-2 text-xs">
               Kept:{" "}

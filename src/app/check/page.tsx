@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { primaryCta, secondaryCta } from "@/components/dashboard/ui";
+import { secondaryCta, tertiaryCta } from "@/components/dashboard/ui";
 import Form from "next/form";
 import Link from "next/link";
 import { AppHeader } from "@/components/AppHeader";
@@ -77,6 +77,10 @@ export default async function CheckPage({
               </button>
             </Form>
 
+            {/* Any other town sits one click away, so the paste box is close on a phone. It opens itself
+                when a search is in the address or the town was typed in. */}
+            <details className="group self-end" open={!!q || town.custom || undefined}>
+              <summary className={`${tertiaryCta} cursor-pointer py-2 group-open:mb-3`}>Use another town</summary>
             <Form action="/check" className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_9.5rem_minmax(0,11rem)_auto] sm:items-end">
               <label className="flex min-w-0 flex-col gap-1 text-sm">
                 <span className="text-xs text-muted">Or any US or Canadian town</span>
@@ -103,7 +107,7 @@ export default async function CheckPage({
                 </select>
               </label>
               <label className="flex min-w-0 flex-col gap-1 text-sm">
-                <span className="text-xs text-muted">Company (optional)</span>
+                <span className="text-xs text-muted">Company funding the program (optional)</span>
                 <input
                   name="company"
                   type="text"
@@ -114,10 +118,11 @@ export default async function CheckPage({
                   className={`${field} h-10 w-full px-3`}
                 />
               </label>
-              <button className={`${primaryCta} h-10`}>
+              <button className={`${secondaryCta} h-10`}>
                 Find
               </button>
             </Form>
+            </details>
           </div>
 
           {result && !result.ok && (

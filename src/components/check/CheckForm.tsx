@@ -6,7 +6,7 @@ import type { CheckResult } from "@/lib/userPlan";
 import { SAMPLE_PLANS, type SamplePlan } from "@/lib/samplePlans";
 import { MAX_CHARS, MIN_CHARS } from "@/lib/userPlanParse";
 import { Notice } from "@/components/dashboard/Icons";
-import { parseFund, primaryCta, secondaryCta } from "@/components/dashboard/ui";
+import { parseFund, primaryCta, secondaryCta, tertiaryCta } from "@/components/dashboard/ui";
 import { CheckResults } from "./CheckResults";
 
 // Step 2: paste, check, read the result. The text lives only in this component's state and the
@@ -43,6 +43,7 @@ export function CheckForm({ town, sample, townSample }: { town: Town; sample?: S
   const [fundEdit, setFundEdit] = useState<string | null>(null);
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState("");
+  const [httpStatus, setHttpStatus] = useState(0);
   const [result, setResult] = useState<CheckResult | null>(null);
   const [step, setStep] = useState(0);
   const [elapsed, setElapsed] = useState(0);
@@ -69,8 +70,17 @@ export function CheckForm({ town, sample, townSample }: { town: Town; sample?: S
 
   useEffect(() => () => inFlight.current?.abort(), []);
 
+  // The result takes focus, so keyboard and screen-reader users land on it; the scroll is instant
+  // when the reader asked for reduced motion.
   useEffect(() => {
-    if (status === "done" && shown) resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (status !== "done" || !shown) return;
+    const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    resultsRef.current?.scrollIntoView({ behavior: still ? "auto" : "smooth", block: "start" });
+    const heading = resultsRef.current?.querySelector<HTMLElement>("h2");
+    if (heading) {
+      heading.tabIndex = -1;
+      heading.focus({ preventScroll: true });
+    }
   }, [status, shown]);
 
   async function check() {
@@ -82,6 +92,7 @@ export function CheckForm({ town, sample, townSample }: { town: Town; sample?: S
     setStep(0);
     setElapsed(0);
     setError("");
+    setHttpStatus(0);
     try {
       const res = await fetch("/api/check", {
         method: "POST",
@@ -95,6 +106,7 @@ export function CheckForm({ town, sample, townSample }: { town: Town; sample?: S
         setError(body?.error ?? "Too many checks from your network. Try again in a few minutes.");
         setStatus("limited");
       } else if (!res.ok || !body || body.error) {
+        setHttpStatus(res.status);
         setError(body?.error ?? "The check didn't finish. Try again in a minute.");
         setStatus("error");
       } else {
@@ -108,6 +120,13 @@ export function CheckForm({ town, sample, townSample }: { town: Town; sample?: S
     } finally {
       if (inFlight.current === ctrl) inFlight.current = null;
     }
+  }
+
+  // Stops a check in flight. The pasted text stays.
+  function stop() {
+    inFlight.current?.abort();
+    inFlight.current = null;
+    setStatus(result ? "done" : "idle");
   }
 
   function clear() {
@@ -145,19 +164,19 @@ export function CheckForm({ town, sample, townSample }: { town: Town; sample?: S
             id="plan-text"
             value={text}
             onChange={(e) => setText(e.target.value)}
-            rows={12}
+            rows={8}
             spellCheck={false}
             autoComplete="off"
             disabled={checking}
             aria-describedby="plan-count plan-disclosure"
             aria-invalid={tooLong || undefined}
             placeholder={"One commitment per line works best, e.g.\n1. Sponsor a STEM summer camp for local students\n2. Host an annual community picnic"}
-            className={`block min-h-56 w-full resize-y rounded-md border bg-paper px-3 py-2.5 font-mono text-[13px] leading-relaxed text-ink transition-colors duration-150 placeholder:text-muted/70 hover:border-ink/50 focus:border-ink focus:outline-none disabled:bg-concrete/60 disabled:text-muted ${tooLong ? "border-amber" : "border-rule"}`}
+            className={`block min-h-44 w-full resize-y rounded-md border bg-paper px-3 py-2.5 font-mono text-[13px] leading-relaxed text-ink transition-colors duration-150 placeholder:text-muted/70 hover:border-ink/50 focus:border-ink focus:outline-none disabled:bg-concrete/60 disabled:text-muted ${tooLong ? "border-amber" : "border-rule"}`}
           />
           <div className="mt-1.5 flex flex-wrap items-center justify-between gap-2 text-xs">
             <p id="plan-count" aria-live="polite" className={`font-mono tabular-nums ${tooLong ? "font-medium text-amber" : "text-muted"}`}>
               {text.length.toLocaleString("en-US")} / {MAX_CHARS.toLocaleString("en-US")} characters
-              {tooLong && ` · ${(text.length - MAX_CHARS).toLocaleString("en-US")} over the limit: trim it before checking`}
+              {tooLong && ` · ${(text.length - MAX_CHARS).toLocaleString("en-US")} over the limit`}
             </p>
             <button
               type="button"
@@ -193,7 +212,17 @@ export function CheckForm({ town, sample, townSample }: { town: Town; sample?: S
             <button type="button" onClick={clear} disabled={checking || (!text && !result)} className={`${secondaryCta} h-10 disabled:cursor-not-allowed disabled:text-muted`}>
               Clear
             </button>
+            {checking && (
+              <button type="button" onClick={stop} className={`${tertiaryCta} h-10`}>
+                Stop
+              </button>
+            )}
             {tooShort && !tooLong && text.length > 0 && <span className="pb-2.5 text-xs text-muted">Paste at least {MIN_CHARS} characters.</span>}
+            {tooLong && (
+              <span className="pb-2.5 text-xs font-medium text-amber">
+                Trim {(text.length - MAX_CHARS).toLocaleString("en-US")} characters to check this draft.
+              </span>
+            )}
           </div>
 
           <p id="plan-disclosure" className="mt-4 border-t border-hairline pt-3 text-xs leading-relaxed text-muted">
@@ -204,20 +233,33 @@ export function CheckForm({ town, sample, townSample }: { town: Town; sample?: S
 
         <div aria-live="polite" className="empty:hidden">
           {checking && (
-            <div role="status" className="mt-4 flex items-start gap-3 rounded-md border border-rule bg-concrete/60 px-4 py-3 text-sm">
-              <span aria-hidden className="mt-1 h-2 w-2 shrink-0 animate-pulse rounded-full bg-contour" />
-              <span>
-                <span className="font-medium">{PROGRESS[step]}</span>
-                <span className="mt-0.5 block text-xs text-muted">
-                  Usually 15–30 seconds<span className="font-mono tabular-nums"> · {elapsed} s</span>
-                </span>
-              </span>
+            <div role="status" className="mt-4 rounded-md border border-rule bg-concrete/60 px-4 py-3 text-sm">
+              {/* Every stage is listed so the reader can see what is left. The stages are paced by time,
+                  not reported by the server, so earlier ones are muted rather than ticked off. */}
+              <ol className="space-y-1">
+                {PROGRESS.map((line, i) => (
+                  <li key={line} aria-current={i === step ? "step" : undefined} className={`flex items-start gap-3 ${i === step ? "font-medium text-ink" : "text-muted"}`}>
+                    <span
+                      aria-hidden
+                      className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${i === step ? "animate-pulse bg-contour motion-reduce:animate-none" : i < step ? "bg-rule" : "border border-rule"}`}
+                    />
+                    <span>{line}</span>
+                  </li>
+                ))}
+              </ol>
+              <p className="mt-2 text-xs text-muted">
+                <span className="sr-only">Stage {step + 1} of {PROGRESS.length}. </span>
+                Usually 15–30 seconds<span className="font-mono tabular-nums"> · {elapsed} s</span>
+              </p>
             </div>
           )}
           {view === "error" && (
             <div role="alert" className="mt-4 flex flex-wrap items-center gap-3 rounded-md border border-amber/35 bg-amber-wash px-4 py-3 text-sm">
               <Notice className="h-4 w-4 text-amber" />
-              <span className="min-w-0 flex-1">{error}</span>
+              <span className="min-w-0 flex-1">
+                {error}
+                {httpStatus > 0 && <span className="text-muted"> (server error {httpStatus})</span>} Your draft is still here.
+              </span>
               <button type="button" onClick={() => void check()} className={secondaryCta}>
                 Try again
               </button>
@@ -227,7 +269,7 @@ export function CheckForm({ town, sample, townSample }: { town: Town; sample?: S
             <div role="alert" className="mt-4 flex gap-3 rounded-md border border-amber/35 bg-amber-wash px-4 py-3 text-sm">
               <Notice className="mt-0.5 h-4 w-4 text-amber" />
               <span>
-                <span className="font-semibold">Limit reached.</span> {error}
+                <span className="font-semibold">Limit reached.</span> {error} Your draft is still here.
               </span>
             </div>
           )}
