@@ -131,15 +131,20 @@ export const NON_GRANT_CEILING = 0.7;
 const HALL = /^(banquet hall|conference center|convention center|community center|auditorium|library|public library|college|community college|university|public university|performing arts theater|meeting planning service|cultural center|civic center|event venue)$/i;
 const ADULT_VENUE = /^(brewery|brewpub|beer garden|beer hall)$/i;
 const NOT_A_TRAINING_HOST = /orchard|farm|petting zoo|\bzoo\b|diner|fast food|amusement|gift shop|ice cream|golf|country club/i;
-export const DINING_NAME = /restaurant|cocktail|\b(micro)?brew(ery|eries|ing|pub|pubs|house|houses|haus|ers?|s)?\b|\bpub\b|grill|\bbar\b|caf[eé]|kitchen|diner|tavern|saloon|pizza|bbq|barbecue|steak|taco|eatery|bistro/i;
+// Brewery words as whole words, shared by the dining, adult-only and age-group host rules so they
+// never disagree. Not "brewer", which is also a surname and a town ("Brewer Public Library").
+export const BREW_WORDS = String.raw`(micro)?brew(ery|eries|ing|pubs?|house|houses|haus|s)?`;
+export const DINING_NAME = new RegExp(String.raw`restaurant|cocktail|\b${BREW_WORDS}\b|\bpub\b|grill|\bbar\b|caf[eé]|kitchen|diner|tavern|saloon|pizza|bbq|barbecue|steak|taco|eatery|bistro`, "i");
 export const DINING = /restaurant|diner|cafe|coffee|pizza|grill|eatery|steak house|takeout|buffet|pub\b|\bbar\b|mexican|american|italian/i;
 
 const INSTITUTION = /^(museum|art museum|history museum|park|city park|zoo|botanical garden|historical landmark|university|public university|college|non profit organization|library|hiking area|nature preserve|community center|festival|performing arts theater|aquarium|arboretum)$/i;
 
 export const OPEN_GRANT_ID = "grants-open";
 
-// Items added by the age-group check carry this id prefix. They are paid from the reserve and kept
-// out of the audit's like-for-like swaps and the /proof partner figures.
+// Items added by the age-group check carry this id prefix. They live only in `program.reachItems`,
+// paid from the reserve, and never in `program.items`: that separation is what keeps them out of the
+// audit's like-for-like swaps, the /proof partner figures and the fund reconciliation. Never merge
+// the two lists.
 export const REACH_PREFIX = "reach-";
 
 export const km = (m?: number) => (m == null ? undefined : Math.round(m / 100) / 10);
