@@ -323,10 +323,10 @@ export function HostStack({ data, nextId }: { data: StackData; nextId: string })
       layer: <ProgramLayer data={data} />,
       links: (
         <span className="st-links">
-          <Link href={data.memoHref} className="lp-textlink">
+          <Link href={data.memoHref} className="lp-btn lp-btn-quiet lp-btn-sm">
             The memo <Chevron />
           </Link>
-          <Link href={data.ballotHref} className="lp-textlink">
+          <Link href={data.ballotHref} className="lp-btn lp-btn-quiet lp-btn-sm">
             The ballot <Chevron />
           </Link>
         </span>

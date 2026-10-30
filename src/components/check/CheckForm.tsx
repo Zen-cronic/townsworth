@@ -182,7 +182,7 @@ export function CheckForm({ town, sample, townSample }: { town: Town; sample?: S
               type="button"
               onClick={() => setText(townSample.text)}
               disabled={checking}
-              className="rounded text-ink underline decoration-rule underline-offset-4 hover:decoration-ink disabled:text-muted"
+              className="lp-btn lp-btn-quiet lp-btn-sm disabled:text-muted"
             >
               Try a sample plan
             </button>

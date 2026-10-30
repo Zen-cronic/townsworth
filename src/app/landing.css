@@ -188,6 +188,17 @@ a:focus-visible .lp-chev {
 .lp-btn-quiet:hover {
   border-color: var(--l-ink);
 }
+/* A small outlined button for a secondary action outside a sentence ("The memo", "Try a sample plan").
+   Inline links inside a sentence keep .lp-textlink. */
+.lp-btn.lp-btn-sm {
+  justify-content: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0 14px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
 .lp-btn-meta {
   font-family: var(--l-mono);
   font-size: 12px;
@@ -1169,11 +1180,10 @@ a:focus-visible .lp-chev {
   text-wrap: pretty;
 }
 .st-links {
-  margin-top: 8px;
+  margin-top: 12px;
   display: flex;
   flex-wrap: wrap;
-  gap: 8px 24px;
-  font-size: 0.9375rem;
+  gap: 8px;
 }
 .st-layer {
   position: relative;
