@@ -494,7 +494,7 @@
 :root #program .memo-section-n { color: var(--ok-text); }
 :root .memo-area-head > * { background: var(--ok); color: var(--ok-on); padding: 8px 10px; }
 :root .memo-area-head .text-muted { color: var(--ok-wash); }
-:root .memo-signal { background: var(--qloo-wash); color: var(--qloo); box-shadow: inset 0 0 0 1px var(--qloo); padding: 0 6px; border-radius: 2px; }
+:root .memo-signal { background: var(--qloo-wash); color: var(--qloo); box-shadow: inset 0 0 0 1px var(--qloo); padding: 0 8px; border-radius: var(--r-pill); }
 :root .memo-amount { color: var(--ok-text); font-weight: 650; }
 @media (max-width: 639px) {
   :root #program { margin-inline: -12px; padding: 16px 12px 20px; }
