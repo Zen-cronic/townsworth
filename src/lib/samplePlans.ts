@@ -6,8 +6,9 @@ import { SAMPLE_PLAN } from "./userPlanParse";
 export interface SamplePlan {
   id: string;
   label: string;
-  // The preset town /check selects when the link carries no town of its own.
-  town: string;
+  // A sample that names real local organisations belongs to one preset town and is only ever checked
+  // against it. A sample without a town fits any town.
+  town?: string;
   text: string;
 }
 
@@ -31,8 +32,10 @@ export const MOUNT_PLEASANT_SAMPLE_PLAN = `Mount Pleasant Community Benefit Comm
 
 export const SAMPLE_PLANS: readonly SamplePlan[] = [
   { id: "mount-pleasant", label: "Mount Pleasant, WI data center draft", town: "mount-pleasant-wi", text: MOUNT_PLEASANT_SAMPLE_PLAN },
-  { id: "generic", label: "A generic draft for any town", town: "mount-pleasant-wi", text: SAMPLE_PLAN },
+  { id: "generic", label: "A generic draft for any town", text: SAMPLE_PLAN },
 ];
+
+const GENERIC = SAMPLE_PLANS.find((s) => !s.town)!;
 
 export const HERO_SAMPLE_ID = "mount-pleasant";
 
@@ -41,9 +44,18 @@ export function samplePlanById(id: unknown): SamplePlan | undefined {
   return typeof id === "string" ? SAMPLE_PLANS.find((s) => s.id === id) : undefined;
 }
 
-// The /check link for a sample: the id and, optionally, a town. Never the plan text.
-export function sampleCheckHref(id: string, town?: string): string {
-  const q = new URLSearchParams({ sample: id });
-  if (town) q.set("town", town);
-  return `/check?${q.toString()}`;
+// The sample written for this town, or the generic one.
+export function samplePlanForTown(slug: string): SamplePlan {
+  return SAMPLE_PLANS.find((s) => s.town === slug) ?? GENERIC;
+}
+
+// The town a /check?sample= link checks against: a town-specific sample always uses its own town, so
+// its named organisations are never checked somewhere else; a generic sample keeps the requested town.
+export function sampleTown(sample: SamplePlan | undefined, requested: string | undefined): string | undefined {
+  return sample?.town ?? requested;
+}
+
+// The /check link for a sample: the id only, never the plan text. The sample decides the town.
+export function sampleCheckHref(id: string): string {
+  return `/check?${new URLSearchParams({ sample: id }).toString()}`;
 }

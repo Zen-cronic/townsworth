@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import type { Town } from "@/lib/towns";
 import type { CheckResult } from "@/lib/userPlan";
-import { MAX_CHARS, MIN_CHARS, SAMPLE_PLAN } from "@/lib/userPlanParse";
+import { SAMPLE_PLANS, type SamplePlan } from "@/lib/samplePlans";
+import { MAX_CHARS, MIN_CHARS } from "@/lib/userPlanParse";
 import { Notice } from "@/components/dashboard/Icons";
 import { parseFund, primaryCta, secondaryCta } from "@/components/dashboard/ui";
 import { CheckResults } from "./CheckResults";
@@ -21,10 +22,24 @@ const PROGRESS = [
   "Costing local replacements against your fund…",
 ];
 
-// `sample` pre-fills the textarea once, from /check?sample=<id>; nothing is checked until the
-// visitor presses the button.
-export function CheckForm({ town, sample }: { town: Town; sample?: string }) {
-  const [text, setText] = useState(sample ?? "");
+// `sample` pre-fills the textarea from /check?sample=<id>, and again whenever the link names a
+// different sample (the form stays mounted across query changes); nothing is checked until the
+// visitor presses the button. `townSample` is what "Try a sample plan" fills: the selected town's own
+// sample, or the generic one.
+export function CheckForm({ town, sample, townSample }: { town: Town; sample?: SamplePlan; townSample: SamplePlan }) {
+  const [text, setText] = useState(sample?.text ?? "");
+  const [shownSample, setShownSample] = useState(sample?.id);
+  if (sample && sample.id !== shownSample) {
+    setShownSample(sample.id);
+    setText(sample.text);
+  }
+  // Pasted text survives a town switch, but a sample written for another town's organisations would
+  // be checked against the wrong place, so it is swapped for the new town's sample.
+  const [shownTown, setShownTown] = useState(town.slug);
+  if (town.slug !== shownTown) {
+    setShownTown(town.slug);
+    if (SAMPLE_PLANS.some((s) => s.town && s.town !== town.slug && s.text === text)) setText(townSample.text);
+  }
   const [fundEdit, setFundEdit] = useState<string | null>(null);
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState("");
@@ -146,7 +161,7 @@ export function CheckForm({ town, sample }: { town: Town; sample?: string }) {
             </p>
             <button
               type="button"
-              onClick={() => setText(sample ?? SAMPLE_PLAN)}
+              onClick={() => setText(townSample.text)}
               disabled={checking}
               className="rounded text-ink underline decoration-rule underline-offset-4 hover:decoration-ink disabled:text-muted"
             >

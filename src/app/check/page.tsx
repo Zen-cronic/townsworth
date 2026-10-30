@@ -7,7 +7,7 @@ import { CheckForm } from "@/components/check/CheckForm";
 import { Chevron, Notice } from "@/components/dashboard/Icons";
 import { StatusPill } from "@/components/dashboard/StatusPill";
 import { cleanTownQuery, geocodeTowns, type GeocodeResult } from "@/lib/nominatim";
-import { samplePlanById } from "@/lib/samplePlans";
+import { samplePlanById, samplePlanForTown, sampleTown } from "@/lib/samplePlans";
 import { cleanCompany, FACILITY_CHOICES, HERO_TOWN, isFacilityCode, SPONSOR_PLACEHOLDER, TOWNS, townBySlug, withCompany } from "@/lib/towns";
 
 export const metadata: Metadata = {
@@ -32,7 +32,8 @@ export default async function CheckPage({
 }) {
   const sp = await searchParams;
   const sample = samplePlanById(sp.sample);
-  const town = (sp.town && townBySlug(sp.town)) || (sample && townBySlug(sample.town)) || HERO_TOWN;
+  const requested = sampleTown(sample, sp.town);
+  const town = (requested && townBySlug(requested)) || HERO_TOWN;
   const q = cleanTownQuery(sp.q);
   const facility = isFacilityCode(sp.facility) ? sp.facility : "data-center";
   const company = cleanCompany(sp.company);
@@ -164,7 +165,7 @@ export default async function CheckPage({
           )}
         </section>
 
-        <CheckForm town={town} sample={sample?.text} />
+        <CheckForm town={town} sample={sample} townSample={samplePlanForTown(town.slug)} />
 
         <p className="no-print ui-note mt-10">
           Town search © OpenStreetMap contributors · taste data from Qloo ·{" "}
