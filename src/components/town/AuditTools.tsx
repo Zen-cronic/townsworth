@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import "./AuditTools.css";
 import { tertiaryCta } from "@/components/dashboard/ui";
 
 type Filter = "all" | "generic" | "unsure" | "kept";
@@ -40,20 +41,34 @@ export function AuditTools({
     else el.removeAttribute("data-full");
   }, [full]);
 
-  // A #line-N jump (from a tile, the stepper or a shared link) always lands on a visible row.
+  // A #line-N jump (from a tile, the stepper or a shared link) always lands on a visible row, in
+  // view and marked. The rows stream in after the page shell, so a link opened from elsewhere
+  // arrives before its row exists and the browser's own jump misses it: the first run below
+  // (on mount) makes that jump, and repeats it once late layout (fonts, the charts) has settled.
   useEffect(() => {
-    const onHash = () => {
+    const land = (scroll: boolean) => {
       const target = document.getElementById(decodeURIComponent(location.hash.slice(1)));
       if (!target || !list()?.contains(target)) return;
-      if (target.offsetParent === null) {
-        setFilter("all");
-        requestAnimationFrame(() => target.scrollIntoView({ block: "start" }));
-      }
+      document.querySelectorAll(".audit-row.is-landed").forEach((el) => el !== target && el.classList.remove("is-landed"));
+      target.classList.add("is-landed");
+      const hidden = target.offsetParent === null;
+      if (hidden) setFilter("all");
+      if (scroll || hidden) requestAnimationFrame(() => target.scrollIntoView({ block: "start" }));
       const i = struckIds.indexOf(target.id);
       if (i >= 0) setAt(i);
     };
+    land(true);
+    const settle = window.setTimeout(() => {
+      const target = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+      const top = target?.getBoundingClientRect().top;
+      if (top != null && (top < 0 || top > window.innerHeight * 0.6)) target!.scrollIntoView({ block: "start" });
+    }, 700);
+    const onHash = () => land(false);
     window.addEventListener("hashchange", onHash);
-    return () => window.removeEventListener("hashchange", onHash);
+    return () => {
+      window.clearTimeout(settle);
+      window.removeEventListener("hashchange", onHash);
+    };
   }, [struckIds]);
 
   const go = useCallback(

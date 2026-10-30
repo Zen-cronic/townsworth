@@ -1,0 +1,20 @@
+/* The line a #line-N link opened: an ink edge and a light wash, so it reads as "this one" at a
+   glance. Ink, not a data colour: it marks where you are, not what the line holds. */
+:root .audit-row.is-landed {
+  background: color-mix(in srgb, var(--ink) 6%, transparent);
+  box-shadow: inset 4px 0 0 var(--ink);
+}
+@media (prefers-reduced-motion: no-preference) {
+  :root .audit-row.is-landed {
+    animation: audit-landed 1.6s ease-out 1;
+  }
+}
+@keyframes audit-landed {
+  0%,
+  35% {
+    background: color-mix(in srgb, var(--ink) 14%, transparent);
+  }
+  100% {
+    background: color-mix(in srgb, var(--ink) 6%, transparent);
+  }
+}
