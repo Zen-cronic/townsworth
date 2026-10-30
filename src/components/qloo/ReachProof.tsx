@@ -41,9 +41,12 @@ export function ReachProof({ towns }: { towns: { slug: string; name: string; rea
   return (
     <section id="age-groups" aria-labelledby="age-groups-title" className="mt-6 scroll-mt-24 ui-card">
       <div className="grid gap-4 border-b border-rule px-5 py-5 sm:grid-cols-[auto_1fr] sm:items-start sm:gap-6 sm:px-6">
-        <p className="text-[2.25rem] leading-none">
-          <Figure value={String(added)} />
-        </p>
+        <div>
+          <p className="text-[2.25rem] leading-none">
+            <Figure value={String(added)} />
+          </p>
+          <p className="mt-1 text-xs text-muted">{added === 1 ? "venue added" : "venues added"}</p>
+        </div>
         <div>
           <p className="font-mono text-[11px] uppercase tracking-wider text-contour">Age groups · Qloo</p>
           <h2 id="age-groups-title" className="mt-1 font-semibold">

@@ -151,7 +151,29 @@ export default async function ProofPage() {
           {changed.length === 0 ? (
             <p className="px-5 py-4 text-sm text-muted sm:px-6">No picks change in this run: the distance-only ranking makes the same choices.</p>
           ) : (
-            <div className="overflow-x-auto">
+            <>
+            {/* Phones: one block per pick, the same data in the same order as the table. */}
+            <ul className="divide-y divide-hairline text-sm sm:hidden">
+              {changed.flatMap((t) =>
+                t.swaps.map((s) => (
+                  <li key={`${t.slug}-${s.slot}-${s.qloo.id}`} className="px-5 py-3">
+                    <p className="font-medium">{t.name}</p>
+                    <p className="text-xs text-muted">{s.slot}</p>
+                    <dl className="mt-2 grid grid-cols-[7.5rem_minmax(0,1fr)] gap-x-3 gap-y-2">
+                      <dt className="text-xs text-muted">Distance only</dt>
+                      <dd>
+                        <Pick p={s.distance} />
+                      </dd>
+                      <dt className="text-xs text-muted">Ranked by Qloo</dt>
+                      <dd>
+                        <Pick p={s.qloo} />
+                      </dd>
+                    </dl>
+                  </li>
+                )),
+              )}
+            </ul>
+            <div className="hidden overflow-x-auto sm:block">
               <table className="w-full min-w-[640px] text-sm">
                 <thead>
                   <tr className="border-b border-hairline text-[11px] uppercase tracking-wider text-muted">
@@ -180,6 +202,7 @@ export default async function ProofPage() {
                 </tbody>
               </table>
             </div>
+            </>
           )}
         </section>
 
@@ -220,7 +243,39 @@ export default async function ProofPage() {
             <h2 id="by-town" className="font-semibold">By town</h2>
             <p className="text-xs text-muted">Local partners are program items with a named local place. Open a town to see its line-by-line check.</p>
           </div>
-          <div className="overflow-x-auto">
+          {/* Phones: one block per town, the same columns as label and value pairs. */}
+          <ul className="divide-y divide-hairline text-sm sm:hidden">
+            {towns.map((t) => (
+              <li key={t.slug} className="px-5 py-3">
+                <p className="flex flex-wrap items-center gap-2">
+                  <Link href={`/town/${t.slug}`} className="group inline-flex items-center gap-1.5 rounded font-medium">
+                    {t.name}
+                    <Chevron className="h-3 w-3 text-muted" />
+                  </Link>
+                  {t.thin && <StatusPill tone="warn">Thin data</StatusPill>}
+                  {t.failed && <StatusPill tone="flag">Qloo didn&apos;t answer</StatusPill>}
+                </p>
+                <dl className="mt-2 grid grid-cols-[minmax(0,1fr)_auto] gap-x-4 gap-y-1 text-xs">
+                  {(
+                    [
+                      ["Partners AI alone named", String(t.llmNamed)],
+                      ["Verified real", `${t.llmVerified} / ${t.llmNamed}`],
+                      ["Institutions", String(t.llmInstitutional)],
+                      [`${PRODUCT_NAME} local partners`, String(t.gnPartners)],
+                      ["Also named by AI alone", String(t.gnAlsoNamedByLlm)],
+                      ["Changed by affinity", `${t.gnPicksChangedByAffinity} / ${t.gnPicks}`],
+                    ] as const
+                  ).map(([k, v]) => (
+                    <div key={k} className="contents">
+                      <dt className="text-muted">{k}</dt>
+                      <dd className="text-right font-mono tabular-nums text-ink">{v}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </li>
+            ))}
+          </ul>
+          <div className="hidden overflow-x-auto sm:block">
             <table className="w-full min-w-[820px] text-sm">
               <thead>
                 <tr className="border-b border-hairline text-[11px] uppercase tracking-wider text-muted">
