@@ -1,6 +1,7 @@
 import "server-only";
 import { unstable_cache } from "next/cache";
 import { SEARCH_RADIUS_KM } from "./geo";
+import { memoSuccess } from "./memo";
 import { parseAreaTags, parseDemographics, type AgeProfile, type AreaTag } from "./qlooInsights";
 
 // Thin server-side client for the Qloo Insights API (hackathon environment).
@@ -183,7 +184,7 @@ async function liveBody(url: string): Promise<unknown> {
 const storedBody = unstable_cache(liveBody, ["qloo-response-v1"], { revalidate: 60 * 60 * 24 });
 
 // Outside a Next server (unit tests, scripts) there is no data cache, so the call goes straight out.
-async function cachedBody(url: string): Promise<unknown> {
+async function storedOrLive(url: string): Promise<unknown> {
   try {
     return await storedBody(url);
   } catch (e) {
@@ -191,6 +192,15 @@ async function cachedBody(url: string): Promise<unknown> {
     throw e;
   }
 }
+
+// In front of the data cache, this server instance keeps each successful body for the same 24 hours
+// (memoSuccess drops a failure the moment it settles, so no failure outlives its request). One page
+// asks for the same national and reference-metro lists once per town; this way each URL is read once,
+// and a cold load sends each request to Qloo once instead of once per town. Bodies are shared, so
+// every reader parses them into new objects and never mutates them. Only inside a Next server: unit
+// tests and scripts keep one request per call.
+const remembered = memoSuccess(storedOrLive, { ttlMs: 60 * 60 * 24 * 1000, max: 500 });
+const cachedBody = (url: string) => (process.env.NEXT_RUNTIME ? remembered(url) : storedOrLive(url));
 
 // One Qloo GET, shared by every endpoint: the key check, timing and status. A missing key throws (a
 // configuration error, never "no results"); a request with no answer, or a 2xx whose body isn't
