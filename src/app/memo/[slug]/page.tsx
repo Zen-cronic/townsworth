@@ -130,7 +130,7 @@ export default async function MemoPage({
   return (
     <>
       <AppHeader active={slug} />
-      <main className="mx-auto max-w-[960px] px-4 pb-24 pt-8 sm:px-8 sm:pt-10">
+      <main id="main" className="mx-auto max-w-[960px] px-4 pb-24 pt-8 sm:px-8 sm:pt-10">
         <div className="no-print mb-4 grid gap-3">
           <Link
             href={`/town/${town.slug}?fund=${program.annualFund}`}

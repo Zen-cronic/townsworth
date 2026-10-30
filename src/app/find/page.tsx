@@ -69,7 +69,7 @@ export default async function FindPage({ searchParams }: { searchParams: Promise
   return (
     <>
       <AppHeader />
-      <main className="mx-auto max-w-[760px] px-4 pb-24 pt-6 sm:px-6 sm:pt-10">
+      <main id="main" className="mx-auto max-w-[760px] px-4 pb-24 pt-6 sm:px-6 sm:pt-10">
         <p className="lp-kicker">Any host town</p>
         <h1 className="lp-h1 mt-3">Type any town</h1>
         <p className="lp-lede mt-3">Any US or Canadian town gets the same check, memo and exports.</p>

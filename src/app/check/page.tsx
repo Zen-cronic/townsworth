@@ -43,7 +43,7 @@ export default async function CheckPage({
   return (
     <>
       <AppHeader towns={false} page="check" />
-      <main>
+      <main id="main">
         <div className="no-print">
           <PageBand kicker="Your own draft" title="Check your own plan" titleId="check-h">
             <p className="ui-band-note">Paste the plan you were sent. Each line is checked against the host town&apos;s Qloo taste data.</p>

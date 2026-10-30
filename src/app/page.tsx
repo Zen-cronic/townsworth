@@ -157,7 +157,7 @@ export default async function Home() {
       <AppHeader towns={false} />
       <LandingEffects />
 
-      <main>
+      <main id="main">
         <section className={`lp-hero lp-grain ${film ? "has-film" : ""}`} aria-labelledby="hero-h">
           {film && <HeroBackdrop media={HERO_VIDEO} />}
           <div className="lp-wrap lp-hero-grid">

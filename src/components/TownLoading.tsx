@@ -1,7 +1,7 @@
 // Shown while a town streams in. A live AI-written draft is the slow case, so it says so.
 export function TownLoading({ live }: { live?: boolean }) {
   return (
-    <main aria-busy="true">
+    <main id="main" aria-busy="true">
       <section className="ui-band">
         <div className="lp-wrap ui-band-main">
           <div className="h-3 w-48 rounded bg-band-text/10" />

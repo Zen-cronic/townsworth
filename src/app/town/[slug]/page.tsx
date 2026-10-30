@@ -46,7 +46,7 @@ export default async function TownPage({
   const amount = parseFund(fund);
   return (
     <>
-      <AppHeader active={slug} />
+      <AppHeader active={slug} skip={{ href: "#audit-title", label: "Skip to the line-by-line check" }} />
       <Suspense key={`${source}-${amount ?? ""}`} fallback={<TownLoading live={live} />}>
         <TownBody slug={slug} fund={amount} source={source} live={live} />
       </Suspense>

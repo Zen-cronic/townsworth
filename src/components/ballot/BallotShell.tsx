@@ -20,7 +20,7 @@ export function BallotShell({
   return (
     <>
       <AppHeader towns={false} />
-      <main className="mx-auto max-w-[680px] px-4 pb-24 pt-5 sm:px-6 sm:pt-8">
+      <main id="main" className="mx-auto max-w-[680px] px-4 pb-24 pt-5 sm:px-6 sm:pt-8">
         <Link
           href={`/memo/${slug}`}
           className="inline-flex items-center gap-1 rounded-md py-1.5 pr-2 text-sm text-muted transition-colors duration-150 hover:text-ink"

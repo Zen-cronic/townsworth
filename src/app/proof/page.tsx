@@ -84,7 +84,7 @@ export default async function ProofPage() {
   return (
     <>
       <AppHeader towns={false} page="proof" />
-      <main className="ui-page">
+      <main id="main" className="ui-page">
         <div className="lg:grid lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:items-start lg:gap-12">
           <header className="max-w-3xl">
             <p className="lp-kicker">Evidence · {towns.length} host towns · recomputed on every load</p>

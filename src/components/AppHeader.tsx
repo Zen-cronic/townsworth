@@ -11,7 +11,19 @@ const navLink =
 // `data-towns` sets the header height (--l-hdr) that sticky rails and anchor offsets clear.
 // Below 400px the links tighten; below 380px the wordmark text collapses to the mark, so the
 // links fit on one row inside the page padding.
-export function AppHeader({ active, page, towns = true }: { active?: string; page?: "proof" | "judges" | "check"; towns?: boolean }) {
+// The first Tab stop skips the header and town strip. A page can point it somewhere more useful
+// than the top of <main id="main">, such as the audit on a town page.
+export function AppHeader({
+  active,
+  page,
+  towns = true,
+  skip = { href: "#main", label: "Skip to content" },
+}: {
+  active?: string;
+  page?: "proof" | "judges" | "check";
+  towns?: boolean;
+  skip?: { href: string; label: string };
+}) {
   const searchIcon = (
     <svg aria-hidden viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-4 w-4">
       <circle cx="7" cy="7" r="4.25" />
@@ -21,6 +33,12 @@ export function AppHeader({ active, page, towns = true }: { active?: string; pag
   const current = (p: string) => (page === p ? "page" : undefined);
   return (
     <header data-app-header="" data-towns={towns ? "" : undefined} className="no-print sticky top-0 z-30 border-b border-hairline bg-paper">
+      <a
+        href={skip.href}
+        className="sr-only rounded-md bg-ink px-3 py-2 text-sm font-medium text-paper focus:not-sr-only focus:absolute focus:left-4 focus:top-2 focus:z-40"
+      >
+        {skip.label}
+      </a>
       <div className="mx-auto flex max-w-[1240px] items-center gap-x-4 px-4 py-2.5 max-[400px]:gap-x-2 sm:px-8">
         <Link href="/" className="flex shrink-0 items-center gap-2 whitespace-nowrap rounded-md py-1 pr-1 font-semibold tracking-tight">
           <span aria-hidden className="grid h-5 w-5 place-items-center rounded-[4px] bg-hivis">
@@ -42,7 +60,7 @@ export function AppHeader({ active, page, towns = true }: { active?: string; pag
             Proof
           </Link>
           <Link href="/judges" aria-current={current("judges")} className={`${navLink} ${page === "judges" ? "text-ink" : ""}`}>
-            <span className="sm:hidden">Tour</span>
+            <span className="sm:hidden">Guide</span>
             <span className="hidden sm:inline">Guided path</span>
           </Link>
         </nav>
