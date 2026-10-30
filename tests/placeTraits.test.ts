@@ -191,3 +191,10 @@ test("isolation: a failed place-traits call adds nothing and leaves failedCalls 
   assert.deepEqual(thrown.areaTags, []);
   assert.equal(thrown.areaTagCalls[0].ok, false);
 });
+
+test("traits: only the top half of the area's list is cited", () => {
+  const area = Array.from({ length: 10 }, (_, k) => ({ id: `t${k + 1}`, name: `Trait ${k + 1}`, subtype: "urn:tag:ambience:qloo", affinity: 1 - k / 10, rank: k + 1 }));
+  const place = entity("p20", "Z", { tags: [{ name: "Trait 8", id: "t8" }, { name: "Trait 3", id: "t3" }] });
+  assert.deepEqual(sharedTraits(place, area), [{ name: "Trait 3", rank: 3, of: 10 }]);
+  assert.deepEqual(sharedTraits(entity("p21", "W", { tags: [{ name: "Trait 9", id: "t9" }] }), area), []);
+});

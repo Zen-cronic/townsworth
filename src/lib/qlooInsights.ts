@@ -111,12 +111,14 @@ export function parseAreaTags(body: unknown): AreaTag[] {
     .map((t, k) => ({ id: t.id, name: t.name, subtype: t.subtype, affinity: t.affinity, rank: k + 1 }));
 }
 
-// The area traits this place carries, matched on tag id, best-ranked first, at most two.
+// The area traits this place carries, matched on tag id, best-ranked first, at most two. Only traits
+// in the top half of the area's list are cited: "#29 of 37" is too weak to explain a pick.
 export function sharedTraits(entity: Pick<QlooEntity, "tags">, areaTags: AreaTag[] | undefined, limit = 2): SharedTrait[] {
   if (!areaTags?.length) return [];
   const own = new Set(entity.tags.map((t) => t.id).filter((id): id is string => !!id));
+  const cutoff = Math.ceil(areaTags.length / 2);
   return areaTags
-    .filter((t) => own.has(t.id))
+    .filter((t) => own.has(t.id) && t.rank <= cutoff)
     .sort((a, b) => a.rank - b.rank)
     .slice(0, limit)
     .map((t) => ({ name: t.name, rank: t.rank, of: areaTags.length }));
