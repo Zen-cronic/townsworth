@@ -22,7 +22,7 @@ import { isLast, ordinal, rankFill, rankInk } from "@/components/ballot/rank";
 import { HERO_TOWN, TOWNS, townBySlug } from "@/lib/towns";
 
 export const metadata: Metadata = {
-  title: `Guided path · ${PRODUCT_NAME}`,
+  title: `Product tour · ${PRODUCT_NAME}`,
   description: `Watch a community-benefits plan get checked against its host town in five steps: the draft line by line, the costed committee memo, the resident ballot, any host town, and the evidence with its limits.`,
 };
 
@@ -230,7 +230,7 @@ export default async function GuidedPath() {
         <section className="gp-hero jg-hero" aria-labelledby="gp-h">
           <div className="lp-wrap jg-hero-grid">
           <div className="jg-hero-copy">
-            <p className="lp-kicker">Guided path · {steps.length} steps · about 2 minutes</p>
+            <p className="lp-kicker">Product tour · {steps.length} steps · about 2 minutes</p>
             {/* A non-breaking hyphen keeps "community-benefits" on one line. */}
             <h1 id="gp-h" className="lp-h1 lp-h1-long">
               Watch a community‑benefits plan <span className="lp-tone">get checked against its host town.</span>
@@ -248,7 +248,7 @@ export default async function GuidedPath() {
                 </span>
               </Link>
               <Link href="/find" className="lp-btn lp-btn-quiet">
-                Try any host town
+                Find a town
               </Link>
             </div>
           </div>

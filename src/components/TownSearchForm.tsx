@@ -9,7 +9,7 @@ const field =
 
 export function HeaderTownSearch() {
   return (
-    <form action="/find" role="search" aria-label="Try any town" className="mr-1 hidden items-center md:flex">
+    <form action="/find" role="search" aria-label="Find a town" className="mr-1 hidden items-center md:flex">
       <label className="sr-only" htmlFor="hdr-town">
         Try any US or Canadian town
       </label>
@@ -25,7 +25,7 @@ export function HeaderTownSearch() {
         className={`${field} w-36 rounded-r-none px-2.5 py-1.5 text-sm xl:w-24`}
       />
       <button className="-ml-px rounded-md rounded-l-none border border-ink bg-ink px-2.5 py-1.5 text-sm font-medium text-paper transition-colors duration-150 hover:bg-ink/85 active:bg-ink/75">
-        Go
+        Search
       </button>
     </form>
   );

@@ -145,7 +145,7 @@ export default async function Home() {
     auditHref,
   };
 
-  // Four questions on the landing, one line each; the guided path carries the full list.
+  // Four questions on the landing, one line each; the product tour carries the full list.
   const objections: Objection[] = [
     { q: "Couldn’t ChatGPT do this?", a: `It names the institutions; ${t.gnNovelPct}% of our local partners it never names.`, href: "/proof#finding-3" },
     { q: "Isn’t this a nearby-places list?", a: `Ordering by distance changes ${t.affinityChangedPct}% of picks: modest, and measured.`, href: "/proof#finding-4" },
@@ -182,7 +182,7 @@ export default async function Home() {
                   </span>
                 </Link>
                 <Link href="/judges" className="lp-btn lp-btn-quiet">
-                  Guided path <span className="lp-btn-meta">2 min</span>
+                  Product tour <span className="lp-btn-meta">2 min</span>
                 </Link>
               </div>
             </div>

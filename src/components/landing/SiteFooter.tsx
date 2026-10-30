@@ -10,17 +10,17 @@ const COLUMNS: { title: string; links: { href: string; label: string; external?:
   {
     title: "Product",
     links: [
-      { href: `/town/${HERO_TOWN.slug}`, label: `${HERO_TOWN.name} audit` },
+      { href: `/town/${HERO_TOWN.slug}`, label: `${HERO_TOWN.name} example` },
       { href: `/memo/${HERO_TOWN.slug}`, label: "Committee memo" },
       { href: `/ballot/${HERO_TOWN.slug}`, label: "Resident ballot" },
-      { href: "/find", label: "Any host town" },
+      { href: "/find", label: "Find a town" },
     ],
   },
   {
-    title: "Evidence",
+    title: "Learn",
     links: [
-      { href: "/judges", label: "Guided path" },
-      { href: "/proof", label: "Proof and its limits" },
+      { href: "/judges", label: "Product tour" },
+      { href: "/proof", label: "Evidence and limits" },
       { href: "/sources", label: "Sources" },
     ],
   },
@@ -28,7 +28,7 @@ const COLUMNS: { title: string; links: { href: string; label: string; external?:
     title: "Project",
     links: [
       { href: REPO, label: "Source code (MIT)", external: true },
-      { href: `${REPO}/issues`, label: "Questions and pilots", external: true },
+      { href: `${REPO}/issues`, label: "Contact", external: true },
     ],
   },
 ];
