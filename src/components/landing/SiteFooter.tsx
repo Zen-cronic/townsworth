@@ -10,24 +10,24 @@ const COLUMNS: { title: string; links: { href: string; label: string; external?:
   {
     title: "Product",
     links: [
-      { href: `/town/${HERO_TOWN.slug}`, label: `${HERO_TOWN.name} example` },
+      { href: `/town/${HERO_TOWN.slug}`, label: "Example report" },
       { href: `/memo/${HERO_TOWN.slug}`, label: "Committee memo" },
       { href: `/ballot/${HERO_TOWN.slug}`, label: "Resident ballot" },
       { href: "/find", label: "Find a town" },
     ],
   },
   {
-    title: "Learn",
+    title: "Resources",
     links: [
       { href: "/judges", label: "Product tour" },
-      { href: "/proof", label: "Evidence and limits" },
+      { href: "/proof", label: "Methodology" },
       { href: "/sources", label: "Sources" },
     ],
   },
   {
-    title: "Project",
+    title: "About",
     links: [
-      { href: REPO, label: "Source code (MIT)", external: true },
+      { href: REPO, label: "GitHub", external: true },
       { href: `${REPO}/issues`, label: "Contact", external: true },
     ],
   },
@@ -41,10 +41,10 @@ export function SiteFooter() {
           <span className="lp-brand">
             <BrandMark size={18} /> {PRODUCT_NAME}
           </span>
-          <p>Community programs a host town recognizes as its own, checked line by line and costed from the fund.</p>
-          <PilotLink className="lp-btn lp-btn-quiet lp-btn-sm lp-footer-pilot" />
+          <p>Checks a facility&apos;s community-benefits plan against the host town, line by line, and costs each item.</p>
+          <PilotLink className="lp-btn lp-btn-quiet lp-btn-sm lp-footer-pilot">Request a pilot</PilotLink>
           <p className="lp-footer-note">
-            Qloo taste data is aggregate for a town, never about a person. Costs come from a per-session model and your fund, not from Qloo.
+            Privacy: Qloo data is aggregate per town, never about a person.
           </p>
         </div>
         {COLUMNS.map((c) => (
