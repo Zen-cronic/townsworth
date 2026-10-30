@@ -69,7 +69,9 @@ npx -y @qloo/qloo-harness api search -q "Racine Zoo" -t place -n 5 --json --para
 ## Tech used
 | Technology | What it does in Townsworth |
 |---|---|
-| Qloo Insights API | Every local signal: places ranked by how strongly locals favour them, distinct local taste, age groups, partner audience ages, area place traits, and venue search (table above) |
+| Qloo Insights API (`/v2/insights`) | Places ranked by how strongly locals favour them, distinct local taste, age-group checks, partner audience ages (`urn:demographics`) and area place traits (`urn:tag`) |
+| Qloo Audiences API (`/v2/audiences`) | Looks up the life-stage audience for the families check |
+| Qloo Search API (`/search`) | Finds each venue a pasted plan names, within 25 km; never cached |
 | OpenAI (`gpt-5.4-mini`, Vercel AI SDK) | The outreach agent: drafts partner emails with tool calls, checked by fixed rules. Also wrote the frozen AI-alone baseline plans and splits a pasted plan into lines. Never decides a verdict or an amount |
 | OpenStreetMap Nominatim | Finds any US or Canadian town, and confirms that a partner a plan names exists nearby |
 | Next.js 15, React 19, TypeScript, Tailwind CSS, Zod | The app: server-rendered pages, fixed rules for every verdict and cost, CSV, calendar and CRM exports |
