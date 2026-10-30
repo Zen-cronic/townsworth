@@ -19,7 +19,7 @@ export const fileStem = (slug: string) => slug.replace(/[^A-Za-z0-9._-]+/g, "_")
 
 // One row per draft line: the verdict, the reason, and the Qloo item that replaces or joins it.
 export function auditCsv(result: CheckResult): string {
-  const header = ["line", "draft_item", "verdict", "reason", "named_partner", "good_neighbor_item", "role", "good_neighbor_partner", "amount_usd", "qloo_signal"];
+  const header = ["line", "draft_item", "verdict", "reason", "named_partner", "townsworth_item", "role", "townsworth_partner", "amount_usd", "qloo_signal"];
   const rows = result.audit.map((a, i) => {
     const swap = a.replacement ?? a.alongside;
     const role = a.replacement ? "replaces this line" : a.alongside ? "added alongside" : a.applicants?.length ? "suggested applicants" : "";

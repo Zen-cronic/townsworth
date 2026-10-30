@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { PRODUCT_NAME } from "@/components/landing/brand";
 import { secondaryCta, tertiaryCta } from "@/components/dashboard/ui";
 import Form from "next/form";
 import Link from "next/link";
@@ -15,7 +16,7 @@ import { samplePlanById, samplePlanForTown, sampleTown } from "@/lib/samplePlans
 import { cleanCompany, FACILITY_CHOICES, HERO_TOWN, isFacilityCode, SPONSOR_PLACEHOLDER, TOWNS, townBySlug, withCompany } from "@/lib/towns";
 
 export const metadata: Metadata = {
-  title: "Check your own plan · Good Neighbor",
+  title: `Check your own plan · ${PRODUCT_NAME}`,
   robots: { index: false, follow: false },
 };
 

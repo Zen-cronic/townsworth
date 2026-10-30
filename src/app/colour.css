@@ -196,7 +196,7 @@
   margin-top: 56px;
 }
 
-/* Proof tables: Good Neighbor's columns, which come from Qloo, on the blue wash. */
+/* Proof tables: Townsworth's columns, which come from Qloo, on the blue wash. */
 :root .ui-page .qloo-col {
   background: var(--qloo-wash);
 }
@@ -280,7 +280,7 @@
   outline-color: var(--band-text);
 }
 
-/* Guided path: the step being read is blue in the rail; Good Neighbor's bar is Qloo blue. */
+/* Guided path: the step being read is blue in the rail; Townsworth's bar is Qloo blue. */
 :root .jg .gp-rail a[aria-current] span {
   background: var(--qloo);
   color: var(--qloo-on);

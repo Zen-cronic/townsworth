@@ -1,5 +1,6 @@
 import "../../ballot.css";
 import type { Metadata } from "next";
+import { PRODUCT_NAME } from "@/components/landing/brand";
 import { notFound } from "next/navigation";
 import { BallotResults } from "@/components/ballot/BallotResults";
 import { LiveDataNotice } from "@/components/LiveDataNotice";
@@ -8,7 +9,7 @@ import { selectShortlist } from "@/lib/ballot";
 import { runTown } from "@/lib/run";
 import { companyFormHref, fundedByLine } from "@/lib/towns";
 
-export const metadata: Metadata = { title: "Ballot tally · Good Neighbor", description: "Checks a facility's draft community plan line by line against the places the host town actually goes (Qloo taste data), and returns a costed, resident-ranked program." };
+export const metadata: Metadata = { title: `Ballot tally · ${PRODUCT_NAME}`, description: "Checks a facility's draft community plan line by line against the places the host town actually goes (Qloo taste data), and returns a costed, resident-ranked program." };
 
 // Per request: never freeze a failed Qloo call into the page (see src/lib/qloo.ts).
 export const dynamic = "force-dynamic";

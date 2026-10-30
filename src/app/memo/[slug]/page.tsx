@@ -187,7 +187,7 @@ export default async function MemoPage({
                 <span aria-hidden className="grid h-4 w-4 place-items-center rounded-[3px] bg-hivis">
                   <span className="h-[2px] w-2 rounded-full bg-paper" />
                 </span>
-                Good Neighbor
+                {PRODUCT_NAME}
               </p>
               <div className="flex items-center gap-2">
                 <span className="font-mono text-[11px] uppercase tracking-wider text-muted">Community commitments memo</span>

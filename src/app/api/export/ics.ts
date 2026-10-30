@@ -45,5 +45,5 @@ export function programIcs(slug: string, items: ProgramItem[], now: Date = new D
         .join("\r\n"),
     ),
   );
-  return ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Good Neighbor//EN", ...events, "END:VCALENDAR"].join("\r\n") + "\r\n";
+  return ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Townsworth//EN", ...events, "END:VCALENDAR"].join("\r\n") + "\r\n";
 }

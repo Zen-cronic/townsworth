@@ -82,7 +82,7 @@ export function BallotResults({ slug, townName, items }: { slug: string; townNam
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `good-neighbor-ballot-${slug}.csv`;
+    a.download = `townsworth-ballot-${slug}.csv`;
     document.body.appendChild(a);
     a.click();
     a.remove();

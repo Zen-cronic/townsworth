@@ -4,6 +4,7 @@
 import { guardFormula } from "./ballot";
 import { BUCKETS, ROLE_LABEL, type Partner, type ProgramItem } from "./plan";
 import type { Town } from "./towns";
+import { PRODUCT_NAME } from "../components/landing/brand";
 
 // Session dates, shared with the .ics export
 
@@ -255,7 +256,7 @@ export function crmAccounts(items: ProgramItem[]): CrmAccount[] {
   return [...byName.values()];
 }
 
-const NOTE_PREFIX = "Good Neighbor draft program, not contacted yet.";
+const NOTE_PREFIX = `${PRODUCT_NAME} draft program, not contacted yet.`;
 const description = (a: CrmAccount) => [NOTE_PREFIX, ...a.notes].join("\n");
 
 // CRM imports read the phone column literally, so drop the leading "+" (which spreadsheets treat as a formula) instead of guarding it.

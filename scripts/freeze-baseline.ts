@@ -32,7 +32,7 @@ async function osmLookup(name: string, town: { lat: number; lon: number }) {
     bounded: "1",
   });
   const res = await fetch(`https://nominatim.openstreetmap.org/search?${params}`, {
-    headers: { "User-Agent": "good-neighbor-hackathon/0.1 (baseline verification)" },
+    headers: { "User-Agent": "townsworth/0.1 (baseline verification)" },
   });
   await sleep(1100);
   if (!res.ok) return { status: res.status, found: false as const };

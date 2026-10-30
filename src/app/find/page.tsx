@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { PRODUCT_NAME } from "@/components/landing/brand";
 import "./find.css";
 import Link from "next/link";
 import { AppHeader } from "@/components/AppHeader";
@@ -8,7 +9,7 @@ import { TownSearchForm } from "@/components/TownSearchForm";
 import { cleanTownQuery, geocodeTowns, type GeocodeResult } from "@/lib/nominatim";
 import { cleanCompany, FACILITY_CHOICES, isFacilityCode, withCompany } from "@/lib/towns";
 
-export const metadata: Metadata = { title: "Type any town · Good Neighbor" };
+export const metadata: Metadata = { title: `Type any town · ${PRODUCT_NAME}` };
 
 // Companies as reported publicly for each example project.
 const EXAMPLES: [string, string, string][] = [

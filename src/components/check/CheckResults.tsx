@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { PRODUCT_NAME } from "@/components/landing/brand";
 import type { AuditRow, Verdict } from "@/lib/audit";
 import { SEARCH_RADIUS_KM } from "@/lib/geo";
 import { BUCKETS, costLine, ROLE_LABEL, type ProgramItem } from "@/lib/plan";
@@ -217,7 +218,7 @@ export function CheckResults({ result }: { result: CheckResult }) {
   return (
     <section aria-labelledby="check-title" className="check-results mt-8 print:mt-0">
       <p className="mb-3 hidden text-xs text-muted print:block">
-        Good Neighbor · your draft checked against {town.name}, {town.region} · annual fund {money(result.annualFund)} · printed{" "}
+        {PRODUCT_NAME} · your draft checked against {town.name}, {town.region} · annual fund {money(result.annualFund)} · printed{" "}
         {new Intl.DateTimeFormat("en-US", { dateStyle: "medium" }).format(new Date())}. Nothing you pasted was stored.
       </p>
       <div className="doc-sheet rounded-lg">
@@ -337,7 +338,7 @@ export function CheckResults({ result }: { result: CheckResult }) {
         <div className="hidden grid-cols-[2.25rem_minmax(0,1fr)_minmax(0,1fr)] gap-x-6 border-b border-hairline px-6 py-2 text-[11px] font-medium uppercase tracking-wider text-muted md:grid">
           <span>#</span>
           <span>Your draft item</span>
-          <span>Good Neighbor</span>
+          <span>{PRODUCT_NAME}</span>
         </div>
 
         {audit.length ? (

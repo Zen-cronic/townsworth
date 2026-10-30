@@ -120,7 +120,7 @@ export default async function ProofPage() {
               label={`of partners are institutions: AI alone vs ${PRODUCT_NAME}`}
               bars={[
                 { label: "AI alone", pct: totals.llmInstitutionalPct, tone: "llm" },
-                { label: "Good Neighbor", pct: totals.gnInstitutionalPct, tone: "gn" },
+                { label: PRODUCT_NAME, pct: totals.gnInstitutionalPct, tone: "gn" },
               ]}
               note="AI alone reaches for the college, the district, the library and the chamber. Qloo surfaces the places residents actually go."
             />
@@ -134,7 +134,7 @@ export default async function ProofPage() {
               n="4"
               big={`${totals.affinityChangedPct}%`}
               label="of picks change without Qloo's taste ranking (ordered by distance, like a nearby-places directory)"
-              note="Same candidate places, same venue-fit and host-community rules; only the order differs: Qloo's local affinity vs distance from the site. The share of Good Neighbor's picks a distance-only directory would not make."
+              note={`Same candidate places, same venue-fit and host-community rules; only the order differs: Qloo's local affinity vs distance from the site. The share of ${PRODUCT_NAME}'s picks a distance-only directory would not make.`}
             />
           </section>
         </div>
@@ -337,7 +337,7 @@ export default async function ProofPage() {
             </summary>
             <ul className="mt-3 space-y-2 text-muted">
               <li>Baseline: OpenAI {baseline.model}, frozen {baseline.createdAt.slice(0, 10)} before any measurement.</li>
-              <li>Good Neighbor: live Qloo Insights calls (places within 15 km, plus local taste), with the same deterministic rules for every town.</li>
+              <li>{PRODUCT_NAME}: live Qloo Insights calls (places within 15 km, plus local taste), with the same deterministic rules for every town.</li>
               <li>
                 &ldquo;Institution&rdquo; is one keyword rule (college, university, school, district, library, chamber, city, county, department, EDC,
                 foundation, park, zoo, museum…), applied identically to both sides.

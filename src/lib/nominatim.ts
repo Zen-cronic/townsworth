@@ -6,7 +6,7 @@ import { CA_PROVINCES, customSlug, inCountry, presetNear, US_STATES, type Facili
 // per server instance, cache results. Only a town name (or a partner name the LLM wrote) is ever sent.
 
 const BASE = "https://nominatim.openstreetmap.org/search";
-const USER_AGENT = "good-neighbor-hackathon/1.0 (contact via GitHub)";
+const USER_AGENT = "townsworth/1.0 (community-benefits planner)";
 const GAP_MS = 1100;
 // A request that would queue longer than this fails fast with a 429 state instead of waiting.
 const MAX_WAIT_MS = 10_000;

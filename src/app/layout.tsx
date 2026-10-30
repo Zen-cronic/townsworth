@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { PRODUCT_NAME } from "@/components/landing/brand";
 import { Archivo } from "next/font/google";
 import "./globals.css";
 import "./landing.css";
@@ -13,7 +14,7 @@ import { SiteFooter } from "@/components/landing/SiteFooter";
 const archivo = Archivo({ variable: "--font-archivo", subsets: ["latin"], axes: ["wdth"] });
 
 export const metadata: Metadata = {
-  title: "Good Neighbor: community programs a town recognizes as its own",
+  title: `${PRODUCT_NAME}: community programs a town recognizes as its own`,
   description:
     "Checks a data center's or plant's community-benefits plan line by line against the host town's own places, using Qloo's local taste data, and returns a costed, resident-ranked program.",
 };
