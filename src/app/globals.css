@@ -46,6 +46,14 @@
   --band-pen: #ffd3ec;
   --band-amber: #e9e2ff;
   --band-contour: #ffffff;
+  /* Qloo blue: the field colour used on paper for data that comes from Qloo's local signal
+     (affinity ranks, suggested partners, rank dots). 6.10:1 on paper, 5.13:1 on concrete, and
+     white on it 6.53:1. Its wash tints Qloo columns and cells (ink on it 13.68:1). */
+  --qloo: var(--band);
+  --qloo-on: #ffffff;
+  --qloo-wash: #dfe6fb;
+  /* Kept as a fill: the kept green behind paper text (11.32:1). */
+  --ok-on: #f8f7f3;
   /* Type roles: Archivo for text and headings; figures use its tabular numerals. */
   --font-body: var(--font-archivo);
   --font-display: var(--font-archivo);
@@ -73,6 +81,10 @@
   --color-ok: var(--ok);
   --color-ok-text: var(--ok-text);
   --color-ok-wash: var(--ok-wash);
+  --color-ok-on: var(--ok-on);
+  --color-qloo: var(--qloo);
+  --color-qloo-on: var(--qloo-on);
+  --color-qloo-wash: var(--qloo-wash);
   --color-amber: var(--amber);
   --color-amber-wash: var(--amber-wash);
   --color-focus: var(--focus);

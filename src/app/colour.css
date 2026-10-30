@@ -1,0 +1,319 @@
+/* Colour with a meaning (loaded last). Each colour says one thing the reader can act on:
+   - Qloo blue (--qloo, the field colour): a value read from Qloo's local signal (affinity ranks,
+     suggested partners, partner dots), and the full-width bands that carry Qloo's findings.
+   - Kept green (--ok): a kept line or an included age group, as a solid fill under paper text.
+   - Pink (--hivis): struck, and nothing else.
+   - Lime (--action): the one primary action, and nothing else.
+   Ratios (WCAG 2.x): white on blue 6.53, blue on paper 6.10, blue on concrete 5.13, ink on the blue
+   wash 13.68, paper on kept green 11.32, band-soft on blue 5.60, band-muted on blue 4.84, light
+   pink on blue 4.91. */
+
+/* Kept: a solid green label beside the ring, so a page of kept lines reads green. */
+:root .kept-label {
+  display: inline-flex;
+  align-items: center;
+  align-self: center;
+  padding: 1px 7px 2px;
+  border-radius: 2px;
+  background: var(--ok);
+  color: var(--ok-on);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 18px;
+}
+
+/* A Qloo value: an affinity rank or a Qloo signal, solid blue. */
+:root .ui-chip.is-qloo {
+  background: var(--qloo);
+  box-shadow: none;
+  color: var(--qloo-on);
+  font-weight: 600;
+}
+/* On a struck row the strike stays loudest: the Qloo rank is an outline on the blue wash
+   (blue on the wash 5.24:1). */
+:root .audit-row.is-struck .ui-chip.is-qloo {
+  background: var(--qloo-wash);
+  box-shadow: inset 0 0 0 1px var(--qloo);
+  color: var(--qloo);
+}
+:root .qloo-rank {
+  color: var(--qloo);
+  font-weight: 650;
+}
+:root .ui-stat-v.is-qloo {
+  color: var(--qloo);
+}
+
+/* Partners by distance: ranked places are Qloo-blue dots, unranked ones blue rings. */
+:root .ch-dot {
+  background: var(--qloo);
+}
+:root .ch-dot.is-unranked {
+  background: var(--paper);
+  box-shadow: inset 0 0 0 2px var(--qloo), 0 0 0 2px var(--paper);
+}
+:root .ch-dots-rank {
+  color: var(--qloo);
+  font-weight: 650;
+}
+:root .ch-dots-rank.is-none {
+  color: var(--muted);
+  font-weight: 400;
+}
+
+/* The session calendar: each month with a session is a filled cell in its program-area colour, so
+   the 24 months read as coloured runs rather than dots. Counts stay inside the cell. */
+:root .ch-tl-m {
+  padding: 2px 1px;
+}
+:root .ch-tl-m i,
+:root .ch-tl-m i.is-many {
+  width: 100%;
+  height: 100%;
+  border-radius: 2px;
+  box-shadow: none;
+}
+:root .ch-tl-m i.is-many {
+  font-size: 10px;
+}
+/* The fund bar a little taller, so the program-area fills carry the chart. */
+:root .ch-bar:not(.is-sm) {
+  height: 32px;
+}
+
+/* A full-width Qloo band inside the page column: the field colour runs edge to edge behind it. */
+:root .ui-section.qloo-band,
+:root .ui-page > .proof-band {
+  color: var(--band-text);
+  border-image: linear-gradient(var(--band), var(--band)) fill 0 / 0 / 0 100vmax;
+}
+
+/* Town: "Qloo also suggests" on the band. */
+:root .ui-section.qloo-band {
+  border-top: 0;
+  padding-top: 56px;
+  padding-bottom: 64px;
+}
+:root .ui-section.qloo-band + .ui-section {
+  margin-top: 0;
+  padding-top: 64px;
+  border-top: 0;
+}
+:root .qloo-band :is(.ui-h3, .lp-h2, .font-medium) {
+  color: var(--band-text);
+}
+:root .qloo-band :is(.lp-section-lede, .text-muted, .ui-note) {
+  color: var(--band-soft);
+}
+:root .qloo-band .divide-hairline > :not(:last-child) {
+  border-color: color-mix(in srgb, var(--band-text) 28%, transparent);
+}
+:root .qloo-band .ui-card {
+  border-top: 1px solid color-mix(in srgb, var(--band-text) 55%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--band-text) 28%, transparent);
+}
+:root .qloo-band .ui-chip.is-qloo {
+  background: var(--band-text);
+  color: var(--qloo);
+}
+:root .qloo-band .ui-chip.is-plain {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--band-text) 60%, transparent);
+  color: var(--band-text);
+}
+:root .qloo-band details summary span {
+  color: var(--band-text);
+  text-decoration-color: color-mix(in srgb, var(--band-text) 55%, transparent);
+}
+:root .qloo-band details summary:hover span {
+  text-decoration-color: var(--band-text);
+}
+:root .qloo-band details > div {
+  border-color: color-mix(in srgb, var(--band-text) 40%, transparent);
+  color: var(--band-soft);
+}
+:root .qloo-band details > div :is(.text-ink, .font-mono) {
+  color: var(--band-text);
+}
+:root .qloo-band :where(a, button, summary):focus-visible {
+  outline-color: var(--band-text);
+}
+
+/* Proof: the headline and the four findings sit on the band. */
+:root .ui-page > .proof-band {
+  margin-top: -72px;
+  padding-top: 64px;
+  padding-bottom: 64px;
+}
+:root .proof-band :is(.lp-kicker, .lp-lede) {
+  color: var(--band-soft);
+}
+:root .proof-band :is(.lp-h1, .lp-h1 .lp-tone) {
+  color: var(--band-text);
+}
+:root .proof-band .ui-more summary {
+  color: var(--band-text);
+  text-decoration-color: color-mix(in srgb, var(--band-text) 50%, transparent);
+}
+:root .proof-band .ui-more summary:hover {
+  text-decoration-color: var(--band-text);
+}
+:root .proof-band .ui-more > div {
+  color: var(--band-soft);
+}
+:root .proof-band .live-notice {
+  color: var(--band-soft);
+}
+:root .proof-band .live-notice :is(b, a) {
+  color: var(--band-text);
+}
+:root .ui-page .proof-band #findings {
+  background: color-mix(in srgb, var(--band-text) 30%, var(--band));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--band-text) 30%, var(--band));
+}
+:root .ui-page .proof-band #findings > * {
+  background: var(--band);
+  color: var(--band-text);
+}
+:root .proof-band #findings .text-muted {
+  color: var(--band-muted);
+}
+:root .proof-band #findings .text-ink {
+  color: var(--band-text);
+}
+:root .proof-band .proof-bar-track {
+  background: color-mix(in srgb, var(--band-text) 22%, var(--band));
+}
+:root .proof-band .proof-bar.is-llm {
+  background: var(--band-quiet);
+}
+:root .proof-band .proof-bar.is-gn {
+  background: var(--band-text);
+}
+:root .proof-band :where(a, button, summary):focus-visible {
+  outline-color: var(--band-text);
+}
+:root .proof-band + section {
+  margin-top: 56px;
+}
+
+/* Proof tables: Good Neighbor's columns, which come from Qloo, on the blue wash. */
+:root .ui-page .qloo-col {
+  background: var(--qloo-wash);
+}
+:root .ui-page thead .qloo-col {
+  color: var(--ink);
+}
+
+@media (max-width: 760px) {
+  :root .ui-section.qloo-band {
+    padding-top: 40px;
+    padding-bottom: 44px;
+  }
+  :root .ui-section.qloo-band + .ui-section {
+    padding-top: 44px;
+  }
+  :root .ui-page > .proof-band {
+    padding-top: 40px;
+    padding-bottom: 44px;
+  }
+  :root .proof-band + section {
+    margin-top: 40px;
+  }
+}
+
+/* Guided path: the hero is the blue band. */
+:root .jg .jg-hero {
+  background: var(--band);
+  color: var(--band-text);
+}
+:root .jg .jg-hero .lp-kicker {
+  color: var(--band-soft);
+}
+:root .jg .jg-hero :is(.lp-h1, .lp-h1 .lp-tone) {
+  color: var(--band-text);
+}
+:root .jg .jg-hero .lp-lede {
+  color: var(--band-soft);
+}
+:root .jg .jg-hero .lp-btn-quiet {
+  background: transparent;
+  border-color: color-mix(in srgb, var(--band-text) 70%, transparent);
+  color: var(--band-text);
+  box-shadow: none;
+}
+:root .jg .jg-hero .lp-btn-quiet:hover {
+  border-color: var(--band-text);
+  background: color-mix(in srgb, var(--band-text) 10%, transparent);
+}
+:root .jg .jg-hero .live-notice {
+  color: var(--band-soft);
+}
+:root .jg .jg-hero .live-notice :is(b, a) {
+  color: var(--band-text);
+}
+:root .jg .jg-hero .live-notice a {
+  text-decoration-color: color-mix(in srgb, var(--band-text) 50%, transparent);
+}
+:root .jg .jg-overview {
+  border-top-color: var(--band-text);
+}
+:root .jg .jg-overview li {
+  border-bottom-color: color-mix(in srgb, var(--band-text) 30%, transparent);
+}
+:root .jg .jg-overview a {
+  color: var(--band-text);
+}
+:root .jg .jg-overview a:hover {
+  background: color-mix(in srgb, var(--band-text) 8%, transparent);
+}
+:root .jg .jg-overview :is(.jg-overview-n, .jg-overview-k) {
+  color: var(--band-soft);
+}
+:root .jg .jg-overview .text-muted {
+  color: var(--band-muted);
+}
+:root .jg .jg-overview-v.is-pen > span > span:not(.text-muted) {
+  color: var(--band-pen);
+}
+:root .jg .jg-hero :where(a, button, summary):focus-visible {
+  outline-color: var(--band-text);
+}
+
+/* Guided path: the step being read is blue in the rail; Good Neighbor's bar is Qloo blue. */
+:root .jg .gp-rail a[aria-current] span {
+  background: var(--qloo);
+  color: var(--qloo-on);
+  box-shadow: 0 0 0 1.5px var(--qloo);
+}
+:root .jg .gp-h2h .ch-hbar:not(.is-quiet) {
+  background: var(--qloo);
+}
+:root .jg .gp-h2h b.is-ok {
+  color: var(--qloo);
+}
+
+/* Print stays black on white: fills drop to outlines and blue type to ink. */
+@media print {
+  :root .kept-label,
+  :root .ui-chip.is-qloo,
+  :root .status-pill.is-ok {
+    background: none;
+    color: var(--ink);
+    box-shadow: inset 0 0 0 1px var(--ink);
+    border-color: var(--ink);
+  }
+  :root .status-pill.is-ok > span {
+    background: var(--ink);
+  }
+  :root :is(.qloo-rank, .ui-stat-v.is-qloo, .ch-dots-rank, .text-qloo) {
+    color: var(--ink);
+  }
+  :root .ch-dot {
+    background: var(--ink);
+  }
+  :root .ui-section.qloo-band,
+  :root .ui-page > .proof-band {
+    color: var(--ink);
+    border-image: none;
+  }
+}

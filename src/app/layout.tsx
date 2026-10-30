@@ -6,6 +6,7 @@ import "./charts.css";
 import "./marks.css";
 import "./motion.css";
 import "./compose.css";
+import "./colour.css";
 import { SiteFooter } from "@/components/landing/SiteFooter";
 
 // Archivo with its width axis: the wide cut sets display sizes, the normal width sets text.

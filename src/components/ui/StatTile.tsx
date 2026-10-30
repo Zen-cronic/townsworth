@@ -8,7 +8,7 @@ export function StatTile({
 }: {
   value: React.ReactNode;
   label: string;
-  tone?: "pen" | "ok";
+  tone?: "pen" | "ok" | "qloo";
   more?: React.ReactNode;
   children?: React.ReactNode;
 }) {

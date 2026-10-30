@@ -55,6 +55,9 @@ const TASTE_LABEL = { brand: "Brands", artist: "Artists", tv_show: "TV", podcast
 // Draft lines are referred to plainly ("Line 4"), and anchored as #line-4.
 const num = (n: number) => String(n);
 
+// Every signal but the open grants call is read from Qloo.
+const isQlooSignal = (signal?: string) => !signal?.startsWith("Open call");
+
 // Everything behind "Why": the signals, the facts about the partner, and how the cost is built.
 function Why({ item, gloss }: { item: ProgramItem; gloss?: string }) {
   const p = item.partner;
@@ -67,7 +70,7 @@ function Why({ item, gloss }: { item: ProgramItem; gloss?: string }) {
   return (
     <details className="group text-xs">
       <summary className="flex cursor-pointer flex-wrap items-center gap-x-2.5 gap-y-1">
-        <Chip tone="plain">{shortSignal(item.provenance[0]?.signal)}</Chip>
+        <Chip tone={isQlooSignal(item.provenance[0]?.signal) ? "qloo" : "plain"}>{shortSignal(item.provenance[0]?.signal)}</Chip>
         <span className="inline-flex items-center gap-0.5 font-medium text-ink underline decoration-rule underline-offset-2 transition-colors duration-150 group-hover:decoration-ink">
           Why
           <Chevron className="chev h-3 w-3" />
@@ -124,7 +127,7 @@ function Applicants({ items }: { items: ProgramItem[] }) {
             {rank != null && (
               <>
                 {" "}
-                <Chip tone="plain" className="align-middle">#{rank} local affinity</Chip>
+                <Chip tone="qloo" className="align-middle">#{rank} local affinity</Chip>
               </>
             )}
           </span>
@@ -153,7 +156,7 @@ function Kept({ row, sameAs }: { row: AuditRow; sameAs?: string }) {
     <>
       <p className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 pt-0.5 text-sm leading-snug">
         <VerdictMark kind="kept" className="kept-mark translate-y-0.5" />
-        <span className="font-medium text-ok-text">Kept</span>
+        <span className="kept-label">Kept</span>
         {bySignal && (
           <span aria-hidden className="-mx-1 text-muted">
             ·
@@ -393,7 +396,7 @@ export function TownView({ run }: { run: TownRun }) {
               </div>
             </details>
           </div>
-          <StatTile value={partnerPlaces} label="local partners Qloo found" tone="ok" more={<>{qlooAdds.length} the draft never named. Each is traced to Qloo&apos;s taste data.</>}>
+          <StatTile value={partnerPlaces} label="local partners Qloo found" tone="qloo" more={<>{qlooAdds.length} the draft never named. Each is traced to Qloo&apos;s taste data.</>}>
             {failed ? (
               <LiveDataNotice towns={[town.name]} subject="the partner list" reloadHref={planHref(source)} />
             ) : partners.length ? (
@@ -548,7 +551,7 @@ export function TownView({ run }: { run: TownRun }) {
         </section>
 
         {/* More local partners */}
-        <section aria-labelledby="adds-title" className="ui-section scroll-mt-24">
+        <section aria-labelledby="adds-title" className="ui-section qloo-band scroll-mt-24">
           <SectionHeader id="adds-title" size="sm" title="Qloo also suggests" lede={`${plural(qlooAdds.length, "local partner", "local partners")} the draft never named`} />
           {qlooAdds.length ? (
             <ul className="ui-card divide-y divide-hairline">

@@ -25,7 +25,7 @@ function Detail({ o }: { o: LensOutcome }) {
         <span className="font-medium text-ink">{first.name}</span>
         <span className="text-muted">
           {" "}
-          is #{first.lensRank} of the places this group favours most{rest.length ? `, with ${rest.length} more of the program's partners` : ""}.
+          is <span className="qloo-rank">#{first.lensRank}</span> of the places this group favours most{rest.length ? `, with ${rest.length} more of the program's partners` : ""}.
         </span>
       </>
     );
@@ -37,7 +37,7 @@ function Detail({ o }: { o: LensOutcome }) {
         <span className="font-medium text-ink">{o.place.name}</span>
         <span className="text-muted">
           {" "}
-          is #{o.place.lensRank} for this group too. The session added for {via} is already there, so nothing more is earmarked.
+          is <span className="qloo-rank">#{o.place.lensRank}</span> for this group too. The session added for {via} is already there, so nothing more is earmarked.
         </span>
       </>
     );
@@ -48,7 +48,7 @@ function Detail({ o }: { o: LensOutcome }) {
         <span className="font-medium text-ink">{o.place.name}</span>
         <span className="text-muted">
           {" "}
-          is #{o.place.lensRank} for this group and no partner was. One open session added there
+          is <span className="qloo-rank">#{o.place.lensRank}</span> for this group and no partner was. One open session added there
           {o.amount ? `, ${usd(o.amount)} earmarked from the reserve` : ""}.
         </span>
       </>
@@ -66,7 +66,7 @@ export function AudienceReach({ reach, className = "" }: { reach?: LensOutcome[]
   return (
     <Card as="section" aria-labelledby="reach-title" className={`overflow-hidden ${className}`}>
       <div className="border-b border-rule px-5 py-4 sm:px-6">
-        <p className="font-mono text-[11px] uppercase tracking-wider text-contour">Age groups · Qloo</p>
+        <p className="font-mono text-[11px] uppercase tracking-wider text-qloo">Age groups · Qloo</p>
         <h2 id="reach-title" className="mt-1 font-semibold">
           Does the program include places the town&apos;s age groups use?
         </h2>
