@@ -37,7 +37,7 @@ const underside = (sx: number) => OY + 2 * L * S + T - Math.abs(sx - OX) * (S / 
 
 function Slab() {
   return (
-    <g>
+    <g className="st-plate">
       <polygon className="st-l" points={pts(P(0, L), P(L, L), [P(L, L)[0], P(L, L)[1] + T], [P(0, L)[0], P(0, L)[1] + T])} />
       <polygon className="st-r" points={pts(P(L, 0), P(L, L), [P(L, L)[0], P(L, L)[1] + T], [P(L, 0)[0], P(L, 0)[1] + T])} />
       <polygon className="st-top" points={pts(P(0, 0), P(L, 0), P(L, L), P(0, L))} />

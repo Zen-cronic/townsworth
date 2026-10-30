@@ -37,9 +37,9 @@ const MATERIAL = [
 
 function SectionTitle({ n, children, note }: { n: string; children: React.ReactNode; note?: React.ReactNode }) {
   return (
-    <div className="border-b border-ink pb-2">
+    <div className="memo-section-head border-b border-ink pb-2">
       <h2 className="flex items-baseline gap-3 font-semibold tracking-tight">
-        <span className="font-mono text-xs font-medium text-muted">{n}</span>
+        <span className="memo-section-n font-mono text-xs font-medium text-muted">{n}</span>
         {children}
       </h2>
       {note && <p className="mt-0.5 pl-7 text-sm text-muted">{note}</p>}
@@ -308,7 +308,7 @@ export default async function MemoPage({
                 .filter((g) => g.items.length)
                 .map(({ b, items, amount }) => (
                   <tbody key={b} className="border-b border-hairline">
-                    <tr>
+                    <tr className="memo-area-head">
                       <th scope="rowgroup" className="pb-1.5 pt-5 text-left font-semibold">
                         {BUCKETS[b].label}
                         <span className="ml-2 text-xs font-normal text-muted">{program.cadence[b]}</span>
@@ -325,12 +325,12 @@ export default async function MemoPage({
                           </div>
                           <div className="text-xs leading-relaxed text-muted">
                             {it.partner?.address ?? it.detail}
-                            <span className="ml-2 inline-block font-mono text-[11px] text-muted/90">{shortSignal(it.provenance[0]?.signal)}</span>
+                            <span className="memo-signal ml-2 inline-block font-mono text-[11px] text-muted/90">{shortSignal(it.provenance[0]?.signal)}</span>
                           </div>
                           <AgeStrip ages={it.partner?.ages} className="mt-0.5 text-xs leading-relaxed" />
                           <SessionCalendarLinks item={it} town={town} firstOnly className="mt-1" />
                         </td>
-                        <td className="py-2 text-right font-mono tabular-nums">{money(it.amount)}</td>
+                        <td className="memo-amount py-2 text-right font-mono tabular-nums">{money(it.amount)}</td>
                       </tr>
                     ))}
                   </tbody>

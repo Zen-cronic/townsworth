@@ -322,21 +322,21 @@ export default async function SourcesPage() {
                   Data and media
                 </h2>
                 <ul className="src-list">
-                  <li>
+                  <li className="is-qloo">
                     <span className="src-k">Qloo</span>
                     <span>
                       Insights API: places within 15 km ranked by local affinity, plus local taste for brands, artists, TV and podcasts. About 25
                       calls per town; aggregate for the town, never about a person.
                     </span>
                   </li>
-                  <li>
+                  <li className="is-qloo">
                     <span className="src-k">Age groups</span>
                     <span>
                       The age-group check asks Qloo about three groups only: young adults (under 25), older residents and families with young
                       children. Each uses aggregate place affinities; no resident is scored and the check asks about no other group.
                     </span>
                   </li>
-                  <li>
+                  <li className="is-qloo">
                     <span className="src-k">Partner ages</span>
                     <span>
                       Up to three Insights calls per town (urn:demographics, five partner ids each, up to 15 partners) give each partner&apos;s
@@ -344,7 +344,7 @@ export default async function SourcesPage() {
                       age buckets are read; gender is discarded. It is not a visitor count and says nothing about this town&apos;s residents.
                     </span>
                   </li>
-                  <li>
+                  <li className="is-qloo">
                     <span className="src-k">Place traits</span>
                     <span>
                       One more Insights call per town (urn:tag at the site, place tags only, take 50) gives the genres, ambience and dishes places
