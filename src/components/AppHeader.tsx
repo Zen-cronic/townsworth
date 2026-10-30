@@ -59,7 +59,7 @@ export function AppHeader({
           <Link href="/proof" aria-current={current("proof")} className={`${navLink} ${page === "proof" ? "text-ink" : ""}`}>
             Evidence
           </Link>
-          <Link href="/judges" aria-current={current("judges")} className={`${navLink} ${page === "judges" ? "text-ink" : ""}`}>
+          <Link href="/judges" aria-current={current("judges")} className="nav-tour ml-1.5 rounded-full px-3.5 py-1.5 text-sm font-semibold max-[400px]:px-2.5">
             <span className="sm:hidden">Tour</span>
             <span className="hidden sm:inline">Product tour</span>
           </Link>

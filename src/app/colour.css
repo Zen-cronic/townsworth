@@ -8,6 +8,39 @@
    wash 13.68, paper on kept green 11.32, band-soft on blue 5.60, band-muted on blue 4.84, light
    pink on blue 4.91. */
 
+/* The product tour entry: the second thing lime marks, after the page's primary action. In the
+   header a lime pill with an ink edge (ink on lime 15.9:1); in the hero an outline in lime with the
+   duration on a lime chip (white on the blue band 6.53:1, ink on lime 15.9:1). */
+:root .nav-tour {
+  background: var(--action);
+  color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--ink);
+  transition: background-color 150ms;
+}
+:root .nav-tour:hover {
+  background: var(--action-hover);
+}
+:root .nav-tour[aria-current="page"] {
+  box-shadow: inset 0 0 0 2px var(--ink);
+}
+:root .lp-btn.lp-btn-tour {
+  border: 2px solid var(--action);
+}
+:root .lp-btn.lp-btn-tour:hover {
+  border-color: var(--action);
+  background: color-mix(in srgb, var(--action) 14%, transparent);
+}
+:root .lp-btn-tour .lp-btn-meta {
+  padding: 2px 8px;
+  border-radius: var(--r-pill);
+  background: var(--action);
+  color: var(--ink);
+  font-weight: 600;
+}
+@media print {
+  :root .nav-tour { background: none; }
+}
+
 /* Kept: a solid green label beside the ring, so a page of kept lines reads green. */
 :root .kept-label {
   display: inline-flex;

@@ -181,7 +181,7 @@ export default async function Home() {
                     <Chevron />
                   </span>
                 </Link>
-                <Link href="/judges" className="lp-btn lp-btn-quiet">
+                <Link href="/judges" className="lp-btn lp-btn-quiet lp-btn-tour">
                   Product tour <span className="lp-btn-meta">2 min</span>
                 </Link>
               </div>
