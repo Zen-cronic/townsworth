@@ -119,17 +119,24 @@ function parseEntity(raw: RawEntity, type: EntityType): QlooEntity {
   };
 }
 
-// At most 6 requests in flight per server instance (module state, not a global limit). The slot is
-// taken before Next's data cache is consulted, so cache hits queue here too; 6 keeps cold misses
-// polite to Qloo while warm renders of all six towns spend less time waiting for a slot. 429s retry
-// with backoff up to three times; a 502 or 503 retries once.
+// At most 6 requests in flight per server instance (module state, not a global limit), and starts
+// spaced to about 9 a second: Qloo allows 10 a second per key, and fast answers would otherwise
+// let 6 slots exceed it. The slot is taken before Next's data cache is consulted, so cache hits are
+// paced too; warm pages rarely get here, because complete town profiles are cached whole
+// (profileCache.ts). 429s retry after a second, up to three times; a 502 or 503 retries once.
 const MAX_IN_FLIGHT = 6;
+const MIN_GAP_MS = 110;
 let inFlight = 0;
+let nextStart = 0;
 const waiters: (() => void)[] = [];
 
 async function withSlot<T>(fn: () => Promise<T>): Promise<T> {
   if (inFlight >= MAX_IN_FLIGHT) await new Promise<void>((r) => waiters.push(r));
   inFlight++;
+  const now = Date.now();
+  const at = Math.max(now, nextStart);
+  nextStart = at + MIN_GAP_MS;
+  if (at > now) await new Promise((r) => setTimeout(r, at - now));
   try {
     return await fn();
   } finally {
@@ -155,7 +162,7 @@ async function fetchWithRetry(url: string, key: string, noStore = false): Promis
     const res = await withSlot(() => fetch(url, { headers: { "X-Api-Key": key, Accept: "application/json" }, ...caching }));
     const transient = (res.status === 502 || res.status === 503) && attempt < 1;
     if (!transient && (res.status !== 429 || attempt >= 3)) return res;
-    await new Promise((r) => setTimeout(r, 400 * 2 ** attempt));
+    await new Promise((r) => setTimeout(r, 1000 * (attempt + 1)));
   }
 }
 
