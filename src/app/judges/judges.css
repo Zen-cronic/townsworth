@@ -1,0 +1,233 @@
+/* Guided path (/judges) only. One containment level: the hero, then five steps as a ruled,
+   numbered sequence, each with its text on the left and one figure on the right. No boxes. */
+
+/* Hero: the copy and its control row on the left; the five steps' figures on the right. */
+.jg .jg-hero {
+  padding: 56px 0 48px;
+}
+/* Raised over the shared guided-path hero grid, which this page replaces with copy | overview. */
+:root .jg .jg-hero .jg-hero-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  grid-template-rows: auto;
+  column-gap: 64px;
+  row-gap: 40px;
+  align-items: end;
+}
+:root .jg .jg-hero .jg-hero-grid > .jg-hero-copy {
+  grid-column: 1;
+  grid-row: 1;
+}
+:root .jg .jg-hero .jg-hero-grid > .jg-overview {
+  grid-column: 2;
+  grid-row: 1;
+}
+.jg .jg-meta {
+  margin-top: 16px;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--l-ink);
+}
+.jg .jg-ctas {
+  margin-top: 28px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.jg .jg-ctas .lp-btn,
+.jg .jg-step-ctas .lp-btn {
+  min-height: 48px;
+}
+.jg .jg-overview {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--l-ink);
+}
+.jg .jg-overview li {
+  border-bottom: 1px solid var(--l-hairline);
+}
+.jg .jg-overview a {
+  display: grid;
+  grid-template-columns: 1.5rem minmax(9.5rem, auto) minmax(0, 1fr);
+  align-items: baseline;
+  gap: 16px;
+  padding: 12px 0;
+  color: var(--l-ink);
+  transition: background-color 150ms;
+}
+.jg .jg-overview a:hover {
+  background: color-mix(in srgb, var(--l-ink) 3%, transparent);
+}
+.jg .jg-overview-n {
+  font-size: 0.875rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--l-muted);
+}
+.jg .jg-overview-v {
+  font-family: var(--font-display);
+  font-stretch: 116%;
+  font-size: 1.375rem;
+  font-weight: 750;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+.jg .jg-overview-v.is-pen {
+  color: var(--hivis-text);
+}
+.jg .jg-overview-k {
+  font-size: 0.9375rem;
+  line-height: 1.4;
+  color: var(--l-muted);
+}
+
+/* The sequence */
+.jg .gp-path {
+  padding: 24px 0 96px;
+}
+.jg .gp-steps {
+  gap: 0;
+}
+.jg .gp-step,
+.jg #own-plan {
+  padding: 56px 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  border-top: 1px solid var(--l-rule);
+}
+.jg .gp-steps > .gp-step:first-child {
+  border-top-color: var(--l-ink);
+}
+.jg .gp-step .lp-kicker {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--l-ink);
+}
+.jg .gp-notice {
+  margin-top: 4px;
+  padding: 0;
+  background: none;
+  border-radius: 0;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--l-ink) !important;
+}
+.jg .gp-notice b {
+  display: block;
+  margin-bottom: 4px;
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--l-muted);
+}
+.jg .jg-step-ctas {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 24px;
+}
+.jg .jg-step-ctas .lp-btn {
+  justify-content: flex-start;
+  gap: 10px;
+}
+.jg .jg-link {
+  font-weight: 600;
+  color: var(--l-ink);
+  text-decoration: underline;
+  text-decoration-color: var(--l-rule);
+  text-underline-offset: 4px;
+}
+.jg .jg-link:hover {
+  text-decoration-color: var(--l-ink);
+}
+
+/* Each step's figure: unboxed, under one hairline, aligned with the step title. */
+.jg .gp-vis {
+  padding: 16px 0 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  border-top: 1px solid var(--l-ink);
+}
+.jg .gp-h2h {
+  color: var(--l-muted);
+  font-size: 0.875rem;
+}
+.jg .gp-h2h b {
+  color: var(--l-ink);
+}
+.jg .gp-h2h b.is-ok {
+  color: var(--l-ink);
+}
+.jg .gp-h2h-t {
+  background: var(--side);
+}
+.jg .gp-h2h .ch-hbar {
+  background: var(--l-ink);
+}
+.jg .gp-h2h .ch-hbar.is-quiet {
+  background: var(--line-quiet);
+}
+.jg .gp-step .gp-vis-note {
+  color: var(--l-muted);
+}
+.jg .gp-towns span {
+  color: var(--l-muted);
+}
+.jg .gp-extra {
+  margin-top: 0;
+}
+.jg .gp-extra .lp-section-head {
+  margin-top: 80px;
+}
+
+@media (max-width: 900px) {
+  :root .jg .jg-hero .jg-hero-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  :root .jg .jg-hero .jg-hero-grid > .jg-overview {
+    grid-column: 1;
+    grid-row: 2;
+  }
+  .jg .gp-step,
+  .jg #own-plan {
+    padding: 40px 0;
+  }
+}
+@media (max-width: 600px) {
+  .jg .jg-hero {
+    padding: 40px 0 32px;
+  }
+  .jg .jg-ctas .lp-btn {
+    width: 100%;
+  }
+  .jg .jg-step-ctas .lp-btn {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .jg .jg-overview a {
+    grid-template-columns: 1.25rem minmax(0, 1fr);
+    gap: 2px 12px;
+  }
+  .jg .jg-overview-k {
+    grid-column: 2;
+  }
+}
+
+/* Phones: the overview would repeat the step figures that follow at once, so the hero ends at its
+   control row. */
+@media (max-width: 600px) {
+  .jg .jg-overview {
+    display: none;
+  }
+}
+/* Secondary text at a readable size. */
+.jg #own-plan .ui-more summary {
+  font-size: 0.875rem;
+}
+.jg .lp-obj-a {
+  font-size: 0.9375rem;
+  color: var(--l-ink);
+}

@@ -1,4 +1,5 @@
 import "../landing.css";
+import "./judges.css";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -62,6 +63,15 @@ export default async function GuidedPath() {
   const sampleHome = sample?.town ? townBySlug(sample.town) : undefined;
   const sampleTownName = sampleHome ? `${sampleHome.name}, ${sampleHome.region}` : "any town";
   const FACILITY = { "data center": "Data center", fab: "Chip fab", nuclear: "Nuclear", plant: "Plant" } as const;
+
+  // The hero's overview: each step's figure in one line, linking to the step.
+  const overview: { value: string; label: string; tone?: "pen" }[] = [
+    { value: `${comp.total - comp.kept} of ${comp.total}`, label: "draft lines struck", tone: comp.total - comp.kept ? "pen" : undefined },
+    { value: usd(run.program.totalAllocated), label: "costed, item by item" },
+    { value: String(shortlist.length), label: "ideas on the ballot" },
+    { value: String(TOWNS.length), label: "host towns ready, or type your own" },
+    { value: `${t.llmInstitutionalPct}% vs ${t.gnInstitutionalPct}%`, label: "partners that are institutions, AI alone vs ours" },
+  ];
 
   const steps: Step[] = [
     {
@@ -188,11 +198,12 @@ export default async function GuidedPath() {
   );
 
   return (
-    <div className="gn-landing">
+    <div className="gn-landing jg">
       <AppHeader towns={false} page="judges" />
       <main id="main">
-        <section className="gp-hero lp-grain" aria-labelledby="gp-h">
-          <div className="lp-wrap">
+        <section className="gp-hero jg-hero" aria-labelledby="gp-h">
+          <div className="lp-wrap jg-hero-grid">
+          <div className="jg-hero-copy">
             <p className="lp-kicker">Guided path · two minutes · nothing to sign up for</p>
             <h1 id="gp-h" className="lp-h1">
               See it work <span className="lp-tone">in two minutes.</span>
@@ -202,22 +213,32 @@ export default async function GuidedPath() {
               that matters.
             </p>
             <LiveDataNotice towns={proof.failedTowns} />
-            <div className="gp-entrances">
-              <Link href="#step-1" className="gp-entry is-primary">
-                <span className="lp-kicker">Start here</span>
-                <span className="gp-entry-t">
-                  Follow the five steps <Chevron />
+            <p className="jg-meta">Begins with {town}, already checked line by line.</p>
+            <div className="jg-ctas">
+              <Link href="#step-1" className="lp-btn lp-btn-primary">
+                Follow the five steps
+                <span className="lp-btn-sq" aria-hidden="true">
+                  <Chevron />
                 </span>
-                <p>Begins with {town}, already checked line by line.</p>
               </Link>
-              <Link href="/find" className="gp-entry">
-                <span className="lp-kicker">Or jump in</span>
-                <span className="gp-entry-t">
-                  Try any host town <Chevron />
-                </span>
-                <p>Type a US or Canadian town and the company funding its program.</p>
+              <Link href="/find" className="lp-btn lp-btn-quiet">
+                Try any host town
               </Link>
             </div>
+          </div>
+          <ol className="jg-overview" aria-label="What the five steps show">
+            {overview.map((o, i) => (
+              <li key={o.label}>
+                <a href={`#step-${i + 1}`}>
+                  <span className="jg-overview-n">{i + 1}</span>
+                  <span className={`jg-overview-v${o.tone ? ` is-${o.tone}` : ""}`}>
+                    <Figure value={o.value} />
+                  </span>
+                  <span className="jg-overview-k">{o.label}</span>
+                </a>
+              </li>
+            ))}
+          </ol>
           </div>
         </section>
 
@@ -252,21 +273,19 @@ export default async function GuidedPath() {
                         <b>What to notice</b>
                         {s.notice}
                       </p>
-                      <div className="lp-ctas">
-                        <Link href={s.primary.href} className="lp-btn lp-btn-primary">
+                      <div className="lp-ctas jg-step-ctas">
+                        <Link href={s.primary.href} className="lp-btn lp-btn-quiet">
                           {s.primary.label}
-                          <span className="lp-btn-sq" aria-hidden="true">
-                            <Chevron />
-                          </span>
+                          <Chevron />
                         </Link>
                         {s.secondary && (
-                          <Link href={s.secondary.href} className="lp-btn lp-btn-quiet">
+                          <Link href={s.secondary.href} className="jg-link">
                             {s.secondary.label}
                           </Link>
                         )}
                       </div>
                     </div>
-                    <div className={`gp-vis ch-anim ${i === steps.length - 1 ? "is-band" : ""}`}>{s.visual}</div>
+                    <div className="gp-vis ch-anim">{s.visual}</div>
                   </li>
                 ))}
               </ol>
@@ -280,12 +299,10 @@ export default async function GuidedPath() {
                         Check a plan of your own
                       </h2>
                       <p>No plan to hand? Check our sample draft for {sampleTownName}: it fills the form, and you press Check this draft.</p>
-                      <div className="lp-ctas">
-                        <Link href={sampleCheckHref(sample.id)} className="lp-btn lp-btn-primary">
+                      <div className="lp-ctas jg-step-ctas">
+                        <Link href={sampleCheckHref(sample.id)} className="lp-btn lp-btn-quiet">
                           Check the sample plan
-                          <span className="lp-btn-sq" aria-hidden="true">
-                            <Chevron />
-                          </span>
+                          <Chevron />
                         </Link>
                       </div>
                       <details className="ui-more">
