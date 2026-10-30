@@ -19,10 +19,13 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en" className={archivo.variable}>
       <body className="gn-landing antialiased">
-        {/* Recolours the hero site plan as green locate paint: light linework stays, the dark ground drops out. */}
+        {/* Recolours the hero site plan as locate paint: the light linework keeps its shape in the
+            kept-mark paint colour (set in CSS), and the dark ground drops out. */}
         <svg aria-hidden="true" width="0" height="0" focusable="false" style={{ position: "absolute" }}>
           <filter id="gn-paint-lines" colorInterpolationFilters="sRGB">
-            <feColorMatrix type="matrix" values="0 0 0 0 0.643  0 0 0 0 0.863  0 0 0 0 0.388  0.468 1.573 0.159 0 -0.4" />
+            <feColorMatrix type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0.468 1.573 0.159 0 -0.4" result="lines" />
+            <feFlood className="gn-paint-flood" result="paint" />
+            <feComposite in="paint" in2="lines" operator="in" />
           </filter>
         </svg>
         {children}

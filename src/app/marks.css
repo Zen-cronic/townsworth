@@ -218,6 +218,9 @@
     background-image: var(--poster-p);
   }
 }
+:root .gn-paint-flood {
+  flood-color: var(--band-ok);
+}
 :root .lp-film::before,
 :root .lp-film-media {
   filter: url("#gn-paint-lines");
