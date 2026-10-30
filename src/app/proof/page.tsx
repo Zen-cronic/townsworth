@@ -145,7 +145,7 @@ export default async function ProofPage() {
             <h2 id="qloo-changes" className="font-semibold">What Qloo changes</h2>
             <p className="mt-1 text-sm leading-relaxed text-muted">
               Each pick Qloo&apos;s local-affinity ranking makes that a distance-only ranking of the same candidates would not, next to the pick the
-              distance ranking makes instead. Same venue-fit and host-community rules, recomputed on this load.
+              distance ranking makes instead. Same venue-fit and host-community rules.
             </p>
           </div>
           {changed.length === 0 ? (
