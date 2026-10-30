@@ -37,7 +37,8 @@ interface Step {
   body: string;
   notice: string;
   // The step's headline figure, which the hero's overview repeats and links to.
-  figure: { value: string; label: string };
+  // "pen" when the figure counts struck lines, so it takes the struck colour.
+  figure: { value: string; label: string; tone?: "pen" };
   visual: React.ReactNode;
   primary: { href: string; label: string };
   secondary?: { href: string; label: string };
@@ -74,7 +75,7 @@ export default async function GuidedPath() {
     {
       title: "The draft, checked line by line",
       rail: "The draft, checked",
-      figure: { value: `${comp.generic + comp.unverified} of ${comp.total}`, label: "draft lines struck" },
+      figure: { value: `${comp.generic + comp.unverified} of ${comp.total}`, label: "draft lines struck", tone: comp.generic + comp.unverified > 0 ? "pen" : undefined },
       body: useTemplate
         ? `${town}, a ${HERO_TOWN.sponsor} data center campus, checked against the generic plan a consultancy might send to any town.`
         : `${town}, a ${HERO_TOWN.sponsor} data center campus. Its draft plan was written by AI alone, the way a consultant would.`,
@@ -253,7 +254,7 @@ export default async function GuidedPath() {
               <li key={s.title}>
                 <a href={`#step-${i + 1}`}>
                   <span className="jg-overview-n">{i + 1}</span>
-                  <span className="jg-overview-v">
+                  <span className={`jg-overview-v ${s.figure.tone ? `is-${s.figure.tone}` : ""}`}>
                     <Figure value={s.figure.value} />
                   </span>
                   <span className="jg-overview-k">{s.figure.label}</span>

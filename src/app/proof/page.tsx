@@ -27,8 +27,8 @@ function Bars({ bars }: { bars: Bar[] }) {
       {bars.map((b) => (
         <div key={b.label} className="grid grid-cols-[5.5rem_1fr_2.75rem] items-center gap-2 text-[11px] text-muted">
           <span className="truncate">{b.label}</span>
-          <span className="h-1.5 overflow-hidden rounded-full bg-hairline">
-            <span className={`block h-full rounded-full ${b.tone === "gn" ? "bg-ink" : "bg-line-faint"}`} style={{ width: `${Math.max(b.pct, 1.5)}%` }} />
+          <span className="proof-bar-track h-1.5 overflow-hidden rounded-full bg-hairline">
+            <span className={`proof-bar is-${b.tone} block h-full rounded-full ${b.tone === "gn" ? "bg-ink" : "bg-line-faint"}`} style={{ width: `${Math.max(b.pct, 1.5)}%` }} />
           </span>
           <span className="text-right font-mono tabular-nums text-ink">{b.pct}%</span>
         </div>
@@ -53,15 +53,15 @@ function Finding({ n, big, label, note, bars }: { n: string; big: string; label:
   );
 }
 
-function Pick({ p }: { p?: PickRef }) {
+function Pick({ p, qloo = false }: { p?: PickRef; qloo?: boolean }) {
   if (!p) return <span className="text-muted">No pick</span>;
   return (
     <span>
       <span className="font-medium text-ink">{p.name}</span>
       <span className="block font-mono text-[11px] tabular-nums text-muted">
-        {[p.distanceKm != null && `${p.distanceKm} km`, p.affinityRank != null ? `#${p.affinityRank} local affinity` : "no affinity score", p.city]
-          .filter(Boolean)
-          .join(" · ")}
+        {p.distanceKm != null && `${p.distanceKm} km · `}
+        <span className={qloo && p.affinityRank != null ? "qloo-rank" : undefined}>{p.affinityRank != null ? `#${p.affinityRank} local affinity` : "no affinity score"}</span>
+        {p.city && ` · ${p.city}`}
       </span>
     </span>
   );
@@ -85,7 +85,7 @@ export default async function ProofPage() {
     <>
       <AppHeader towns={false} page="proof" />
       <main id="main" className="ui-page">
-        <div className="lg:grid lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:items-start lg:gap-12">
+        <div className="proof-band lg:grid lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:items-start lg:gap-12">
           <header className="max-w-3xl">
             <p className="lp-kicker">Evidence · {towns.length} host towns · recomputed on every load</p>
             <h1 className="lp-h1 mt-3">
@@ -164,9 +164,9 @@ export default async function ProofPage() {
                       <dd>
                         <Pick p={s.distance} />
                       </dd>
-                      <dt className="text-xs text-muted">Ranked by Qloo</dt>
+                      <dt className="text-xs text-qloo">Ranked by Qloo</dt>
                       <dd>
-                        <Pick p={s.qloo} />
+                        <Pick p={s.qloo} qloo />
                       </dd>
                     </dl>
                   </li>
@@ -179,7 +179,7 @@ export default async function ProofPage() {
                   <tr className="border-b border-hairline text-[11px] uppercase tracking-wider text-muted">
                     <th scope="col" className="px-4 py-2.5 pl-5 text-left font-medium sm:pl-6">Town · slot</th>
                     <th scope="col" className="px-4 py-2.5 text-left font-medium">Distance only</th>
-                    <th scope="col" className="px-4 py-2.5 pr-6 text-left font-medium">Ranked by Qloo</th>
+                    <th scope="col" className="px-4 py-2.5 pr-6 text-left font-medium text-qloo">Ranked by Qloo</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-hairline">
@@ -194,7 +194,7 @@ export default async function ProofPage() {
                           <Pick p={s.distance} />
                         </td>
                         <td className="px-4 py-3 pr-6 align-top">
-                          <Pick p={s.qloo} />
+                          <Pick p={s.qloo} qloo />
                         </td>
                       </tr>
                     )),
@@ -283,9 +283,9 @@ export default async function ProofPage() {
                   <th scope="col" className="px-4 py-2.5 text-right font-medium">Partners AI alone named</th>
                   <th scope="col" className="px-4 py-2.5 text-right font-medium">Verified real</th>
                   <th scope="col" className="px-4 py-2.5 text-right font-medium">Institutions</th>
-                  <th scope="col" className="border-l border-hairline px-4 py-2.5 text-right font-medium">{PRODUCT_NAME} local partners</th>
-                  <th scope="col" className="px-4 py-2.5 text-right font-medium">Also named by AI alone</th>
-                  <th scope="col" className="px-4 py-2.5 pr-6 text-right font-medium">Changed by affinity</th>
+                  <th scope="col" className="qloo-col border-l border-hairline px-4 py-2.5 text-right font-medium">{PRODUCT_NAME} local partners</th>
+                  <th scope="col" className="qloo-col px-4 py-2.5 text-right font-medium">Also named by AI alone</th>
+                  <th scope="col" className="qloo-col px-4 py-2.5 pr-6 text-right font-medium">Changed by affinity</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-hairline">
@@ -313,9 +313,9 @@ export default async function ProofPage() {
                       <span className="text-muted"> / {t.llmNamed}</span>
                     </td>
                     <td className={num}>{t.llmInstitutional}</td>
-                    <td className={`${num} border-l border-hairline`}>{t.gnPartners}</td>
-                    <td className={num}>{t.gnAlsoNamedByLlm}</td>
-                    <td className={`${num} pr-6`}>
+                    <td className={`${num} qloo-col border-l border-hairline`}>{t.gnPartners}</td>
+                    <td className={`${num} qloo-col`}>{t.gnAlsoNamedByLlm}</td>
+                    <td className={`${num} qloo-col pr-6`}>
                       {t.gnPicksChangedByAffinity}
                       <span className="text-muted"> / {t.gnPicks}</span>
                     </td>
