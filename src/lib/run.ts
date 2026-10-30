@@ -3,8 +3,7 @@ import { cache } from "react";
 import { auditPlan, GENERIC_AGENCY_PLAN, isKept, type AuditInput, type AuditRow } from "./audit";
 import { baselineFor, BASELINE, isInstitution } from "./baselineData";
 import { liveLlmDraft } from "./liveDraft";
-import type { TownProfile } from "./profile";
-import { townProfile } from "./profileCache";
+import { buildProfile, type TownProfile } from "./profile";
 import { buildProgram, runWith, type Bucket, type Program, type ProgramItem } from "./plan";
 import { applyReach } from "./reach";
 import { townBySlug } from "./towns";
@@ -60,7 +59,7 @@ export const runTown = cache(async (slug: string, fund?: number, source: PlanSou
   const frozen = baselineFor(town.slug);
   const wantLive = source === "llm" && !frozen.length && live && !!town.custom;
   const [profile, liveResult] = await Promise.all([
-    townProfile(town.slug),
+    buildProfile(town),
     wantLive
       ? liveLlmDraft(town.slug).then(
           (d) => ({ ok: true as const, d }),

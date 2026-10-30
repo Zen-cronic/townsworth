@@ -1,4 +1,5 @@
 import "server-only";
+import { unstable_cache } from "next/cache";
 import { SEARCH_RADIUS_KM } from "./geo";
 
 // Thin server-side client for the Qloo Insights API (hackathon environment).
@@ -120,10 +121,10 @@ function parseEntity(raw: RawEntity, type: EntityType): QlooEntity {
 }
 
 // At most 6 requests in flight per server instance (module state, not a global limit), and starts
-// spaced to about 9 a second: Qloo allows 10 a second per key, and fast answers would otherwise
-// let 6 slots exceed it. The slot is taken before Next's data cache is consulted, so cache hits are
-// paced too; warm pages rarely get here, because complete town profiles are cached whole
-// (profileCache.ts). 429s retry after a second, up to three times; a 502 or 503 retries once.
+// spaced to about 9 a second: Qloo allows 10 a second per key, and fast answers would otherwise let
+// 6 slots exceed it. Only requests that go to Qloo take a slot; cached responses (below) never wait.
+// A freed slot passes straight to the next waiter, so a new arrival can't take it in between.
+// 429s retry after a second, up to three times; a 502 or 503 retries once.
 const MAX_IN_FLIGHT = 6;
 const MIN_GAP_MS = 110;
 let inFlight = 0;
@@ -131,8 +132,8 @@ let nextStart = 0;
 const waiters: (() => void)[] = [];
 
 async function withSlot<T>(fn: () => Promise<T>): Promise<T> {
-  if (inFlight >= MAX_IN_FLIGHT) await new Promise<void>((r) => waiters.push(r));
-  inFlight++;
+  if (inFlight < MAX_IN_FLIGHT) inFlight++;
+  else await new Promise<void>((r) => waiters.push(r));
   const now = Date.now();
   const at = Math.max(now, nextStart);
   nextStart = at + MIN_GAP_MS;
@@ -140,29 +141,53 @@ async function withSlot<T>(fn: () => Promise<T>): Promise<T> {
   try {
     return await fn();
   } finally {
-    inFlight--;
-    waiters.shift()?.();
+    const next = waiters.shift();
+    if (next) next();
+    else inFlight--;
   }
 }
 
-// Caching policy. Each Qloo response is kept in Next's data cache for 24 hours, and only 2xx
-// responses are stored, so a failed call is retried on the next request rather than remembered.
-// That guarantee is lost if the page that made the call is itself cached: a statically prerendered
-// or ISR page stores its HTML, and a failure during that render (at build time or on the first
-// visit) would be served for the whole revalidate window even though the data cache holds nothing
-// for it. So every route that renders Qloo-derived figures (runTown, computeProof) is rendered per
-// request with `export const dynamic = "force-dynamic"`, or uses request data that makes it dynamic
-// anyway; warm renders still read the cached responses here and stay fast. When a call does fail,
-// the profile records it in `failedCalls` and the pages say so instead of showing partial figures.
-// `noStore` skips the data cache entirely: used for lookups built from user-pasted text, which must
-// not outlive the request.
-async function fetchWithRetry(url: string, key: string, noStore = false): Promise<Response> {
-  const caching: RequestInit = noStore ? { cache: "no-store" } : { next: { revalidate: 60 * 60 * 24 } };
+async function fetchWithRetry(url: string, key: string): Promise<Response> {
   for (let attempt = 0; ; attempt++) {
-    const res = await withSlot(() => fetch(url, { headers: { "X-Api-Key": key, Accept: "application/json" }, ...caching }));
+    const res = await withSlot(() => fetch(url, { headers: { "X-Api-Key": key, Accept: "application/json" }, cache: "no-store" }));
     const transient = (res.status === 502 || res.status === 503) && attempt < 1;
     if (!transient && (res.status !== 429 || attempt >= 3)) return res;
     await new Promise((r) => setTimeout(r, 1000 * (attempt + 1)));
+  }
+}
+
+// Caching policy. Each successful Qloo response is kept for 24 hours in Next's data cache, keyed by
+// its request URL (the key is read inside, so it is never part of the cache key). Only a 2xx whose
+// body parses is stored: a failed call throws out of the cache, so the next request asks Qloo again
+// rather than remembering the failure. The limiter above runs only on a miss, so warm pages read
+// every response at once. That guarantee is lost if the page that made the call is itself cached: a
+// statically prerendered or ISR page stores its HTML, and a failure during that render (at build
+// time or on the first visit) would be served for the whole revalidate window even though the data
+// cache holds nothing for it. So every route that renders Qloo-derived figures (runTown,
+// computeProof) is rendered per request with `export const dynamic = "force-dynamic"`, or uses
+// request data that makes it dynamic anyway. When a call does fail, the profile records it in
+// `failedCalls` and the pages say so instead of showing partial figures.
+class QlooFailure extends Error {
+  constructor(readonly status: number) {
+    super(`Qloo answered ${status}`);
+  }
+}
+
+async function liveBody(url: string): Promise<unknown> {
+  const res = await fetchWithRetry(url, process.env.QLOO_API_KEY!);
+  if (!res.ok) throw new QlooFailure(res.status);
+  return await res.json();
+}
+
+const storedBody = unstable_cache(liveBody, ["qloo-response-v1"], { revalidate: 60 * 60 * 24 });
+
+// Outside a Next server (unit tests, scripts) there is no data cache, so the call goes straight out.
+async function cachedBody(url: string): Promise<unknown> {
+  try {
+    return await storedBody(url);
+  } catch (e) {
+    if (e instanceof Error && /incrementalCache missing/.test(e.message)) return liveBody(url);
+    throw e;
   }
 }
 
@@ -175,12 +200,21 @@ async function qlooGet<T>(path: string, params: Record<string, string>, { noStor
   const started = Date.now();
   let status = 0;
   let body: T | null = null;
+  const url = `${BASE}${path}?${new URLSearchParams(params)}`;
   try {
-    const res = await fetchWithRetry(`${BASE}${path}?${new URLSearchParams(params)}`, key, noStore);
-    body = res.ok ? ((await res.json()) as T) : null;
-    status = res.status;
-  } catch {
-    // No answer at all: keep status 0 so the UI reports an error rather than thin data.
+    if (noStore) {
+      // Lookups built from user-pasted text skip the cache: they must not outlive the request.
+      const res = await fetchWithRetry(url, key);
+      body = res.ok ? ((await res.json()) as T) : null;
+      status = res.status;
+    } else {
+      body = (await cachedBody(url)) as T;
+      status = 200;
+    }
+  } catch (e) {
+    // Qloo's own status when it answered with an error; otherwise no answer at all (or a body that
+    // isn't JSON), so status stays 0 and the UI reports an error rather than thin data.
+    if (e instanceof QlooFailure) status = e.status;
   }
   return { status, ok: status >= 200 && status < 300, body, ms: Date.now() - started };
 }
