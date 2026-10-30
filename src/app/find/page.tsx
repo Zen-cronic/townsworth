@@ -162,12 +162,10 @@ export default async function FindPage({ searchParams }: { searchParams: Promise
           </section>
         )}
 
-        <ol className="find-steps mt-10" aria-label="What you get">
+        <ol className="find-line mt-10" aria-label="What you get">
           {STEPS.map((st) => (
-            <li key={st.title}>
-              <span className="find-step-i">{st.icon}</span>
-              <span className="find-step-t">{st.title}</span>
-              <span className="find-step-n">{st.note}</span>
+            <li key={st.title} title={st.note}>
+              {st.title}
             </li>
           ))}
         </ol>

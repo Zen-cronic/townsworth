@@ -21,9 +21,9 @@ type Mine = { state: "unknown" } | { state: "none" } | { state: "stale" } | { st
 
 const ordinal = (n: number) => `${n}${n % 10 === 1 && n % 100 !== 11 ? "st" : n % 10 === 2 && n % 100 !== 12 ? "nd" : n % 10 === 3 && n % 100 !== 13 ? "rd" : "th"}`;
 
-// One blue ramp, darkest = ranked first: a mix of the field blue into paper. Pink stays the strike.
+// One ink ramp, darkest = ranked first: a mix of ink into paper. Pink stays the strike.
 const shade = (r: number, n: number) => Math.round(n <= 1 ? 100 : 100 - (r / (n - 1)) * 70);
-const fill = (r: number, n: number) => `color-mix(in srgb, var(--band) ${shade(r, n)}%, var(--paper))`;
+const fill = (r: number, n: number) => `color-mix(in srgb, var(--ink) ${shade(r, n)}%, var(--paper))`;
 
 function RankBar({ counts, total, label }: { counts: number[]; total: number; label: string }) {
   const n = counts.length;

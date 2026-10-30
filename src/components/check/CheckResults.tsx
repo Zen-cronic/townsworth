@@ -13,7 +13,7 @@ import { cadenceLower, formatPhone, km, quotedName } from "@/components/dashboar
 import { secondaryCta } from "@/components/dashboard/ui";
 import { CheckExports } from "./CheckExports";
 import { LiveDataNotice } from "@/components/LiveDataNotice";
-import { FundBar, LineStrip, PartnerNames, fundSplit, lineComposition, partnerPoints } from "@/components/charts";
+import { FundBar, StruckTally, PartnerNames, fundSplit, lineComposition, partnerPoints } from "@/components/charts";
 
 // The audit of a pasted draft, rendered from the JSON the check route returns. Same verdict
 // vocabulary as the town pages; audit.ts stays out of the client bundle (it carries the baseline).
@@ -22,7 +22,6 @@ const isKept = (v: Verdict) => v === "grounded" || v === "institution" || v === 
 
 const money = (n: number) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n);
 // Draft lines are numbered plainly.
-const pad2 = (n: number) => String(n);
 const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
 
 const CARD = {
@@ -137,7 +136,7 @@ function AuditLine({ row, index }: { row: AuditRow; index: number }) {
   const missing = row.verdict === "unverified" ? quotedName(row.reasons[0]) : undefined;
   return (
     <li data-testid="check-row" data-verdict={row.verdict} className={`${ROW} audit-row row-edge ${kept ? "is-kept" : "is-struck"}${row.verdict === "unverified" ? " is-unsure" : ""} break-inside-avoid`}>
-      <span className="pt-0.5 font-mono text-xs tabular-nums text-muted">{pad2(index + 1)}</span>
+      <span className="pt-0.5 font-mono text-xs tabular-nums text-muted">{index + 1}</span>
       <div className="min-w-0">
         <p className={`text-[15px] leading-relaxed ${kept ? "text-ink" : "text-muted"}`}>
           <span className={kept ? "" : "strike"} style={kept ? undefined : { animationDelay: `${index * 70}ms` }}>
@@ -168,16 +167,17 @@ function AuditLine({ row, index }: { row: AuditRow; index: number }) {
   );
 }
 
-function Stat({ title, figure, tone, children }: { title: string; figure: string; tone?: "flag"; children: React.ReactNode }) {
+// One summary cell. Without a figure it holds the struck tally, which carries its own.
+function Stat({ title, figure, children }: { title?: string; figure?: string; children: React.ReactNode }) {
   return (
     <div className="flex flex-col bg-paper px-4 py-3.5 sm:px-6 sm:py-5">
-      <p className="font-mono text-[11px] uppercase tracking-wider text-muted">
-        {title}
-      </p>
-      <p className={`mt-2 text-[1.625rem] leading-none sm:mt-3 sm:text-[2rem] ${tone === "flag" ? "text-hivis-text" : "text-ink"}`}>
-        <Figure value={figure} />
-      </p>
-      <div className="mt-3 text-sm leading-snug text-muted">{children}</div>
+      {title && <p className="font-mono text-[11px] uppercase tracking-wider text-muted">{title}</p>}
+      {figure && (
+        <p className="mt-2 text-[1.625rem] leading-none text-ink sm:mt-3 sm:text-[2rem]">
+          <Figure value={figure} />
+        </p>
+      )}
+      <div className={`${figure ? "mt-3 " : ""}text-sm leading-snug text-muted`}>{children}</div>
     </div>
   );
 }
@@ -196,7 +196,6 @@ function Note({ tone, children }: { tone: "amber" | "flag"; children: React.Reac
 
 export function CheckResults({ result }: { result: CheckResult }) {
   const { town, audit, qlooAdds, program, parse, osm, qlooSearch, profile } = result;
-  const flagged = audit.filter((a) => !isKept(a.verdict)).length;
   const keptPartners = audit.filter((a) => a.verdict === "grounded" && a.matched).length;
   const keptSignals = audit.filter((a) => a.verdict === "grounded" && !a.matched).length;
   const keptInstitutions = audit.filter((a) => a.verdict === "institution").length;
@@ -266,8 +265,8 @@ export function CheckResults({ result }: { result: CheckResult }) {
         </div>
 
         <div className="grid gap-px border-b border-rule bg-hairline sm:grid-cols-3">
-          <Stat title={`Draft lines struck · ${audit.length - flagged} kept`} figure={`${flagged} of ${audit.length}`} tone={flagged ? "flag" : undefined}>
-            {audit.length > 0 && <LineStrip comp={comp} />}
+          <Stat>
+            <StruckTally comp={comp} draft="Your draft" />
             <p className="mt-2 text-xs">
               Kept:{" "}
               {[

@@ -1,7 +1,7 @@
 /* Marks and type, applied after the base sheets. The look borrows the paint marks a utility locator
-   sprays before anyone digs: hot pink is the one strong accent and means struck; acid lime is the
-   kept or added mark, always a flat fill with ink text or an ink edge; an electric-blue field
-   carries the hero and page bands. Kept is a ring and struck is a cross, so the two differ in shape
+   sprays before anyone digs: hot pink is the one strong accent and means struck; deep green is the
+   kept or added mark; acid lime is the action; an electric-blue field carries the hero and page
+   bands. Kept is a ring and struck is a cross, so the two differ in shape
    as well as colour. Selectors carry :root so they outrank the single-class rules they refine. */
 
 /* Labels: sentence case in the body face, never tracked capitals. */
@@ -201,7 +201,7 @@
   color: var(--ink);
 }
 
-/* The hero and closing drawing: the site plan redrawn as lime linework on the blue field.
+/* The hero and closing drawing: the site plan redrawn as pale linework on the blue field.
    The filter keeps only the drawing's light linework and recolours it; the dark ground drops out. */
 :root .lp-film {
   background-image: none;
@@ -219,7 +219,7 @@
   }
 }
 :root .gn-paint-flood {
-  flood-color: var(--band-ok);
+  flood-color: var(--band-quiet);
 }
 :root .lp-film::before,
 :root .lp-film-media {
@@ -283,6 +283,8 @@
   :root .gp-hero .lp-wrap {
     display: grid;
     grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    /* The ways in span every row; the spare height goes to the last row, not between the lines. */
+    grid-template-rows: auto auto auto auto 1fr;
     column-gap: 64px;
     align-items: start;
   }
@@ -291,7 +293,7 @@
   }
   :root .gp-hero .lp-wrap > .gp-entrances {
     grid-column: 2;
-    grid-row: 1 / span 6;
+    grid-row: 1 / span 5;
     margin-top: 0;
     grid-template-columns: minmax(0, 1fr);
     align-self: center;
@@ -410,52 +412,201 @@
   }
 }
 
-/* Lime is a fill, never text: kept labels and icons use the kept text colour, and every lime mark on
-   a light ground carries an ink edge so it holds 3:1. */
+/* Kept or added is deep green: a ring in the gutter, a filled tally cell, a green-washed chip.
+   Kept labels and icons use the kept text colour. */
 :root .text-ok {
   color: var(--ok-text);
-}
-:root .ch-k-kept {
-  box-shadow: inset 0 0 0 1px var(--ink);
-}
-:root :is(.ui-chip-dot, .lp-dot) {
-  box-shadow: 0 0 0 1px var(--ink);
-}
-:root .ui-band .ui-chip-dot {
-  box-shadow: none;
-}
-:root .ui-chip.is-ok {
-  color: var(--ink);
-}
-:root .audit-row.is-kept > span:first-child::before,
-:root .audit-row.is-kept > details > summary > span:first-child::before {
-  border: 1.5px solid var(--ink);
-  background: var(--ok);
 }
 :root .gn-proposal {
   border-color: var(--line-quiet);
 }
 /* On a struck row the pink cross and strike stay the loudest marks: the proposal's signal chip is
-   an outline with a lime dot instead of a lime fill. */
+   an outline with a green dot instead of a filled chip. */
 :root .audit-row.is-struck .ui-chip.is-ok {
   background: transparent;
   box-shadow: inset 0 0 0 1px var(--line-quiet);
 }
 
-/* The primary button is lime with ink text and an ink edge, wherever it sits. */
+/* The action colour is lime, used only for the primary button: ink text and an ink edge. */
 :root :is(.btn-primary, .lp-btn-primary, .has-film .lp-btn-primary, .ui-fund .ui-band-cta) {
-  background: var(--ok);
+  background: var(--action);
   border: 1px solid var(--ink);
   color: var(--ink);
 }
 :root :is(.btn-primary, .lp-btn-primary, .ui-fund .ui-band-cta):hover {
-  background: var(--ok-hover);
+  background: var(--action-hover);
 }
 :root :is(.lp-btn-primary, .has-film .lp-btn-primary, .ui-fund .ui-band-cta) .lp-btn-sq {
   background: var(--ink);
-  color: var(--ok);
+  color: var(--action);
 }
-/* The hero card's lead figure sits on a quiet ground; lime is kept for the chips inside it. */
+/* A busy or disabled primary keeps AA: ink text on a pale, not faded, ground. */
+:root .btn-primary:disabled {
+  opacity: 1;
+  background: var(--side-2);
+  border-color: var(--line-quiet);
+  color: var(--ink);
+}
+/* The hero card's lead figure sits on a quiet ground. */
 :root .lp-preview-lead {
   background: var(--side);
+}
+
+/* The struck tally: one weight, one "of N" ratio and one cell strip wherever a draft is summarised. */
+:root .tally {
+  display: grid;
+  gap: 4px;
+}
+:root .tally-draft {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+:root .tally-v {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-size: 2.25rem;
+  line-height: 1;
+  font-stretch: 108%;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+:root .tally-v > span > span:not(.text-muted) {
+  font-weight: 750;
+}
+:root .tally-v.is-pen {
+  color: var(--hivis-text);
+}
+:root .tally-v.is-ok {
+  color: var(--ok-text);
+}
+:root .tally-k {
+  font-size: 0.875rem;
+  color: var(--ink);
+}
+:root .tally .ch-anim {
+  margin-top: 8px;
+}
+@media (max-width: 760px) {
+  :root .tally-v {
+    font-size: 1.875rem;
+  }
+}
+:root button.gn-menu-item {
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+:root .gn-menu.is-end .gn-menu-list {
+  left: auto;
+  right: 0;
+}
+
+/* The filter options carry their verdict's gutter mark, so the option row is also the legend. */
+:root .audit-mark {
+  flex: none;
+  width: 10px;
+  height: 10px;
+}
+:root .audit-mark.is-kept {
+  border: 2px solid var(--ok);
+  border-radius: 50%;
+}
+:root .audit-mark.is-unsure {
+  border: 1.5px dashed var(--hivis);
+  border-radius: 50%;
+}
+:root .audit-mark.is-generic {
+  background:
+    linear-gradient(45deg, transparent 39%, var(--hivis) 39% 61%, transparent 61%),
+    linear-gradient(-45deg, transparent 39%, var(--hivis) 39% 61%, transparent 61%);
+}
+
+/* Page heroes share one type ramp: the label sits half a cap height above the headline, and the
+   lede a full cap height below it. */
+:root :is(.gp-hero, .src-hero) .lp-h1,
+:root .ui-page > div > header .lp-h1,
+:root main > .lp-kicker + .lp-h1 {
+  margin-top: 0.36em;
+  margin-bottom: 0.72em;
+}
+/* The band stacks on a 10px gap, so its headline margins are what remains of the ramp. */
+:root .ui-band-main .ui-band-h {
+  margin-top: calc(0.36em - 10px);
+  margin-bottom: calc(0.72em - 10px);
+}
+:root :is(.gp-hero, .src-hero) .lp-lede,
+:root .ui-page > div > header .lp-lede,
+:root main > .lp-h1 + .lp-lede {
+  margin-top: 0;
+}
+:root .src-hero .lp-h1 .lp-tone {
+  color: inherit;
+  font-weight: inherit;
+}
+/* Sources hero: the lede takes the right half instead of leaving it empty. */
+@media (min-width: 1024px) {
+  :root .src-hero .lp-wrap {
+    display: grid;
+    grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+    column-gap: 64px;
+    align-items: end;
+  }
+  :root .src-hero .lp-wrap > * {
+    grid-column: 1;
+  }
+  :root .src-hero .lp-wrap > .lp-lede {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    align-self: end;
+    margin-bottom: 0.9rem;
+  }
+}
+
+/* Plain grounds: no paper-grain texture on any band. */
+:root .lp-grain::after {
+  display: none;
+}
+
+/* The landing's chapter tabs are gone: each section opens on its own heading. */
+:root .lp-ch-tab {
+  display: none;
+}
+
+/* On a phone the hero label holds to one line. */
+@media (max-width: 440px) {
+  :root .lp-hero .lp-kicker {
+    font-size: 12px;
+    font-stretch: 88%;
+    white-space: nowrap;
+  }
+}
+
+/* Tags on the town header are legible: larger, with a firmer ground and edge. */
+:root .ui-band .ui-chip {
+  font-size: 13px;
+  padding: 4px 9px;
+  background: color-mix(in srgb, var(--band-text) 14%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--band-text) 45%, transparent);
+}
+
+/* /find: what you get, as one line of steps. */
+:root .find-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+:root .find-line li + li::before {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin: 0 14px 1px 12px;
+  border-top: 1.5px solid var(--line-quiet);
+  border-right: 1.5px solid var(--line-quiet);
+  transform: rotate(45deg);
 }

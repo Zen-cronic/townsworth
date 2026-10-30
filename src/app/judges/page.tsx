@@ -10,7 +10,7 @@ import { CopyablePlan } from "@/components/landing/CopyablePlan";
 import { heroFacts } from "@/components/landing/heroFacts";
 import { Objections, objectionsFor } from "@/components/landing/Objections";
 import { selectShortlist, SIMULATED_BALLOTS } from "@/lib/ballot";
-import { FundBar, LineStrip, fundSplit, lineComposition } from "@/components/charts";
+import { FundBar, StruckTally, fundSplit, lineComposition } from "@/components/charts";
 import { Figure } from "@/components/dashboard/Figure";
 import { computeProof } from "@/lib/proof";
 import { runTown } from "@/lib/run";
@@ -71,11 +71,7 @@ export default async function GuidedPath() {
         : `${town}, a ${HERO_TOWN.sponsor} data center campus. Its draft plan was written by AI alone, the way a consultant would.`,
       visual: (
         <>
-          <p className={`gp-vis-v ${comp.total - comp.kept ? "is-pen" : "is-ok"}`}>
-            <Figure value={`${comp.total - comp.kept} of ${comp.total}`} />
-          </p>
-          <p className="gp-vis-k">draft lines struck · {comp.kept} kept</p>
-          <LineStrip comp={comp} size="sm" />
+          <StruckTally comp={comp} draft={useTemplate ? "Consultant template" : "AI-written draft"} />
         </>
       ),
       notice: ft.swap
@@ -114,7 +110,7 @@ export default async function GuidedPath() {
           <p className="gp-vis-k">ideas on the ballot</p>
           <ol className="gp-rank" aria-label="Ballot positions, first to last">
             {shortlist.map((it, i) => (
-              <li key={it.id} style={{ background: `color-mix(in srgb, var(--band) ${i === 0 ? 100 : Math.round(55 - ((i - 1) / Math.max(shortlist.length - 2, 1)) * 35)}%, var(--paper))` }}>
+              <li key={it.id} style={{ background: `color-mix(in srgb, var(--ink) ${i === 0 ? 100 : Math.round(55 - ((i - 1) / Math.max(shortlist.length - 2, 1)) * 35)}%, var(--paper))` }}>
                 <span className={i === 0 ? "is-dark" : ""}>{i === 0 ? "1st" : i === 1 ? "2nd" : i === 2 ? "3rd" : `${i + 1}th`}</span>
               </li>
             ))}

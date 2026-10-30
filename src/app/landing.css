@@ -1215,7 +1215,7 @@ a:focus-visible .lp-chev {
 .st-awning .st-top,
 .st-awning .st-l,
 .st-awning .st-r {
-  fill: var(--l-band);
+  fill: var(--l-ok);
 }
 .st-tree line {
   stroke: var(--line-quiet);
@@ -1253,7 +1253,7 @@ a:focus-visible .lp-chev {
   fill: var(--l-card);
 }
 .st-tile-edge {
-  stroke: var(--l-band) !important;
+  stroke: var(--l-ok) !important;
   stroke-width: 3 !important;
 }
 .st-memo .st-top {
@@ -1335,7 +1335,7 @@ a:focus-visible .lp-chev {
   background: var(--l-ink);
 }
 .st-co.is-ok .st-co-mark {
-  background: var(--l-band);
+  background: var(--l-ok);
 }
 
 @media (min-width: 900px) {
@@ -1448,7 +1448,7 @@ a:focus-visible .lp-chev {
     outline: 2px solid var(--l-card);
   }
   .st-co.is-ok .st-co-lead {
-    border-top-color: color-mix(in srgb, var(--l-band) 60%, transparent);
+    border-top-color: color-mix(in srgb, var(--l-ok) 60%, transparent);
   }
   /* The step being drawn is marked with an ink rule; every step stays fully legible. */
   .st-copy {

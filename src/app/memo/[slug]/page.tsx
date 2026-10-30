@@ -6,10 +6,11 @@ import { AgentDrafts } from "@/components/AgentDrafts";
 import { AppHeader } from "@/components/AppHeader";
 import { PilotLink } from "@/components/PilotLink";
 import { SpyLinks } from "@/components/ui/SpyLinks";
-import { FundBar, LineStrip, SessionTimeline, fundSplit, lineComposition, sessionsByBucket, splitFigures } from "@/components/charts";
+import { FundBar, StruckTally, SessionTimeline, fundSplit, lineComposition, sessionsByBucket, splitFigures } from "@/components/charts";
 import { Figure } from "@/components/dashboard/Figure";
 import { Chevron, ChevronLeft, Download } from "@/components/dashboard/Icons";
 import { PrintButton } from "@/components/dashboard/PrintButton";
+import { EXPORT_ITEM, ExportMenu } from "@/components/ui/ExportMenu";
 import { parseFund, primaryCta, secondaryCta } from "@/components/dashboard/ui";
 import { StatusPill } from "@/components/dashboard/StatusPill";
 import { CrmExportLinks, SessionCalendarLinks } from "@/components/integrations";
@@ -30,8 +31,6 @@ const MATERIAL = [
   ["Tax", "Abatements, PILOT payments, school-district share"],
 ] as const;
 
-// The export menu's items: one plain row each.
-const menuItem = "gn-menu-item";
 
 function SectionTitle({ n, children, note }: { n: string; children: React.ReactNode; note?: React.ReactNode }) {
   return (
@@ -115,7 +114,6 @@ export default async function MemoPage({
   const comp = lineComposition(audit);
   const fundParts = fundSplit(program.items, program.unassigned);
   const sessions = sessionsByBucket(program.items);
-  const struck = generic + unverified;
   const exportBase = `/api/export/${town.slug}?fund=${program.annualFund}`;
   const prepared = new Intl.DateTimeFormat("en-US", { day: "numeric", month: "long", year: "numeric", timeZone: "America/Toronto" }).format(new Date());
 
@@ -167,24 +165,17 @@ export default async function MemoPage({
           {/* Exports line up with the memo's left edge */}
           <span className="flex flex-wrap items-start gap-2">
             <PrintButton className={primaryCta} />
-            <details className="gn-menu">
-              <summary className={secondaryCta}>
-                <Download />
-                Export
-                <Chevron className="chev h-3 w-3" />
-              </summary>
-              <div className="gn-menu-list">
-                <a href={`${exportBase}&format=csv`} className={menuItem}>
+            <ExportMenu>
+                <a href={`${exportBase}&format=csv`} className={EXPORT_ITEM}>
                   <Download />
                   Partner sheet (CSV)
                 </a>
-                <a href={`${exportBase}&format=ics`} className={menuItem}>
+                <a href={`${exportBase}&format=ics`} className={EXPORT_ITEM}>
                   <Download />
                   Calendar (.ics)
                 </a>
-                <CrmExportLinks slug={town.slug} fund={program.annualFund} linkClassName={menuItem} />
-              </div>
-            </details>
+                <CrmExportLinks slug={town.slug} fund={program.annualFund} linkClassName={EXPORT_ITEM} />
+              </ExportMenu>
           </span>
         </div>
 
@@ -216,9 +207,9 @@ export default async function MemoPage({
               ))}
             </dl>
             <div className="memo-figs mt-6">
-              <MemoFigure value={`${struck} of ${audit.length}`} label={`${struck === 1 ? "draft line struck" : "draft lines struck"} · ${audit.length - struck} kept`} tone={struck ? "pen" : undefined}>
-                {audit.length > 0 && <LineStrip comp={comp} size="sm" />}
-              </MemoFigure>
+              <div className="memo-cell">
+                <StruckTally comp={comp} draft="AI-written draft" />
+              </div>
               <MemoFigure value={String(program.items.length)} label={`program items, ${partnerPlaces} with a local partner`} tone="ok" />
               <MemoFigure value={money(program.totalAllocated)} label="itemized over 24 months" />
               <MemoFigure value={money(program.unassigned)} label="held in reserve for the committee" />

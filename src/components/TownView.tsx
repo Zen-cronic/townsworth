@@ -13,7 +13,7 @@ import { keptBreakdown } from "@/components/ui/keptBreakdown";
 import { kindOf, LOCAL_AFFINITY, shortOrg, shortSignal, shortTermHit } from "@/components/ui/labels";
 import { LiveDataNotice } from "@/components/LiveDataNotice";
 import { AudienceReach } from "@/components/qloo/AudienceReach";
-import { FundBar, LineStrip, PartnerDistance, PartnerNames, SessionTimeline, fundSplit, lineComposition, partnerPoints, sessionsByBucket } from "@/components/charts";
+import { FundBar, PartnerDistance, PartnerNames, StruckTally, SessionTimeline, fundSplit, lineComposition, partnerPoints, sessionsByBucket } from "@/components/charts";
 
 const FACILITY_LABEL: Record<string, string> = {
   "data center": "Data center",
@@ -286,7 +286,6 @@ const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one :
 export function TownView({ run }: { run: TownRun }) {
   const { town, profile, program, audit, source, qlooAdds, draft } = run;
 
-  const flagged = audit.filter((a) => !isKept(a.verdict)).length;
   const kept = keptBreakdown(audit);
   const partnerPlaces = program.items.filter((it) => it.partner).length;
   const failed = profile.failedCalls.length;
@@ -382,14 +381,15 @@ export function TownView({ run }: { run: TownRun }) {
 
       <div className="ui-page">
         <section aria-label="Summary" className="ui-stats">
-          <StatTile
-            value={`${flagged} of ${audit.length}`}
-            label={`draft lines struck · ${kept.total} kept`}
-            tone={flagged ? "pen" : "ok"}
-            more={kept.parts.length > 0 && <>Kept: {kept.parts.join(", ")}.</>}
-          >
-            {audit.length > 0 && <LineStrip comp={comp} anchorOf={(i) => anchors[i]} legend={false} />}
-          </StatTile>
+          <div className="ui-stat">
+            <StruckTally comp={comp} draft={DRAFT[source].tab} anchorOf={(i) => anchors[i]} />
+            {kept.parts.length > 0 && (
+              <details className="ui-more">
+                <summary>Details</summary>
+                <div>Kept: {kept.parts.join(", ")}.</div>
+              </details>
+            )}
+          </div>
           <StatTile value={partnerPlaces} label="local partners Qloo found" tone="ok" more={<>{qlooAdds.length} the draft never named. Each is traced to Qloo&apos;s taste data.</>}>
             {failed ? (
               <LiveDataNotice towns={[town.name]} subject="the partner list" reloadHref={planHref(source)} />
@@ -454,42 +454,39 @@ export function TownView({ run }: { run: TownRun }) {
             </nav>
           </div>
 
-          {/* Verdict legend: pills only; the definitions are a click away */}
-          <details className="group border-b border-hairline bg-concrete/50 px-5 py-2.5 text-xs text-muted sm:px-6">
-            <summary className="flex cursor-pointer flex-wrap items-center gap-2">
-              <Chip tone="pen">Not local</Chip>
-              <Chip tone="unsure">Can&apos;t confirm</Chip>
-              <Chip>Kept</Chip>
-              <span className="inline-flex items-center gap-0.5 font-medium text-ink underline decoration-rule underline-offset-2 group-hover:decoration-ink">
-                What do these mean?
-                <Chevron className="chev h-3 w-3" />
-              </span>
-            </summary>
-            <dl className="mt-3 grid gap-x-6 gap-y-2 md:grid-cols-3">
-              <div>
-                <dt className="font-medium text-ink">Not local</dt>
-                <dd>Names no local partner and matches nothing this town stands out for.</dd>
-              </div>
-              <div>
-                <dt className="font-medium text-ink">Can&apos;t confirm</dt>
-                <dd>Names a partner that isn&apos;t an institution and isn&apos;t found in Qloo or OpenStreetMap. It may exist; it can&apos;t be checked here.</dd>
-              </div>
-              <div>
-                <dt className="font-medium text-ink">Kept</dt>
-                <dd>
-                  A verified local partner, something the town stands out for, an institution we can&apos;t check here (for the committee to confirm), or a
-                  commitment kept as drafted.
-                </dd>
-              </div>
-            </dl>
-          </details>
-
-          {audit.length > 0 && <AuditTools counts={{ all: audit.length, struck: flagged, kept: kept.total }} struckIds={struckIds} />}
+          {audit.length > 0 && (
+            <AuditTools counts={{ all: audit.length, generic: comp.generic, unsure: comp.unverified, kept: kept.total }} struckIds={struckIds}>
+              {/* The verdict definitions, a click away beside the options */}
+              <details className="group text-xs text-muted open:basis-full">
+                <summary className="inline-flex cursor-pointer items-center gap-0.5 font-medium text-ink underline decoration-rule underline-offset-2 group-hover:decoration-ink">
+                  What do these mean?
+                  <Chevron className="chev h-3 w-3" />
+                </summary>
+                <dl className="mt-3 grid gap-x-6 gap-y-2 md:grid-cols-3">
+                  <div>
+                    <dt className="font-medium text-ink">Not local</dt>
+                    <dd>Names no local partner and matches nothing this town stands out for.</dd>
+                  </div>
+                  <div>
+                    <dt className="font-medium text-ink">Can&apos;t confirm</dt>
+                    <dd>Names a partner that isn&apos;t an institution and isn&apos;t found in Qloo or OpenStreetMap. It may exist; it can&apos;t be checked here.</dd>
+                  </div>
+                  <div>
+                    <dt className="font-medium text-ink">Kept</dt>
+                    <dd>
+                      A verified local partner, something the town stands out for, an institution we can&apos;t check here (for the committee to confirm), or a
+                      commitment kept as drafted.
+                    </dd>
+                  </div>
+                </dl>
+              </details>
+            </AuditTools>
+          )}
 
           {audit.length ? (
             <ol
               id="audit-lines"
-              className="group/audit px-5 data-[filter=kept]:[&>li.is-struck]:hidden data-[filter=struck]:[&>li.is-kept]:hidden sm:px-6"
+              className="group/audit px-5 data-[filter=kept]:[&>li.is-struck]:hidden data-[filter=generic]:[&>li.is-kept]:hidden data-[filter=generic]:[&>li.is-unsure]:hidden data-[filter=unsure]:[&>li:not(.is-unsure)]:hidden sm:px-6"
             >
               {segment(audit).map((seg) =>
                 seg.kind === "row" ? (

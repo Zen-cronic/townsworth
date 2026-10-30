@@ -28,7 +28,7 @@ function Bars({ bars }: { bars: Bar[] }) {
         <div key={b.label} className="grid grid-cols-[5.5rem_1fr_2.75rem] items-center gap-2 text-[11px] text-muted">
           <span className="truncate">{b.label}</span>
           <span className="h-1.5 overflow-hidden rounded-full bg-hairline">
-            <span className={`block h-full rounded-full ${b.tone === "gn" ? "bg-band" : "bg-ink/50"}`} style={{ width: `${Math.max(b.pct, 1.5)}%` }} />
+            <span className={`block h-full rounded-full ${b.tone === "gn" ? "bg-ink" : "bg-line-faint"}`} style={{ width: `${Math.max(b.pct, 1.5)}%` }} />
           </span>
           <span className="text-right font-mono tabular-nums text-ink">{b.pct}%</span>
         </div>

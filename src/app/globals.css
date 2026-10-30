@@ -1,11 +1,11 @@
 @import "tailwindcss";
 
-/* Palette: a saturated electric-blue field, ink and neutral concrete grounds, acid-lime paint for
-   what is kept or added and hot pink for a struck line and nothing else. Lime is only ever a flat
-   fill under ink text or with an ink edge, never text. Lime and pink sit far apart in lightness, so
-   they stay distinct for the common colour-vision deficiencies, and the gutter marks also differ in
-   shape. System faults and illustrative figures use violet, never pink. Every text pair below
-   passes WCAG AA on the surfaces it is used on. Every colour in the app derives from these. */
+/* Palette: a saturated electric-blue field (and brand), ink and neutral concrete grounds. Each
+   meaning has one colour: acid lime is the action (primary buttons, never text), deep green is
+   kept or added, hot pink is struck and nothing else, violet is a system fault or an illustrative
+   figure. Green and pink stay apart in lightness for the common colour-vision deficiencies, and
+   the gutter marks also differ in shape. Every text pair below passes WCAG AA on the surfaces it
+   is used on. Every colour in the app derives from these. */
 :root {
   --concrete: #e5e4de;
   --paper: #f8f7f3;
@@ -23,10 +23,13 @@
   --hivis: #e9369d;
   --hivis-text: #b0166f;
   --hivis-wash: #fcd6ec;
-  --ok: #c9ff3d;
-  --ok-hover: #b8f01f;
-  --ok-text: #2f6b4f;
-  --ok-wash: #c9ff3d;
+  --ok: #143d2a;
+  --ok-text: #1f5a3e;
+  --ok-wash: #e0ece4;
+  --action: #c9ff3d;
+  --action-hover: #b8f01f;
+  --plum: #71405a;
+  --slate: #56708c;
   --amber: #5537b8;
   --amber-mark: #7853ff;
   --amber-rule: #c9b8ff;
@@ -39,7 +42,7 @@
   --band-soft: #e8edff;
   --band-muted: #d3ddff;
   --band-quiet: #a9bcff;
-  --band-ok: #c9ff3d;
+  --band-ok: #b9ecc9;
   --band-pen: #ffd3ec;
   --band-amber: #e9e2ff;
   --band-contour: #ffffff;
@@ -105,6 +108,12 @@ body {
   .btn:disabled {
     cursor: not-allowed;
     opacity: 0.45;
+  }
+  @media (max-width: 640px) {
+    .btn {
+      white-space: normal;
+      text-align: left;
+    }
   }
   .btn-primary {
     background: var(--ink);
