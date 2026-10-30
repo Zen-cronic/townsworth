@@ -2913,15 +2913,15 @@ a:focus-visible .lp-chev {
   }
 }
 
-/* Stack step labels: In, Signals and Out sit in the deep green label box. */
+/* Stack step labels: In, Signals and Out sit in the bright green label box. */
 :root li.st-step:is(.is-0, .is-1, .is-2) .lp-step-n {
   display: inline-flex;
   align-items: center;
   width: fit-content;
   padding: 4px 10px;
   border-radius: var(--r-btn);
-  background: var(--ok-text);
-  color: #ffffff;
+  background: var(--action);
+  color: var(--ink);
   font-weight: 650;
   letter-spacing: 0.01em;
 }
