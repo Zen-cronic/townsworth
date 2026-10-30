@@ -6,7 +6,7 @@ import { Words } from "./Words";
 
 export interface ProofStat {
   pct: number;
-  // Which side the figure measures; only the product's own figures take the green.
+  // Which side the figure measures.
   arm: "llm" | "gn";
   label: string;
   note: string;

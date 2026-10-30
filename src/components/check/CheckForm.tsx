@@ -152,10 +152,10 @@ export function CheckForm({ town, sample, townSample }: { town: Town; sample?: S
             aria-describedby="plan-count plan-disclosure"
             aria-invalid={tooLong || undefined}
             placeholder={"One commitment per line works best, e.g.\n1. Sponsor a STEM summer camp for local students\n2. Host an annual community picnic"}
-            className={`block min-h-56 w-full resize-y rounded-md border bg-paper px-3 py-2.5 font-mono text-[13px] leading-relaxed text-ink transition-colors duration-150 placeholder:text-muted/70 hover:border-ink/50 focus:border-ink focus:outline-none disabled:bg-concrete/60 disabled:text-muted ${tooLong ? "border-hivis" : "border-rule"}`}
+            className={`block min-h-56 w-full resize-y rounded-md border bg-paper px-3 py-2.5 font-mono text-[13px] leading-relaxed text-ink transition-colors duration-150 placeholder:text-muted/70 hover:border-ink/50 focus:border-ink focus:outline-none disabled:bg-concrete/60 disabled:text-muted ${tooLong ? "border-amber" : "border-rule"}`}
           />
           <div className="mt-1.5 flex flex-wrap items-center justify-between gap-2 text-xs">
-            <p id="plan-count" aria-live="polite" className={`font-mono tabular-nums ${tooLong ? "font-medium text-hivis-text" : "text-muted"}`}>
+            <p id="plan-count" aria-live="polite" className={`font-mono tabular-nums ${tooLong ? "font-medium text-amber" : "text-muted"}`}>
               {text.length.toLocaleString("en-US")} / {MAX_CHARS.toLocaleString("en-US")} characters
               {tooLong && ` · ${(text.length - MAX_CHARS).toLocaleString("en-US")} over the limit: trim it before checking`}
             </p>
@@ -215,8 +215,8 @@ export function CheckForm({ town, sample, townSample }: { town: Town; sample?: S
             </div>
           )}
           {view === "error" && (
-            <div role="alert" className="mt-4 flex flex-wrap items-center gap-3 rounded-md border border-hivis/35 bg-hivis-wash px-4 py-3 text-sm">
-              <Notice className="h-4 w-4 text-hivis-text" />
+            <div role="alert" className="mt-4 flex flex-wrap items-center gap-3 rounded-md border border-amber/35 bg-amber-wash px-4 py-3 text-sm">
+              <Notice className="h-4 w-4 text-amber" />
               <span className="min-w-0 flex-1">{error}</span>
               <button type="button" onClick={() => void check()} className={secondaryCta}>
                 Try again

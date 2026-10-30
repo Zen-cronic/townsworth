@@ -1,8 +1,8 @@
-/* Paint marks and type, applied after the base sheets. The look follows the marks a utility locator
-   sprays on concrete and asphalt before anyone digs: survey pink is the one strong accent and means
-   struck; green is the kept mark; green paint on warm asphalt carries the hero. Kept is a ring and
-   struck is a cross, so the two differ in shape as well as colour. Selectors carry :root so they
-   outrank the single-class rules they refine. */
+/* Marks and type, applied after the base sheets. The look borrows the paint marks a utility locator
+   sprays before anyone digs: hot pink is the one strong accent and means struck; acid lime is the
+   kept or added mark, always a flat fill with ink text or an ink edge; an electric-blue field
+   carries the hero and page bands. Kept is a ring and struck is a cross, so the two differ in shape
+   as well as colour. Selectors carry :root so they outrank the single-class rules they refine. */
 
 /* Labels: sentence case in the body face, never tracked capitals. */
 :root .lp-kicker,
@@ -133,7 +133,7 @@
   background: transparent;
 }
 
-/* Struck: a thick pink survey stroke through the text. */
+/* Struck: a thick pink stroke through the text. */
 :root :is(.strike, .lp-strike) {
   background-size: 100% 3px;
   background-position: 0 56%;
@@ -201,7 +201,7 @@
   color: var(--ink);
 }
 
-/* The hero and closing drawing: the site plan redrawn as green locate paint on warm asphalt.
+/* The hero and closing drawing: the site plan redrawn as lime linework on the blue field.
    The filter keeps only the drawing's light linework and recolours it; the dark ground drops out. */
 :root .lp-film {
   background-image: none;
@@ -306,7 +306,7 @@
 :root .lp-btn-primary {
   box-shadow: none;
 }
-/* On the asphalt band: primary is paper, secondary an outline in paint white. */
+/* On the blue band: primary is lime, secondary an outline in white. */
 :root .ui-fund button,
 :root .ui-fund .ui-band-cta {
   border-radius: 2px;
@@ -408,4 +408,54 @@
   :root .ui-page > div > header .lp-h1 {
     font-size: clamp(2.25rem, 1.2rem + 1.9vw, 3.125rem);
   }
+}
+
+/* Lime is a fill, never text: kept labels and icons use the kept text colour, and every lime mark on
+   a light ground carries an ink edge so it holds 3:1. */
+:root .text-ok {
+  color: var(--ok-text);
+}
+:root .ch-k-kept {
+  box-shadow: inset 0 0 0 1px var(--ink);
+}
+:root :is(.ui-chip-dot, .lp-dot) {
+  box-shadow: 0 0 0 1px var(--ink);
+}
+:root .ui-band .ui-chip-dot {
+  box-shadow: none;
+}
+:root .ui-chip.is-ok {
+  color: var(--ink);
+}
+:root .audit-row.is-kept > span:first-child::before,
+:root .audit-row.is-kept > details > summary > span:first-child::before {
+  border: 1.5px solid var(--ink);
+  background: var(--ok);
+}
+:root .gn-proposal {
+  border-color: var(--line-quiet);
+}
+/* On a struck row the pink cross and strike stay the loudest marks: the proposal's signal chip is
+   an outline with a lime dot instead of a lime fill. */
+:root .audit-row.is-struck .ui-chip.is-ok {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--line-quiet);
+}
+
+/* The primary button is lime with ink text and an ink edge, wherever it sits. */
+:root :is(.btn-primary, .lp-btn-primary, .has-film .lp-btn-primary, .ui-fund .ui-band-cta) {
+  background: var(--ok);
+  border: 1px solid var(--ink);
+  color: var(--ink);
+}
+:root :is(.btn-primary, .lp-btn-primary, .ui-fund .ui-band-cta):hover {
+  background: var(--ok-hover);
+}
+:root :is(.lp-btn-primary, .has-film .lp-btn-primary, .ui-fund .ui-band-cta) .lp-btn-sq {
+  background: var(--ink);
+  color: var(--ok);
+}
+/* The hero card's lead figure sits on a quiet ground; lime is kept for the chips inside it. */
+:root .lp-preview-lead {
+  background: var(--side);
 }

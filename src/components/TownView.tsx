@@ -71,7 +71,7 @@ function Why({ item, gloss }: { item: ProgramItem; gloss?: string }) {
           <Chevron className="chev h-3 w-3" />
         </span>
       </summary>
-      <div className="mt-2 space-y-1.5 border-l border-ok/40 pl-3 leading-relaxed text-muted">
+      <div className="mt-2 space-y-1.5 border-l border-rule pl-3 leading-relaxed text-muted">
         {gloss && <p>{gloss}</p>}
         {item.provenance.map((pv, i) => (
           <p key={i}>
@@ -268,7 +268,7 @@ function QlooCalls({ calls }: { calls: TownRun["profile"]["calls"] }) {
   return (
     <details id="qloo-calls" className="group no-print scroll-mt-24 text-xs">
       <summary className="cursor-pointer">
-        <Chip tone={failed ? "pen" : "ok"}>
+        <Chip tone={failed ? "warn" : "plain"}>
           Qloo calls: {calls.length} · {failed ? `${failed} failed` : "all OK"}
         </Chip>
       </summary>

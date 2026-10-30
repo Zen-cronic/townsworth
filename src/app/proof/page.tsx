@@ -28,7 +28,7 @@ function Bars({ bars }: { bars: Bar[] }) {
         <div key={b.label} className="grid grid-cols-[5.5rem_1fr_2.75rem] items-center gap-2 text-[11px] text-muted">
           <span className="truncate">{b.label}</span>
           <span className="h-1.5 overflow-hidden rounded-full bg-hairline">
-            <span className={`block h-full rounded-full ${b.tone === "gn" ? "bg-ok" : "bg-ink/50"}`} style={{ width: `${Math.max(b.pct, 1.5)}%` }} />
+            <span className={`block h-full rounded-full ${b.tone === "gn" ? "bg-band" : "bg-ink/50"}`} style={{ width: `${Math.max(b.pct, 1.5)}%` }} />
           </span>
           <span className="text-right font-mono tabular-nums text-ink">{b.pct}%</span>
         </div>
@@ -237,9 +237,9 @@ export default async function ProofPage() {
                 {towns.map((t) => (
                   <tr key={t.slug}>
                     <td className="sticky left-0 z-10 bg-paper px-4 py-3 pl-5 sm:pl-6">
-                      <Link href={`/town/${t.slug}`} className="group inline-flex items-center gap-1.5 rounded font-medium hover:text-hivis-text">
+                      <Link href={`/town/${t.slug}`} className="group inline-flex items-center gap-1.5 rounded font-medium hover:text-ink">
                         {t.name}
-                        <Chevron className="h-3 w-3 text-muted group-hover:text-hivis-text" />
+                        <Chevron className="h-3 w-3 text-muted group-hover:text-ink" />
                       </Link>
                       {t.thin && (
                         <span className="ml-2">
@@ -248,7 +248,7 @@ export default async function ProofPage() {
                       )}
                       {t.failed && (
                         <span className="ml-2">
-                          <StatusPill tone="flag">Qloo didn&apos;t answer</StatusPill>
+                          <StatusPill tone="warn">Qloo didn&apos;t answer</StatusPill>
                         </span>
                       )}
                     </td>

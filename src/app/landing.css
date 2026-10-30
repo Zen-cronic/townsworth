@@ -521,7 +521,7 @@ a:focus-visible .lp-chev {
   color: var(--l-hivis-text);
 }
 
-/* The survey-pink strike. Static by default; the replay below animates it. */
+/* The pink strike. Static by default; the replay below animates it. */
 .lp-strike {
   text-decoration: none;
   color: var(--l-muted);
@@ -533,7 +533,7 @@ a:focus-visible .lp-chev {
   box-decoration-break: slice;
 }
 .lp-swap {
-  border: 1px solid color-mix(in srgb, var(--l-ok) 40%, var(--l-hairline));
+  border: 1px solid var(--l-rule);
   border-radius: 4px;
   background: var(--l-card);
   padding: 12px 14px;
@@ -668,7 +668,7 @@ a:focus-visible .lp-chev {
   background: var(--l-band-quiet);
 }
 .lp-legend .is-gn::before {
-  background: var(--l-band-ok);
+  background: var(--l-band-text);
 }
 .lp-h2h {
   list-style: none;
@@ -728,7 +728,7 @@ a:focus-visible .lp-chev {
   background: var(--l-band-quiet);
 }
 .lp-h2h-line.is-gn .lp-h2h-fill {
-  background: var(--l-band-ok);
+  background: var(--l-band-text);
 }
 .lp-h2h-val {
   text-align: right;
@@ -741,7 +741,7 @@ a:focus-visible .lp-chev {
 }
 .lp-h2h-line.is-gn .lp-h2h-val {
   font-weight: 700;
-  color: var(--l-band-ok);
+  color: var(--l-band-text);
 }
 .lp-h2h-line.is-gn .lp-h2h-who {
   color: var(--l-paper);
@@ -846,8 +846,6 @@ a:focus-visible .lp-chev {
   display: grid;
   align-content: start;
   gap: 4px;
-  padding-left: 12px;
-  border-left: 2px solid var(--l-ok);
 }
 .lp-town-pick.is-empty {
   border-left-color: var(--amber-mark);
@@ -1217,7 +1215,7 @@ a:focus-visible .lp-chev {
 .st-awning .st-top,
 .st-awning .st-l,
 .st-awning .st-r {
-  fill: var(--l-ok);
+  fill: var(--l-band);
 }
 .st-tree line {
   stroke: var(--line-quiet);
@@ -1255,7 +1253,7 @@ a:focus-visible .lp-chev {
   fill: var(--l-card);
 }
 .st-tile-edge {
-  stroke: var(--l-ok) !important;
+  stroke: var(--l-band) !important;
   stroke-width: 3 !important;
 }
 .st-memo .st-top {
@@ -1337,7 +1335,7 @@ a:focus-visible .lp-chev {
   background: var(--l-ink);
 }
 .st-co.is-ok .st-co-mark {
-  background: var(--l-ok);
+  background: var(--l-band);
 }
 
 @media (min-width: 900px) {
@@ -1450,7 +1448,7 @@ a:focus-visible .lp-chev {
     outline: 2px solid var(--l-card);
   }
   .st-co.is-ok .st-co-lead {
-    border-top-color: color-mix(in srgb, var(--l-ok) 60%, transparent);
+    border-top-color: color-mix(in srgb, var(--l-band) 60%, transparent);
   }
   /* The step being drawn is marked with an ink rule; every step stays fully legible. */
   .st-copy {
@@ -2027,7 +2025,7 @@ a:focus-visible .lp-chev {
   font-family: var(--l-mono);
   font-size: 11px;
   font-weight: 500;
-  color: var(--l-ok-text);
+  color: var(--l-ink);
 }
 .gp-step .lp-ctas {
   margin-top: 8px;
@@ -2606,7 +2604,7 @@ a:focus-visible .lp-chev {
   color: var(--l-band-text);
 }
 .ui-band .ui-chip-dot {
-  background: var(--l-band-ok);
+  background: var(--l-band-text);
 }
 .ui-band .ui-chip.is-warn {
   color: var(--l-band-amber);
@@ -2615,8 +2613,9 @@ a:focus-visible .lp-chev {
 .ui-band-muted {
   color: var(--l-band-soft);
 }
+/* A system fault (a call that failed) is a warning, never the strike colour. */
 .ui-band-alert {
-  color: var(--l-band-pen);
+  color: var(--l-band-amber);
 }
 .ui-band-warn {
   color: var(--l-band-amber);
@@ -2773,7 +2772,7 @@ a:focus-visible .lp-chev {
     text-decoration-color: var(--l-rule);
   }
   .ui-band-alert {
-    color: var(--l-hivis-text);
+    color: var(--l-amber-text);
   }
   .ui-band-warn {
     color: var(--l-amber-text);
@@ -2784,7 +2783,7 @@ a:focus-visible .lp-chev {
     color: var(--l-ink);
   }
   .ui-band .ui-chip-dot {
-    background: var(--l-ok);
+    background: var(--l-ink);
   }
   .ui-band .ui-chip.is-warn {
     color: var(--l-amber-text);
@@ -2810,7 +2809,7 @@ a:focus-visible .lp-chev {
 }
 .live-notice b {
   font-weight: 650;
-  color: var(--hivis-text);
+  color: var(--amber);
 }
 .live-notice a {
   color: var(--ink);
@@ -2823,7 +2822,7 @@ a:focus-visible .lp-chev {
   color: var(--l-band-muted);
 }
 .is-ink .live-notice b {
-  color: var(--l-band-pen);
+  color: var(--l-band-amber);
 }
 .is-ink .live-notice a {
   color: var(--paper);

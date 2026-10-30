@@ -100,7 +100,7 @@ export default async function GuidedPath() {
           <p className="gp-vis-k">ideas on the ballot</p>
           <ol className="gp-rank" aria-label="Ballot positions, first to last">
             {shortlist.map((it, i) => (
-              <li key={it.id} style={{ background: `color-mix(in srgb, var(--ok) ${i === 0 ? 100 : Math.round(55 - ((i - 1) / Math.max(shortlist.length - 2, 1)) * 35)}%, var(--paper))` }}>
+              <li key={it.id} style={{ background: `color-mix(in srgb, var(--band) ${i === 0 ? 100 : Math.round(55 - ((i - 1) / Math.max(shortlist.length - 2, 1)) * 35)}%, var(--paper))` }}>
                 <span className={i === 0 ? "is-dark" : ""}>{i === 0 ? "1st" : i === 1 ? "2nd" : i === 2 ? "3rd" : `${i + 1}th`}</span>
               </li>
             ))}

@@ -5,7 +5,7 @@ const share = (p: FundPart) => (p.amount > 0 && p.pct < 1 ? "<1%" : `${p.pct}%`)
 
 const usd = (n: number) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n);
 
-// Segments that can carry an inside label at AA contrast: paper on green or asphalt, ink on pale concrete.
+// Segments that can carry an inside label at AA contrast: paper on blue or ink, ink on pale concrete.
 const DARK = new Set<FundPart["key"]>(["training", "grants"]);
 const LABELLED = new Set<FundPart["key"]>(["training", "grants", "channels"]);
 

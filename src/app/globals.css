@@ -1,10 +1,11 @@
 @import "tailwindcss";
 
-/* Locate palette: the marks a utility locator paints on concrete and asphalt before anyone digs.
-   Concrete grounds, asphalt bands, survey pink for a struck line and nothing else, green paint for
-   what is kept or added. Pink and green stay apart for the common colour-vision deficiencies, and the
-   gutter marks also differ in shape. Every text pair below passes WCAG AA on the surfaces it is used
-   on. Every colour in the app derives from these. */
+/* Palette: a saturated electric-blue field, ink and neutral concrete grounds, acid-lime paint for
+   what is kept or added and hot pink for a struck line and nothing else. Lime is only ever a flat
+   fill under ink text or with an ink edge, never text. Lime and pink sit far apart in lightness, so
+   they stay distinct for the common colour-vision deficiencies, and the gutter marks also differ in
+   shape. System faults and illustrative figures use violet, never pink. Every text pair below
+   passes WCAG AA on the surfaces it is used on. Every colour in the app derives from these. */
 :root {
   --concrete: #e5e4de;
   --paper: #f8f7f3;
@@ -19,28 +20,29 @@
   --line-quiet: #85857f;
   --line-faint: #adaca5;
   --line-fainter: #c6c5be;
-  --hivis: #c41a6b;
-  --hivis-text: #a8125a;
-  --hivis-wash: #f6dce8;
-  --ok: #3a6e00;
-  --ok-text: #2f5a00;
-  --ok-wash: #e0ebcd;
-  --amber: #5f4b00;
-  --amber-mark: #d9ad00;
-  --amber-rule: #e2cd70;
-  --amber-wash: #f4e8b0;
-  --contour: #2b6a9e;
+  --hivis: #e9369d;
+  --hivis-text: #b0166f;
+  --hivis-wash: #fcd6ec;
+  --ok: #c9ff3d;
+  --ok-hover: #b8f01f;
+  --ok-text: #2f6b4f;
+  --ok-wash: #c9ff3d;
+  --amber: #5537b8;
+  --amber-mark: #7853ff;
+  --amber-rule: #c9b8ff;
+  --amber-wash: #e6defe;
+  --contour: #137a6c;
   --focus: #1b1c1e;
-  /* Warm asphalt band (hero, evidence, town header) and the paint that sits on it. */
-  --band: #28261f;
-  --band-text: #f5f3ec;
-  --band-soft: #dedbd1;
-  --band-muted: #bcb8ac;
-  --band-quiet: #8e8a7f;
-  --band-ok: #a4dc63;
-  --band-pen: #ff7ab5;
-  --band-amber: #f2cd3c;
-  --band-contour: #f5f3ec;
+  /* The electric-blue field (hero, evidence band, page headers) and what sits on it. */
+  --band: #2450d8;
+  --band-text: #ffffff;
+  --band-soft: #e8edff;
+  --band-muted: #d3ddff;
+  --band-quiet: #a9bcff;
+  --band-ok: #c9ff3d;
+  --band-pen: #ffd3ec;
+  --band-amber: #e9e2ff;
+  --band-contour: #ffffff;
   /* Type roles: Archivo for text and headings; figures use its tabular numerals. */
   --font-body: var(--font-archivo);
   --font-display: var(--font-archivo);
@@ -173,7 +175,7 @@ details[open] > summary .chev { transform: rotate(90deg); }
   to { background-position: -100% 0; }
 }
 
-/* Signature moment: the survey-pink strike sweeping across a generic item. */
+/* Signature moment: the pink strike sweeping across a generic item. */
 .strike {
   background-image: linear-gradient(var(--hivis), var(--hivis));
   background-repeat: no-repeat;

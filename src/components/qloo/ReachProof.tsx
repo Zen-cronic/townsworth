@@ -21,7 +21,7 @@ function Cell({ status, place, ranked, fit }: { status?: LensStatus; place?: str
   if (status === "unchecked") return <StatusPill tone="neutral">Couldn&apos;t check</StatusPill>;
   return (
     <span className="flex flex-col items-start gap-1">
-      <StatusPill tone="flag">Not reached</StatusPill>
+      <StatusPill tone="warn">Not reached</StatusPill>
       <span className="text-xs text-muted">{status === "no-fit" ? `${place}: ${fit === "ceiling" ? "non-grant cap reached" : "reserve too small"}` : ranked === 0 ? "No places ranked" : "No eligible host"}</span>
     </span>
   );

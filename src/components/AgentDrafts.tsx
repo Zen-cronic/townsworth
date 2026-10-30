@@ -133,7 +133,7 @@ export function AgentDrafts({ slug, fund }: { slug: string; fund: number }) {
 
         {state === "error" && (
           <div className="flex gap-3 border-t border-hairline px-5 py-4 text-sm sm:px-6">
-            <Notice className="mt-0.5 h-4 w-4 text-hivis-text" />
+            <Notice className="mt-0.5 h-4 w-4 text-amber" />
             <p>
               <span className="font-medium">{errorText ?? "The drafting agent is unavailable right now."}</span>{" "}
               <span className="text-muted">The program, the partner sheet and the calendar still work.{errorText ? "" : " Try again in a moment."}</span>

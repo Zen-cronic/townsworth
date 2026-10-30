@@ -9,7 +9,6 @@ import { Check, Chevron, Notice } from "@/components/dashboard/Icons";
 import { Figure } from "@/components/dashboard/Figure";
 import { ProvenanceChip } from "@/components/dashboard/ProvenanceChip";
 import { Chip } from "@/components/ui";
-import { StatusPill } from "@/components/dashboard/StatusPill";
 import { cadenceLower, formatPhone, km, quotedName } from "@/components/dashboard/format";
 import { secondaryCta } from "@/components/dashboard/ui";
 import { CheckExports } from "./CheckExports";
@@ -146,11 +145,7 @@ function AuditLine({ row, index }: { row: AuditRow; index: number }) {
           </span>
         </p>
         <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1">
-          {kept ? (
-            <StatusPill tone="ok">Kept</StatusPill>
-          ) : (
-            <StatusPill tone={row.verdict === "unverified" ? "unsure" : "flag"}>{row.verdict === "unverified" ? "Can't confirm" : "Not local"}</StatusPill>
-          )}
+          {kept ? <Chip>Kept</Chip> : row.verdict === "unverified" ? <Chip tone="unsure">Can&apos;t confirm</Chip> : null}
           <span className="text-xs text-muted">{BUCKETS[row.bucket].label}</span>
           {missing && <span className="text-xs text-muted">· &ldquo;{missing}&rdquo; not found locally</span>}
         </div>
@@ -316,13 +311,13 @@ export function CheckResults({ result }: { result: CheckResult }) {
         <dl className="mt-3 grid gap-x-6 gap-y-2 md:grid-cols-3">
           <div className="flex items-start gap-2">
             <dt>
-              <StatusPill tone="flag">Not local</StatusPill>
+              <Chip tone="pen">Not local</Chip>
             </dt>
             <dd className="pt-0.5">Names no local partner and matches nothing this town stands out for.</dd>
           </div>
           <div className="flex items-start gap-2">
             <dt>
-              <StatusPill tone="unsure">Can&apos;t confirm</StatusPill>
+              <Chip tone="unsure">Can&apos;t confirm</Chip>
             </dt>
             <dd className="pt-0.5">Names a partner that isn&apos;t an institution and isn&apos;t found in Qloo or OpenStreetMap. It may exist; it can&apos;t be checked here.</dd>
           </div>
