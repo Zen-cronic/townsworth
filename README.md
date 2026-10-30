@@ -26,10 +26,11 @@ An own-town check (partners found in their own town's Qloo places 100% vs a diff
 The guided path is at `/judges`.
 1. Open `/town/mount-pleasant-wi`: the AI-written plan, checked line by line. Real partners and named institutions are kept. Items that name nothing local are struck, and a local host venue or supplier is put in their place.
 2. Click **why?** on any replacement to see the Qloo signal behind it.
-3. Open the commitments memo, download the partner sheet (CSV) and calendar (.ics), and click **Draft outreach** to run the OpenAI agent.
-4. **Send the shortlist to residents** from the memo: rank the grants and events in the resident ballot, then see the committee tally. The tally uses 120 simulated sample ballots plus yours, and every screen says so. Your ballot stays in your browser.
-5. **Type any US or Canadian town** in the header (try *Taylor, Texas*, a chip fab, or *St. Thomas, Ontario*, a battery plant). It checks the typical consultant template, or click **Have AI write a draft now** to have OpenAI write a fresh draft live (about 20 s) and check that.
-6. Switch towns in the header. Kemmerer, WY shows the plan with limited local data.
+3. Scroll to **The plan on the map**: a 3D map of the town with the facility site, the Qloo-ranked places within 15 km and a flow from the site to each program venue. On the consultant template (`/town/mount-pleasant-wi?plan=agency`), click **Apply all 7 swaps** and the flows redraw to the local venues as the total updates; click a venue for its rank and costed sessions. **Full screen** (or F) keeps the plan beside the map; Esc exits.
+4. Open the commitments memo, download the partner sheet (CSV) and calendar (.ics), and click **Draft outreach** to run the OpenAI agent.
+5. **Send the shortlist to residents** from the memo: rank the grants and events in the resident ballot, then see the committee tally. The tally uses 120 simulated sample ballots plus yours, and every screen says so. Your ballot stays in your browser.
+6. **Type any US or Canadian town** in the header (try *Taylor, Texas*, a chip fab, or *St. Thomas, Ontario*, a battery plant). It checks the typical consultant template, or click **Have AI write a draft now** to have OpenAI write a fresh draft live (about 20 s) and check that.
+7. Switch towns in the header. Kemmerer, WY shows the plan with limited local data.
 
 ## Who pays, and why now
 - **The buyer:** the community-affairs or host-community lead at a hyperscaler, developer, fab or utility. They already run these funds: Micron's $500M/20-year Green CHIPS fund ([ESD](https://esd.ny.gov/green-chips-community-investment-fund)), Frederick County MD's $110M+ data-center CBA ([MACo, Sep 2026](https://conduitstreet.mdcounties.org/2026/09/02/frederick-secures-110m-community-benefits-agreement-for-data-center-campus/)), Swatara Township PA's $120.3M package ([Blackridge, Oct 2026](https://www.blackridgeresearch.com/news-releases/swatara-township-approves-usd-120-3-million-community-benefits-package-for-two-proposed-data-centers)).
