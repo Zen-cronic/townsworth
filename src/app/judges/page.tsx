@@ -15,6 +15,7 @@ import { Figure } from "@/components/dashboard/Figure";
 import { computeProof } from "@/lib/proof";
 import { runTown } from "@/lib/run";
 import { HERO_SAMPLE_ID, sampleCheckHref, samplePlanById } from "@/lib/samplePlans";
+import { SpyLinks } from "@/components/ui/SpyLinks";
 import { HERO_TOWN, TOWNS, townBySlug } from "@/lib/towns";
 
 export const metadata: Metadata = {
@@ -36,13 +37,24 @@ interface Step {
 }
 
 export default async function GuidedPath() {
-  const [run, proof] = await Promise.all([runTown(HERO_TOWN.slug, undefined, "llm"), computeProof()]);
+  const [run, template, proof] = await Promise.all([
+    runTown(HERO_TOWN.slug, undefined, "llm"),
+    runTown(HERO_TOWN.slug, undefined, "agency"),
+    computeProof(),
+  ]);
   if (!run) notFound();
   const f = heroFacts(run);
+  // Step 1 has to show a strike. When the AI-written draft strikes nothing, it opens the
+  // consultant template instead, at its strongest swap; the kept institution stays the second link.
+  const useTemplate = !f.swap && !!template;
+  const first = useTemplate && template ? template : run;
+  const ft = useTemplate && template ? heroFacts(template) : f;
+  const firstTownHref = useTemplate ? `${f.townHref}?plan=agency` : f.townHref;
+  const firstSwapHref = ft.swap ? (useTemplate ? `${firstTownHref}#line-${ft.swap.line}` : ft.swap.href) : undefined;
   const t = proof.totals;
   const heroProof = proof.towns.find((p) => p.slug === HERO_TOWN.slug);
   const town = `${HERO_TOWN.name}, ${HERO_TOWN.region}`;
-  const comp = lineComposition(run.audit);
+  const comp = lineComposition(first.audit);
   const fund = fundSplit(run.program.items, run.program.unassigned);
   const shortlist = selectShortlist(run.program.items);
   const usd = (n: number) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n);
@@ -54,20 +66,22 @@ export default async function GuidedPath() {
   const steps: Step[] = [
     {
       title: "The draft, checked line by line",
-      body: `${town}, a ${HERO_TOWN.sponsor} data center campus. Its draft plan was written by AI alone, the way a consultant would.`,
+      body: useTemplate
+        ? `${town}, a ${HERO_TOWN.sponsor} data center campus, checked against the generic plan a consultancy might send to any town.`
+        : `${town}, a ${HERO_TOWN.sponsor} data center campus. Its draft plan was written by AI alone, the way a consultant would.`,
       visual: (
         <>
-          <p className="gp-vis-v is-ok">
-            <Figure value={`${comp.kept} of ${comp.total}`} />
+          <p className={`gp-vis-v ${comp.total - comp.kept ? "is-pen" : "is-ok"}`}>
+            <Figure value={`${comp.total - comp.kept} of ${comp.total}`} />
           </p>
-          <p className="gp-vis-k">draft lines kept</p>
+          <p className="gp-vis-k">draft lines struck · {comp.kept} kept</p>
           <LineStrip comp={comp} size="sm" />
         </>
       ),
-      notice: f.swap
-        ? `Line ${f.swap.line} is struck: it could fit any town. In its place: ${f.swap.title}${f.swap.rank ? `, #${f.swap.rank} by local affinity` : ""}. Click “Why” to see the Qloo signal.${f.institution ? ` Line ${f.institution.line} keeps ${f.institution.name}: real institutions stay.` : ""}`
+      notice: ft.swap
+        ? `Line ${ft.swap.line} is struck: it could fit any town. In its place: ${ft.swap.title}${ft.swap.rank ? `, #${ft.swap.rank} by local affinity` : ""}. Click “Why” to see the Qloo signal.${!useTemplate && f.institution ? ` Line ${f.institution.line} keeps ${f.institution.name}: real institutions stay.` : ""}`
         : "Struck lines could fit any town; each replacement names a local place and the Qloo signal behind it.",
-      primary: { href: f.swap?.href ?? f.townHref, label: f.swap ? `Open line ${f.swap.line}` : "Open the check" },
+      primary: { href: firstSwapHref ?? firstTownHref, label: ft.swap ? `Open line ${ft.swap.line}` : "Open the check" },
       secondary: f.institution ? { href: f.institution.href, label: "See a kept institution" } : undefined,
     },
     {
@@ -218,13 +232,14 @@ export default async function GuidedPath() {
               <ol>
                 {steps.map((s, i) => (
                   <li key={s.title}>
-                    <a href={`#step-${i + 1}`}>
+                    <a href={`#step-${i + 1}`} data-step={i + 1} aria-label={`Step ${i + 1}: ${s.title}`}>
                       <span aria-hidden="true" />
                       {s.title}
                     </a>
                   </li>
                 ))}
               </ol>
+              <SpyLinks current="step" />
             </nav>
 
             <div>
@@ -232,6 +247,9 @@ export default async function GuidedPath() {
                 {steps.map((s, i) => (
                   <li key={s.title} id={`step-${i + 1}`} className="gp-step">
                     <div className="gp-step-body">
+                      <p className="lp-kicker">
+                        Step {i + 1} of {steps.length}
+                      </p>
                       <h2 className="lp-h2">{s.title}</h2>
                       <p>{s.body}</p>
                       <p className="gp-notice">
