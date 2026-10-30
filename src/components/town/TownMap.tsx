@@ -191,6 +191,9 @@ export function TownMap({ data, townName }: { data: MapData; townName: string })
             />
           )}
           <Legend />
+          {data.venues.length === 0 && !failed && (
+            <p className="tm-empty">No venue in this plan has a Qloo map position here. The lines are listed beside the map.</p>
+          )}
           {!failed && (
             <button type="button" className="tm-btn tm-reset" onClick={() => (setFocus(undefined), setResetTick((t) => t + 1))}>
               Reset view
@@ -292,7 +295,9 @@ export function TownMap({ data, townName }: { data: MapData; townName: string })
             </label>
             {data.unplaced.length > 0 && (
               <details className="tm-unplaced">
-                <summary>{data.unplaced.length} partners with no map position</summary>
+                <summary>
+                  {data.unplaced.length} {data.unplaced.length === 1 ? "partner" : "partners"} with no map position
+                </summary>
                 <ul>
                   {data.unplaced.map((u) => (
                     <li key={u.name}>

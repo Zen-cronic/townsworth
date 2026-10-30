@@ -203,7 +203,7 @@ export default function TownMapCanvas({ data, legs, venues, showPlaces, focus, h
       }
       map.current = m;
       m.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), "top-right");
-      m.addControl(new maplibregl.AttributionControl(), "bottom-right");
+      m.addControl(new maplibregl.AttributionControl({ customAttribution: "© OpenStreetMap contributors" }), "bottom-right");
       m.on("error", (e) => {
         // A missing tile or glyph is not fatal; a lost WebGL context is.
         if (/webgl/i.test(String(e.error?.message ?? ""))) cb.current.onFail();

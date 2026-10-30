@@ -67,12 +67,12 @@
 
 .tm-legend {
   position: absolute;
-  left: 12px;
-  bottom: 12px;
+  top: 10px;
+  left: 112px;
   display: flex;
   flex-wrap: wrap;
   gap: 6px 14px;
-  max-width: calc(100% - 24px - 280px);
+  max-width: calc(100% - 112px - 60px);
   padding: 8px 12px;
   border-radius: var(--r-btn);
   background: color-mix(in srgb, var(--card) 94%, transparent);
@@ -81,6 +81,20 @@
   color: var(--ink);
 }
 .tm-legend.is-inline { display: none; }
+.tm-empty {
+  position: absolute;
+  left: 50%;
+  bottom: 40px;
+  transform: translateX(-50%);
+  width: min(420px, calc(100% - 24px));
+  padding: 10px 14px;
+  border-radius: var(--r-btn);
+  background: var(--card);
+  box-shadow: 0 0 0 1px var(--hairline);
+  font-size: 13px;
+  text-align: center;
+  color: var(--muted);
+}
 .tm-legend span {
   display: inline-flex;
   align-items: center;
