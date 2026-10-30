@@ -1,7 +1,7 @@
 // Age-group check. Every place and lens list here is hand-written; none of it is Qloo API output.
 import assert from "node:assert/strict";
 import { afterEach, test } from "node:test";
-import { buildProgram, NON_GRANT_CEILING, REACH_PREFIX, type Program } from "../src/lib/plan";
+import { buildProgram, NON_GRANT_CEILING, REACH_PREFIX, UNIT, type Program } from "../src/lib/plan";
 import { fetchLenses } from "../src/lib/profile";
 import { applyReach, isAdultOnly, isLensHost, reachSummary, type LensData } from "../src/lib/reach";
 import { entity, NORMAL_PLACES, profileOf } from "./fixtures";
@@ -126,6 +126,41 @@ test("a shared venue is used only when it is the group's best eligible host", ()
   assertReconciles(program);
 });
 
+test("when a group's best host needs a session the reserve can't cover, it joins a shared one lower down", () => {
+  const { profile, program } = withLenses([
+    { key: "young-adults", ok: true, ids: ["p7"] },
+    { key: "older", ok: true, ids: ["p1"] },
+    { key: "families", ok: true, ids: ["p8", "p7"] },
+  ]);
+  // Room for exactly one session.
+  program.unassigned = UNIT.watch.cost;
+  applyReach(profile, program);
+  const families = program.reach!.find((o) => o.key === "families")!;
+  assert.equal(families.status, "added");
+  assert.equal(families.sharedWith, "young-adults");
+  assert.equal(families.place?.name, "Sandy Point Beach");
+  assert.equal(families.place?.lensRank, 2);
+  assert.equal(program.reachItems!.length, 1);
+  assert.equal(program.reachEarmarked, UNIT.watch.cost);
+  // The shared session runs at the earlier of the two groups' slots.
+  assert.deepEqual(program.reachItems![0].months, [4]);
+});
+
+test("three groups sharing one session: the title names all three and the ranking lines say so", () => {
+  const { profile, program } = withLenses([
+    { key: "young-adults", ok: true, ids: ["p7"] },
+    { key: "older", ok: true, ids: ["p7"] },
+    { key: "families", ok: true, ids: ["p7"] },
+  ]);
+  applyReach(profile, program);
+  const item = program.reachItems![0];
+  assert.equal(program.reachItems!.length, 1);
+  assert.equal(item.title, "Open session for young adults (under 25), older residents and families with young children at Sandy Point Beach");
+  assert.equal(item.provenance.filter((p) => p.signal.startsWith("Favoured by")).length, 3);
+  for (const p of item.provenance.filter((x) => x.signal.startsWith("Favoured by")).slice(1)) assert.match(p.detail, /shares the session added for young adults/);
+  assertReconciles(program);
+});
+
 test("when the session doesn't fit in the reserve it is skipped and said so", () => {
   const { profile, program } = withLenses(all(["p8"]), 20_000);
   const before = program.items.map((it) => it.id);
@@ -230,6 +265,13 @@ test("host rules match whole words: a name fragment never disqualifies a real ha
   assert.ok(isAdultOnly(entity("l", "Lakefront Microbrewery Hall", { cats: ["Banquet hall"] })));
   assert.ok(!isLensHost(entity("m", "Riverside Gymnasium Park", { cats: ["Park"] })));
   assert.ok(!isLensHost(entity("n", "Twin Hotels Conference Center", { cats: ["Conference center"] })));
+  // A taproom is adult-only, so it is never a host either.
+  assert.ok(isAdultOnly(entity("o", "Harbor Taproom Event Hall", { cats: ["Banquet hall"] })));
+  assert.ok(!isLensHost(entity("o", "Harbor Taproom Event Hall", { cats: ["Banquet hall"] })));
+  // "Brewer" is a surname and a town, not a brewery.
+  assert.ok(isLensHost(entity("p", "Brewer Public Library", { cats: ["Public library"] })));
+  assert.ok(isLensHost(entity("q", "Brewers Hill Park", { cats: ["Park"] })));
+  assert.ok(!isAdultOnly(entity("q", "Brewers Hill Park", { cats: ["Park"] })));
 });
 
 const realFetch = globalThis.fetch;

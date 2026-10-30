@@ -2,6 +2,7 @@ import type { QlooEntity } from "./qloo";
 import type { TownProfile } from "./profile";
 import { categories, isChain } from "./filters";
 import {
+  BREW_WORDS,
   cleanName,
   costed,
   DINING,
@@ -91,8 +92,13 @@ const LENS_HOST =
 // word of the name), or a place that is retail first (its primary category, or a retail word in a
 // name with no host word). Whole words only, so "Farmington Community Library", "Brewster Ladies'
 // Library", "Sandbar Beach Park" and "Market Square Park" stay hosts. A museum with a gift shop stays.
-const NOT_A_LENS_HOST =
-  /\b(bars?|pubs?|(micro)?brew(ery|eries|ing|pub|pubs|house|houses|haus|ers?)|beers?|winery|wineries|night ?clubs?|lounges?|gym(s|nasium)?|fitness|yoga|casinos?|hotels?|motels?|golf|country clubs?|orchards?|farms?|petting zoos?)\b/i;
+// Bar, brewery and winery words: an adult-only venue is never a host, and the same words mark a
+// partner as adult-only, so the two rules can't disagree.
+const ADULT_WORDS = String.raw`bars?|pubs?|${BREW_WORDS}|beers?|taverns?|saloons?|taprooms?|winery|wineries`;
+const NOT_A_LENS_HOST = new RegExp(
+  String.raw`\b(${ADULT_WORDS}|night ?clubs?|lounges?|gym(s|nasium)?|fitness|yoga|casinos?|hotels?|motels?|golf|country clubs?|orchards?|farms?|petting zoos?)\b`,
+  "i",
+);
 const RETAIL = /\b(stores?|shops?|shoppes|market|marketplace|mall|outlet|boutique|supermarket|marina)\b/i;
 const HOST_WORD = /\b(park|library|museum|hall|center|centre|school|college|university|beach|zoo|preserve|auditorium)\b/i;
 
@@ -108,7 +114,7 @@ export function isLensHost(e: QlooEntity): boolean {
 
 // Bars, pubs, breweries and wineries: the program already runs them as adult (21+) evening venues.
 const ADULT_ONLY = /^(bar|pub|sports bar|brewery|brewpub|beer garden|beer hall|night club|winery|wine bar|cocktail bar|lounge|tavern)$/i;
-const ADULT_NAME = /\b(bars?|pubs?|(micro)?brew(ery|eries|ing|pub|pubs|house|houses|haus|ers?|s)?|beers?|taverns?|saloons?|taprooms?|winery|wineries)\b/i;
+const ADULT_NAME = new RegExp(String.raw`\b(${ADULT_WORDS})\b`, "i");
 
 export function isAdultOnly(e: QlooEntity): boolean {
   return categories(e).some((c) => ADULT_ONLY.test(c)) || ADULT_NAME.test(cleanName(e.name));
@@ -147,7 +153,8 @@ export function applyReach(profile: TownProfile, program: Program): Program {
   const partnerIds = new Set(program.picks.affinity);
   const addedBy = new Map<string, LensOutcome>();
   const reachItems: ProgramItem[] = [];
-  const groupsOf = new Map<string, Lens[]>();
+  // The groups an added session serves, from the outcomes already recorded for it.
+  const groupsOn = (itemId: string) => outcomes.filter((o) => o.itemId === itemId).map((o) => LENSES.find((l) => l.key === o.key)!);
   const earmarked = () => reachItems.reduce((s, it) => s + it.amount, 0);
   const localById = new Map(profile.localPlaces.map((e) => [e.id, e]));
 
@@ -174,23 +181,31 @@ export function applyReach(profile: TownProfile, program: Program): Program {
       outcomes.push({ ...base, status: "covered", partners: covered, note: `${covered[0].name} is #${covered[0].lensRank} for ${lens.label}.` });
       continue;
     }
-    // The group's best eligible host, in Qloo's order for the group: a venue an earlier group's
-    // session already uses, or one in Qloo's local list with a local-affinity rank, a hall, library,
-    // park, museum, zoo, school or college, and not already in the program.
-    const best = data.ids
+    // The group's eligible hosts, in Qloo's order for the group: a venue an earlier group's session
+    // already uses, or one in Qloo's local list with a local-affinity rank, a hall, library, park,
+    // museum, zoo, school or college, and not already in the program.
+    const candidates = data.ids
       .map((id, i) => ({ id, rank: i + 1, e: localById.get(id), prior: addedBy.get(id) }))
-      .find((c) => c.prior || (c.e && profile.placeMeta.get(c.id)?.affinityRank != null && !partnerIds.has(c.id) && isLensHost(c.e)));
+      .filter((c) => c.prior || (c.e && profile.placeMeta.get(c.id)?.affinityRank != null && !partnerIds.has(c.id) && isLensHost(c.e)));
+    const nonGrant = program.items.filter((it) => it.bucket !== "grants").reduce((s, it) => s + it.amount, 0) + earmarked();
+    const reserveLeft = program.unassigned - earmarked();
+    const overReserve = SESSION.cost > reserveLeft;
+    const fits = !overReserve && nonGrant + SESSION.cost <= program.twoYearFund * NON_GRANT_CEILING;
+    // The best host wins; when it would need a new session the budget can't cover, a shared session
+    // further down the list still fits, because it earmarks nothing.
+    const best = (candidates[0]?.prior || fits) ? candidates[0] : (candidates.find((c) => c.prior) ?? candidates[0]);
     if (best?.prior) {
       const prior = best.prior;
       const place = { ...prior.place!, lensRank: best.rank };
       const item = reachItems.find((it) => it.id === prior.itemId)!;
-      const groups = [...groupsOf.get(item.id)!, lens];
-      groupsOf.set(item.id, groups);
+      const groups = [...groupsOn(item.id), lens];
       item.title = `Open session for ${joinLabels(groups)} at ${place.name}`;
       item.detail = sessionDetail(groups);
+      // The earliest of the groups' slots, so no group waits on another's later one.
+      item.months = [Math.min(...groups.map((g) => g.month))];
       item.provenance.splice(groups.length - 1, 0, {
         signal: `Favoured by ${lens.label} · #${best.rank} of ${data.ids.length} (Qloo, aggregate)`,
-        detail: `None of the program's partners is in Qloo's top ${data.ids.length} places within 15 km for ${lens.label} either, and this venue is the best-ranked eligible host there, so the one session covers both groups.`,
+        detail: `None of the program's partners is in Qloo's top ${data.ids.length} places within 15 km for ${lens.label} either, and this venue is its best-ranked eligible host that fits, so it shares the session added for ${prior.label}.`,
       });
       outcomes.push({
         ...base,
@@ -214,10 +229,7 @@ export function applyReach(profile: TownProfile, program: Program): Program {
       continue;
     }
     const place = lensPlace(best.id, best.rank, profile);
-    const nonGrant = program.items.filter((it) => it.bucket !== "grants").reduce((s, it) => s + it.amount, 0) + earmarked();
-    const reserveLeft = program.unassigned - earmarked();
-    const overReserve = SESSION.cost > reserveLeft;
-    if (overReserve || nonGrant + SESSION.cost > program.twoYearFund * NON_GRANT_CEILING) {
+    if (!fits) {
       outcomes.push({
         ...base,
         status: "no-fit",
@@ -251,7 +263,6 @@ export function applyReach(profile: TownProfile, program: Program): Program {
       ],
     });
     reachItems.push(item);
-    groupsOf.set(item.id, [lens]);
     const outcome: LensOutcome = { ...base, status: "added", place, itemId: item.id, amount: item.amount, note: `Added one session at ${place.name}, #${best.rank} for ${lens.label}.` };
     outcomes.push(outcome);
     addedBy.set(best.id, outcome);
