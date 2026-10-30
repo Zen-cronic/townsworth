@@ -5,16 +5,19 @@ export function SpecBand({ specs, town, asOf }: { specs: Spec[]; town: string; a
   return (
     <ul className="lp-specs" data-reveal="" aria-label={`Material commitments for ${town}`}>
       {specs.map((s) => (
-        <li key={s.topic} className="lp-spec">
+        <li key={s.topic} className="lp-spec" data-topic={s.topic.toLowerCase()}>
           <p className="lp-spec-k">{s.topic}</p>
           <p className="lp-spec-v">
             {s.value} <span>{s.unit}</span>
           </p>
           <p className="lp-spec-note">{s.note}</p>
-          <a href={s.url} target="_blank" rel="noopener noreferrer" className="lp-spec-src">
-            {s.source}
-            <span className="sr-only"> (opens in a new tab)</span>
-          </a>
+          <p className="lp-spec-src">
+            Source:{" "}
+            <a href={s.url} target="_blank" rel="noopener noreferrer">
+              {s.source}
+              <span className="sr-only"> (opens in a new tab)</span>
+            </a>
+          </p>
         </li>
       ))}
       <li className="lp-spec-foot">

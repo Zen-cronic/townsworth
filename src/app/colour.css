@@ -41,6 +41,75 @@
   :root .nav-tour { background: none; }
 }
 
+/* Landing commitments: each card filled by what it commits. People and money (jobs, tax) on the
+   green tint with green figures; resources the site draws (power, water) on the pale blue with blue
+   figures. A heavy top rule in the same colour. Ratios: deep green on the green wash 9.99, blue on
+   band-soft 5.60, muted on the washes 6.98 and 7.26, ink 14.6 and up. */
+:root .lp-specs {
+  gap: 16px;
+}
+:root .lp-spec {
+  padding: 24px 24px 28px;
+  border-top: 6px solid var(--ok);
+  border-radius: 0 0 2px 2px;
+  background: var(--ok-wash);
+}
+:root .lp-spec :is(.lp-spec-k, .lp-spec-v) {
+  color: var(--ok);
+}
+:root .lp-spec-k {
+  font-size: 0.8125rem;
+  font-weight: 650;
+  text-transform: none;
+}
+:root .lp-spec-v {
+  font-weight: 650;
+}
+:root .lp-spec-v span {
+  color: var(--ink);
+}
+:root .lp-spec:is([data-topic="power"], [data-topic="water"]) {
+  border-top-color: var(--qloo);
+  background: var(--band-soft);
+}
+:root .lp-spec:is([data-topic="power"], [data-topic="water"]) :is(.lp-spec-k, .lp-spec-v) {
+  color: var(--qloo);
+}
+:root .lp-spec-note {
+  color: var(--muted);
+}
+:root .lp-spec-src {
+  margin-top: 12px;
+  font-size: 0.875rem;
+  color: var(--muted);
+  text-decoration: none;
+}
+:root .lp-spec-src a {
+  color: var(--ink);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: var(--line-quiet);
+  text-underline-offset: 3px;
+}
+:root .lp-spec-src a:hover {
+  text-decoration-color: currentColor;
+}
+:root .lp-spec-foot {
+  margin-top: 8px;
+  padding: 0;
+  background: none;
+  border: 0;
+  font-size: 0.875rem;
+}
+@media (max-width: 600px) {
+  :root .lp-spec { padding: 20px 20px 22px; }
+  :root .lp-spec-v { margin-top: 8px; }
+}
+@media print {
+  :root .lp-spec { background: none; border-top-color: var(--ink); }
+  :root .lp-spec :is(.lp-spec-k, .lp-spec-v) { color: var(--ink); }
+}
+
 /* Kept: a solid green label beside the ring, so a page of kept lines reads green. */
 :root .kept-label {
   display: inline-flex;
