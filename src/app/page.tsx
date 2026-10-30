@@ -29,7 +29,7 @@ import { money, runTown } from "@/lib/run";
 import { HERO_TOWN, TOWNS } from "@/lib/towns";
 
 const TITLE = `${PRODUCT_NAME}: a community-benefits plan built from the host town`;
-const DESCRIPTION = `${PRODUCT_NAME} checks a facility's draft community plan line by line, keeps the real local institutions, keeps the institutions it already names, adds the local places residents go that AI alone never names (Qloo's local taste data), and costs each item.`;
+const DESCRIPTION = `${PRODUCT_NAME} checks a facility's draft community-benefits plan line by line. It marks lines that name no local partner, keeps the local institutions the plan already names, adds places the town's residents favour (from Qloo's local taste data), and costs each item from the fund.`;
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -164,15 +164,14 @@ export default async function Home() {
           <div className="lp-wrap lp-hero-grid">
             <div className="lp-hero-copy">
               <p className="lp-kicker lp-for">For community-affairs teams at data centers, fabs and plants</p>
-              <h1 id="hero-h" className="lp-h1">
-                A community-benefits plan built from the host town, <span className="lp-tone">not a template.</span>
+              {/* A non-breaking hyphen keeps "community-benefits" on one line. */}
+              <h1 id="hero-h" className="lp-h1 lp-h1-long">
+                Is your community‑benefits plan written for this town, <span className="lp-tone">or any town?</span>
               </h1>
               <p className="lp-lede">
-                {PRODUCT_NAME} checks a data center’s or plant’s{" "}
-                <abbr title="The community-benefits plan, or CBA, that a facility funds" className="lp-abbr">
-                  community-benefits plan
-                </abbr>{" "}
-                line by line. It keeps the institutions, adds the places residents actually go, and costs each item.
+                {PRODUCT_NAME} checks a data center’s or plant’s draft plan line by line. It marks lines that name no local partner, keeps the
+                local institutions the plan already names, adds places that town’s residents favour (from Qloo’s local taste data), and costs
+                each item from your fund.
               </p>
               <div className="lp-ctas">
                 <Link href={previewHref} className="lp-btn lp-btn-primary">
