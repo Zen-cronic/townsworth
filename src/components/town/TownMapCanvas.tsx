@@ -210,13 +210,15 @@ export interface CanvasProps {
   focus?: string;
   hover?: string;
   resetTick: number;
+  /** Full screen is on: plain scroll and one-finger drag move the map, and the canvas resizes. */
+  full: boolean;
   onHover: (key: string | undefined, point?: { x: number; y: number }) => void;
   onSelect: (key: string) => void;
   onPoint: (point: { x: number; y: number } | undefined) => void;
   onFail: () => void;
 }
 
-export default function TownMapCanvas({ data, legs, venues, showPlaces, focus, hover, resetTick, onHover, onSelect, onPoint, onFail }: CanvasProps) {
+export default function TownMapCanvas({ data, legs, venues, showPlaces, focus, hover, resetTick, full, onHover, onSelect, onPoint, onFail }: CanvasProps) {
   const el = useRef<HTMLDivElement>(null);
   const map = useRef<MlMap | null>(null);
   const [ready, setReady] = useState(false);
@@ -527,6 +529,21 @@ export default function TownMapCanvas({ data, legs, venues, showPlaces, focus, h
     overview(m, true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready, resetTick]);
+
+  // Full screen: no gesture gate (the page isn't scrolling behind the map), and a new canvas size.
+  useEffect(() => {
+    const m = map.current;
+    if (!ready || !m) return;
+    if (full) m.cooperativeGestures.disable();
+    else m.cooperativeGestures.enable();
+    const id = requestAnimationFrame(() => {
+      m.resize();
+      const k = focusRef.current;
+      const v = k ? venueByKey.current.get(k) : undefined;
+      if (v) cb.current.onPoint(m.project([v.lon, v.lat]));
+    });
+    return () => cancelAnimationFrame(id);
+  }, [ready, full]);
 
   return <div ref={el} className="tm-canvas" />;
 }

@@ -68,11 +68,11 @@
 .tm-legend {
   position: absolute;
   top: 10px;
-  left: 112px;
+  left: 246px;
   display: flex;
   flex-wrap: wrap;
   gap: 6px 14px;
-  max-width: calc(100% - 112px - 60px);
+  max-width: calc(100% - 246px - 60px);
   padding: 8px 12px;
   border-radius: var(--r-btn);
   background: color-mix(in srgb, var(--card) 94%, transparent);
@@ -126,10 +126,68 @@
   transition: border-color 150ms;
 }
 .tm-btn:hover { border-color: var(--ink); }
-.tm-reset {
+.tm-tools {
   position: absolute;
+  z-index: 2;
   top: 10px;
   left: 10px;
+  display: flex;
+  gap: 6px;
+}
+.tm-full {
+  gap: 7px;
+  padding: 0 12px 0 10px;
+}
+.tm-full svg {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.tm-full[aria-pressed="true"] {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+}
+.tm-full[aria-pressed="true"]:hover { background: var(--ink-deep); }
+
+/* The exit hint in full screen; fades after a few seconds. */
+.tm-hint {
+  position: absolute;
+  z-index: 2;
+  left: 50%;
+  bottom: 28px;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: var(--r-pill);
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 13px;
+  white-space: nowrap;
+  pointer-events: none;
+  transition: opacity 400ms ease, visibility 0s linear 400ms;
+}
+.tm-hint.is-gone {
+  opacity: 0;
+  visibility: hidden;
+}
+.tm-hint kbd {
+  min-width: 22px;
+  padding: 1px 6px;
+  border-radius: var(--r-btn-inner);
+  background: var(--paper);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
 }
 
 /* The venue card */
@@ -319,6 +377,8 @@
 .tm-line.is-unsure { border-left-color: var(--hivis); }
 .tm-line.is-swap { border-left-color: var(--qloo); }
 .tm-line.is-hot { background: var(--paper); }
+.tm-line.is-go { background: var(--qloo-wash); transition: background-color 600ms; }
+.tm-line:focus { outline: none; }
 .tm-line-n {
   padding-top: 1px;
   font-size: 12px;
@@ -442,6 +502,67 @@
     gap: 4px 12px;
   }
   .tm-card { max-height: calc(var(--tm-h) - 16px); overflow-y: auto; }
+}
+/* Full screen: the section fills the screen (Fullscreen API) or the viewport (the overlay
+   fallback). The map takes the space; the panel stays docked and scrolls on its own. */
+:root .tm.is-full.ui-section {
+  --tm-h: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: var(--paper);
+}
+.tm.is-full .tm-legend:not(.is-inline) {
+  left: 268px;
+  max-width: calc(100% - 268px - 60px);
+}
+.tm.is-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  height: 100dvh;
+}
+.tm:fullscreen {
+  width: 100%;
+  height: 100%;
+}
+.tm::backdrop { background: var(--paper); }
+.tm.is-full .tm-frame {
+  height: 100%;
+  border: 0;
+  border-radius: 0;
+  grid-template-columns: minmax(0, 1fr) 380px;
+}
+.tm.is-full .tm-map,
+.tm.is-full .tm-panel { height: 100%; }
+.tm.is-full .tm-panel {
+  min-height: 0;
+  border-left: 1px solid var(--hairline);
+  border-top: 0;
+}
+.tm.is-full .tm-lines { overflow-y: auto; }
+@media (max-width: 1100px) {
+  .tm.is-full .tm-frame { grid-template-columns: minmax(0, 1fr) 330px; }
+}
+/* Phones: the panel becomes a bottom sheet that scrolls. */
+@media (max-width: 700px) {
+  .tm.is-full .tm-frame {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) 42%;
+  }
+  .tm.is-full .tm-map { height: auto; }
+  .tm.is-full .tm-panel {
+    height: auto;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border-left: 0;
+    border-top: 1px solid var(--hairline);
+    border-radius: var(--r-btn) var(--r-btn) 0 0;
+    background: var(--card);
+  }
+  .tm.is-full .tm-lines { overflow: visible; }
+  .tm.is-full .tm-hint { top: 58px; bottom: auto; }
+  .tm.is-full .tm-card { max-height: calc(100% - 16px); overflow-y: auto; }
 }
 @media print {
   .tm { display: none; }

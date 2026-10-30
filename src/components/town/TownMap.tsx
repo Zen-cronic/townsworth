@@ -1,10 +1,11 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import "./TownMap.css";
 import { BUCKETS, type Bucket } from "@/lib/buckets";
 import { defaultChoices, planState, type Choice, type MapData, type MapLeg, type MapLine } from "@/lib/mapData";
+import { fullscreenKey, isTypingTarget, type FullMode } from "@/lib/mapFullscreen";
 
 // The town page's main view: the plan drawn on a 3D map of the town (OpenStreetMap data), with a
 // panel that lists the draft's lines. Each struck line with a local swap flips between the draft
@@ -37,7 +38,7 @@ function scrollToLine(anchor: string) {
   el.focus({ preventScroll: true });
 }
 
-function VenueCard({ data, venueKey, legs, style, onClose }: { data: MapData; venueKey: string; legs: MapLeg[]; style?: React.CSSProperties; onClose?: () => void }) {
+function VenueCard({ data, venueKey, legs, style, onClose, onGo }: { data: MapData; venueKey: string; legs: MapLeg[]; style?: React.CSSProperties; onClose?: () => void; onGo?: (n: number) => void }) {
   const v = data.venues.find((x) => x.key === venueKey);
   if (!v) return null;
   const here = legs.filter((l) => l.venue === venueKey);
@@ -79,7 +80,7 @@ function VenueCard({ data, venueKey, legs, style, onClose }: { data: MapData; ve
       {lines.length > 0 && (
         <div className="tm-card-actions">
           {lines.map((n) => (
-            <button key={n} type="button" className="tm-btn" onClick={() => scrollToLine(data.lines[n - 1]?.anchor ?? `line-${n}`)}>
+            <button key={n} type="button" className="tm-btn" onClick={() => (onGo ? onGo(n) : scrollToLine(data.lines[n - 1]?.anchor ?? `line-${n}`))}>
               Go to line {n}
             </button>
           ))}
@@ -158,8 +159,175 @@ export function TownMap({ data, townName }: { data: MapData; townName: string })
   const onPoint = useCallback((p?: { x: number; y: number }) => setPoint(p), []);
   const onFail = useCallback(() => setFailed(true), []);
 
+  // Full screen covers the whole section, map and panel, so every control keeps working. It uses
+  // the Fullscreen API where the browser has it, and a fixed overlay over the page where it doesn't
+  // (iPhone Safari has no element full screen).
+  const section = useRef<HTMLElement>(null);
+  const fullBtn = useRef<HTMLButtonElement>(null);
+  const [full, setFull] = useState<FullMode | null>(null);
+  const fullRef = useRef(full);
+  fullRef.current = full;
+  const hovered = useRef(false);
+  const [hint, setHint] = useState(false);
+  const [goLine, setGoLine] = useState<number>();
+
+  const enterFull = useCallback(async () => {
+    const el = section.current as (HTMLElement & { webkitRequestFullscreen?: () => void }) | null;
+    if (!el || fullRef.current) return;
+    const doc = document as Document & { webkitFullscreenEnabled?: boolean };
+    if (typeof el.requestFullscreen === "function" && document.fullscreenEnabled) {
+      try {
+        await el.requestFullscreen({ navigationUI: "hide" });
+        return;
+      } catch {
+        // Refused (a policy or an embedding frame): use the overlay.
+      }
+    } else if (typeof el.webkitRequestFullscreen === "function" && doc.webkitFullscreenEnabled) {
+      el.webkitRequestFullscreen();
+      return;
+    }
+    setFull("overlay");
+  }, []);
+
+  const exitFull = useCallback(() => {
+    const doc = document as Document & { webkitFullscreenElement?: Element | null; webkitExitFullscreen?: () => void };
+    if (fullRef.current === "native") {
+      if (document.fullscreenElement) document.exitFullscreen().catch(() => setFull(null));
+      else if (doc.webkitFullscreenElement) doc.webkitExitFullscreen?.();
+      else setFull(null);
+    } else if (fullRef.current === "overlay") setFull(null);
+  }, []);
+
+  const toggleFull = useCallback(() => {
+    if (fullRef.current) exitFull();
+    else void enterFull();
+  }, [enterFull, exitFull]);
+
+  // The browser reports native full screen changes, including its own Esc.
+  useEffect(() => {
+    const onChange = () => {
+      const doc = document as Document & { webkitFullscreenElement?: Element | null };
+      const el = document.fullscreenElement ?? doc.webkitFullscreenElement ?? null;
+      if (el && el === section.current) setFull("native");
+      else if (fullRef.current === "native") setFull(null);
+    };
+    document.addEventListener("fullscreenchange", onChange);
+    document.addEventListener("webkitfullscreenchange", onChange);
+    return () => {
+      document.removeEventListener("fullscreenchange", onChange);
+      document.removeEventListener("webkitfullscreenchange", onChange);
+    };
+  }, []);
+
+  // F toggles while the map has focus or the pointer; Esc exits the overlay.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const el = section.current;
+      if (!el) return;
+      const target = e.target instanceof HTMLElement ? e.target : null;
+      const engaged = hovered.current || (!!target && el.contains(target)) || el.contains(document.activeElement);
+      const act = fullscreenKey({ key: e.key, ctrl: e.ctrlKey, meta: e.metaKey, alt: e.altKey, repeat: e.repeat, typing: isTypingTarget(target), engaged }, fullRef.current);
+      if (!act) return;
+      e.preventDefault();
+      if (act === "exit") exitFull();
+      else toggleFull();
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [exitFull, toggleFull]);
+
+  // On enter: show the exit hint for a few seconds. On exit: focus goes back to the button.
+  const wasFull = useRef(false);
+  useEffect(() => {
+    if (full) {
+      wasFull.current = true;
+      setHint(true);
+      const t = window.setTimeout(() => setHint(false), 3500);
+      return () => window.clearTimeout(t);
+    }
+    if (wasFull.current) {
+      wasFull.current = false;
+      setHint(false);
+      fullBtn.current?.focus({ preventScroll: true });
+    }
+  }, [full]);
+
+  // The overlay locks the page behind it.
+  useEffect(() => {
+    if (full !== "overlay") return;
+    const html = document.documentElement;
+    const body = document.body;
+    const prev = [html.style.overflow, body.style.overflow];
+    html.style.overflow = "hidden";
+    body.style.overflow = "hidden";
+    return () => {
+      html.style.overflow = prev[0];
+      body.style.overflow = prev[1];
+    };
+  }, [full]);
+
+  // Focus stays inside the full screen view: Tab wraps, and focus that lands behind it comes back.
+  useEffect(() => {
+    if (!full) return;
+    const onFocusIn = (e: FocusEvent) => {
+      const el = section.current;
+      if (el && e.target instanceof Node && !el.contains(e.target)) fullBtn.current?.focus({ preventScroll: true });
+    };
+    document.addEventListener("focusin", onFocusIn);
+    return () => document.removeEventListener("focusin", onFocusIn);
+  }, [full]);
+
+  const trapTab = (e: React.KeyboardEvent) => {
+    const el = section.current;
+    if (!full || e.key !== "Tab" || !el) return;
+    const items = [...el.querySelectorAll<HTMLElement>('button:not([disabled]), a[href], input:not([disabled]), summary, [tabindex]:not([tabindex="-1"])')].filter((x) => x.getClientRects().length > 0);
+    if (items.length === 0) return;
+    const first = items[0];
+    const last = items[items.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  };
+
+  // In full screen, "Go to line" goes to the line in the panel; the page's line list is hidden.
+  const goToPanelLine = useCallback((n: number) => {
+    const row = section.current?.querySelector<HTMLElement>(`.tm-line[data-line="${n}"]`);
+    if (!row) return;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let box: HTMLElement | null = row.parentElement;
+    while (box && box !== section.current && !(box.scrollHeight > box.clientHeight && /auto|scroll/.test(getComputedStyle(box).overflowY))) box = box.parentElement;
+    if (box && box !== section.current) {
+      const top = row.getBoundingClientRect().top - box.getBoundingClientRect().top + box.scrollTop - 8;
+      box.scrollTo({ top, behavior: reduce ? "auto" : "smooth" });
+    }
+    (row.querySelector<HTMLElement>(".tm-line-go") ?? row).focus({ preventScroll: true });
+    setGoLine(n);
+  }, []);
+  useEffect(() => {
+    if (goLine == null) return;
+    const t = window.setTimeout(() => setGoLine(undefined), 1800);
+    return () => window.clearTimeout(t);
+  }, [goLine]);
+
   return (
-    <section aria-labelledby="map-title" className="tm ui-section no-print" onKeyDown={(e) => e.key === "Escape" && (setFocus(undefined), setHover(undefined))}>
+    <section
+      ref={section}
+      aria-labelledby="map-title"
+      className={`tm ui-section no-print${full ? " is-full" : ""}${full === "overlay" ? " is-overlay" : ""}`}
+      onKeyDown={(e) => {
+        if (e.key === "Escape") {
+          setFocus(undefined);
+          setHover(undefined);
+        }
+        trapTab(e);
+      }}
+      onPointerEnter={() => (hovered.current = true)}
+      onPointerLeave={() => (hovered.current = false)}
+    >
       <div className="tm-frame">
         <div ref={mapEl} className="tm-map" role="region" aria-label={`Map of ${townName}: the facility site, the ${data.radiusKm} km Qloo search radius and each program venue. The panel lists the same plan.`}>
           {failed ? (
@@ -175,6 +343,7 @@ export function TownMap({ data, townName }: { data: MapData; townName: string })
               focus={focus}
               hover={hover}
               resetTick={resetTick}
+              full={!!full}
               onHover={onHover}
               onSelect={onSelect}
               onPoint={onPoint}
@@ -187,6 +356,7 @@ export function TownMap({ data, townName }: { data: MapData; townName: string })
               venueKey={shown}
               legs={state.visible}
               onClose={focus ? () => setFocus(undefined) : undefined}
+              onGo={full ? goToPanelLine : undefined}
               style={cardPos(point, mapEl.current)}
             />
           )}
@@ -195,9 +365,31 @@ export function TownMap({ data, townName }: { data: MapData; townName: string })
             <p className="tm-empty">No venue in this plan has a Qloo map position here. The lines are listed beside the map.</p>
           )}
           {!failed && (
-            <button type="button" className="tm-btn tm-reset" onClick={() => (setFocus(undefined), setResetTick((t) => t + 1))}>
-              Reset view
-            </button>
+            <div className="tm-tools">
+              <button type="button" className="tm-btn tm-reset" onClick={() => (setFocus(undefined), setResetTick((t) => t + 1))}>
+                Reset view
+              </button>
+              <button
+                ref={fullBtn}
+                type="button"
+                className="tm-btn tm-full"
+                aria-pressed={!!full}
+                aria-label={full ? "Exit full screen" : "Full screen"}
+                aria-keyshortcuts="F"
+                title={full ? "Exit full screen (Esc or F)" : "Full screen (F)"}
+                onClick={toggleFull}
+              >
+                <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                  {full ? <path d="M6 2v4H2M10 2v4h4M6 14v-4H2M10 14v-4h4" /> : <path d="M2 6V2h4M14 6V2h-4M2 10v4h4M14 10v4h-4" />}
+                </svg>
+                <span>{full ? "Exit full screen" : "Full screen"}</span>
+              </button>
+            </div>
+          )}
+          {full && (
+            <p className={`tm-hint${hint ? "" : " is-gone"}`} role="status">
+              Press <kbd>Esc</kbd> or <kbd>F</kbd> to exit
+            </p>
           )}
         </div>
 
@@ -243,7 +435,7 @@ export function TownMap({ data, townName }: { data: MapData; townName: string })
               const venue = lineVenue(l);
               const status = swapped ? "swap" : l.status;
               return (
-                <li key={l.n} className={`tm-line is-${status}${venue && venue === shown ? " is-hot" : ""}`}>
+                <li key={l.n} data-line={l.n} tabIndex={-1} className={`tm-line is-${status}${venue && venue === shown ? " is-hot" : ""}${goLine === l.n ? " is-go" : ""}`}>
                   <span className="tm-line-n">{l.n}</span>
                   <div className="tm-line-body">
                     {venue ? (
