@@ -90,7 +90,7 @@ type Layer = StyleSpecification["layers"][number];
 type Editable = Layer & { paint?: Record<string, unknown>; layout?: Record<string, unknown> };
 
 // The tile source carries its own attribution (OpenFreeMap, OpenMapTiles, OpenStreetMap
-// contributors), shown in full in the corner.
+// contributors), behind the info button in the corner.
 
 const polygons = ["match", ["geometry-type"], ["MultiPolygon", "Polygon"], true, false];
 const landFill = (id: string, sourceLayer: string, classes: string[], color: string, minzoom = 0): Layer =>
@@ -282,8 +282,8 @@ export default function TownMapCanvas({ data, legs, venues, showPlaces, focus, h
       }
       map.current = m;
       m.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), "top-right");
-      m.addControl(new maplibregl.AttributionControl({ customAttribution: "© OpenStreetMap contributors" }), "bottom-right");
-      // Compact attribution opens expanded on narrow maps; start it collapsed so it doesn't cover the map.
+      m.addControl(new maplibregl.AttributionControl({ compact: true, customAttribution: "© OpenStreetMap contributors" }), "bottom-right");
+      // Always compact, so a resize (full screen in or out) never re-opens it; it starts expanded, so close it once.
       const collapseAttribution = () => {
         const a = m?.getContainer().querySelector(".maplibregl-ctrl-attrib.maplibregl-compact");
         a?.classList.remove("maplibregl-compact-show");
@@ -538,19 +538,13 @@ export default function TownMapCanvas({ data, legs, venues, showPlaces, focus, h
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready, resetTick]);
 
-  // Full screen: no gesture gate (the page isn't scrolling behind the map), and a new canvas size.
+  // Full screen: no gesture gate, since the page isn't scrolling behind the map. The map's own resize
+  // observer redraws it at the new size, and its "move" event re-places the venue card.
   useEffect(() => {
     const m = map.current;
     if (!ready || !m) return;
     if (full) m.cooperativeGestures.disable();
     else m.cooperativeGestures.enable();
-    const id = requestAnimationFrame(() => {
-      m.resize();
-      const k = focusRef.current;
-      const v = k ? venueByKey.current.get(k) : undefined;
-      if (v) cb.current.onPoint(m.project([v.lon, v.lat]));
-    });
-    return () => cancelAnimationFrame(id);
   }, [ready, full]);
 
   return <div ref={el} className="tm-canvas" />;
