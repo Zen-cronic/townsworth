@@ -18,7 +18,8 @@ import { StatusPill } from "@/components/dashboard/StatusPill";
 import { CalendarMenu, CrmExportLinks } from "@/components/integrations";
 import { cadenceLower } from "@/components/dashboard/format";
 import { AgeStrip } from "@/components/qloo/AgeStrip";
-import { commitmentsFor } from "@/lib/commitments";
+import { commitmentsFor, type CommitmentTopic } from "@/lib/commitments";
+import { memoHeadlinesFor } from "@/components/landing/specs";
 import { BUCKETS, type Bucket, type ProgramItem } from "@/lib/plan";
 import { money, runTown } from "@/lib/run";
 
@@ -27,7 +28,7 @@ export const metadata: Metadata = {
   description: "Checks a facility's draft community plan line by line against the places the host town actually goes (Qloo taste data), and returns a costed, resident-ranked program.",
 };
 
-const MATERIAL = [
+const MATERIAL: readonly (readonly [CommitmentTopic, string])[] = [
   ["Jobs", "Permanent roles, local-hire target, construction peak"],
   ["Power", "Who pays for grid upgrades; effect on household rates"],
   ["Water", "Cooling method, annual draw, replenishment"],
@@ -35,6 +36,22 @@ const MATERIAL = [
   ["Tax", "Abatements, PILOT payments, school-district share"],
 ] as const;
 
+
+// One line icon per commitment topic, drawn in the topic card's colour.
+const TOPIC_PATHS: Record<CommitmentTopic, string> = {
+  Jobs: "M12 11.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM5 20c0-3.9 3.1-7 7-7s7 3.1 7 7",
+  Power: "M13 3 5 13.5h6L10 21l8-10.5h-6L13 3z",
+  Water: "M12 3.5c3 4 6 7.2 6 10.5a6 6 0 0 1-12 0c0-3.3 3-6.5 6-10.5z",
+  "Noise & light": "M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z",
+  Tax: "M3 9.5 12 4l9 5.5M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 20.5h18",
+};
+function TopicIcon({ topic }: { topic: CommitmentTopic }) {
+  return (
+    <svg aria-hidden viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="memo-topic-i">
+      <path d={TOPIC_PATHS[topic]} />
+    </svg>
+  );
+}
 
 // "4 sessions × $6,000": the cost basis without the partner name, which the title already carries.
 const unitLine = (it: ProgramItem) => `${it.sessions} ${it.sessions === 1 ? it.unit : `${it.unit}s`} × ${money(it.unitCost)}`;
@@ -114,6 +131,7 @@ export default async function MemoPage({
   const unverified = audit.filter((a) => a.verdict === "unverified").length;
   const keptInstitutions = audit.filter((a) => a.verdict === "institution").length;
   const commitments = commitmentsFor(town.slug);
+  const headlines = memoHeadlinesFor(town.slug);
   const partnerPlaces = program.items.filter((i) => i.partner).length;
   const byBucket = (Object.keys(BUCKETS) as Bucket[])
     .map((b) => ({ b, items: program.items.filter((i) => i.bucket === b) }))
@@ -231,55 +249,75 @@ export default async function MemoPage({
               Material commitments, from the developer&apos;s filings
             </SectionTitle>
             <ul className="memo-topics mt-4" aria-label="Material commitments by topic">
-              {MATERIAL.map(([k]) => {
-                const n = commitments?.items.filter((c) => c.topic === k).length ?? 0;
+              {MATERIAL.map(([k, hint]) => {
+                const items = commitments?.items.filter((c) => c.topic === k) ?? [];
+                const pick = headlines[k];
+                const firstFigure = items.map((c) => splitFigures(c.text)[1]).find(Boolean);
                 return (
-                  <li key={k} className={n ? "is-cited" : "is-missing"}>
-                    <span className="memo-topic-k">{k}</span>
-                    <span className="memo-topic-v">{n ? n : "–"}</span>
-                    <span className="memo-topic-n">{n ? (n === 1 ? "cited figure" : "cited figures") : "not yet entered"}</span>
+                  <li key={k} className={items.length ? "is-cited" : "is-missing"} data-topic={k.toLowerCase()}>
+                    <span className="memo-topic-head">
+                      <TopicIcon topic={k} />
+                      <span className="memo-topic-k">{k}</span>
+                    </span>
+                    {items.length ? (
+                      <>
+                        <span className={`memo-topic-v ${pick && !/\d/.test(pick.value) ? "is-text" : ""}`}>
+                          {pick ? pick.value : firstFigure ?? items.length}
+                          <span className="memo-topic-u"> {pick ? pick.unit : firstFigure ? "" : items.length === 1 ? "cited figure" : "cited figures"}</span>
+                        </span>
+                        <span className="memo-topic-note">{pick ? pick.note : "the first cited figure; every line is in the detail below"}</span>
+                        <span className="memo-topic-n">
+                          {items.length} {items.length === 1 ? "source" : "sources"}
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="memo-topic-v is-missing">Not yet entered</span>
+                        <span className="memo-topic-note">{hint}</span>
+                      </>
+                    )}
                   </li>
                 );
               })}
             </ul>
+            {!commitments && (
+              <p className="memo-cites-asof">Copy each figure from the developer&apos;s filings before this memo goes to the committee.</p>
+            )}
             {commitments && (
-              <dl className="mt-4 divide-y divide-hairline rounded-md border border-hairline text-sm">
-                {MATERIAL.filter(([k]) => commitments.items.some((c) => c.topic === k)).map(([k]) => (
-                  <div key={k} className="grid gap-1 px-4 py-3 sm:grid-cols-[6.5rem_1fr] sm:gap-3 sm:px-5">
-                    <dt className="font-medium">{k}</dt>
-                    <dd className="space-y-1.5">
-                      {commitments.items
-                        .filter((c) => c.topic === k)
-                        .map((c, i) => (
-                          <p key={i} className="leading-relaxed">
-                            <Figures text={c.text} />{" "}
-                            <a href={c.url} target="_blank" rel="noopener noreferrer" className="text-xs text-muted underline decoration-rule underline-offset-2 [overflow-wrap:anywhere] hover:text-ink">
-                              {c.source}
-                            </a>
-                          </p>
-                        ))}
-                    </dd>
-                  </div>
-                ))}
-                <p className="px-4 py-2 text-[11px] text-muted sm:px-5">
+              <div className="memo-cites mt-4">
+                {MATERIAL.filter(([k]) => commitments.items.some((c) => c.topic === k)).map(([k]) => {
+                  const items = commitments.items.filter((c) => c.topic === k);
+                  const body = items.map((c, i) => (
+                    <p key={i} className="leading-relaxed">
+                      <Figures text={c.text} />{" "}
+                      <a href={c.url} target="_blank" rel="noopener noreferrer" className="text-xs text-muted underline decoration-rule underline-offset-2 [overflow-wrap:anywhere] hover:text-ink">
+                        {c.source}
+                        <span className="sr-only"> (opens in a new tab)</span>
+                      </a>
+                    </p>
+                  ));
+                  return (
+                    <div key={k} className="memo-cite">
+                      <details className="memo-cite-more print:hidden">
+                        <summary>
+                          <span className="memo-cite-k">{k}</span>
+                          <span className="memo-cite-s">
+                            Sources and detail · {items.length} {items.length === 1 ? "source" : "sources"}
+                          </span>
+                          <Chevron className="memo-cite-c h-3.5 w-3.5" />
+                        </summary>
+                        <div className="memo-cite-body">{body}</div>
+                      </details>
+                      <div className="memo-cite-print hidden print:block">
+                        <p className="memo-cite-k">{k}: sources and detail</p>
+                        <div className="memo-cite-body">{body}</div>
+                      </div>
+                    </div>
+                  );
+                })}
+                <p className="memo-cites-asof">
                   From public reporting as of {commitments.asOf}. Check each figure against the developer&apos;s filings before this memo goes to the committee.
                 </p>
-              </dl>
-            )}
-            {MATERIAL.some(([k]) => !commitments?.items.some((c) => c.topic === k)) && (
-              <div className="mt-4 rounded-md border border-dashed border-amber/50 bg-amber-wash/40 px-4 py-4 sm:px-5">
-                <p className="flex flex-wrap items-center gap-2 text-sm font-medium">
-                  Not yet entered
-                  <span className="text-xs font-normal text-muted">Copy each figure from the developer&apos;s filings before this memo goes to the committee.</span>
-                </p>
-                <dl className="mt-3 grid gap-x-8 gap-y-2 text-sm sm:grid-cols-2">
-                  {MATERIAL.filter(([k]) => !commitments?.items.some((c) => c.topic === k)).map(([k, v]) => (
-                    <div key={k} className="grid grid-cols-[6.5rem_1fr] gap-2">
-                      <dt className="font-medium">{k}</dt>
-                      <dd className="text-muted">{v}</dd>
-                    </div>
-                  ))}
-                </dl>
               </div>
             )}
           </section>

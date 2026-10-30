@@ -704,10 +704,83 @@
 
 /* Memo: the commitment counts as green cells, the outreach step on the blue band. The memo body
    keeps its paper sheet; the program section already sits on the green tint. */
-:root .memo-topics li.is-cited { background: var(--ok-wash); box-shadow: inset 0 3px 0 var(--ok); }
-:root .memo-topics li.is-cited .memo-topic-v { color: var(--ok-text); }
+
+/* Memo commitments as topic cards: an icon, the headline figure, one plain sentence and the source
+   count, on the green tint under a kept-green rule. Cited paragraphs sit behind one "Sources and
+   detail" disclosure per topic; print shows them all. Ratios: deep green on the tint 9.99, green
+   text 6.67, muted 6.98, ink 14.04; a topic not yet entered is ink and muted on paper. */
+:root .memo-topics {
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+}
+:root .memo-topics li {
+  grid-template-columns: minmax(0, 1fr);
+  grid-auto-flow: row;
+  align-content: start;
+  gap: 6px;
+  padding: 16px 16px 14px;
+  border-radius: 2px;
+}
+:root .memo-topics li.is-cited { background: var(--ok-wash); box-shadow: inset 0 4px 0 var(--ok); }
 :root .memo-topics li.is-missing { background: var(--paper); box-shadow: none; outline: 1px dashed var(--rule); outline-offset: -1px; }
-:root #commitments > dl { background: var(--card); }
+:root .memo-topic-head { display: flex; align-items: center; gap: 8px; }
+:root .memo-topic-i { width: 22px; height: 22px; flex: none; color: var(--ok); }
+:root .memo-topics li.is-missing .memo-topic-i { color: var(--muted); }
+:root .memo-topic-k { font-size: 0.875rem; font-weight: 650; color: var(--ink); }
+:root .memo-topics li .memo-topic-v {
+  margin-top: 4px;
+  font-family: var(--font-display);
+  font-stretch: 116%;
+  font-size: 1.625rem;
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--ok);
+  overflow-wrap: break-word;
+}
+:root .memo-topics li .memo-topic-v.is-text { font-size: 1.25rem; line-height: 1.15; }
+:root .memo-topics li .memo-topic-v.is-missing { font-size: 1rem; font-weight: 700; color: var(--ink); }
+:root .memo-topic-u { display: block; margin-top: 2px; font-family: var(--font-body); font-stretch: 100%; font-size: 0.8125rem; font-weight: 600; letter-spacing: 0; color: var(--ok-text); }
+:root .memo-topic-note { font-size: 0.8125rem; line-height: 1.45; color: var(--muted); }
+:root .memo-topic-n { margin-top: 2px; font-size: 0.75rem; font-weight: 600; color: var(--ok-text); }
+:root .memo-cites { border-top: 1px solid var(--ok); }
+:root .memo-cite { border-bottom: 1px solid var(--hairline); }
+:root .memo-cite-more > summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  padding: 8px 4px;
+  cursor: pointer;
+  list-style: none;
+}
+:root .memo-cite-more > summary::-webkit-details-marker { display: none; }
+:root .memo-cite-more > summary:hover { background: color-mix(in srgb, var(--ok-wash) 60%, transparent); }
+:root .memo-cite-k { min-width: 7rem; font-size: 0.875rem; font-weight: 650; color: var(--ink); }
+:root .memo-cite-s { flex: 1; font-size: 0.8125rem; color: var(--muted); }
+:root .memo-cite-c { color: var(--ink); transition: transform 150ms; }
+:root .memo-cite-more[open] .memo-cite-c { transform: rotate(90deg); }
+:root .memo-cite-body { display: grid; gap: 8px; padding: 4px 4px 16px; font-size: 0.875rem; }
+:root .memo-cites-asof { padding: 10px 4px 0; font-size: 11px; color: var(--muted); }
+/* Guardrails, the memo's other run of sentences: four short cells in two columns. */
+:root #guardrails > ol { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+:root #guardrails > ol > li { margin: 0; padding: 12px 14px; background: var(--concrete); box-shadow: inset 0 3px 0 var(--ink); }
+@media (max-width: 639px) {
+  :root #guardrails > ol { grid-template-columns: minmax(0, 1fr); }
+  :root .memo-topics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  :root .memo-topics li:last-child:nth-child(odd) { grid-column: 1 / -1; }
+  :root .memo-cite-k { min-width: 5.5rem; }
+}
+@media print {
+  :root .memo-topics { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  :root .memo-topics li .memo-topic-v,
+  :root :is(.memo-topic-u, .memo-topic-n, .memo-topic-i) { color: var(--ink) !important; }
+  :root .memo-topics li.is-missing { outline-color: var(--ink); }
+  :root .memo-cite-print { padding: 8px 0; }
+  :root .memo-cite-print .memo-cite-k { margin-bottom: 4px; }
+  :root .memo-cites { border-top-color: var(--ink); }
+  :root #guardrails > ol > li { background: none; box-shadow: inset 0 0 0 1px var(--ink); }
+}
 :root [data-testid="agent-drafts"] { overflow: hidden; border-color: var(--band); }
 :root [data-testid="agent-drafts"] > div:first-child {
   background: var(--band);

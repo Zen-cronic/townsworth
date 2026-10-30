@@ -28,3 +28,27 @@ export function specsFor(slug: string): { asOf: string; specs: Spec[] } | null {
   });
   return specs.length ? { asOf: c.asOf, specs } : null;
 }
+
+// The memo's topic cards: the same headline figures, plus noise and light, which has a cited
+// commitment but no number. A topic without a matching line gets no headline, never a guessed one.
+const MEMO_PICKS: typeof PICKS = [
+  ...PICKS,
+  {
+    topic: "Noise & light",
+    match: /vegetative screening/,
+    value: "Screened site",
+    unit: "and downward lighting",
+    note: "planting, setbacks and downward lighting, Microsoft says",
+  },
+];
+
+export function memoHeadlinesFor(slug: string): Partial<Record<Commitment["topic"], Spec>> {
+  const c = commitmentsFor(slug);
+  const out: Partial<Record<Commitment["topic"], Spec>> = {};
+  if (!c) return out;
+  for (const p of MEMO_PICKS) {
+    const hit = c.items.find((it) => it.topic === p.topic && p.match.test(it.text));
+    if (hit) out[p.topic] = { topic: p.topic, value: p.value, unit: p.unit, note: p.note, source: hit.source.split(" — ")[0], url: hit.url };
+  }
+  return out;
+}
