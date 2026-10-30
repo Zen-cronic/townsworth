@@ -29,5 +29,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ slug: st
     audit,
     calls: profile.calls,
     lensCalls: profile.lensCalls,
+    areaTags: profile.areaTags,
+    areaTagCalls: profile.areaTagCalls,
   });
 }

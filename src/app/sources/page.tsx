@@ -345,6 +345,14 @@ export default async function SourcesPage() {
                     </span>
                   </li>
                   <li>
+                    <span className="src-k">Place traits</span>
+                    <span>
+                      One more Insights call per town (urn:tag at the site, place tags only, take 50) gives the genres, ambience and dishes places
+                      around the site over-index on. Tags about who goes there (Locals, Families and the like) are dropped, as are generic ones. A
+                      partner&apos;s &ldquo;Why&rdquo; names the traits it carries, by rank among the rest.
+                    </span>
+                  </li>
+                  <li>
                     <span className="src-k">OpenStreetMap</span>
                     <span>
                       Partner checks and town geocoding (Nominatim). Map data © OpenStreetMap contributors, available under the Open Database

@@ -14,6 +14,7 @@ import { isQlooSignal, kindOf, LOCAL_AFFINITY, shortOrg, shortSignal, shortTermH
 import { LiveDataNotice } from "@/components/LiveDataNotice";
 import { AudienceReach } from "@/components/qloo/AudienceReach";
 import { AgeStrip } from "@/components/qloo/AgeStrip";
+import { PlaceTraits, TraitLine } from "@/components/qloo/PlaceTraits";
 import { FundBar, PartnerDistance, PartnerNames, StruckTally, SessionTimeline, fundSplit, lineComposition, partnerPoints, sessionsByBucket } from "@/components/charts";
 
 const FACILITY_LABEL: Record<string, string> = {
@@ -80,6 +81,7 @@ function Why({ item, gloss }: { item: ProgramItem; gloss?: string }) {
             <span className="font-mono text-ink">{pv.signal}</span>: {pv.detail}
           </p>
         ))}
+        <TraitLine traits={p?.traits} />
         {facts.length > 0 && <p>{facts.join(" · ")}</p>}
         <AgeStrip ages={p?.ages} />
         <p>
@@ -322,6 +324,8 @@ export function TownView({ run }: { run: TownRun }) {
   const glossIndex = audit.findIndex((r) => LOCAL_AFFINITY.test((r.replacement ?? r.alongside)?.provenance[0]?.signal ?? ""));
   const glossRank = glossIndex >= 0 ? (audit[glossIndex].replacement ?? audit[glossIndex].alongside)!.provenance[0].signal.match(/#(\d+)/)?.[1] : undefined;
   const gloss = glossRank ? `#${glossRank} of ${profile.placeCount} places within 15 km, ranked by Qloo for how strongly locals favour them.` : undefined;
+  // The "Place traits" row shows when Qloo answered with traits, or says it couldn't check.
+  const hasTraitsRow = !!profile.areaTags?.length || !!profile.areaTagCalls?.some((c) => !c.ok);
   const topPlaces = [...profile.localPlaces]
     .map((p) => ({ p, meta: profile.placeMeta.get(p.id) }))
     .sort((a, b) => (a.meta?.affinityRank ?? 1e6) - (b.meta?.affinityRank ?? 1e6))
@@ -590,8 +594,9 @@ export function TownView({ run }: { run: TownRun }) {
                 ))}
               </ol>
             )}
-            {tastes.length > 0 && (
+            {(tastes.length > 0 || hasTraitsRow) && (
               <dl className="taste-types">
+                <PlaceTraits tags={profile.areaTags} calls={profile.areaTagCalls} />
                 {tastes.map(({ t, items, local }) => (
                   <div key={t} className={local ? "is-local" : "is-national"}>
                     <dt>{TASTE_LABEL[t]}</dt>
@@ -607,7 +612,7 @@ export function TownView({ run }: { run: TownRun }) {
                 ))}
               </dl>
             )}
-            {!tastes.length && !topPlaces.length && <p className="text-sm">Nothing stands out locally for {town.name}.</p>}
+            {!tastes.length && !topPlaces.length && !hasTraitsRow && <p className="text-sm">Nothing stands out locally for {town.name}.</p>}
           </div>
           <p className="ui-note mt-4">
             Guardrails: not tied to any vote or permit · residents rank · no political, religious or identity targeting ({profile.excluded.length} excluded by

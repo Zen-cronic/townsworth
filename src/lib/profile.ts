@@ -1,8 +1,8 @@
 import "server-only";
-import { lifeStageAudiences, placesForLens, placesNear, tasteNational, tasteNear, type EntityType, type LensSignal, type QlooCall, type QlooEntity } from "./qloo";
+import { areaPlaceTags, lifeStageAudiences, placesForLens, placesNear, tasteNational, tasteNear, type EntityType, type LensSignal, type QlooCall, type QlooEntity } from "./qloo";
 import { brandKey, isChain, isLocalPartner, isMegabrand, signalTags, splitSafe, type ExclusionReason } from "./filters";
 import { LENSES, PARENTS_AUDIENCE, type LensData, type LensKey } from "./reach";
-import type { AgeProfile } from "./qlooInsights";
+import type { AgeProfile, AreaTag } from "./qlooInsights";
 import type { Town } from "./towns";
 
 type TasteType = Exclude<EntityType, "place">;
@@ -64,6 +64,10 @@ export interface TownProfile {
   // apart: a failed call leaves partners without a profile and never counts toward `failedCalls`.
   partnerAges?: Map<string, AgeProfile>;
   ageCalls?: QlooCall[];
+  // The place traits the area over-indexes on (Qloo urn:tag at the site), identity tags removed.
+  // Optional, with its own call list: a failure leaves no traits and never counts toward `failedCalls`.
+  areaTags?: AreaTag[];
+  areaTagCalls?: QlooCall[];
 }
 
 const TASTE_TYPES: TasteType[] = ["brand", "artist", "tv_show", "podcast"];
@@ -139,6 +143,12 @@ export async function fetchLenses(town: Pick<Town, "lat" | "lon">): Promise<{ le
   return { lenses, lensCalls: calls };
 }
 
+// The area's place traits. Never rejects: a failure is an empty list plus its call record.
+export async function fetchAreaTags(town: Pick<Town, "lat" | "lon">): Promise<{ areaTags: AreaTag[]; areaTagCalls: QlooCall[] }> {
+  const res = await areaPlaceTags(town.lat, town.lon).catch(() => null);
+  return { areaTags: res?.tags ?? [], areaTagCalls: res ? [res.call] : [] };
+}
+
 // `lenses: false` skips the age-group queries, for callers that never show them (/check).
 export async function buildProfile(town: Town, { lenses = true }: { lenses?: boolean } = {}): Promise<TownProfile> {
   const refs = REFERENCE_METROS[town.country].filter(([lat, lon]) => Math.hypot(lat - town.lat, lon - town.lon) > 0.5);
@@ -161,7 +171,8 @@ export async function buildProfile(town: Town, { lenses = true }: { lenses?: boo
   // The lens queries start only once the town's own calls are done, so they never queue ahead of a
   // program call (or its 429 retries) in the shared Qloo limiter. A cold load pays one extra round
   // trip; warm loads read the data cache. fetchLenses never rejects.
-  const lensRes = lenses ? await fetchLenses(town) : null;
+  // The area's place traits wait for the same reason, and run beside the lenses.
+  const [lensRes, traitRes] = await Promise.all([lenses ? fetchLenses(town) : null, fetchAreaTags(town)]);
 
   const calls: QlooCall[] = [
     placesRes.call,
@@ -249,5 +260,7 @@ export async function buildProfile(town: Town, { lenses = true }: { lenses?: boo
     distinctShare,
     thin: !failedCalls.length && (localPlaces.length < 15 || allSignals.length < 40),
     ...(lensRes ? { lenses: lensRes.lenses, lensCalls: lensRes.lensCalls } : {}),
+    areaTags: traitRes.areaTags,
+    areaTagCalls: traitRes.areaTagCalls,
   };
 }

@@ -3,7 +3,7 @@ import { cache } from "react";
 import { auditPlan, GENERIC_AGENCY_PLAN, isKept, type AuditInput, type AuditRow } from "./audit";
 import { baselineFor, BASELINE, isInstitution } from "./baselineData";
 import { liveLlmDraft } from "./liveDraft";
-import { addPartnerAges, partnerItems } from "./partnerInsights";
+import { addPartnerAges, addPartnerTraits, partnerItems } from "./partnerInsights";
 import { buildProfile, type TownProfile } from "./profile";
 import { buildProgram, runWith, type Bucket, type Program, type ProgramItem } from "./plan";
 import { applyReach } from "./reach";
@@ -104,7 +104,10 @@ export const runTown = cache(async (slug: string, fund?: number, source: PlanSou
   // Qloo's audience age profile per partner, for display only: it runs after everything above and
   // attaches to the partners, so no verdict, amount or /proof figure can move. A failed call shows
   // no age strip and stays out of `failedCalls`.
-  await addPartnerAges(profile, auditPartnerItems(audit, qlooAdds, program));
+  // The area place traits each partner carries, for the "Why" lines; also display only.
+  const shown = auditPartnerItems(audit, qlooAdds, program);
+  addPartnerTraits(profile, shown);
+  await addPartnerAges(profile, shown);
 
   return { town, profile, program, audit, source: used, qlooAdds, draft };
 });

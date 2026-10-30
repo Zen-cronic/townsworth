@@ -7,7 +7,7 @@ import { osmLookup } from "./nominatim";
 import { buildProfile, type TownProfile } from "./profile";
 import { searchPlaces } from "./qloo";
 import { buildProgram, type ProgramItem } from "./plan";
-import { addPartnerAges } from "./partnerInsights";
+import { addPartnerAges, addPartnerTraits } from "./partnerInsights";
 import { auditDraft, auditPartnerItems } from "./run";
 import type { Town } from "./towns";
 import { groundModelItems, modelPlanSchema, SHORT_INPUT, splitPlanLines, userPlanMessage, userPlanPrompt, userPlanSchema } from "./userPlanParse";
@@ -148,8 +148,10 @@ export async function runUserPlan(town: Town, fund: number | undefined, text: st
   const inputs = withOsm.map((i) => ({ ...i, qloo: i.named ? (search.matches.get(normName(i.named)) ?? null) : null }));
 
   const { audit, qlooAdds } = auditDraft(inputs, profile, program);
-  // Display only, after the audit: a failure shows no age strip and changes no verdict.
-  await addPartnerAges(profile, auditPartnerItems(audit, qlooAdds, program));
+  // Display only, after the audit: a failed call shows no age strip or trait line and changes no verdict.
+  const shown = auditPartnerItems(audit, qlooAdds, program);
+  addPartnerTraits(profile, shown);
+  await addPartnerAges(profile, shown);
   return {
     town,
     annualFund,

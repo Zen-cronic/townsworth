@@ -1,7 +1,7 @@
 import "server-only";
 import { unstable_cache } from "next/cache";
 import { SEARCH_RADIUS_KM } from "./geo";
-import { parseDemographics, type AgeProfile } from "./qlooInsights";
+import { parseAreaTags, parseDemographics, type AgeProfile, type AreaTag } from "./qlooInsights";
 
 // Thin server-side client for the Qloo Insights API (hackathon environment).
 // Responses are cached privately by Next's data cache; never write them to the repo.
@@ -310,6 +310,16 @@ export async function partnerDemographics(ids: string[]): Promise<{ ages: Map<st
   // Only ids that were asked about: an unexpected row is ignored.
   for (const k of [...ages.keys()]) if (!unique.includes(k)) ages.delete(k);
   return { ages, calls };
+}
+
+// The place traits (genres, ambience, dishes, activities) that places around the point over-index
+// on, in Qloo's order. Identity, sensitive and generic tags are dropped in parseAreaTags before
+// anything is ranked or shown.
+export async function areaPlaceTags(lat: number, lon: number, take = 50): Promise<{ tags: AreaTag[]; call: QlooCall }> {
+  const params = { "filter.type": "urn:tag", "signal.location": point(lat, lon), "filter.parents.types": "urn:entity:place", take: String(take) };
+  const res = await qlooGet<unknown>("/v2/insights", params);
+  const tags = res.ok ? parseAreaTags(res.body) : [];
+  return { tags, call: { label: "place traits near point", params, status: res.status, ok: res.ok, count: tags.length, ms: res.ms } };
 }
 
 export interface QlooAudience {

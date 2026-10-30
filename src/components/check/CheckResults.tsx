@@ -15,6 +15,7 @@ import { secondaryCta } from "@/components/dashboard/ui";
 import { CheckExports } from "./CheckExports";
 import { LiveDataNotice } from "@/components/LiveDataNotice";
 import { AgeStrip } from "@/components/qloo/AgeStrip";
+import { TraitLine } from "@/components/qloo/PlaceTraits";
 import { FundBar, StruckTally, PartnerNames, fundSplit, lineComposition, partnerPoints } from "@/components/charts";
 
 // The audit of a pasted draft, rendered from the JSON the check route returns. Same verdict
@@ -54,6 +55,7 @@ function PartnerFacts({ item }: { item: ProgramItem }) {
   return (
     <>
       {facts.length > 0 && <p className="mt-0.5 text-xs text-muted">{facts.join(" · ")}</p>}
+      <TraitLine traits={p.traits} className="mt-1 text-[12px] leading-4" />
       <AgeStrip ages={p.ages} className="mt-1 text-[12px] leading-4" />
     </>
   );

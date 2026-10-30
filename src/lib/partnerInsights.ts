@@ -2,6 +2,7 @@ import "server-only";
 import { cleanName, km, type ProgramItem } from "./plan";
 import type { TownProfile } from "./profile";
 import { partnerDemographics, type QlooEntity } from "./qloo";
+import { sharedTraits } from "./qlooInsights";
 
 // Qloo add-ons per partner, attached once the program, the audit and the reach check are built. They
 // only add display fields to `item.partner`; no amount, verdict, pick or count changes, and their
@@ -28,6 +29,17 @@ export function partnerItems(lists: (ProgramItem | undefined | null)[][]): Progr
     }
   }
   return out;
+}
+
+// Attaches the area place traits each partner carries (at most two, best-ranked first). Pure: it reads
+// `profile.areaTags` and calls nothing. A partner with no overlap gets nothing.
+export function addPartnerTraits(profile: TownProfile, items: ProgramItem[]): void {
+  if (!profile.areaTags?.length) return;
+  for (const it of items) {
+    const e = partnerEntity(it, profile.places);
+    const traits = e ? sharedTraits(e, profile.areaTags) : [];
+    if (traits.length) it.partner!.traits = traits;
+  }
 }
 
 // Asks Qloo for the partners' audience age profiles in one call (at most 15 places) and attaches each
