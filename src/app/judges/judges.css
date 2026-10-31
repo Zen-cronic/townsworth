@@ -180,6 +180,14 @@
 .jg .gp-towns span {
   color: var(--l-muted);
 }
+.jg .gp-towns .gp-towns-more a {
+  font-weight: 500;
+  color: var(--l-muted);
+  text-decoration: none;
+}
+.jg .gp-towns .gp-towns-more a:hover {
+  color: var(--l-ink);
+}
 .jg .gp-extra {
   margin-top: 0;
 }

@@ -161,12 +161,17 @@ export default async function GuidedPath() {
           </p>
           <p className="gp-vis-k">host towns ready, or type your own</p>
           <ul className="gp-towns">
-            {TOWNS.map((t) => (
+            {TOWNS.slice(0, 3).map((t) => (
               <li key={t.slug}>
                 <Link href={`/town/${t.slug}`}>{t.name}</Link>
                 <span>{FACILITY[t.facility]}</span>
               </li>
             ))}
+            {TOWNS.length > 3 && (
+              <li className="gp-towns-more">
+                <Link href="/find">+{TOWNS.length - 3} more</Link>
+              </li>
+            )}
           </ul>
         </>
       ),
