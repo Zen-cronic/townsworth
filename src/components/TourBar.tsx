@@ -36,21 +36,26 @@ export function TourStops({ stops }: { stops: TourStop[] }) {
 // it closes for good with Close. Pages opened any other way never show it.
 export function TourBar() {
   const pathname = usePathname();
-  const [state, setState] = useState<{ step: number; stops: TourStop[] | null } | null>(null);
+  const [state, setState] = useState<{ step: number; done: boolean; stops: TourStop[] | null } | null>(null);
 
   useEffect(() => {
     let step: number | null = null;
+    let done = false;
     try {
       step = tourStep(new URLSearchParams(location.search).get("tour"), TOTAL);
       if (step) sessionStorage.setItem(AT_KEY, String(step));
-      else step = tourStep(sessionStorage.getItem(AT_KEY), TOTAL);
+      else {
+        step = tourStep(sessionStorage.getItem(AT_KEY), TOTAL);
+        // Moving on from the last step's page ends the tour: the bar says so and keeps the way back.
+        done = step === TOTAL;
+      }
     } catch {}
     // The tour page itself needs no bar.
-    setState(step && pathname !== "/judges" ? { step, stops: readStops() } : null);
+    setState(step && pathname !== "/judges" ? { step, done, stops: readStops() } : null);
   }, [pathname]);
 
   if (!state) return null;
-  const { step, stops } = state;
+  const { step, done, stops } = state;
   const here = stops?.[step - 1]?.title;
   const next = nextStop(step, stops, TOTAL);
   const close = () => {
@@ -70,15 +75,22 @@ export function TourBar() {
               <i key={i} className={i < step ? "is-done" : undefined} />
             ))}
           </span>
-          <span className="tour-n">
-            Step {step} of {TOTAL}
-          </span>
-          {here && <span className="tour-title">{here}</span>}
+          {done ? (
+            <span className="tour-n">Tour complete</span>
+          ) : (
+            <>
+              <span className="tour-n">
+                Step {step} of {TOTAL}
+              </span>
+              {here && <span className="tour-title">{here}</span>}
+            </>
+          )}
         </p>
         <div className="tour-actions">
-          <Link href={`/judges#step-${step}`} className="tour-btn tour-back">
+          <Link href={done ? "/judges" : `/judges#step-${step}`} className="tour-btn tour-back">
             Back to the tour
           </Link>
+          {!done && (
           <Link href={next.href} className="tour-btn tour-next">
             {step >= TOTAL ? (
               <span className="tour-next-k is-last">Try your own plan</span>
@@ -90,6 +102,7 @@ export function TourBar() {
             )}
             <Chevron />
           </Link>
+          )}
           <button type="button" onClick={close} className="tour-close" aria-label="Close the tour bar">
             <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
               <path d="M4 4l8 8M12 4l-8 8" />
