@@ -1,7 +1,7 @@
 /* Guided path (/judges) only. One containment level: the hero, then five steps as a ruled,
    numbered sequence, each with its text on the left and one figure on the right. No boxes. */
 
-/* Hero: the copy and its control row on the left; the five steps' figures on the right. */
+/* Hero: the copy and its control row on the left; the five steps' figures on the right, centred against it. */
 .jg .jg-hero {
   padding: 56px 0 48px;
 }
@@ -11,7 +11,7 @@
   grid-template-rows: auto;
   column-gap: 64px;
   row-gap: 40px;
-  align-items: end;
+  align-items: center;
 }
 .jg .jg-hero-grid > .jg-hero-copy {
   grid-column: 1;
