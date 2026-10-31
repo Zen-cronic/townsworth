@@ -372,7 +372,7 @@
 .jg .jg-film-media {
   display: block;
   width: 100%;
-  max-width: 960px;
+  max-width: none;
   height: auto;
   aspect-ratio: 16 / 9;
   border-radius: var(--r-btn);
