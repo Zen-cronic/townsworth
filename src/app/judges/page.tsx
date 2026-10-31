@@ -236,7 +236,7 @@ export default async function GuidedPath() {
                 </span>
               </Link>
               <a href="#tour-video" className="lp-btn lp-btn-quiet">
-                Watch it in 70 seconds
+                Watch it in 73 seconds
               </a>
             </div>
           </div>
@@ -260,7 +260,7 @@ export default async function GuidedPath() {
         <section id="tour-video" className="jg-film" aria-labelledby="jg-film-h">
           <div className="lp-wrap">
             <h2 id="jg-film-h" className="jg-film-h">
-              The five steps, recorded on the live site <span>70 seconds, no sound</span>
+              The five steps, recorded on the live site <span>73 seconds, no sound</span>
             </h2>
             <video className="jg-film-media" controls muted playsInline preload="none" poster="/tour/product-tour-poster.webp" width={1280} height={720}>
               <source src="/tour/product-tour.mp4" type="video/mp4" />
