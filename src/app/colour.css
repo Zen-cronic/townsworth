@@ -993,6 +993,12 @@
 :root #ch-02 { --ch-bg: var(--ground-blue); }
 :root #ch-05 { --ch-bg: var(--ground-green); }
 
+/* Landing closing band: the footer's gradient flipped, blue at the bottom left shading into the
+   deep green at the top right, so the two bands mirror each other. */
+:root .lp-close.has-film {
+  background: linear-gradient(45deg, var(--band) 0%, var(--ok-text) 100%);
+}
+:root .lp-close.has-film::before { display: none; }
 /* Footer: the blue band shading diagonally into the deep green, with a white hairline on its top
    edge so it stays apart from a blue closing band above it. White 6.53 to 8.11 across the
    gradient; band-soft links 5.60 to 6.94. The inner rule is
