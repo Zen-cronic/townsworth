@@ -352,7 +352,13 @@ export default function TownMapCanvas({ data, legs, area, venues, showPlaces, fo
         });
 
         m.addSource("tm-places", { type: "geojson", data: fc(data.places.map((p) => ({ type: "Feature", properties: { name: p.name }, geometry: { type: "Point", coordinates: [p.lon, p.lat] } }))) });
-        m.addLayer({ id: "tm-places", type: "circle", source: "tm-places", layout: { visibility: "none" }, paint: { "circle-radius": 2.6, "circle-color": c.qloo, "circle-opacity": 0.35 } });
+        m.addLayer({ id: "tm-places", type: "circle", source: "tm-places", layout: { visibility: "none" }, paint: {
+            "circle-radius": ["interpolate", ["linear"], ["zoom"], 9, 4, 13, 6.5],
+            "circle-color": c.qloo,
+            "circle-opacity": 0.85,
+            "circle-stroke-color": c.paper,
+            "circle-stroke-width": 1.5,
+          } });
 
         m.addSource("tm-arcs", { type: "geojson", data: fc([]) });
         const arcColor = ["match", ["get", "bucket"], "training", c.training, "procurement", c.procurement, "grants", c.grants, "events", c.events, c.channels] as unknown as string;
