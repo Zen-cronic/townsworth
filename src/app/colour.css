@@ -928,14 +928,16 @@
 :root #ch-02 { --ch-bg: var(--ground-blue); }
 :root #ch-05 { --ch-bg: var(--ground-green); }
 
-/* Footer: on the blue band, with a white hairline on its top edge so it stays apart from a blue
-   closing band above it. White on blue 6.53, band-soft links 5.60. No underlines; the pilot link a
-   white outline. */
+/* Footer: the blue band shading diagonally into the deep green, with a white hairline on its top
+   edge so it stays apart from a blue closing band above it. White 6.53 to 8.11 across the
+   gradient; band-soft links 5.60 to 6.94. The inner rule is
+   translucent white so it reads the same across the gradient. No underlines; the pilot link a
+   white outline. Hidden in print. */
 :root .lp-footer {
   --l-ink: var(--band-text);
   --l-muted: var(--band-soft);
-  --l-hairline: color-mix(in srgb, var(--band-text) 28%, var(--band));
-  background: var(--band);
+  --l-hairline: color-mix(in srgb, var(--band-text) 28%, transparent);
+  background: linear-gradient(135deg, var(--band) 0%, var(--ok-text) 100%);
   color: var(--band-soft);
   box-shadow: inset 0 1px 0 color-mix(in srgb, var(--band-text) 40%, var(--band));
 }
