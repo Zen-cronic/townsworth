@@ -2534,8 +2534,6 @@ a:focus-visible .lp-chev {
   background: var(--l-band);
   color: var(--l-paper);
   padding: 48px 0 40px;
-  /* A white paint rule along the top edge. */
-  box-shadow: inset 0 4px 0 var(--band-contour);
 }
 .ui-band::after {
   opacity: 0.08;

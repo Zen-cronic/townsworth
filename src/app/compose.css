@@ -993,10 +993,11 @@
   box-shadow: none;
   padding: 0;
 }
-/* The drawing uses the band's full height, still 16px clear of each edge. */
+/* The drawing uses the band's height: 28px clear of its top edge, so the label never meets it,
+   and 16px clear of its foot. */
 @media (min-width: 900px) {
   :root .ui-band-visual {
-    top: -28px;
+    top: -16px;
     bottom: -24px;
   }
 }

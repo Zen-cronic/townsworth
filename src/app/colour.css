@@ -378,9 +378,11 @@
 :root .jg .jg-overview .text-muted {
   color: var(--band-muted);
 }
-/* Only the struck count is pink; the "of 12" total stays band white. */
+/* The struck count is band white with a pink strike, the mark for a struck line; the "of 12"
+   total stays plain. White on the band is 6.5:1. */
 :root .jg .jg-overview-v.is-pen > span > span:first-child {
-  color: var(--band-pen);
+  color: var(--band-text);
+  text-decoration: line-through 3px var(--band-pen);
 }
 :root .jg .jg-hero :where(a, button, summary):focus-visible {
   outline-color: var(--band-text);
