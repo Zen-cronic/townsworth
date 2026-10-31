@@ -1,25 +1,42 @@
-/* The product-tour bar: one dark strip at the foot of the screen, only on pages opened from the
-   tour. Ink, with the next step in lime, the colour that marks the tour entry (ink on lime 14.5:1,
-   muted on lime 7.2:1), and a five-segment progress strip. */
-.tour-spacer {
-  height: 88px;
+/* The product-tour bar: a dark strip docked under the sticky site header, only on pages opened
+   from the tour. It takes its own room: the header keeps a gap of the strip's height below it, and
+   the header-height token every sticky rail and anchor offset reads grows by the same amount, so the
+   strip never covers the page. Ink, with the next step in lime, the colour that marks the tour entry
+   (ink on lime 14.5:1, muted on lime 7.2:1), and a five-segment progress strip. */
+html[data-tour] {
+  --tour-h: 52px;
+}
+html[data-tour] header[data-app-header] {
+  margin-bottom: var(--tour-h);
+}
+html[data-tour] .gn-landing {
+  --l-hdr: calc(53px + var(--tour-h));
+}
+html[data-tour] .gn-landing:has(header[data-app-header][data-towns]) {
+  --l-hdr: calc(90px + var(--tour-h));
+}
+@media (min-width: 768px) {
+  html[data-tour] .gn-landing {
+    --l-hdr: calc(55px + var(--tour-h));
+  }
+  html[data-tour] .gn-landing:has(header[data-app-header][data-towns]) {
+    --l-hdr: calc(92px + var(--tour-h));
+  }
 }
 .tour-bar {
   position: fixed;
-  z-index: 40;
-  left: 50%;
-  bottom: 16px;
-  transform: translateX(-50%);
-  width: min(760px, calc(100% - 24px));
+  z-index: 29;
+  left: 0;
+  right: 0;
+  top: calc(var(--l-hdr) - var(--tour-h));
+  height: var(--tour-h);
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 8px 8px 8px 18px;
-  border-radius: 14px;
+  padding: 0 max(32px, calc((100% - 1240px) / 2 + 32px));
   background: var(--ink);
   color: var(--paper);
-  box-shadow: 0 8px 28px color-mix(in srgb, var(--ink) 28%, transparent);
   font-size: 0.875rem;
 }
 .tour-at {
@@ -124,27 +141,30 @@
   outline: 2px solid var(--paper);
   outline-offset: 2px;
 }
-/* Phones: the step count over the two actions; the next step's title gives way to "Next". */
+/* Phones: one row. The pips and "2/5" on the left, then Next and Close; the way back to the tour
+   stays in the header's Tour button. */
 @media (max-width: 640px) {
-  .tour-spacer {
-    height: 112px;
-  }
   .tour-bar {
-    bottom: 10px;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 6px;
-    padding: 8px;
+    gap: 10px;
+    padding: 0 8px 0 16px;
   }
   .tour-at {
-    padding: 2px 6px 0;
+    gap: 8px;
   }
   .tour-prog i {
     width: 10px;
   }
-  .tour-actions .tour-btn {
-    flex: 1 1 0;
-    justify-content: center;
+  .tour-title,
+  .tour-back {
+    display: none;
+  }
+  .tour-n-l {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
   .tour-next-l {
     display: none;
@@ -154,9 +174,16 @@
     font-weight: 600;
   }
 }
-@media print {
-  .tour-bar,
-  .tour-spacer {
+@media (min-width: 641px) {
+  .tour-n-s {
     display: none;
+  }
+}
+@media print {
+  .tour-bar {
+    display: none;
+  }
+  html[data-tour] header[data-app-header] {
+    margin-bottom: 0;
   }
 }

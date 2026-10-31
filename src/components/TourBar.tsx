@@ -30,8 +30,9 @@ export function TourStops({ stops }: { stops: TourStop[] }) {
   return null;
 }
 
-// A bar at the foot of the screen on a page opened from the product tour (`?tour=N`): where you
-// are in the tour, the way back to it, and the next step. It stays for the rest of the visit, so a
+// A strip docked under the site header on a page opened from the product tour (`?tour=N`): where
+// you are in the tour, the way back to it, and the next step. It takes its own room in the layout
+// (the header and every sticky offset move down by its height), so it never covers the page. It stays for the rest of the visit, so a
 // click onward inside the step (a town from the search, the results of the ballot) keeps it, and
 // it closes for good with Close. Pages opened any other way never show it.
 export function TourBar() {
@@ -54,6 +55,14 @@ export function TourBar() {
     setState(step && pathname !== "/judges" ? { step, done, stops: readStops() } : null);
   }, [pathname]);
 
+  const on = state !== null;
+  useEffect(() => {
+    if (!on) return;
+    const root = document.documentElement;
+    root.setAttribute("data-tour", "");
+    return () => root.removeAttribute("data-tour");
+  }, [on]);
+
   if (!state) return null;
   const { step, done, stops } = state;
   const here = stops?.[step - 1]?.title;
@@ -67,7 +76,6 @@ export function TourBar() {
 
   return (
     <>
-      <div className="tour-spacer no-print" aria-hidden="true" />
       <nav className="tour-bar no-print" aria-label="Product tour">
         <p className="tour-at">
           <span className="tour-prog" aria-hidden="true">
@@ -80,7 +88,11 @@ export function TourBar() {
           ) : (
             <>
               <span className="tour-n">
-                Step {step} of {TOTAL}
+                <span className="tour-n-l">Step </span>
+                {step}
+                <span className="tour-n-l"> of </span>
+                <span className="tour-n-s" aria-hidden="true">/</span>
+                {TOTAL}
               </span>
               {here && <span className="tour-title">{here}</span>}
             </>
