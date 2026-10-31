@@ -93,8 +93,8 @@ export default async function CheckPage({
             </li>
           </ul>
 
-          <div className="ck-town-pick grid gap-5 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)] lg:gap-8">
-            <Form action="/check" className="flex items-end gap-2">
+          <div className="ck-town-pick flex flex-wrap items-end gap-x-8 gap-y-5">
+            <Form action="/check" className="flex w-full max-w-[22rem] items-end gap-2">
               <label className="flex min-w-0 flex-1 flex-col gap-1 text-sm">
                 <span className="text-xs text-muted">A preset town</span>
                 <select name="town" defaultValue={town.custom ? "" : town.slug} className={`${field} h-11 px-2.5`}>
@@ -112,8 +112,8 @@ export default async function CheckPage({
             </Form>
 
             {/* Any other town sits one click away, so the paste box is close on a phone. It opens itself
-                when a search is in the address or the town was typed in. */}
-            <details className="group self-end" open={!!q || town.custom || undefined}>
+                when a search is in the address or the town was typed in; open, it takes a full row of its own. */}
+            <details className="group open:basis-full" open={!!q || town.custom || undefined}>
               <summary className={`${secondaryCta} ck-other h-11 cursor-pointer group-open:mb-3`}>
                 Use another town
                 <Chevron className="h-3.5 w-3.5 transition-transform duration-150 group-open:rotate-90" />
@@ -144,7 +144,7 @@ export default async function CheckPage({
                 </select>
               </label>
               <label className="flex min-w-0 flex-col gap-1 text-sm">
-                <span className="text-xs text-muted">Company funding the program (optional)</span>
+                <span className="text-xs text-muted">Funder (optional)</span>
                 <input
                   name="company"
                   type="text"
