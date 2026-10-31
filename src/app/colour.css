@@ -506,6 +506,68 @@
 @media (max-width: 760px) {
   :root .ui-page > section.ui-card[aria-labelledby="step1-h"] { padding: 16px; }
 }
+/* The host-town panel: the town on the blue wash with a Qloo-blue rule, its facts as chips (the
+   facility in blue, the fund in green), then the town picker on a white inset. */
+:root .ui-page > section.ui-card.ck-town {
+  padding: 36px 40px 0;
+  border-left: 4px solid var(--qloo);
+  overflow: hidden;
+}
+:root .ck-town-head { display: flex; align-items: flex-start; gap: 16px; }
+:root .ck-town-mark {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  background: var(--qloo);
+  color: var(--qloo-on);
+}
+:root .ck-town-mark svg { width: 30px; height: 30px; }
+:root .ck-town-facts {
+  list-style: none;
+  margin: 20px 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+:root .ck-town-facts li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 0 12px;
+  border-radius: var(--r-pill);
+  background: var(--card);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--qloo) 22%, transparent);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+:root .ck-town-facts li span { font-weight: 500; color: var(--muted); }
+:root .ck-town-facts li.is-qloo { background: var(--qloo); color: var(--qloo-on); box-shadow: none; }
+:root .ck-town-facts li.is-ok { background: var(--ok-wash); color: var(--ok-text); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ok) 22%, transparent); }
+:root .ck-town-facts li.is-ok span { color: var(--ok-text); font-weight: 500; }
+:root .ck-town > .ck-town-pick {
+  margin: 28px -40px 0;
+  padding: 24px 40px 28px;
+  background: var(--card);
+  border-top: 1px solid color-mix(in srgb, var(--qloo) 18%, transparent);
+  border-right: 1px solid color-mix(in srgb, var(--qloo) 18%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--qloo) 18%, transparent);
+}
+:root .ck-town .ck-other { display: inline-flex; list-style: none; }
+:root .ck-town .ck-other::-webkit-details-marker { display: none; }
+@media (max-width: 760px) {
+  :root .ui-page > section.ui-card.ck-town { padding: 22px 20px 0; }
+  :root .ck-town-head { gap: 12px; }
+  :root .ck-town-mark { width: 40px; height: 40px; }
+  :root .ck-town-mark svg { width: 24px; height: 24px; }
+  :root .ck-town > .ck-town-pick { margin: 22px -20px 0; padding: 20px 20px 22px; }
+}
 :root .check-results [aria-labelledby="adds-title"] > :first-child { background: var(--qloo-wash); }
 :root .check-results [aria-labelledby="fund-title"] { background: var(--ok-wash); }
 

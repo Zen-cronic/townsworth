@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { PRODUCT_NAME } from "@/components/landing/brand";
-import { secondaryCta, tertiaryCta } from "@/components/dashboard/ui";
+import { secondaryCta } from "@/components/dashboard/ui";
 import Form from "next/form";
 import Link from "next/link";
 import { AppHeader } from "@/components/AppHeader";
@@ -60,19 +60,44 @@ export default async function CheckPage({
         </div>
         <div className="ui-page">
 
-        <section aria-labelledby="step1-h" className="no-print ui-card p-4 sm:p-6">
-          <StepLabel>Host town</StepLabel>
-          <h2 id="step1-h" className="mt-2 flex flex-wrap items-center gap-2 text-lg font-semibold tracking-tight">
-            {town.name}, {town.region}
-            {town.custom && <StatusPill tone="neutral">Entered by you</StatusPill>}
-          </h2>
-          <p className="mt-0.5 text-xs text-muted">{town.project}</p>
+        <section aria-labelledby="step1-h" className="no-print ui-card ck-town">
+          <div className="ck-town-head">
+            <span className="ck-town-mark" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <circle cx="12" cy="12" r="10" strokeDasharray="3 2.5" />
+                <circle cx="12" cy="12" r="5.5" />
+                <rect x="9.5" y="9.5" width="5" height="5" rx="0.5" fill="currentColor" stroke="none" />
+              </svg>
+            </span>
+            <div className="min-w-0">
+              <StepLabel>Host town</StepLabel>
+              <h2 id="step1-h" className="mt-1 flex flex-wrap items-center gap-2 text-xl font-semibold tracking-tight">
+                {town.name}, {town.region}
+                {town.custom && <StatusPill tone="neutral">Entered by you</StatusPill>}
+              </h2>
+              <p className="mt-1 text-sm text-muted">{town.project}</p>
+            </div>
+          </div>
+          <ul className="ck-town-facts" aria-label="About this town">
+            <li className="is-qloo">{FACILITY_NAME[town.facility]}</li>
+            {town.sponsorSource !== "placeholder" && (
+              <li>
+                <span>Funder</span> {town.sponsor}
+              </li>
+            )}
+            <li className="is-ok">
+              <span>Annual fund</span> ${town.defaultAnnualFund.toLocaleString("en-US")}
+            </li>
+            <li>
+              <span>Site</span> {Math.abs(town.lat).toFixed(4)}° {town.lat >= 0 ? "N" : "S"}, {Math.abs(town.lon).toFixed(4)}° {town.lon >= 0 ? "E" : "W"}
+            </li>
+          </ul>
 
-          <div className="mt-4 grid gap-5 lg:grid-cols-[minmax(0,20rem)_minmax(0,1fr)] lg:gap-8">
+          <div className="ck-town-pick grid gap-5 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)] lg:gap-8">
             <Form action="/check" className="flex items-end gap-2">
               <label className="flex min-w-0 flex-1 flex-col gap-1 text-sm">
                 <span className="text-xs text-muted">A preset town</span>
-                <select name="town" defaultValue={town.custom ? "" : town.slug} className={`${field} h-10 px-2.5`}>
+                <select name="town" defaultValue={town.custom ? "" : town.slug} className={`${field} h-11 px-2.5`}>
                   {town.custom && <option value="">Choose a preset…</option>}
                   {TOWNS.map((t) => (
                     <option key={t.slug} value={t.slug}>
@@ -81,7 +106,7 @@ export default async function CheckPage({
                   ))}
                 </select>
               </label>
-              <button className={`${secondaryCta} h-10`}>
+              <button className={`${secondaryCta} h-11`}>
                 Use
               </button>
             </Form>
@@ -89,7 +114,10 @@ export default async function CheckPage({
             {/* Any other town sits one click away, so the paste box is close on a phone. It opens itself
                 when a search is in the address or the town was typed in. */}
             <details className="group self-end" open={!!q || town.custom || undefined}>
-              <summary className={`${tertiaryCta} cursor-pointer py-2 group-open:mb-3`}>Use another town</summary>
+              <summary className={`${secondaryCta} ck-other h-11 cursor-pointer group-open:mb-3`}>
+                Use another town
+                <Chevron className="h-3.5 w-3.5 transition-transform duration-150 group-open:rotate-90" />
+              </summary>
             <Form action="/check" className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_9.5rem_minmax(0,11rem)_auto] sm:items-end">
               <label className="flex min-w-0 flex-col gap-1 text-sm">
                 <span className="text-xs text-muted">Or any US or Canadian town</span>
