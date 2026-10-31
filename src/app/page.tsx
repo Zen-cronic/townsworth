@@ -5,7 +5,6 @@ import { notFound } from "next/navigation";
 import { preload } from "react-dom";
 import { AppHeader } from "@/components/AppHeader";
 import { AuditPreview, type PreviewRow } from "@/components/landing/AuditPreview";
-import { LiveDataNotice } from "@/components/LiveDataNotice";
 import { PilotLink } from "@/components/PilotLink";
 import { PRODUCT_NAME } from "@/components/landing/brand";
 import { Chapter } from "@/components/landing/Chapter";
@@ -54,8 +53,6 @@ export default async function Home() {
   ]);
   if (!run || !template) notFound();
   const { town, program } = run;
-  // The hero run's Qloo calls failed on this request: the card and the stack say so instead of "+0".
-  const heroFailed = run.profile.failedCalls.length ? [town.name] : [];
   const facts = heroFacts(run);
   const auditHref = facts.townHref;
   if (HERO_VIDEO.ready) preload(HERO_VIDEO.poster, { as: "image", fetchPriority: "high" });
@@ -221,17 +218,16 @@ export default async function Home() {
               Generic plan in. <span className="lp-tone">A costed, local program out.</span>
             </h2>
             <p className="lp-section-lede">Three layers, drawn from the {town.name} run.</p>
-            <LiveDataNotice towns={heroFailed} subject="these layers" retry />
           </div>
           <HostStack data={stack} nextId="ch-03" />
         </Chapter>
 
         <Chapter name="Evidence" id="ch-03" labelledBy="proof-h" tone="is-ink">
-          <ProofBand paired={paired} stats={stats} townCount={TOWNS.length === 6 ? "six" : String(TOWNS.length)} failedTowns={proof.failedTowns} />
+          <ProofBand paired={paired} stats={stats} townCount={TOWNS.length === 6 ? "six" : String(TOWNS.length)} />
         </Chapter>
 
         <Chapter name="Host towns" id="ch-04" labelledBy="towns-h">
-          <TownGrid towns={TOWNS} partners={partnersByTown} picks={picksByTown} heroSlug={HERO_TOWN.slug} failedTowns={proof.failedTowns} />
+          <TownGrid towns={TOWNS} partners={partnersByTown} picks={picksByTown} heroSlug={HERO_TOWN.slug} />
         </Chapter>
 
         <Chapter name="Questions" id="ch-05" labelledBy="ch-05-h">
@@ -240,7 +236,6 @@ export default async function Home() {
               Fair questions.
             </h2>
             <p className="lp-section-lede">Each answer opens the live screen.</p>
-            <LiveDataNotice towns={proof.failedTowns} subject="these answers" retry />
           </div>
           <Objections items={objections} />
           <Guardrails />

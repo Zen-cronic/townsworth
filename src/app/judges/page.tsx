@@ -4,7 +4,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AppHeader } from "@/components/AppHeader";
-import { LiveDataNotice } from "@/components/LiveDataNotice";
 import { PRODUCT_NAME } from "@/components/landing/brand";
 import { Chevron } from "@/components/landing/Chevron";
 import { CopyablePlan } from "@/components/landing/CopyablePlan";
@@ -226,7 +225,6 @@ export default async function GuidedPath() {
             <p className="lp-lede">
               {town}, home to a {HERO_TOWN.sponsor} data center campus. Each step opens the live page.
             </p>
-            <LiveDataNotice towns={proof.failedTowns} retry />
             <div className="jg-ctas">
               <Link href="#step-1" className="lp-btn lp-btn-primary">
                 Start at step 1

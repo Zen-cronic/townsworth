@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { AppHeader } from "@/components/AppHeader";
 import { ScrollToHash } from "@/components/ui/ScrollToHash";
-import { LiveDataNotice } from "@/components/LiveDataNotice";
 import { Figure } from "@/components/dashboard/Figure";
 import { Chevron } from "@/components/dashboard/Icons";
 import { StatusPill } from "@/components/dashboard/StatusPill";
@@ -70,7 +69,7 @@ function Pick({ p, qloo = false }: { p?: PickRef; qloo?: boolean }) {
 }
 
 export default async function ProofPage() {
-  const { towns, totals, baseline, failedTowns } = await computeProof();
+  const { towns, totals, baseline } = await computeProof();
   const num = "px-4 py-3 text-right font-mono tabular-nums";
   const changed = towns.filter((t) => t.swaps.length > 0);
   const kemmerer = towns.find((t) => t.slug === "kemmerer-wy");
@@ -97,7 +96,6 @@ export default async function ProofPage() {
             <p className="lp-lede mt-4">
               {totals.llmVerifiedPct}% of the partners AI alone named could be confirmed ({totals.llmVerified} of {totals.llmNamed}). {replacementsLine}
             </p>
-            <LiveDataNotice towns={failedTowns} className="mt-3" retry />
             <details className="ui-more mt-3">
               <summary>How the test was set up</summary>
               <div>

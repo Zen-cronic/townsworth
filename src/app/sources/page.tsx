@@ -5,7 +5,6 @@ import Link from "next/link";
 import { AppHeader } from "@/components/AppHeader";
 import { ScrollToHash } from "@/components/ui/ScrollToHash";
 import { SpyLinks } from "@/components/ui/SpyLinks";
-import { LiveDataNotice } from "@/components/LiveDataNotice";
 import { PRODUCT_NAME } from "@/components/landing/brand";
 import { Chevron } from "@/components/landing/Chevron";
 import { commitmentsFor } from "@/lib/commitments";
@@ -96,7 +95,7 @@ function PctBars({ bars }: { bars: { label: string; pct: number; tone: "gn" | "l
 }
 
 export default async function SourcesPage() {
-  const { totals: t, baseline, towns, failedTowns } = await computeProof();
+  const { totals: t, baseline, towns } = await computeProof();
   const figures: { k: string; text: string; bars: { label: string; pct: number; tone: "gn" | "llm" }[] }[] = [
     {
       k: "Institutions",
@@ -258,7 +257,6 @@ export default async function SourcesPage() {
                   plans were frozen on {baseline.createdAt.slice(0, 10)} before any measurement. The method, the per-town table and what the
                   test does not prove are on <Link href="/proof" className="lp-textlink">the evidence page</Link>.
                 </p>
-                <LiveDataNotice towns={failedTowns} retry />
                 <ul className="src-list">
                   {figures.map((f) => (
                     <li key={f.k}>
