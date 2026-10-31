@@ -444,10 +444,6 @@ export function CheckResults({ result }: { result: CheckResult }) {
             <Chevron className="h-3.5 w-3.5" />
           </Link>
         </div>
-        <p className="ui-note self-start">
-          Guardrails: not tied to any vote or permit · residents rank · no political, religious or identity targeting ({profile.excluded} excluded by
-          rule) · the sponsor is named on every message. <Link href="/sources#data">Sources</Link>
-        </p>
       </section>
     </section>
   );

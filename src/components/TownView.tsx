@@ -634,10 +634,6 @@ export function TownView({ run }: { run: TownRun }) {
             )}
             {!tastes.length && !topPlaces.length && !hasTraitsRow && <p className="text-sm">Nothing stands out locally for {town.name}.</p>}
           </div>
-          <p className="ui-note mt-4">
-            Guardrails: not tied to any vote or permit · residents rank · no political, religious or identity targeting ({profile.excluded.length} excluded by
-            rule) · the sponsor is named on every message. <Link href="/sources#data">Sources</Link>
-          </p>
         </section>
       </div>
     </main>
