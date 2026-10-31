@@ -699,14 +699,9 @@
 /* Questions stay on paper; the guardrails each open on a green rule, as standing commitments. */
 :root #ch-05 .lp-rail-list li { border-top: 3px solid var(--ok); }
 
-/* Product tour: each step's figure panel is one card shape (white, a hairline, a 4px top rule, one
-   numeral size and caption style); only the rule colour follows what it shows. Struck lines pink
-   (the pink cells keep 3.3:1 against the card), costed items deep green, the Qloo comparison blue,
-   the ballot and the host towns ink. The questions after the steps sit on a full-width ground. */
+/* Product tour: each step's figure panel is one card shape (white, a hairline, a 4px ink top rule,
+   one numeral size and caption style). The questions after the steps sit on a full-width ground. */
 :root .jg .gp-steps > .gp-step .gp-vis { padding: 18px 18px 20px; background: var(--card); box-shadow: inset 0 0 0 1px var(--rule), inset 0 4px 0 var(--ink); }
-:root .jg .gp-steps > .gp-step:nth-child(1) .gp-vis { box-shadow: inset 0 0 0 1px var(--rule), inset 0 4px 0 var(--hivis); }
-:root .jg .gp-steps > .gp-step:nth-child(2) .gp-vis { box-shadow: inset 0 0 0 1px var(--rule), inset 0 4px 0 var(--ok); }
-:root .jg .gp-steps > .gp-step:nth-child(5) .gp-vis { box-shadow: inset 0 0 0 1px var(--rule), inset 0 4px 0 var(--qloo); }
 :root .jg .gp-vis :is(.gp-vis-v, .tally-v) > span { font-family: inherit; font-weight: inherit; }
 :root .jg .gp-steps > .gp-step:nth-child(4) .gp-towns :is(li, a) { border-color: var(--rule); }
 :root .jg .gp-steps > .gp-step:nth-child(5) .gp-h2h .ch-hbar.is-quiet { background: var(--line-quiet); }
