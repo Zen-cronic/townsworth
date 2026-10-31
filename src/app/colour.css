@@ -372,17 +372,11 @@
 :root .jg .jg-overview a:hover {
   background: color-mix(in srgb, var(--band-text) 8%, transparent);
 }
-:root .jg .jg-overview :is(.jg-overview-n, .jg-overview-k) {
+:root .jg .jg-overview .jg-overview-n {
   color: var(--band-soft);
 }
 :root .jg .jg-overview .text-muted {
   color: var(--band-muted);
-}
-/* The struck count is band white with a pink strike, the mark for a struck line; the "of 12"
-   total stays plain. White on the band is 6.5:1. */
-:root .jg .jg-overview-v.is-pen > span > span:first-child {
-  color: var(--band-text);
-  text-decoration: line-through 3px var(--band-pen);
 }
 :root .jg .jg-hero :where(a, button, summary):focus-visible {
   outline-color: var(--band-text);

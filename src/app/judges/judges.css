@@ -38,7 +38,7 @@
 }
 .jg .jg-overview a {
   display: grid;
-  grid-template-columns: 1.5rem minmax(9.5rem, auto) minmax(0, 1fr);
+  grid-template-columns: 1.5rem minmax(0, 1fr);
   align-items: baseline;
   gap: 16px;
   padding: 12px 0;
@@ -54,24 +54,10 @@
   font-variant-numeric: tabular-nums;
   color: var(--l-muted);
 }
-.jg .jg-overview-v {
-  font-family: var(--font-display);
-  font-stretch: 116%;
-  font-size: 1.375rem;
-  font-weight: 750;
-  line-height: 1.1;
-  letter-spacing: -0.02em;
-  font-variant-numeric: tabular-nums;
-}
-/* Figure sets its own face, weight and tracking; here the figure takes the overview's. */
-.jg .jg-overview-v > span {
-  font: inherit;
-  letter-spacing: inherit;
-}
 .jg .jg-overview-k {
-  font-size: 0.9375rem;
-  line-height: 1.4;
-  color: var(--l-muted);
+  font-size: 1.0625rem;
+  font-weight: 600;
+  line-height: 1.35;
 }
 
 /* The sequence */

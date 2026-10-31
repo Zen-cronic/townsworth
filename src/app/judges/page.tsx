@@ -37,9 +37,6 @@ interface Step {
   rail?: string;
   // One line: the thing to look for on the live page.
   notice: string;
-  // The step's headline figure, which the hero's overview repeats and links to.
-  // "pen" when the figure counts struck lines, so it takes the struck colour.
-  figure: { value: string; label: string; tone?: "pen" };
   visual: React.ReactNode;
   primary: { href: string; label: string };
 }
@@ -75,7 +72,6 @@ export default async function GuidedPath() {
     {
       title: "The draft, checked line by line",
       rail: "The draft, checked",
-      figure: { value: `${comp.generic + comp.unverified} of ${comp.total}`, label: "draft lines struck", tone: comp.generic + comp.unverified > 0 ? "pen" : undefined },
       visual: (
         <>
           <StruckTally comp={comp} draft={useTemplate ? "Consultant template" : "AI-written draft"} />
@@ -104,7 +100,6 @@ export default async function GuidedPath() {
     },
     {
       title: "The committee memo",
-      figure: { value: usd(run.program.totalAllocated), label: "costed, item by item" },
       visual: (
         <>
           <p className="gp-vis-v">
@@ -122,7 +117,6 @@ export default async function GuidedPath() {
     },
     {
       title: "Residents rank",
-      figure: { value: String(shortlist.length), label: "ideas on the ballot" },
       visual: (
         <>
           <p className="gp-vis-v is-ok">
@@ -153,7 +147,6 @@ export default async function GuidedPath() {
     },
     {
       title: "Any host town",
-      figure: { value: String(TOWNS.length), label: "host towns ready, or type your own" },
       visual: (
         <>
           <p className="gp-vis-v">
@@ -180,7 +173,6 @@ export default async function GuidedPath() {
     },
     {
       title: "The evidence and its limits",
-      figure: { value: `${t.llmInstitutionalPct}% vs ${t.gnInstitutionalPct}%`, label: "partners that are institutions, AI alone vs ours" },
       visual: (
         <>
           <p className="gp-vis-v">
@@ -250,10 +242,7 @@ export default async function GuidedPath() {
               <li key={s.title}>
                 <a href={`#step-${i + 1}`}>
                   <span className="jg-overview-n">{i + 1}</span>
-                  <span className={`jg-overview-v ${s.figure.tone ? `is-${s.figure.tone}` : ""}`}>
-                    <Figure value={s.figure.value} />
-                  </span>
-                  <span className="jg-overview-k">{s.figure.label}</span>
+                  <span className="jg-overview-k">{s.title}</span>
                 </a>
               </li>
             ))}
