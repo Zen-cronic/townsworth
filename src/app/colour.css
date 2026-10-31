@@ -270,6 +270,9 @@
   color: var(--band-text);
 }
 :root .ui-page .proof-band #findings {
+  /* The findings sit beside or under the headline, so a link to them opens at the top of the band
+     with the headline in view (the scroll stops at the page top). */
+  scroll-margin-top: 100vh;
   background: color-mix(in srgb, var(--band-text) 30%, var(--band));
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--band-text) 30%, var(--band));
 }
