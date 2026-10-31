@@ -24,7 +24,7 @@ An own-town check (partners found in their own town's Qloo places 100% vs a diff
 
 ## Start here (two minutes)
 The guided path is at `/judges`.
-1. Open `/town/mount-pleasant-wi`: the AI-written plan, checked line by line. Real partners and named institutions are kept. Items that name nothing local are struck, and a local host venue or supplier is put in their place.
+1. Open `/town/mount-pleasant-wi`: the AI-powered plan, checked line by line. Real partners and named institutions are kept. Items that name nothing local are struck, and a local host venue or supplier is put in their place.
 2. Click **why?** on any replacement to see the Qloo signal behind it.
 3. Scroll to **The plan on the map**: a 3D map of the town with the facility site, the Qloo-ranked places within 15 km and a flow from the site to each program venue. On the consultant template (`/town/mount-pleasant-wi?plan=agency`), click **Apply all 7 swaps** and the flows redraw to the local venues as the total updates; click a venue for its rank and costed sessions. **Full screen** (or F) keeps the plan beside the map; Esc exits.
 4. Open the commitments memo, download the partner sheet (CSV) and calendar (.ics), and click **Draft outreach** to run the OpenAI agent.

@@ -49,7 +49,7 @@ export default async function GuidedPath() {
   ]);
   if (!run) notFound();
   const f = heroFacts(run);
-  // Step 1 has to show a strike. When the AI-written draft strikes nothing, it opens the
+  // Step 1 has to show a strike. When the AI-powered draft strikes nothing, it opens the
   // consultant template instead, at its strongest swap; the kept institution stays the second link.
   const useTemplate = !f.swap && !!template;
   const first = useTemplate && template ? template : run;
@@ -74,7 +74,7 @@ export default async function GuidedPath() {
       rail: "The draft, checked",
       visual: (
         <>
-          <StruckTally comp={comp} draft={useTemplate ? "Consultant template" : "AI-written draft"} />
+          <StruckTally comp={comp} draft={useTemplate ? "Consultant template" : "AI-powered draft"} />
           {/* The verdicts behind the cells, in the shared marks. */}
           <p className="gp-vis-note jg-verdicts">
             {comp.generic > 0 && (

@@ -45,7 +45,7 @@ function SwapCard({ item: r }: { item: ProgramItem }) {
 export function AuditPreview({
   row,
   townLabel,
-  title = "AI-written draft, checked",
+  title = "AI-powered draft, checked",
   href,
   kept,
   struck,

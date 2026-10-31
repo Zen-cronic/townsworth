@@ -27,7 +27,7 @@ const FACILITY_LABEL: Record<string, string> = {
 
 const DRAFT: Record<PlanSource, { tab: string; note: string }> = {
   llm: {
-    tab: "AI-written draft",
+    tab: "AI-powered draft",
     note: "Written by AI without Qloo data, and fixed before it was checked.",
   },
   agency: {
@@ -48,7 +48,7 @@ function draftNote(run: TownRun): string {
       : `on ${new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", timeZone: "America/Toronto" }).format(new Date(draft.live.createdAt))}`;
     return `Written live by OpenAI ${draft.live.model} ${when} (${secs} s, no Qloo access), not part of the frozen set on /proof.${failed}`;
   }
-  if (town.custom && source === "agency") return "No frozen AI-written plan for this town; checking the typical consultant template.";
+  if (town.custom && source === "agency") return "No frozen AI-powered plan for this town; checking the typical consultant template.";
   return DRAFT[source].note;
 }
 

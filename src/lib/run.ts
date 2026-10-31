@@ -12,7 +12,7 @@ import { townBySlug } from "./towns";
 export type PlanSource = "llm" | "agency";
 
 export const PLAN_LABEL: Record<PlanSource, string> = {
-  llm: `AI-written plan (OpenAI ${BASELINE.model}, no Qloo data)`,
+  llm: `AI-powered plan (OpenAI ${BASELINE.model}, no Qloo data)`,
   agency: "Consultant template (sample)",
 };
 
@@ -95,7 +95,7 @@ export const runTown = cache(async (slug: string, fund?: number, source: PlanSou
     draft.origin = "live";
     draft.live = { model: d.model, createdAt: d.createdAt, llmMs: d.llmMs, osmMs: d.osmMs, osmFailures: d.osmFailures };
   } else if (liveResult && !liveResult.ok) {
-    draft.notice = `The live AI-written draft didn't finish (${liveResult.reason.slice(0, 100)}), so this checks the consultant template instead.`;
+    draft.notice = `The live AI-powered draft didn't finish (${liveResult.reason.slice(0, 100)}), so this checks the consultant template instead.`;
   }
   const { audit, qlooAdds } = auditDraft(inputs, profile, program);
   // The age-group check reads the costed program and adds its sessions to `program.reachItems` only,

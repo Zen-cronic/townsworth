@@ -231,7 +231,7 @@ export default async function MemoPage({
             </dl>
             <div className="memo-figs mt-6">
               <div className="memo-cell">
-                <StruckTally comp={comp} draft="AI-written draft" />
+                <StruckTally comp={comp} draft="AI-powered draft" />
               </div>
               <MemoFigure value={String(program.items.length)} label={`program items, ${partnerPlaces} with a local partner`} tone="ok" />
               <MemoFigure value={money(program.totalAllocated)} label="itemized over 24 months" />

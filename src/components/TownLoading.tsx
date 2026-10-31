@@ -1,4 +1,4 @@
-// Shown while a town streams in. A live AI-written draft is the slow case, so it says so.
+// Shown while a town streams in. A live AI-powered draft is the slow case, so it says so.
 export function TownLoading({ live }: { live?: boolean }) {
   return (
     <main id="main" aria-busy="true">
