@@ -67,7 +67,7 @@ export function AppHeader({
       </div>
 
       {towns && (
-        <div className="border-t border-hairline bg-concrete/60">
+        <div data-town-strip="" className="border-t border-hairline bg-concrete/60">
           <nav
             aria-label="Towns"
             className="no-scrollbar fade-x mx-auto flex max-w-[1240px] items-center gap-0.5 overflow-x-auto px-4 py-1 sm:px-8"

@@ -12,15 +12,28 @@ html[data-tour] header[data-app-header] {
 html[data-tour] .gn-landing {
   --l-hdr: calc(53px + var(--tour-h));
 }
+/* While the tour runs the town strip is hidden, so the header is one height on every step. */
 html[data-tour] .gn-landing:has(header[data-app-header][data-towns]) {
-  --l-hdr: calc(90px + var(--tour-h));
+  --l-hdr: calc(53px + var(--tour-h));
+}
+html[data-tour] [data-town-strip] {
+  display: none;
+}
+/* The tour's Next is the one lime action in the chrome; the header's tour link goes quiet. */
+html[data-tour] .nav-tour {
+  background: transparent;
+  color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--rule);
+}
+html[data-tour] .nav-tour:hover {
+  background: var(--concrete);
 }
 @media (min-width: 768px) {
   html[data-tour] .gn-landing {
     --l-hdr: calc(55px + var(--tour-h));
   }
   html[data-tour] .gn-landing:has(header[data-app-header][data-towns]) {
-    --l-hdr: calc(92px + var(--tour-h));
+    --l-hdr: calc(55px + var(--tour-h));
   }
 }
 .tour-bar {
