@@ -259,11 +259,6 @@
   font-variant-numeric: tabular-nums;
   box-shadow: 0 0 0 6px var(--l-paper);
 }
-.jg .jg-step-n.is-optional {
-  background: var(--l-paper);
-  color: var(--qloo);
-  box-shadow: inset 0 0 0 2px var(--qloo), 0 0 0 6px var(--l-paper);
-}
 /* The joining rule runs from each badge's centre to the next step's badge (step padding 56px, plus
    half the badge). */
 .jg .gp-steps > .gp-step {
@@ -322,9 +317,6 @@
     font-size: 1.0625rem;
     box-shadow: none;
   }
-  .jg .jg-step-n.is-optional {
-    box-shadow: inset 0 0 0 2px var(--qloo);
-  }
   .jg .gp-steps > .gp-step::before {
     display: none;
   }
@@ -334,8 +326,7 @@
 }
 
 @media print {
-  .jg .jg-step-n,
-  .jg .jg-step-n.is-optional {
+  .jg .jg-step-n {
     background: none;
     color: var(--ink);
     box-shadow: inset 0 0 0 1.5px var(--ink);

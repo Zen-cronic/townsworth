@@ -316,7 +316,7 @@ export default async function GuidedPath() {
                   <section id="own-plan" className="gp-step" aria-labelledby="own-plan-h">
                     <div className="gp-step-body">
                       <div className="jg-step-head">
-                        <span className="jg-step-n is-optional" aria-hidden="true">
+                        <span className="jg-step-n" aria-hidden="true">
                           +
                         </span>
                         <h2 id="own-plan-h" className="lp-h2">
