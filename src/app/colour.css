@@ -646,14 +646,14 @@
 :root .jg .gp-vis :is(.gp-vis-v, .tally-v) > span { font-family: inherit; font-weight: inherit; }
 :root .jg .gp-steps > .gp-step:nth-child(4) .gp-towns :is(li, a) { border-color: var(--rule); }
 :root .jg .gp-steps > .gp-step:nth-child(5) .gp-h2h .ch-hbar.is-quiet { background: var(--line-quiet); }
-:root .jg .gp-extra:last-child {
+:root .jg .jg-faq {
   padding: 64px 0 72px;
   border-image: linear-gradient(var(--concrete), var(--concrete)) fill 0 / 0 / 0 100vmax;
 }
-:root .jg .gp-extra:last-child .lp-obj:hover { background: color-mix(in srgb, var(--paper) 60%, transparent); }
+:root .jg .jg-faq .lp-obj:hover { background: color-mix(in srgb, var(--paper) 60%, transparent); }
 :root .jg .gp-path { padding-bottom: 0; }
 @media (max-width: 760px) {
-  :root .jg .gp-extra:last-child { margin-top: 64px; padding: 36px 0 48px; }
+  :root .jg .jg-faq { margin-top: 64px; padding: 36px 0 48px; }
 }
 :root .jg .gp-path + * { margin-top: 0; }
 
@@ -899,7 +899,7 @@
     background: none !important;
     box-shadow: none !important;
   }
-  :root :is(.jg .gp-extra:last-child, .ui-section[aria-labelledby="reach-title"], .ui-section[aria-labelledby="favours-title"], .fd .fd-hero) {
+  :root :is(.jg .jg-faq, .ui-section[aria-labelledby="reach-title"], .ui-section[aria-labelledby="favours-title"], .fd .fd-hero) {
     border-image: none;
   }
   :root :is(.fd .fd-hero, .bl .bl-hero, [data-testid="agent-drafts"] > div:first-child),
@@ -951,7 +951,7 @@
 :root .lp-footer :where(a, button):focus-visible { outline-color: var(--band-text); }
 
 /* Product tour: the path on white, the questions on pale green. */
-:root .jg .gp-extra:last-child {
+:root .jg .jg-faq {
   border-image: linear-gradient(var(--ground-green), var(--ground-green)) fill 0 / 0 / 0 100vmax;
 }
 

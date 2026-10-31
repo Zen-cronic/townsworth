@@ -348,6 +348,12 @@ export default async function GuidedPath() {
                 </div>
               )}
 
+            </div>
+          </div>
+
+          {/* The questions follow the steps at full width, after the steps' rail ends. */}
+          <div className="jg-faq">
+            <div className="lp-wrap">
               <div className="gp-extra">
                 <div className="lp-section-head">
                   <h2 className="lp-h2">

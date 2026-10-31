@@ -83,7 +83,7 @@
 }
 .jg .gp-step,
 .jg #own-plan {
-  padding: 56px 0;
+  padding: 34px 0;
   border-radius: 0;
   background: none;
   box-shadow: none;
@@ -95,7 +95,7 @@
   border-top: 0;
 }
 .jg .gp-rail {
-  padding-top: 56px;
+  padding-top: 34px;
 }
 .jg .gp-rail .lp-kicker {
   font-size: 0.875rem;
@@ -184,7 +184,7 @@
   margin-top: 0;
 }
 .jg .gp-extra .lp-section-head {
-  margin-top: 80px;
+  margin-top: 16px;
 }
 
 @media (max-width: 900px) {
@@ -197,7 +197,7 @@
   }
   .jg .gp-step,
   .jg #own-plan {
-    padding: 40px 0;
+    padding: 24px 0;
   }
 }
 @media (max-width: 600px) {
