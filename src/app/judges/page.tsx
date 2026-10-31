@@ -178,7 +178,10 @@ export default async function GuidedPath() {
       figure: { value: `${t.llmInstitutionalPct}% vs ${t.gnInstitutionalPct}%`, label: "partners that are institutions, AI alone vs ours" },
       visual: (
         <>
-          <p className="gp-vis-k">Partners that are institutions</p>
+          <p className="gp-vis-v">
+            <Figure value={`${t.llmInstitutionalPct}% vs ${t.gnInstitutionalPct}%`} />
+          </p>
+          <p className="gp-vis-k">partners that are institutions, AI alone vs ours</p>
           <div className="gp-h2h">
             <span>AI alone</span>
             <span className="gp-h2h-t">
