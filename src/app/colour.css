@@ -497,9 +497,9 @@
 
 /* Check: the host town, whose Qloo data the draft is checked against, on the blue wash; the draft
    itself stays paper. In the results, Qloo's added partners head on the wash, the fund on green. */
-:root .ui-card[aria-labelledby="step1-h"] { background: var(--qloo-wash); padding: 24px; margin-inline: -24px; }
+:root .ui-page > section.ui-card[aria-labelledby="step1-h"] { background: var(--qloo-wash); padding: 24px; margin-inline: 0; }
 @media (max-width: 760px) {
-  :root .ui-card[aria-labelledby="step1-h"] { padding: 16px; margin-inline: 0; }
+  :root .ui-page > section.ui-card[aria-labelledby="step1-h"] { padding: 16px; }
 }
 :root .check-results [aria-labelledby="adds-title"] > :first-child { background: var(--qloo-wash); }
 :root .check-results [aria-labelledby="fund-title"] { background: var(--ok-wash); }
